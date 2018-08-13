@@ -23,7 +23,7 @@ class Movie extends Component {
         const versions = getVersions(movie);
 
         for (var i = 0; i < versions.length; i++) {
-            versions[i].progress = getProgress(versions[i].infoHash);
+            versions[i].progress = getProgress(versions[i].hashString);
         }
 
         return (
@@ -39,14 +39,14 @@ class Movie extends Component {
                     <div className="quality">
                         {versions.map(version => (
                             <Fragment
-                                key={version.infoHash}
+                                key={version.hashString}
                             >
                                 <span>{version.quality}</span>
-                                {version.progress > 0 ? (
+                                {version.progress != null ? (
                                     <button className="red" onClick={(e) => {
                                         e.stopPropagation();
                                         e.nativeEvent.stopImmediatePropagation();
-                                        cancelTorrent(version.infoHash);
+                                        cancelTorrent(version.hashString);
                                     }}><FaTrash/></button>
                                 ) : (
                                     <button className="orange download" onClick={(e) => {
@@ -54,7 +54,7 @@ class Movie extends Component {
                                         e.nativeEvent.stopImmediatePropagation();
                                         downloadTorrent(version);
                                     }}>
-                                        {started.indexOf(version.infoHash) !== -1 ? (
+                                        {started.indexOf(version.hashString) !== -1 ? (
                                             <Spinner visible noMargin button />
                                         ) : (
                                             <FaDownload />

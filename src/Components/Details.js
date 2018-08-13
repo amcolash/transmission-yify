@@ -125,9 +125,9 @@ class Details extends Component {
                     {versions.map(version => (
                         <div className="version" key={version.url}>
                             <b>{version.quality}</b>
-                            {getProgress(version.infoHash) ? null : (
+                            {getProgress(version.hashString) ? null : (
                                 <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
-                                    {started.indexOf(version.infoHash) !== -1 ? (
+                                    {started.indexOf(version.hashString) !== -1 ? (
                                         <Spinner visible noMargin button />
                                     ) : (
                                         <FaDownload/>
@@ -136,11 +136,12 @@ class Details extends Component {
                             )}
                             <span> {version.size}, (Peers: {version.peers}, Seeds: {version.seeds}, Ratio: {version.ratio})</span>
                             <br/>
-                            {getProgress(version.infoHash) ? (
+                            {getProgress(version.hashString) ? (
                                 <Progress
-                                    torrent={getTorrent(version.infoHash)}
+                                    torrent={getTorrent(version.hashString)}
                                     getLink={getLink}
                                     cancelTorrent={cancelTorrent}
+                                    getProgress={getProgress}
                                     fullName
                                 />
                             ) : null}

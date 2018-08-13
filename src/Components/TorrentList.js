@@ -25,7 +25,7 @@ class TorrentList extends Component {
     }
 
     render() {
-        const { getLink, cancelTorrent, torrents } = this.props;
+        const { cancelTorrent, torrents, getProgress } = this.props;
 
         if (torrents.length === 0) return null;
 
@@ -42,10 +42,10 @@ class TorrentList extends Component {
                     <div>
                         {(torrents.map(torrent => (
                             <Progress
-                                key={torrent.infoHash}
+                                key={torrent.hashString}
                                 torrent={torrent}
-                                getLink={getLink}
                                 cancelTorrent={cancelTorrent}
+                                getProgress={getProgress}
                                 fullName={false}
                             />
                         )))}

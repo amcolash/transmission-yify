@@ -6,14 +6,14 @@ import {
 class Progress extends Component {
     
     render() {
-        const { torrent, cancelTorrent, fullName } = this.props;
+        const { torrent, cancelTorrent, fullName, getProgress } = this.props;
 
-        if (!torrent || !torrent.name || !torrent.progress) return null;
+        if (!torrent || !torrent.name) return null;
 
         const type = torrent.name.indexOf("720") !== -1 ? "720p" : (torrent.name.indexOf("1080") !== -1 ? "1080p" : (torrent.name.indexOf("3D") !== -1 ? "3D" : null));
         const name = (fullName || torrent.name.indexOf(")") === -1) ? torrent.name : torrent.name.substring(0, torrent.name.indexOf(")") + 1) + (type ? " [" + type + "]" : "");
-        const speed = torrent.stats ? (torrent.stats.speed.down / 1000000).toFixed(2) : null;
-        const progress = torrent.progress[0].toFixed(0);
+        const speed = (torrent.rateDownload / 1024 / 1024).toFixed(2);
+        const progress = getProgress(torrent.hashString);
 
         return (
             (torrent && torrent.name) ? (
@@ -21,7 +21,7 @@ class Progress extends Component {
                     <span>{name}</span>
                     <progress value={progress > 1 ? progress : null } max="100" />
                     <span>{progress}% </span>
-                    {torrent.stats && progress < 95 ? (
+                    {progress < 95 ? (
                         <span className={speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red"}>
                             {speed < 0.15 ? (
                                 <FaExclamationCircle
@@ -31,7 +31,7 @@ class Progress extends Component {
                             [{speed} MB/s]
                         </span>
                     ) : null}
-                    <button className="red" onClick={() => cancelTorrent(torrent.infoHash)}><FaTrash/></button>
+                    <button className="red" onClick={() => cancelTorrent(torrent.hashString)}><FaTrash/></button>
                 </div>
             ) : null
         );

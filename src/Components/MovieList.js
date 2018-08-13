@@ -84,10 +84,10 @@ class MovieList extends Component {
 
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
-            const torrents = response.data;
-            const started = this.state.started.filter(infoHash => {
+            const torrents = response.data.torrents;
+            const started = this.state.started.filter(hashString => {
                 for (var i = 0; i < torrents.length; i++) {
-                    if (torrents[i].infoHash === infoHash) return false;
+                    if (torrents[i].hashString === hashString) return false;
                 }
                 return true;
             });
@@ -95,9 +95,9 @@ class MovieList extends Component {
             for (var i = 0; i < torrents.length; i++) {
                 const torrent = torrents[i];
                 if (torrent.files && torrent.files.length <= 5 && torrent.progress && torrent.progress[0] > 99.9 && !torrent.halted) {
-                    console.log("moving/removing complete torrent: " + torrent.infoHash + ", " + torrent.name);
-                    axios.post(this.server + '/torrents/' + torrent.infoHash + '/move').then(response => {
-                        console.log("successfully moved torrent: " + torrent.infoHash + ", " + torrent.name);
+                    console.log("moving/removing complete torrent: " + torrent.hashString + ", " + torrent.name);
+                    axios.post(this.server + '/torrents/' + torrent.hashString + '/move').then(response => {
+                        console.log("successfully moved torrent: " + torrent.hashString + ", " + torrent.name);
                     }, error => {
                         console.error(error);
                     });
@@ -178,8 +178,8 @@ class MovieList extends Component {
         });
     }
 
-    cancelTorrent = (infoHash) => {
-        axios.delete(this.server + '/torrents/' + infoHash).then(response => {
+    cancelTorrent = (hashString) => {
+        axios.delete(this.server + '/torrents/' + hashString).then(response => {
             this.updateTorrents();
         }, error => {
             console.error(error);
@@ -188,10 +188,10 @@ class MovieList extends Component {
 
     downloadTorrent = (version) => {
         this.setState({
-            started: [ ...this.state.started, version.infoHash ]
+            started: [ ...this.state.started, version.hashString ]
         });
 
-        axios.post(this.server + '/torrents', { link: version.url }).then(response => {
+        axios.post(this.server + '/torrents', { url: version.url }).then(response => {
             this.updateTorrents();
         }, error => {
             console.error(error);
@@ -213,7 +213,7 @@ class MovieList extends Component {
                     seeds: torrent.seeds.toFixed(0),
                     ratio: torrent.peers > 0 ? (torrent.seeds / torrent.peers).toFixed(3) : 0,
                     url: torrent.url,
-                    infoHash: torrent.hash.toLowerCase(),
+                    hashString: torrent.hash.toLowerCase(),
                     size: torrent.size
                 };
 
@@ -226,18 +226,18 @@ class MovieList extends Component {
         return Object.values(versions);
     }
 
-    getTorrent(infoHash) {
+    getTorrent(hashString) {
         for (var i = 0; i < this.state.torrents.length; i++) {
             const torrent = this.state.torrents[i];
-            if (torrent.infoHash === infoHash) return torrent;
+            if (torrent.hashString === hashString) return torrent;
         }
 
         return null;
     }
 
-    getProgress(infoHash) {
-        const torrent = this.getTorrent(infoHash);
-        return (torrent !== null && torrent.progress && torrent.progress[0]) ? torrent.progress[0] + 0.001 : null;
+    getProgress(hashString) {
+        const torrent = this.getTorrent(hashString);
+        return (torrent !== null) ? (torrent.percentDone * 100).toFixed(0) : null;
     }
 
     onOpenModal = (movie) => {
@@ -302,6 +302,7 @@ class MovieList extends Component {
                         torrents={torrents}
                         cancelTorrent={this.cancelTorrent}
                         getLink={this.getLink}
+                        getProgress={this.getProgress}
                         ref={instance => { this.torrentList = instance; }}
                     />
 
