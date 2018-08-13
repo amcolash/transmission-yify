@@ -84,7 +84,7 @@ class MovieList extends Component {
 
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
-            const torrents = response.data.torrents;
+            const torrents = response.data.torrents || [];
             const started = this.state.started.filter(hashString => {
                 for (var i = 0; i < torrents.length; i++) {
                     if (torrents[i].hashString === hashString) return false;
@@ -93,8 +93,8 @@ class MovieList extends Component {
             });
 
             this.setState({
-                torrents: torrents || [],
-                started: started || []
+                torrents: torrents,
+                started: started
             });
         }, error => {
             console.error(error);
