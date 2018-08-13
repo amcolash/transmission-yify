@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-    FaTrash, FaPlay, FaExclamationCircle
+    FaTrash, FaExclamationCircle
 } from 'react-icons/lib/fa';
 
 class Progress extends Component {
@@ -20,8 +20,6 @@ class Progress extends Component {
             title: name,
             url: link
         }
-        const playerBase = window.location.href + "player?data=";
-        const playerLink = playerBase + encodeURIComponent(JSON.stringify(data));
 
         return (
             (torrent && torrent.name) ? (
@@ -39,7 +37,6 @@ class Progress extends Component {
                             [{speed} MB/s]
                         </span>
                     ) : null}
-                    <button className="green" onClick={() => window.open(playerLink)}><FaPlay/></button>
                     <button className="red" onClick={() => cancelTorrent(torrent.infoHash)}><FaTrash/></button>
                 </div>
             ) : null

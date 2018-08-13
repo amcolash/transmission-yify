@@ -1,4 +1,4 @@
-# yify-react
+# transmission-yify
 A simple react app that shows info from the yify api.
 
 Please know that this was a test of using real life apis. Don't pirate movies.
@@ -10,37 +10,13 @@ Please know that this was a test of using real life apis. Don't pirate movies.
 ### Server
 There is not a specific way to actually host the server. You can host the `/build` folder with something like nginx. Since the project is static (only does CRUD), any http server will do.
 ```
-git clone https://github.com/amcolash/yify-react.git
-cd yify-react
+git clone https://github.com/amcolash/transmission-yify.git
+cd transmission-yify
 npm install
 npm run build
 ```
 
-### Peerflix Daemon (Or Docker, read below)
-For the peerflix server, I just used pm2 to keep it alive.
-```
-npm install -g peerflix-server pm2
-pm2 startup
-pm2 start peerflix-server
-pm2 save
-```
-
-### Docker + VPN
-The below setup will get you going with some prebuilt docker images:
-- [openvpn-client](https://github.com/dperson/openvpn-client)
-- [nginx container](https://github.com/dperson/nginx)
-- [peerflix-server](https://github.com/asapach/peerflix-server)
-
-Note: the copy of the "config" folder is the ovpn + crt config files for openvpn into the vpn instance.
-```
-docker run -it --cap-add=NET_ADMIN --device /dev/net/tun --name vpn --restart unless-stopped -d dperson/openvpn-client
-docker cp config vpn:/vpn/
-docker restart vpn
-docker run --net=container:vpn --name=peerflix --restart unless-stopped -m 512m -d -v /usb/media/torrent-stream:/tmp/torrent-stream -v /usb/media/Videos/Peerflix:/tmp/peerflix-symlinks asapach/peerflix-server
-docker run -it --name proxy --restart unless-stopped -p 9000:80 --link vpn:peerflix -d dperson/nginx -w "http://peerflix:9000;/"
-
-(optional to restart unhealthy containers): docker run -it --name health_check --restart unless-stopped -d willfarrell/autoheal -e AUTOHEAL_CONTAINER_LABEL=all
-```
+# More to come...
 
 ---
 
