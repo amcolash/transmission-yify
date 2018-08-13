@@ -6,7 +6,6 @@ import {
 } from 'react-icons/lib/fa';
 
 import './MovieList.css';
-import keys from '../keys';
 import Movie from './Movie';
 import Spinner from './Spinner';
 import Details from './Details';
@@ -73,7 +72,7 @@ class MovieList extends Component {
     updateLocation() {
         // If the server is not patched or something goes wrong, no worries
         axios.get(this.server + '/ip').then(ip => {
-            axios.get('https://api.ipdata.co/' + ip.data + "?api-key=" + keys.ipdata).then(response => {
+            axios.get('https://api.ipdata.co/' + ip.data + "?api-key=" + process.env.REACT_APP_IP_KEY).then(response => {
                 this.setState({ location: response.data.city + ', ' + response.data.country_name });
             }, error => {
                 console.error(error);
@@ -115,7 +114,10 @@ class MovieList extends Component {
 
         // Additionally get storage info here
         axios.get(this.server + '/storage').then(response => {
-            this.setState({storage: response.data.used});
+            const gb = 1024 * 1024 * 1024;
+            const total_space = gb * 51;
+            var percent = (total_space - response.data["size-bytes"]) / total_space;
+            this.setState({ storage: (percent * 100).toFixed(1) });
         }, error => {
             console.error(error);
         });
@@ -238,28 +240,6 @@ class MovieList extends Component {
         return (torrent !== null && torrent.progress && torrent.progress[0]) ? torrent.progress[0] + 0.001 : null;
     }
 
-    getLink = (infoHash) => {
-        const { torrents } = this.state;
-
-        for (var i = 0; i < torrents.length; i++) {
-            const torrent = torrents[i];
-            if (torrent.infoHash === infoHash) {
-                var largestSize = 0;
-                var largestIndex = 0;
-
-                for (var j = 0; j < torrent.files.length; j++) {
-                    const file = torrent.files[j];
-                    if (file.length > largestSize) {
-                        largestIndex = j;
-                        largestSize = file.length;
-                    }
-                }
-
-                return this.server + torrent.files[largestIndex].link;
-            }
-        }
-    }
-
     onOpenModal = (movie) => {
         this.setState({ movie: movie, modal: true });
     };
@@ -305,7 +285,6 @@ class MovieList extends Component {
                             updateTorrents={this.updateTorrents}
                             cancelTorrent={this.cancelTorrent}
                             downloadTorrent={this.downloadTorrent}
-                            getLink={this.getLink}
                             getProgress={this.getProgress}
                             getTorrent={this.getTorrent}
                             getVersions={this.getVersions}

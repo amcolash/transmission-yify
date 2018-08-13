@@ -6,7 +6,7 @@ import {
 class Progress extends Component {
     
     render() {
-        const { torrent, getLink, cancelTorrent, fullName } = this.props;
+        const { torrent, cancelTorrent, fullName } = this.props;
 
         if (!torrent || !torrent.name || !torrent.progress) return null;
 
@@ -14,12 +14,6 @@ class Progress extends Component {
         const name = (fullName || torrent.name.indexOf(")") === -1) ? torrent.name : torrent.name.substring(0, torrent.name.indexOf(")") + 1) + (type ? " [" + type + "]" : "");
         const speed = torrent.stats ? (torrent.stats.speed.down / 1000000).toFixed(2) : null;
         const progress = torrent.progress[0].toFixed(0);
-        const link = getLink(torrent.infoHash);
-
-        const data = {
-            title: name,
-            url: link
-        }
 
         return (
             (torrent && torrent.name) ? (

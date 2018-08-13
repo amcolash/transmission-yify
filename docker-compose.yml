@@ -1,0 +1,37 @@
+version: '2'
+services:
+  transmission:
+    image: haugene/transmission-openvpn
+    container_name: transmission
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    restart: always
+    ports:
+      - "9091:9091"
+      - "8888:8888"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/transmission:/data
+    env_file:
+      - .env
+    environment:
+      - OPENVPN_PROVIDER=TIGER
+      # - OPENVPN_USERNAME=username
+      # - OPENVPN_PASSWORD=password
+      - OPENVPN_CONFIG=CA Toronto
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
+      - LOCAL_NETWORK=192.168.0.0/24
+  proxy:
+    image: haugene/transmission-openvpn-proxy
+    container_name: proxy
+    links:
+      - transmission
+    ports:
+      - 8080:8080
+    volumes:
+      - /etc/localtime:/etc/localtime:ro

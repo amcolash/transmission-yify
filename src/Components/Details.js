@@ -4,7 +4,6 @@ import {
 } from 'react-icons/lib/fa';
 import axios from 'axios';
 
-import keys from '../keys';
 import './Details.css';
 import Progress from './Progress';
 import Spinner from './Spinner';
@@ -17,7 +16,7 @@ class Details extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://www.omdbapi.com/?apikey=' + keys.omdb + '&i=' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
+        axios.get('http://www.omdbapi.com/?apikey=' + process.env.REACT_APP_OMDB_KEY + '&i=' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
             this.setState({ moreData: response.data });
         }, error => {
             console.error(error);
@@ -127,7 +126,7 @@ class Details extends Component {
                         <div className="version" key={version.url}>
                             <b>{version.quality}</b>
                             {getProgress(version.infoHash) ? null : (
-                                <button className="orange download" onClick={() => downloadTorrent(version)}>
+                                <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
                                     {started.indexOf(version.infoHash) !== -1 ? (
                                         <Spinner visible noMargin button />
                                     ) : (
