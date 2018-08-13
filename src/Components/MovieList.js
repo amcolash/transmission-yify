@@ -92,18 +92,6 @@ class MovieList extends Component {
                 return true;
             });
 
-            for (var i = 0; i < torrents.length; i++) {
-                const torrent = torrents[i];
-                if (torrent.files && torrent.files.length <= 5 && torrent.progress && torrent.progress[0] > 99.9 && !torrent.halted) {
-                    console.log("moving/removing complete torrent: " + torrent.hashString + ", " + torrent.name);
-                    axios.post(this.server + '/torrents/' + torrent.hashString + '/move').then(response => {
-                        console.log("successfully moved torrent: " + torrent.hashString + ", " + torrent.name);
-                    }, error => {
-                        console.error(error);
-                    });
-                }
-            }
-
             this.setState({
                 torrents: torrents,
                 started: started

@@ -16,25 +16,19 @@ app.use(express.json());
 app.use(cors());
 
 // Transmission wrapper
-const transmission = new transmissionWrapper();
+const transmission = new transmissionWrapper({host: HOST});
 
 // Set up static content
 app.use('/', express.static('build'));
 
-// Yuck, this makes it so we don't need to modify the transmission image - it works I guess...
 app.get('/ip', function (req, res) {
-    exec('docker exec -i transmission sh -c "curl http://ipinfo.io/ip"', function (err, output) {
-        if (!err) {
-            res.send(output);
-        } else {
-            console.error(err);
-            axios.get('http://ipinfo.io/ip').then(function (response) {
-                res.send(response.data);
-            }).catch(function (error) {
-                res.status(500).send("Error: " + error);
-            });
-        }
-    });
+    try {
+        var fs = require('fs');
+        var file = fs.readFileSync("/data/ip.txt", "utf8");
+        res.send(file);
+    } catch(err) {
+        res.statusCode(500).send("unknown");
+    }
 });
 
 app.get('/storage', function (req, res) { transmission.freeSpace('/data', (err, data) => handleResponse(res, err, data)); });

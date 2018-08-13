@@ -17,6 +17,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/transmission:/data
+      - ./get_ip.sh:/root/get_ip.sh:ro
     env_file:
       - .env
     environment:
@@ -26,6 +27,7 @@ services:
       # - OPENVPN_CONFIG=CA Toronto
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.0.0/24
+    command: sh -c "/root/get_ip.sh & dumb-init /etc/openvpn/start.sh"
 
   proxy:
     image: haugene/transmission-openvpn-proxy
@@ -39,7 +41,9 @@ services:
 
   client:
     image: amcolash/transmission-yify
-    conatiner_name: client
+    container_name: client
+    volumes:
+      - /tmp/transmission:/data
     links:
       - transmission
     env_file:
