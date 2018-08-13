@@ -93,8 +93,8 @@ class MovieList extends Component {
             });
 
             this.setState({
-                torrents: torrents,
-                started: started
+                torrents: torrents || [],
+                started: started || []
             });
         }, error => {
             console.error(error);
