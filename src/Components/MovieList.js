@@ -72,11 +72,7 @@ class MovieList extends Component {
     updateLocation() {
         // If the server is not patched or something goes wrong, no worries
         axios.get(this.server + '/ip').then(ip => {
-            axios.get('https://api.ipdata.co/' + ip.data + "?api-key=" + process.env.REACT_APP_IP_KEY).then(response => {
-                this.setState({ location: response.data.city + ', ' + response.data.country_name });
-            }, error => {
-                console.error(error);
-            });
+            this.setState({ location: response.data.city + ', ' + response.data.country_name });
         }, error => {
             console.error(error);
         });
@@ -270,6 +266,7 @@ class MovieList extends Component {
                             server={this.server}
                             torrents={torrents}
                             started={started}
+                            server={this.server}
                             updateTorrents={this.updateTorrents}
                             cancelTorrent={this.cancelTorrent}
                             downloadTorrent={this.downloadTorrent}

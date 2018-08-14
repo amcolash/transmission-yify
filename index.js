@@ -4,7 +4,8 @@ const axios = require('axios');
 const cors = require('cors');
 const express = require('express');
 const transmissionWrapper = require('transmission');
-const { exec } = require('child_process');
+
+require('dotenv').config();
 
 // Constants
 const PORT = 9000;
@@ -24,11 +25,27 @@ app.use('/', express.static('build'));
 app.get('/ip', function (req, res) {
     try {
         var fs = require('fs');
-        var file = fs.readFileSync("/data/ip.txt", "utf8");
-        res.send(file);
+        var file = fs.readFileSync("/tmp/ip.txt", "utf8").trim();
+
+        axios.get('https://api.ipdata.co/' + file + "?api-key=" + process.env.IP_KEY).then(response => {
+            res.send(response.data);
+        }, error => {
+            console.error(error);
+            res.send(file);
+        });
     } catch(err) {
-        res.statusCode(500).send("unknown");
+        res.send("unknown");
     }
+});
+
+app.get('/imdb/:id', function(req, res) {
+    axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 })
+        .then(response => {
+            res.send(response.data);
+        }, error => {
+            console.error(error);
+            res.send(error);
+        });
 });
 
 app.get('/storage', function (req, res) { transmission.freeSpace('/data', (err, data) => handleResponse(res, err, data)); });
