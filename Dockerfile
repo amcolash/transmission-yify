@@ -3,11 +3,14 @@ FROM mhart/alpine-node:8
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy everything to docker image
-COPY . .
+# For caching purposes, install deps without other changed files
+COPY "package.json" .
 
-# Install deps
+# Install deps (can be cached)
 RUN npm install
+
+# Copy everything to docker image (this invalidates the cache now...)
+COPY . .
 
 # Build react app
 RUN npm run-script build

@@ -71,7 +71,7 @@ class MovieList extends Component {
 
     updateLocation() {
         // If the server is not patched or something goes wrong, no worries
-        axios.get(this.server + '/ip').then(ip => {
+        axios.get(this.server + '/ip').then(response => {
             this.setState({ location: response.data.city + ', ' + response.data.country_name });
         }, error => {
             console.error(error);

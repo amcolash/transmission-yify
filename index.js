@@ -25,7 +25,7 @@ app.use('/', express.static('build'));
 app.get('/ip', function (req, res) {
     try {
         var fs = require('fs');
-        var file = fs.readFileSync("/tmp/ip.txt", "utf8").trim();
+        var file = fs.readFileSync("/data/ip.txt", "utf8").trim();
 
         axios.get('https://api.ipdata.co/' + file + "?api-key=" + process.env.IP_KEY).then(response => {
             res.send(response.data);
