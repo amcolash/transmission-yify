@@ -4,13 +4,13 @@ FROM mhart/alpine-node:8
 WORKDIR /usr/src/app
 
 # For caching purposes, install deps without other changed files
-COPY "package.json" .
+COPY package.json package-lock.json ./
 
 # Install deps (can be cached)
 RUN npm install
 
 # Copy everything to docker image (this invalidates the cache now...)
-COPY . .
+COPY ./ ./
 
 # Build react app
 RUN npm run-script build
