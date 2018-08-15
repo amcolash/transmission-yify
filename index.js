@@ -9,7 +9,6 @@ require('dotenv').config();
 
 // Constants
 const PORT = 9000;
-const HOST = '0.0.0.0';
 
 // App
 const app = express();
@@ -79,7 +78,7 @@ function autoPrune() {
                     // Soft remove (keep data but stop uploading)
                     console.log("removing complete torrent: " + torrent.name + (uploadComplete ? ", upload complete" : "") + (expired ? ", expired" : ""));
 
-                    transmission.remove(torrent.hashString, false, (err, data) => {
+                    transmission.remove(torrent.hashString, false, (err) => {
                         if (err) console.error(err);
                     });
                 }
@@ -90,8 +89,8 @@ function autoPrune() {
 
 // Get this party started!
 try {
-    app.listen(PORT, HOST);
-    console.log(`Running on http://${HOST}:${PORT}`);
+    app.listen(PORT);
+    console.log(`Running on port ${PORT}`);
 
     // Autoprune on start
     autoPrune();
