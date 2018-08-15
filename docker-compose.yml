@@ -32,6 +32,7 @@ services:
   proxy:
     image: haugene/transmission-openvpn-proxy
     container_name: proxy
+    restart: always
     links:
       - transmission
     ports:
@@ -42,6 +43,7 @@ services:
   client:
     image: amcolash/transmission-yify
     container_name: client
+    restart: always
     volumes:
       - /tmp/transmission:/data
     links:

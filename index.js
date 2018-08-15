@@ -9,7 +9,7 @@ require('dotenv').config();
 
 // Constants
 const PORT = 9000;
-const HOST = 'localhost';
+const HOST = '0.0.0.0';
 
 // App
 const app = express();
@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 
 // Transmission wrapper
-const transmission = new transmissionWrapper({host: HOST});
+const transmission = new transmissionWrapper({host: 'localhost'});
 
 // Set up static content
 app.use('/', express.static('build'));
