@@ -9,7 +9,7 @@ require('dotenv').config();
 
 // Constants
 const PORT = 9000;
-const HOST = '0.0.0.0';
+const HOST = 'localhost';
 
 // App
 const app = express();
@@ -34,18 +34,18 @@ app.get('/ip', function (req, res) {
             res.send(file);
         });
     } catch(err) {
+        console.error(err);
         res.send("unknown");
     }
 });
 
 app.get('/imdb/:id', function(req, res) {
-    axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 })
-        .then(response => {
-            res.send(response.data);
-        }, error => {
-            console.error(error);
-            res.send(error);
-        });
+    axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 }).then(response => {
+        res.send(response.data);
+    }, error => {
+        console.error(error);
+        res.send(error);
+    });
 });
 
 app.get('/storage', function (req, res) { transmission.freeSpace('/data', (err, data) => handleResponse(res, err, data)); });
@@ -58,6 +58,7 @@ app.get('/session', function (req, res) { transmission.session((err, data) => ha
 // Single handler for all of the transmission wrapper responses
 function handleResponse(res, err, data) {
     if (err) {
+        console.error(err);
         res.send(err);
     } else {
         res.send(data);
