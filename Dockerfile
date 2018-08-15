@@ -15,6 +15,9 @@ COPY ./ ./
 # Build react app
 RUN npm run-script build
 
+# Clean up build deps
+RUN rm -rf node_modules
+
 # Start things up
 EXPOSE 9000
 CMD [ "npm", "run-script", "docker" ]
