@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Install deps (can be cached)
-RUN npm install --only=dev
+RUN npm install
 
 # Copy everything to docker image (this invalidates the cache now...)
 COPY ./ ./
@@ -18,6 +18,6 @@ RUN npm run build
 # Clean up build deps
 RUN rm -rf node_modules
 
-# Start things up
+# Set things up
 EXPOSE 9000
 CMD [ "npm", "run", "docker" ]
