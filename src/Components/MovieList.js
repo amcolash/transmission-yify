@@ -99,7 +99,11 @@ class MovieList extends Component {
         // Additionally get storage info here
         axios.get(this.server + '/storage').then(response => {
             var percent = response.data.used;
-            this.setState({ storage: percent.toFixed(1) });
+            try {
+                this.setState({ storage: parseFloat(percent).toFixed(1) });
+            } catch (err) {
+                console.error(err);
+            }
         }, error => {
             console.error(error);
         });
