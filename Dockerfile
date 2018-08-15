@@ -4,20 +4,20 @@ FROM mhart/alpine-node:8
 WORKDIR /usr/src/app
 
 # For caching purposes, install deps without other changed files
-COPY package.json yarn.lock ./
+COPY package.json package-lock.json ./
 
 # Install deps (can be cached)
-RUN yarn install --only=dev
+RUN npm install --only=dev
 
 # Copy everything to docker image (this invalidates the cache now...)
 COPY ./ ./
 
 # Build react app
-RUN yarn run build
+RUN npm run build
 
 # Clean up build deps
 RUN rm -rf node_modules
 
 # Start things up
 EXPOSE 9000
-CMD [ "npm", "run-script", "docker" ]
+CMD [ "npm", "run", "docker" ]

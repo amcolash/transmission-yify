@@ -2,6 +2,7 @@
 
 const axios = require('axios');
 const cors = require('cors');
+const { exec } = require('child_process');
 const express = require('express');
 const fs = require('fs');
 const transmissionWrapper = require('transmission');
@@ -9,7 +10,8 @@ const transmissionWrapper = require('transmission');
 require('dotenv').config();
 
 // Constants
-const PORT = 9000;
+const IS_DOCKER = fs.existsSync('/.dockerenv');
+const PORT = IS_DOCKER ? 9000 : 9001;
 
 // App
 const app = express();
@@ -17,7 +19,7 @@ app.use(express.json());
 app.use(cors());
 
 // Transmission wrapper, conditional host based on if running from a docker container
-const transmission = new transmissionWrapper({ host: fs.existsSync('/.dockerenv') ? 'transmission' : '0.0.0.0'});
+const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0'});
 
 // Set up static content
 app.use('/', express.static('build'));
@@ -38,6 +40,17 @@ app.get('/ip', function (req, res) {
     }
 });
 
+app.get('/storage', function (req, res) {
+    exec("df " + process.env.DATA_DIR + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
+        if (err) {
+            console.error(err);
+            res.send("unknown");
+        } else {
+            res.send({ used: output.replace("%", "").trim() });
+        }
+    });
+});
+
 app.get('/imdb/:id', function(req, res) {
     axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 }).then(response => {
         res.send(response.data);
@@ -47,7 +60,6 @@ app.get('/imdb/:id', function(req, res) {
     });
 });
 
-app.get('/storage', function (req, res) { transmission.freeSpace('/data', (err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
 app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, true, (err, data) => handleResponse(res, err, data)); });

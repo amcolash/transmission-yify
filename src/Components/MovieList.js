@@ -98,10 +98,8 @@ class MovieList extends Component {
 
         // Additionally get storage info here
         axios.get(this.server + '/storage').then(response => {
-            const gb = 1024 * 1024 * 1024;
-            const total_space = gb * 51;
-            var percent = (total_space - response.data["size-bytes"]) / total_space;
-            this.setState({ storage: (percent * 100).toFixed(1) });
+            var percent = response.data.used;
+            this.setState({ storage: percent.toFixed(1) });
         }, error => {
             console.error(error);
         });
