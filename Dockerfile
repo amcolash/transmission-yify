@@ -4,7 +4,7 @@ FROM mhart/alpine-node:8
 WORKDIR /usr/src/app
 
 # For caching purposes, install deps without other changed files
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
 # Install deps (can be cached)
 RUN yarn install --only=dev
