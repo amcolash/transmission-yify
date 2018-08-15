@@ -16,18 +16,13 @@ services:
       - 8.8.4.4
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/transmission:/data
-      - ./get_ip.sh:/root/get_ip.sh:ro
+      - ${DATA_DIR}:/data
+      - ./get_ip.sh:/scripts/transmission-post-start.sh:ro
     env_file:
       - .env
     environment:
-      # - OPENVPN_PROVIDER=TIGER
-      # - OPENVPN_USERNAME=username
-      # - OPENVPN_PASSWORD=password
-      # - OPENVPN_CONFIG=CA Toronto
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.0.0/24
-    command: sh -c "/root/get_ip.sh & dumb-init /etc/openvpn/start.sh"
 
   proxy:
     image: haugene/transmission-openvpn-proxy
@@ -44,11 +39,11 @@ services:
     image: amcolash/transmission-yify
     container_name: client
     restart: always
-    volumes:
-      - /tmp/transmission:/data
     links:
       - transmission
-    env_file:
-      - .env
     ports:
       - 9000:9000
+    volumes:
+      - ${DATA_DIR}:/data
+    env_file:
+      - .env

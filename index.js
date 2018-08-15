@@ -3,6 +3,7 @@
 const axios = require('axios');
 const cors = require('cors');
 const express = require('express');
+const fs = require('fs');
 const transmissionWrapper = require('transmission');
 
 require('dotenv').config();
@@ -15,15 +16,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Transmission wrapper
-const transmission = new transmissionWrapper({host: 'localhost'});
+// Transmission wrapper, conditional host based on if running from a docker container
+const transmission = new transmissionWrapper({ host: fs.existsSync('/.dockerenv') ? 'transmission' : '0.0.0.0'});
 
 // Set up static content
 app.use('/', express.static('build'));
 
 app.get('/ip', function (req, res) {
     try {
-        var fs = require('fs');
         var file = fs.readFileSync("/data/ip.txt", "utf8").trim();
 
         axios.get('https://api.ipdata.co/' + file + "?api-key=" + process.env.IP_KEY).then(response => {
