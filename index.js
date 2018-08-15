@@ -41,7 +41,7 @@ app.get('/ip', function (req, res) {
 });
 
 app.get('/storage', function (req, res) {
-    exec("df " + process.env.DATA_DIR + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
+    exec("df " + (IS_DOCKER ? "/data" : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
         if (err) {
             console.error(err);
             res.send("unknown");
