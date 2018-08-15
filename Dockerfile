@@ -7,13 +7,13 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Install deps (can be cached)
-RUN npm install --only=dev
+RUN yarn install --only=dev
 
 # Copy everything to docker image (this invalidates the cache now...)
 COPY ./ ./
 
 # Build react app
-RUN npm run-script build
+RUN yarn run build
 
 # Clean up build deps
 RUN rm -rf node_modules

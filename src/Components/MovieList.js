@@ -266,7 +266,6 @@ class MovieList extends Component {
                             server={this.server}
                             torrents={torrents}
                             started={started}
-                            server={this.server}
                             updateTorrents={this.updateTorrents}
                             cancelTorrent={this.cancelTorrent}
                             downloadTorrent={this.downloadTorrent}
