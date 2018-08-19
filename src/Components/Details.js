@@ -46,6 +46,8 @@ class Details extends Component {
             if (versions[i].peers > 0) hasPeers = true;
         }
 
+        var rating = (moreData !== "ERROR" && moreData !== null && !moreData.Error) ? moreData.imdbRating : movie.rating;
+
         return (
             <div className="container">
                 {showCover ? (
@@ -82,7 +84,8 @@ class Details extends Component {
                             <br/>
                         </Fragment>
                     ) : null}
-                    <a href={"https://www.imdb.com/title/" + movie.imdb_code} target="_blank">IMDB Rating</a><span>: {movie.rating} / 10</span>
+                    <a href={"https://www.imdb.com/title/" + movie.imdb_code} target="_blank">IMDB Rating</a>
+                    <span>: {rating}{rating !== "N/A" ? " / 10" : ""}</span>
                     
                     {moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
                         <Fragment>
