@@ -1,4 +1,5 @@
 echo Starting IP service
+touch /data/ip.txt
 
 # Wait for vpn to start up
 sleep 20

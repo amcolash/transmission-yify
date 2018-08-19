@@ -7,7 +7,7 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun
-    restart: always
+    restart: unless-stopped
     ports:
       - "9091:9091"
       - "8888:8888"
@@ -24,21 +24,10 @@ services:
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.0.0/24
 
-  proxy:
-    image: haugene/transmission-openvpn-proxy
-    container_name: proxy
-    restart: always
-    links:
-      - transmission
-    ports:
-      - 8080:8080
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-
   client:
     image: amcolash/transmission-yify
     container_name: client
-    restart: always
+    restart: unless-stopped
     links:
       - transmission
     ports:
