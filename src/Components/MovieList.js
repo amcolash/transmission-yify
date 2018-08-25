@@ -166,7 +166,6 @@ class MovieList extends Component {
 
             axios.get(POPCORN_ENDPOINT).then(response => {
                 var promises = [];
-                var allData = [];
 
                 for (var i = 0; i < limit; i++) {
                     if (response.data.length >= i) {
