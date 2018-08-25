@@ -26,6 +26,7 @@ class Search extends Component {
                     <div className="searchItem">
                         <span>Search</span>
                         <DebounceInput
+                            disabled={order === "popularity"}
                             value={search}
                             debounceTimeout={500}
                             onChange={(event) => updateSearch(event.target.value, genre, order, quality)}
@@ -37,6 +38,7 @@ class Search extends Component {
                         <select
                             onChange={(event) => updateSearch(search, event.target.value, order, quality)}
                             value={genre}
+                            disabled={order === "popularity"}
                         >
                             {Genre.map(genre => (
                                 <option
@@ -71,6 +73,7 @@ class Search extends Component {
                         <select
                             onChange={(event) => updateSearch(search, genre, quality, event.target.value)}
                             value={quality}
+                            disabled={order === "popularity"}
                         >
                             {Quality.map(quality => (
                                 <option
