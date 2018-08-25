@@ -126,6 +126,11 @@ class MovieList extends Component {
             isSearching: true
         });
 
+        if (order === "popularity") {
+            this.fetchPopular();
+            return;
+        }
+
         const limit = 20;
         const direction = order === 'title' ? 'asc' : 'dec';
         const params = 'limit=' + limit + '&page=' + page +
@@ -141,6 +146,45 @@ class MovieList extends Component {
             axios.get(ENDPOINT).then(response => {
                 searchCache[ENDPOINT] = response.data.data;
                 this.handleData(response.data.data, limit);
+            }, error => {
+                this.setState({
+                    error: error,
+                    isLoaded: true,
+                    isSearching: false,
+                });
+            });
+        }
+    }
+
+    fetchPopular() {
+        const limit = 20;
+        if (searchCache.popular) {
+            this.handleData(searchCache.popular, 20);
+        } else {
+            const POPCORN_ENDPOINT = 'https://tv-v2.api-fetch.website/movies/1?sort=trending';
+            const YIFY_ENDPOINT = 'https://yts.am/api/v2/list_movies.json?query_term=';
+
+            axios.get(POPCORN_ENDPOINT).then(response => {
+                var promises = [];
+                var allData = [];
+
+                for (var i = 0; i < limit; i++) {
+                    if (response.data.length >= i) {
+                        const id = response.data[i].imdb_id;
+                        promises.push(axios.get(YIFY_ENDPOINT + id));
+                    }
+                }
+
+                axios.all(promises).then(results => {
+                    var data = { movies: [] };
+                    for (var i = 0; i < results.length; i++) {
+                        if (results[i].data && results[i].data.data && results[i].data.data.movies) {
+                            data.movies.push(results[i].data.data.movies[0]);
+                        }
+                    }
+                    searchCache.popular = data;
+                    this.handleData(data, limit);
+                });
             }, error => {
                 this.setState({
                     error: error,
