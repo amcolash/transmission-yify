@@ -4,6 +4,7 @@ import {
 } from 'react-icons/lib/fa';
 
 import Progress from './Progress';
+import './TorrentList.css';
 
 class TorrentList extends Component {
     constructor(props) {
