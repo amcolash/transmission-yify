@@ -11,7 +11,7 @@ require('dotenv').config();
 
 // Constants
 const IS_DOCKER = fs.existsSync('/.dockerenv');
-const PORT = IS_DOCKER ? 9000 : 9001;
+const PORT = 9000;
 
 // App
 const app = express();
@@ -60,6 +60,7 @@ app.get('/imdb/:id', function(req, res) {
     });
 });
 
+app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
 app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, true, (err, data) => handleResponse(res, err, data)); });

@@ -10,6 +10,7 @@ import Movie from './Movie';
 import Spinner from './Spinner';
 import Details from './Details';
 import TorrentList from './TorrentList';
+import Plex from './Plex';
 import Search from './Search';
 
 const searchCache = [];
@@ -53,9 +54,8 @@ class MovieList extends Component {
         
         this.updateLocation();
         
-        // First update, then schedule polling
+        // First update for torrents
         this.updateTorrents();
-        setInterval(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
 
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
@@ -92,8 +92,11 @@ class MovieList extends Component {
                 torrents: torrents,
                 started: started
             });
+
+            setTimeout(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
         }, error => {
             console.error(error);
+            setTimeout(() => this.updateTorrents(), 60000); // Poll again in 1 minute since it seems server is down
         });
 
         // Additionally get storage info here
@@ -305,6 +308,7 @@ class MovieList extends Component {
         } else {
             return (
                 <Fragment>
+                    <Plex server={this.server}/>
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800}>
                         <Details
                             movie={movie}
