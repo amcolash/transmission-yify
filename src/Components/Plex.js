@@ -21,7 +21,7 @@ class Plex extends Component {
 
         if (plex) {
             return (
-                <a href={this.props.plexServer} id="plex" target="_parent">
+                <a href={this.state.plexServer} id="plex" target="_parent">
                     <img src="plex.svg" alt="Plex Logo"/>
                 </a>
             );
