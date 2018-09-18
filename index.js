@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cors());
 
 // Transmission wrapper, conditional host based on if running from a docker container
-const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0'});
+const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0' });
 
 // Set up static content
 app.use('/', express.static('build'));
@@ -51,8 +51,17 @@ app.get('/storage', function (req, res) {
     });
 });
 
-app.get('/imdb/:id', function(req, res) {
+app.get('/omdb/:id', function(req, res) {
     axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 }).then(response => {
+        res.send(response.data);
+    }, error => {
+        console.error(error);
+        res.send(error);
+    });
+});
+
+app.get('/themoviedb/:id', function (req, res) {
+    axios.get('https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY, { timeout: 10000 }).then(response => {
         res.send(response.data);
     }, error => {
         console.error(error);

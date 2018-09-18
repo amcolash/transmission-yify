@@ -16,7 +16,7 @@ class Details extends Component {
     }
 
     componentDidMount() {
-        axios.get(this.props.server + '/imdb/' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
+        axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
             this.setState({ moreData: response.data });
         }, error => {
             console.error(error);

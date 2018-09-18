@@ -136,7 +136,7 @@ class MovieList extends Component {
 
         const limit = 20;
         const direction = order === 'title' ? 'asc' : 'dec';
-        const params = 'limit=' + limit + '&page=' + page +
+        const params = 'limit=' + limit + '&page=' + page + 
             (search.length > 0 ? '&query_term=' + search : '') +
             '&sort_by=' + order + '&order_by=' + direction +
             (genre.length > 0 ? '&genre=' + genre : '') +
@@ -365,6 +365,7 @@ class MovieList extends Component {
                                         started={started}
                                         getProgress={this.getProgress}
                                         getVersions={this.getVersions}
+                                        server={this.server}
                                     />
                                 ) : null
                             ))
