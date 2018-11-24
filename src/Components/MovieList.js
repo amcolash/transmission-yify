@@ -80,11 +80,13 @@ class MovieList extends Component {
 
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
-            const torrents = response.data.torrents || [];
+            const torrents = response.data.torrents ? response.data.torrents.filter(torrent => {
+                return torrent.downloadDir.indexOf("/data") !== -1;
+            }) : [];
+
             const started = this.state.started.filter(hashString => {
                 for (var i = 0; i < torrents.length; i++) {
                     if (torrents[i].hashString === hashString) return false;
-                    if (torrents[i].downloadDir.indexOf("/data") === -1) return false;
                 }
                 return true;
             });
