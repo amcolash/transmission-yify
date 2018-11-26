@@ -29,10 +29,17 @@
 
 .pager {
     padding: 0.5em;
+    position: fixed;
+    bottom: 0.5em;
+    right: 0.5em;
+    background-color: rgba(30,30,30,0.9);
+    border-radius: 0.25em;
+    border: solid 2px white;
 }
 
 .pager span {
     padding: 0.25em;
+    vertical-align: bottom;
 }
 
 .footer {
@@ -44,6 +51,5 @@
 }
 
 .footer hr {
-    margin-top: 1em;
-    margin-bottom: 1.25em;
+    margin: 1em;
 }

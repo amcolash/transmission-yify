@@ -222,7 +222,7 @@ class MovieList extends Component {
             var promises = [];
             for (var i = 0; i < movies.length; i++) {
                 const id = movies[i].imdb_id;
-                if (!alternateVersion[id] && movies[i].title.includes("Incredibles")) promises.push(axios.get(YIFY_ENDPOINT + id));
+                if (!alternateVersion[id]) promises.push(axios.get(YIFY_ENDPOINT + id));
             }
 
             axios.all(promises).then(results => {
@@ -427,42 +427,42 @@ class MovieList extends Component {
                     <div className="pager">
                         <FaAngleDoubleLeft
                             className="arrow"
-                            style={{ visibility: page > 1 ? "visible" : "hidden" }}
+                            style={{ display: page > 1 ? "inline-block" : "none" }}
                             onClick={() => this.changePage(-5)}
                         />
                         <FaAngleLeft
                             className="arrow"
-                            style={{ visibility: page > 1 ? "visible" : "hidden" }}
+                            style={{ display: page > 1 ? "inline-block" : "none" }}
                             onClick={() => this.changePage(-1)}
                         />
                         <span>{page}</span>
                         <FaAngleRight
                             className="arrow"
-                            style={{ visibility: movies.length === 50 ? "visible" : "hidden" }}
+                            style={{ display: movies.length === 50 ? "inline-block" : "none" }}
                             onClick={() => this.changePage(1)}
                         />
                         <FaAngleDoubleRight
                             className="arrow"
-                            style={{ visibility: movies.length === 50 ? "visible" : "hidden" }}
+                            style={{ display: movies.length === 50 ? "inline-block" : "none" }}
                             onClick={() => this.changePage(5)}
                         />
+                    </div>
 
-                        <div className="footer">
-                            <hr/>
+                    <div className="footer">
+                        <hr/>
 
-                            {totalMovies ? (
-                                <p>Total Movies: {totalMovies}</p>
-                            ) : null}
-                            {location ? (
-                                <p>Server Location: {location}</p>
-                            ) : null}
-                            {storage ? (
-                                <p>
-                                    <span>Disk Usage: {storage}%</span>
-                                    <progress value={storage} max="100"/>
-                                </p>
-                            ) : null}
-                        </div>
+                        {totalMovies ? (
+                            <p>Total Movies: {totalMovies}</p>
+                        ) : null}
+                        {location ? (
+                            <p>Server Location: {location}</p>
+                        ) : null}
+                        {storage ? (
+                            <p>
+                                <span>Disk Usage: {storage}%</span>
+                                <progress value={storage} max="100"/>
+                            </p>
+                        ) : null}
                     </div>
                 </Fragment>
             );
