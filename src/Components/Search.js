@@ -12,7 +12,7 @@ import Order from '../Data/Order';
 class Search extends Component {
 
     clearSearch() {
-        this.props.updateSearch("", "", "last added", "All");
+        this.props.updateSearch("", "", "last added", "All", 1);
     }
 
     render() {

@@ -24,9 +24,7 @@ class MovieList extends Component {
             error: null,
             isLoaded: false,
             movies: [],
-            totalMovies: 0,
             page: 1,
-            totalPages: 1,
             modal: false,
             movie: {},
             torrents: [],
@@ -50,15 +48,18 @@ class MovieList extends Component {
     }
     
     componentDidMount() {
+        // Get movie list
         this.updateData();
+        this.updateStats();
         
+        // Get data from server
         this.updateLocation();
-        
         this.updateDocker();
 
         // First update for torrents
         this.updateTorrents();
 
+        // Update window size
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
     }
@@ -82,6 +83,14 @@ class MovieList extends Component {
     updateLocation() {
         axios.get(this.server + '/ip').then(response => {
             this.setState({ location: response.data.city + ', ' + response.data.country_name });
+        }, error => {
+            console.error(error);
+        });
+    }
+
+    updateStats() {
+        axios.get('https://tv-v2.api-fetch.website/status?').then(response => {
+            this.setState({ totalMovies: response.data.totalMovies });
         }, error => {
             console.error(error);
         });
@@ -127,13 +136,13 @@ class MovieList extends Component {
         });
     }
 
-    updateSearch(search, genre, order, quality) {
+    updateSearch(search, genre, order, quality, page) {
         this.setState({
             search: search,
             genre: genre,
             order: order,
             quality: quality,
-            page: 1,
+            page: page || this.state.page,
         }, () => this.updateData());
     }
     
@@ -189,9 +198,7 @@ class MovieList extends Component {
         this.setState({
             movies: data,
             isLoaded: true,
-            isSearching: false,
-            totalPages: 1,
-            totalMovies: 0
+            isSearching: false
         });
     }
 
@@ -266,18 +273,17 @@ class MovieList extends Component {
     };
 
     changePage(direction) {
-        const { page, totalPages } = this.state;
+        const page= this.state.page;
         var newPage = direction + page;
         if (page === newPage) return;
         if (newPage < 1) newPage = 1;
-        if (newPage > totalPages) newPage = totalPages;
 
         this.setState({ page: newPage }, () => this.updateData());
     }
 
     render() {
         const {
-            error, isLoaded, movies, modal, movie, page, totalPages, torrents, isSearching, location,
+            error, isLoaded, movies, modal, movie, page, torrents, isSearching, location,
             totalMovies, started, width, storage
         } = this.state;
 
@@ -334,8 +340,6 @@ class MovieList extends Component {
                         page={this.state.page}
                     />
 
-                    <h2>{totalMovies} Movies</h2>
-
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
                             movies.map(movie => (
@@ -355,57 +359,50 @@ class MovieList extends Component {
                                 ) : null
                             ))
                         ) :
-                            <div className="message">No Results</div>
+                            <h1>No Results</h1>
                         }
                     </div>
 
-                    {(movies && movies.length > 0) ? (
-                        <div className="pager">
-                            <FaAngleDoubleLeft
-                                className="arrow"
-                                style={{ visibility: page > 1 ? "visible" : "hidden" }}
-                                onClick={() => this.changePage(-5)}
-                            />
-                            <FaAngleLeft
-                                className="arrow"
-                                style={{ visibility: page > 1 ? "visible" : "hidden" }}
-                                onClick={() => this.changePage(-1)}
-                            />
-                            <span>{page}</span>
-                            <FaAngleRight
-                                className="arrow"
-                                style={{ visibility: page < totalPages ? "visible" : "hidden" }}
-                                onClick={() => this.changePage(1)}
-                            />
-                            <FaAngleDoubleRight
-                                className="arrow"
-                                style={{ visibility: page < totalPages ? "visible" : "hidden" }}
-                                onClick={() => this.changePage(5)}
-                            />
+                    <div className="pager">
+                        <FaAngleDoubleLeft
+                            className="arrow"
+                            style={{ visibility: page > 1 ? "visible" : "hidden" }}
+                            onClick={() => this.changePage(-5)}
+                        />
+                        <FaAngleLeft
+                            className="arrow"
+                            style={{ visibility: page > 1 ? "visible" : "hidden" }}
+                            onClick={() => this.changePage(-1)}
+                        />
+                        <span>{page}</span>
+                        <FaAngleRight
+                            className="arrow"
+                            style={{ visibility: movies.length === 50 ? "visible" : "hidden" }}
+                            onClick={() => this.changePage(1)}
+                        />
+                        <FaAngleDoubleRight
+                            className="arrow"
+                            style={{ visibility: movies.length === 50 ? "visible" : "hidden" }}
+                            onClick={() => this.changePage(5)}
+                        />
 
-                            <br/>
-                            
-                            <Spinner visible={isSearching} noMargin />
+                        <div className="footer">
+                            <hr/>
 
-                            <div className="footer">
-                                {location ? (
-                                    <Fragment>
-                                        <br/>
-                                        <br/>
-                                        <span className="location">Server Location: {location}</span>
-                                    </Fragment>
-                                ) : null}
-                                <br/>
-                                <br/>
-                                {storage ? (
-                                    <Fragment>
-                                        <span>Disk Usage: {storage}%</span>
-                                        <progress value={storage} max="100"/>
-                                    </Fragment>
-                                ) : null}
-                            </div>
+                            {totalMovies ? (
+                                <p>Total Movies: {totalMovies}</p>
+                            ) : null}
+                            {location ? (
+                                <p>Server Location: {location}</p>
+                            ) : null}
+                            {storage ? (
+                                <p>
+                                    <span>Disk Usage: {storage}%</span>
+                                    <progress value={storage} max="100"/>
+                                </p>
+                            ) : null}
                         </div>
-                    ) : null}
+                    </div>
                 </Fragment>
             );
         }

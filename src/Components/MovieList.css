@@ -38,3 +38,12 @@
 .footer {
     font-size: 0.85em;
 }
+
+.footer p {
+    margin: 0.75em;
+}
+
+.footer hr {
+    margin-top: 1em;
+    margin-bottom: 1.25em;
+}
