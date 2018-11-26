@@ -15,6 +15,7 @@ import Plex from './Plex';
 import Search from './Search';
 
 const searchCache = [];
+const hashMapping = {};
 
 class MovieList extends Component {
 
@@ -105,6 +106,13 @@ class MovieList extends Component {
                     return torrent.downloadDir.indexOf("/data") !== -1;
                 });
             }
+
+            torrents.map(torrent => {
+                if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
+                    torrent.name = hashMapping[torrent.hashString];
+                }
+                return torrent;
+            });
 
             const started = this.state.started.filter(hashString => {
                 for (var i = 0; i < torrents.length; i++) {
@@ -216,6 +224,8 @@ class MovieList extends Component {
             started: [ ...this.state.started, version.hashString ]
         });
 
+        hashMapping[version.hashString] = version.title;
+
         axios.post(this.server + '/torrents', { url: version.url }).then(response => {
             this.updateTorrents();
         }, error => {
@@ -238,7 +248,8 @@ class MovieList extends Component {
                     ratio: torrent.peer > 0 ? (torrent.seed / torrent.peer).toFixed(3) : 0,
                     url: torrent.url,
                     hashString: magnet.decode(torrent.url).infoHash.toLowerCase(),
-                    size: torrent.filesize
+                    size: torrent.filesize,
+                    title: movie.title + " (" + movie.year + ") [" + quality + "]"
                 };
 
                 if (!versions[quality] || versions[quality].ratio < version.ratio) {
