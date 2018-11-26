@@ -16,7 +16,7 @@ class Details extends Component {
     }
 
     componentDidMount() {
-        axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
+        axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
             this.setState({ moreData: response.data });
         }, error => {
             console.error(error);
@@ -46,14 +46,12 @@ class Details extends Component {
             if (versions[i].peers > 0) hasPeers = true;
         }
 
-        var rating = (moreData !== "ERROR" && moreData !== null && !moreData.Error) ? moreData.imdbRating : movie.rating;
-
         return (
             <div className="container">
                 {showCover ? (
                     <div className="left">
                         <img
-                            src={movie.medium_cover_image}
+                            src={movie.images.poster}
                             alt={movie.title}
                             onError={this.imageError.bind(this)}
                         />
@@ -74,30 +72,30 @@ class Details extends Component {
                     <p>{movie.summary}</p>
                     {movie.genres ? (
                         <Fragment>
-                            <span>
+                            <span className="capitalize">
                                 {
                                     (movie.genres.length === 1 ? "Genre: " : "Genres: ") +
                                     JSON.stringify(movie.genres).replace(/[[\]"]/g, '').replace(/,/g, ', ')
                                 }
                             </span>
-                            <br/>
-                            <br/>
                         </Fragment>
                     ) : null}
-                    <a href={"https://www.imdb.com/title/" + movie.imdb_code} target="_blank">IMDB Rating</a>
-                    <span>: {rating}{rating !== "N/A" ? " / 10" : ""}</span>
                     
                     {moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
                         <Fragment>
                             <br/>
+                            {moreData.Ratings.length > 0 ? <br/> : null}
                             {moreData.Ratings.map(rating => (
                                 <Fragment key={rating.Source}>
-                                    {rating.Source !== "Internet Movie Database" ? (
+                                    {rating.Source === "Internet Movie Database" ? (
                                         <Fragment>
-                                            <span>{rating.Source}: {rating.Value}</span>
-                                            <br />
+                                            <a href={"https://www.imdb.com/title/" + movie.imdb_id} target="_blank">IMDB Rating</a>
+                                            <span>: {rating.Value}</span>
                                         </Fragment>
-                                    ) : null}
+                                    ) : (
+                                        <span>{rating.Source}: {rating.Value}</span>
+                                    )}
+                                    <br/>
                                 </Fragment>
                             ))}
                             <hr/>
