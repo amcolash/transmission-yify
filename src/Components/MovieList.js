@@ -37,7 +37,8 @@ class MovieList extends Component {
             isSearching: false,
             storage: null,
             width: 0,
-            height: 0
+            height: 0,
+            docker: true
         }
 
         this.updateSearch = this.updateSearch.bind(this);
@@ -53,6 +54,8 @@ class MovieList extends Component {
         
         this.updateLocation();
         
+        this.updateDocker();
+
         // First update for torrents
         this.updateTorrents();
 
@@ -68,8 +71,15 @@ class MovieList extends Component {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     }
 
+    updateDocker() {
+        axios.get(this.server + '/docker').then(response => {
+            this.setState({ docker: response.data });
+        }, error => {
+            console.error(error);
+        });
+    }
+
     updateLocation() {
-        // If the server is not patched or something goes wrong, no worries
         axios.get(this.server + '/ip').then(response => {
             this.setState({ location: response.data.city + ', ' + response.data.country_name });
         }, error => {
@@ -79,9 +89,12 @@ class MovieList extends Component {
 
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
-            const torrents = response.data.torrents ? response.data.torrents.filter(torrent => {
-                return torrent.downloadDir.indexOf("/data") !== -1 || true; // NO_COMMIT
-            }) : [];
+            var torrents = response.data.torrents;
+            if (this.state.docker) {
+                torrents = response.data.torrents.filter(torrent => {
+                    return torrent.downloadDir.indexOf("/data") !== -1;
+                });
+            }
 
             const started = this.state.started.filter(hashString => {
                 for (var i = 0; i < torrents.length; i++) {
@@ -165,6 +178,13 @@ class MovieList extends Component {
             movie.year = Math.min(now, movie.year);
             return movie;
         });
+
+        // Only show movies with enough ratings to be useful
+        if (this.state.order === 'rating') {
+            data = data.filter(movie => {
+                return movie.rating.votes > 10;
+            })
+        }
 
         this.setState({
             movies: data,

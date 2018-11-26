@@ -78,6 +78,7 @@ app.get('/themoviedb/:id', function (req, res) {
     });
 });
 
+app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
 app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
