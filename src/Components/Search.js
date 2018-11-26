@@ -15,6 +15,11 @@ class Search extends Component {
         this.props.updateSearch("", "", "last added", "All", 1);
     }
 
+    toggle3D() {
+        let { search, genre, order, quality, page, updateSearch } = this.props;
+        updateSearch(search, genre, order, quality === "All" ? "3D" : "All", page);
+    }
+
     render() {
         let { search, genre, order, quality, page, isSearching, updateSearch } = this.props;
         let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "date_added" || page !== 1;
@@ -66,6 +71,8 @@ class Search extends Component {
                             ))}
                         </select>
                     </div>
+
+                    <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaClose /></button>
                 </div>

@@ -16,6 +16,7 @@ import Search from './Search';
 
 const searchCache = [];
 const hashMapping = {};
+const alternateVersion = {};
 
 class MovieList extends Component {
 
@@ -33,6 +34,7 @@ class MovieList extends Component {
             started: [],
             search: '',
             genre: '',
+            quality: 'All',
             order: 'last added',
             isSearching: false,
             storage: null,
@@ -169,7 +171,6 @@ class MovieList extends Component {
             (genre.length > 0 ? '&genre=' + genre : '');
         const ENDPOINT = 'https://tv-v2.api-fetch.website/' + type + '/' + page + '?' + params;
 
-        window.scrollTo(0, 0);
         if (searchCache[ENDPOINT]) {
             this.handleData(searchCache[ENDPOINT]);
         } else {
@@ -201,14 +202,48 @@ class MovieList extends Component {
         if (this.state.order === 'rating') {
             data = data.filter(movie => {
                 return movie.rating.votes > 10;
-            })
+            });
         }
 
-        this.setState({
-            movies: data,
-            isLoaded: true,
-            isSearching: false
-        });
+        if (this.state.quality === "3D") {
+            this.get3D(data);
+        } else {
+            this.setState({
+                movies: data,
+                isLoaded: true,
+                isSearching: false
+            });
+        }
+    }
+
+    get3D(movies) {
+            const YIFY_ENDPOINT = 'https://yts.am/api/v2/list_movies.json?query_term=';
+            
+            var promises = [];
+            for (var i = 0; i < movies.length; i++) {
+                const id = movies[i].imdb_id;
+                if (!alternateVersion[id] && movies[i].title.includes("Incredibles")) promises.push(axios.get(YIFY_ENDPOINT + id));
+            }
+
+            axios.all(promises).then(results => {
+                for (var i = 0; i < results.length; i++) {
+                    const data = results[i].data;
+                    if (data && data.data && data.data.movies) {
+                        const movie = data.data.movies[0];
+                        alternateVersion[movie.imdb_code] = {};
+                        for (var j = 0; j < movie.torrents.length; j++) {
+                            const version = movie.torrents[j];
+                            if (version.quality === "3D") alternateVersion[movie.imdb_code] = version;
+                        }
+                    }
+                }
+
+                this.setState({
+                    movies: movies,
+                    isLoaded: true,
+                    isSearching: false
+                });
+            });
     }
 
     cancelTorrent = (hashString) => {
@@ -235,10 +270,23 @@ class MovieList extends Component {
         this.torrentList.expand();
     }
 
-    getVersions(movie) {
+    getVersions = (movie) => {
         var versions = {};
 
         if (movie.torrents && movie.torrents.en) {
+            if (this.state.quality === "3D" && alternateVersion[movie.imdb_id] && alternateVersion[movie.imdb_id].hash) {
+                const version = alternateVersion[movie.imdb_id];
+                movie.torrents.en["3D"] = {
+                    peer: version.peers,
+                    seed: version.seeds,
+                    url: version.url,
+                    hash: version.hash.toLowerCase(),
+                    filesize: version.size
+                };
+            } else {
+                delete movie.torrents.en["3D"];
+            }
+
             for (const [quality, torrent] of Object.entries(movie.torrents.en)) {
                 let version = {
                     quality: quality,
@@ -247,7 +295,7 @@ class MovieList extends Component {
                     seeds: torrent.seed.toFixed(0),
                     ratio: torrent.peer > 0 ? (torrent.seed / torrent.peer).toFixed(3) : 0,
                     url: torrent.url,
-                    hashString: magnet.decode(torrent.url).infoHash.toLowerCase(),
+                    hashString: torrent.hash || magnet.decode(torrent.url).infoHash.toLowerCase(),
                     size: torrent.filesize,
                     title: movie.title + " (" + movie.year + ") [" + quality + "]"
                 };
