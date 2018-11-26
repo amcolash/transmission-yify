@@ -25,5 +25,11 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "docker": "if [ ! -d node_modules ]; then npm install --only=prod; fi && node index.js"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

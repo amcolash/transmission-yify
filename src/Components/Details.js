@@ -46,6 +46,15 @@ class Details extends Component {
             if (versions[i].peers > 0) hasPeers = true;
         }
 
+        var mpaa = movie.certification;
+        if (!mpaa || mpaa === "N/A") {
+            if (moreData && moreData.Rated !== "N/A") {
+                mpaa = moreData.Rated;
+            } else {
+                mpaa = "NR";
+            }
+        }
+
         return (
             <div className="container">
                 {showCover ? (
@@ -55,6 +64,10 @@ class Details extends Component {
                             alt={movie.title}
                             onError={this.imageError.bind(this)}
                         />
+                        <hr/>
+                        {movie.trailer ? (
+                            <a href={movie.trailer} target="_blank" rel="noopener noreferrer"><FaPlayCircle />Trailer</a>
+                        ) : null}
                     </div>
                 ) : null }
                 <div className="right">
@@ -64,12 +77,9 @@ class Details extends Component {
                     </h3>
                     <h4>
                         {movie.year}, {this.convertTime(movie.runtime)}
-                        <div className="mpaa-rating">{movie.mpa_rating ? movie.mpa_rating : "NR"}</div>
+                        <div className="mpaa-rating">{mpaa}</div>
                     </h4>
-                    {movie.yt_trailer_code ? (
-                        <a href={'https://www.youtube.com/watch?v=' + movie.yt_trailer_code} target="_blank"><FaPlayCircle />Trailer</a>
-                    ) : null}
-                    <p>{movie.summary}</p>
+                    <p>{movie.synopsis}</p>
                     {movie.genres ? (
                         <Fragment>
                             <span className="capitalize">
@@ -89,7 +99,7 @@ class Details extends Component {
                                 <Fragment key={rating.Source}>
                                     {rating.Source === "Internet Movie Database" ? (
                                         <Fragment>
-                                            <a href={"https://www.imdb.com/title/" + movie.imdb_id} target="_blank">IMDB Rating</a>
+                                            <a href={"https://www.imdb.com/title/" + movie.imdb_id} target="_blank" rel="noopener noreferrer">IMDB Rating</a>
                                             <span>: {rating.Value}</span>
                                         </Fragment>
                                     ) : (
