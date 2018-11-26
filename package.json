@@ -7,6 +7,7 @@
     "cors": "^2.8.4",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "magnet-uri": "^5.2.4",
     "transmission": "^0.4.9"
   },
   "devDependencies": {
@@ -15,7 +16,7 @@
     "react-dom": "^16.4.2",
     "react-icons": "^2.2.7",
     "react-responsive-modal": "^3.2.0",
-    "react-scripts": "1.1.4",
+    "react-scripts": "^2.1.1",
     "scrollreveal": "^3.4.0"
   },
   "scripts": {

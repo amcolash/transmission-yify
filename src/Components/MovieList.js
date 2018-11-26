@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import axios from 'axios';
+import magnet from 'magnet-uri';
 import Modal from 'react-responsive-modal';
 import {
     FaAngleDoubleRight, FaAngleDoubleLeft, FaAngleRight, FaAngleLeft, FaExclamationTriangle
@@ -227,27 +228,28 @@ class MovieList extends Component {
     getVersions(movie) {
         var versions = {};
 
-        if (movie.torrents) {
-            for (var i = 0; i < movie.torrents.length; i++) {
-                const torrent = movie.torrents[i];
-
+        if (movie.torrents && movie.torrents.en) {
+            for (const [quality, torrent] of Object.entries(movie.torrents.en)) {
                 let version = {
-                    quality: torrent.quality,
-                    peers: torrent.peers.toFixed(0),
-                    seeds: torrent.seeds.toFixed(0),
-                    ratio: torrent.peers > 0 ? (torrent.seeds / torrent.peers).toFixed(3) : 0,
+                    quality: quality,
+                    sort: quality === "1080p" ? 2 : (quality === "720p" ? 1 : 0),
+                    peers: torrent.peer.toFixed(0),
+                    seeds: torrent.seed.toFixed(0),
+                    ratio: torrent.peer > 0 ? (torrent.seed / torrent.peer).toFixed(3) : 0,
                     url: torrent.url,
-                    hashString: torrent.hash.toLowerCase(),
-                    size: torrent.size
+                    hashString: magnet.decode(torrent.url).infoHash.toLowerCase(),
+                    size: torrent.filesize
                 };
 
-                if (!versions[version.quality] || versions[version.quality].ratio < version.ratio) {
-                    versions[version.quality] = version;
+                if (!versions[quality] || versions[quality].ratio < version.ratio) {
+                    versions[quality] = version;
                 }
             }
         }
 
-        return Object.values(versions);
+        return Object.values(versions).sort(function(a, b) {
+            return a.sort - b.sort;
+        });
     }
 
     getTorrent(hashString) {
@@ -283,7 +285,7 @@ class MovieList extends Component {
 
     render() {
         const {
-            error, isLoaded, movies, modal, movie, page, torrents, isSearching, location,
+            error, isLoaded, movies, modal, movie, page, torrents, location,
             totalMovies, started, width, storage
         } = this.state;
 
