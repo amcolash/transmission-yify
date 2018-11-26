@@ -8,7 +8,6 @@ import Spinner from './Spinner';
 
 import Genre from '../Data/Genre';
 import Order from '../Data/Order';
-import Quality from '../Data/Quality';
 
 class Search extends Component {
 
@@ -63,24 +62,6 @@ class Search extends Component {
                                     value={order.value}
                                 >
                                     {order.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="searchItem">
-                        <span>Quality</span>
-                        <select
-                            onChange={(event) => updateSearch(search, genre, quality, event.target.value)}
-                            value={quality}
-                            disabled={order === "popularity"}
-                        >
-                            {Quality.map(quality => (
-                                <option
-                                    key={quality.label}
-                                    value={quality.value}
-                                >
-                                    {quality.label}
                                 </option>
                             ))}
                         </select>

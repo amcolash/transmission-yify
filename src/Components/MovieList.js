@@ -33,8 +33,7 @@ class MovieList extends Component {
             started: [],
             search: '',
             genre: '',
-            quality: 'All',
-            order: 'date_added',
+            order: 'last added',
             isSearching: false,
             storage: null,
             width: 0,
@@ -81,7 +80,7 @@ class MovieList extends Component {
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
             const torrents = response.data.torrents ? response.data.torrents.filter(torrent => {
-                return torrent.downloadDir.indexOf("/data") !== -1;
+                return torrent.downloadDir.indexOf("/data") !== -1 || true; // NO_COMMIT
             }) : [];
 
             const started = this.state.started.filter(hashString => {
@@ -126,32 +125,26 @@ class MovieList extends Component {
     }
     
     updateData() {
-        const { search, page, genre, order, quality } = this.state;
+        const { search, page, genre, order } = this.state;
         
         this.setState({
             isSearching: true
         });
 
-        if (order === "popularity") {
-            this.fetchPopular();
-            return;
-        }
+        const direction = order === 'title' ? '1' : '-1';
+        const type = 'movies';
+        const params = (search.length > 0 ? '&keywords=' + search : '') +
+            '&sort=' + order + '&order=' + direction +
+            (genre.length > 0 ? '&genre=' + genre : '');
+        const ENDPOINT = 'https://tv-v2.api-fetch.website/' + type + '/' + page + '?' + params;
 
-        const limit = 20;
-        const direction = order === 'title' ? 'asc' : 'dec';
-        const params = 'limit=' + limit + '&page=' + page + 
-            (search.length > 0 ? '&query_term=' + search : '') +
-            '&sort_by=' + order + '&order_by=' + direction +
-            (genre.length > 0 ? '&genre=' + genre : '') +
-            '&quality=' + quality;
-        const ENDPOINT = 'https://yts.am/api/v2/list_movies.json?' + params;
-
+        window.scrollTo(0, 0);
         if (searchCache[ENDPOINT]) {
-            this.handleData(searchCache[ENDPOINT], limit);
+            this.handleData(searchCache[ENDPOINT]);
         } else {
             axios.get(ENDPOINT).then(response => {
-                searchCache[ENDPOINT] = response.data.data;
-                this.handleData(response.data.data, limit);
+                searchCache[ENDPOINT] = response.data;
+                this.handleData(response.data);
             }, error => {
                 this.setState({
                     error: error,
@@ -162,54 +155,23 @@ class MovieList extends Component {
         }
     }
 
-    fetchPopular() {
-        const limit = 20;
-        if (searchCache.popular) {
-            this.handleData(searchCache.popular, 20);
-        } else {
-            const POPCORN_ENDPOINT = 'https://tv-v2.api-fetch.website/movies/1?sort=trending';
-            const YIFY_ENDPOINT = 'https://yts.am/api/v2/list_movies.json?query_term=';
+    handleData(data) {
+        // const total = data.movie_count;
+        // const totalPages = Math.ceil(total / limit);
 
-            axios.get(POPCORN_ENDPOINT).then(response => {
-                var promises = [];
-
-                for (var i = 0; i < limit; i++) {
-                    if (response.data.length >= i) {
-                        const id = response.data[i].imdb_id;
-                        promises.push(axios.get(YIFY_ENDPOINT + id));
-                    }
-                }
-
-                axios.all(promises).then(results => {
-                    var data = { movies: [] };
-                    for (var i = 0; i < results.length; i++) {
-                        if (results[i].data && results[i].data.data && results[i].data.data.movies) {
-                            data.movies.push(results[i].data.data.movies[0]);
-                        }
-                    }
-                    searchCache.popular = data;
-                    this.handleData(data, limit);
-                });
-            }, error => {
-                this.setState({
-                    error: error,
-                    isLoaded: true,
-                    isSearching: false,
-                });
-            });
-        }
-    }
-
-    handleData(data, limit) {
-        const total = data.movie_count;
-        const totalPages = Math.ceil(total / limit);
+        // fix weird years (since it seems the year can vary based on region released first)
+        var now = new Date().getFullYear();
+        data.map(movie => {
+            movie.year = Math.min(now, movie.year);
+            return movie;
+        });
 
         this.setState({
-            movies: data.movies,
+            movies: data,
             isLoaded: true,
             isSearching: false,
-            totalPages: totalPages,
-            totalMovies: total
+            totalPages: 1,
+            totalMovies: 0
         });
     }
 
@@ -359,7 +321,7 @@ class MovieList extends Component {
                             movies.map(movie => (
                                 movie.torrents ? (
                                     <Movie
-                                        key={movie.id}
+                                        key={movie._id}
                                         movie={movie}
                                         click={this.onOpenModal}
                                         downloadTorrent={this.downloadTorrent}

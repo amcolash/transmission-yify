@@ -25,7 +25,7 @@ class Movie extends Component {
     }
 
     coverError() {
-        axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_code, { timeout: 10000 }).then(response => {
+        axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
             const data = response.data.movie_results;
             if (data.length > 0) {
                 // if this breaks, consider doing things the right way as described here:
@@ -33,7 +33,7 @@ class Movie extends Component {
                 const image = 'https://image.tmdb.org/t/p/w342' + data[0].poster_path;
                 
                 var movie = this.state.movie;
-                movie.medium_cover_image = image;
+                movie.images.poster = image;
                 this.setState({ movie: movie });
             }
         }, error => {
@@ -52,13 +52,18 @@ class Movie extends Component {
             versions[i].progress = getProgress(versions[i].hashString);
         }
 
+        if (!movie.images || !movie.images.poster) {
+        //     this.coverError();
+            movie.images.poster = "broken image";
+        }
+
         return (
             <div className="movie" ref='movieCover'>
                 <div
                     className="cover"
                     onClick={(e) => click(movie)}
                 >
-                    <img className="movieCover" src={this.state.altCover || movie.medium_cover_image} alt="" onError={this.coverError.bind(this)} />
+                    <img className="movieCover" src={this.state.altCover || movie.images.poster} alt="" onError={this.coverError.bind(this)} />
                     <div className="movieIcon">
                         <FaFilm />
                     </div>

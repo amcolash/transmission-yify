@@ -26,14 +26,23 @@ app.use('/', express.static('build'));
 
 app.get('/ip', function (req, res) {
     try {
-        var file = fs.readFileSync("/data/ip.txt", "utf8").trim();
+        var promise;
+        if (IS_DOCKER) {
+            promise = fs.readFile("/data/ip.txt", "utf8");
+        } else {
+            promise = axios.get("http://ipinfo.io/ip");
+        }
 
-        axios.get('https://api.ipdata.co/' + file + "?api-key=" + process.env.IP_KEY).then(response => {
-            res.send(response.data);
-        }, error => {
-            console.error(error);
-            res.send(file);
+        promise.then(ip => {
+            if (!IS_DOCKER) ip = ip.data;
+            axios.get('https://api.ipdata.co/' + ip.trim() + "?api-key=" + process.env.IP_KEY).then(response => {
+                res.send(response.data);
+            }, error => {
+                console.error(error);
+                res.send(ip);
+            });
         });
+
     } catch(err) {
         console.error(err);
         res.send("unknown");
