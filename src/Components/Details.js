@@ -12,7 +12,7 @@ class Details extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { moreData: null, showCover: true };
+        this.state = { moreData: null, tvData: null, season: 1, showCover: true };
     }
 
     componentDidMount() {
@@ -22,6 +22,14 @@ class Details extends Component {
             console.error(error);
             this.setState({ moreData: "ERROR" });
         });
+
+        if (this.props.movie.num_seasons) {
+            axios.get('https://tv-v2.api-fetch.website/show/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
+                this.setState({ tvData: response.data });
+            }, error => {
+                console.error(error);
+            });
+        }
     }
 
     convertTime(min) {
@@ -35,14 +43,33 @@ class Details extends Component {
         this.setState({ showCover: false });
     }
 
+    updateSeason(season) {
+        this.setState({ season: season });
+    }
+
     render() {
         const { movie, downloadTorrent, cancelTorrent, getLink, getVersions, getTorrent, getProgress, started } = this.props;
-        const { moreData, showCover } = this.state;
+        const { moreData, showCover, tvData, season } = this.state;
 
         var versions = getVersions(movie);
 
+        var seasons = [];
+        var episodes = [];
+        if (movie.num_seasons) {
+            for (var i = 1; i < movie.num_seasons + 1; i++) {
+                seasons.push(i);
+            }
+            if (tvData) {
+                tvData.episodes.map(episode => {
+                    episodes[episode.season] = episodes[episode.season] || [];
+                    episodes[episode.season][episode.episode] = episode;
+                    return episode;
+                });
+            }
+        }
+
         var hasPeers = false;
-        for (var i = 0; i < versions.length; i++) {
+        for (i = 0; i < versions.length; i++) {
             if (versions[i].peers > 0) hasPeers = true;
         }
 
@@ -55,6 +82,13 @@ class Details extends Component {
             }
         }
 
+        var genres = movie.genres;
+        if (tvData) genres = tvData.genres;
+        if (genres) {
+            genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
+            JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
+        }
+
         return (
             <div className="container">
                 {showCover ? (
@@ -64,29 +98,36 @@ class Details extends Component {
                             alt={movie.title}
                             onError={this.imageError.bind(this)}
                         />
-                        <hr/>
                         {movie.trailer ? (
-                            <a href={movie.trailer} target="_blank" rel="noopener noreferrer"><FaPlayCircle />Trailer</a>
+                            <Fragment>
+                                <hr/>
+                                <a href={movie.trailer} target="_blank" rel="noopener noreferrer"><FaPlayCircle />Trailer</a>
+                            </Fragment>
                         ) : null}
                     </div>
                 ) : null }
                 <div className="right">
                     <h3>
-                        <span className={hasPeers ? "status green" : "status red"}><FaCircle/></span>
+                        {!movie.num_seasons ? (
+                            <span className={hasPeers ? "status green" : "status red"}><FaCircle/></span>
+                        ) : null}
                         {movie.title}
                     </h3>
                     <h4>
-                        {movie.year}, {this.convertTime(movie.runtime)}
-                        <div className="mpaa-rating">{mpaa}</div>
+                        <Fragment>
+                            {!movie.num_seasons ? (
+                                <span>{movie.year}, {this.convertTime(movie.runtime)}</span>
+                            ) : (
+                                <span>{moreData ? moreData.Year : movie.year} ({movie.num_seasons} Seasons)</span>
+                            )}
+                            <div className="mpaa-rating">{mpaa}</div>
+                        </Fragment>
                     </h4>
                     <p>{movie.synopsis ? movie.synopsis : (moreData ? moreData.Plot : "")}</p>
-                    {movie.genres ? (
+                    {movie.genres || tvData ? (
                         <Fragment>
                             <span className="capitalize">
-                                {
-                                    (movie.genres.length === 1 ? "Genre: " : "Genres: ") +
-                                    JSON.stringify(movie.genres).replace(/[[\]"]/g, '').replace(/,/g, ', ')
-                                }
+                                {genres}
                             </span>
                             <br/>
                         </Fragment>
@@ -136,7 +177,7 @@ class Details extends Component {
 
                     <hr/>
 
-                    {versions.map(version => (
+                    {!movie.num_seasons ? versions.map(version => (
                         <div className="version" key={version.url}>
                             <b>{version.quality}</b>
                             {getProgress(version.hashString) ? null : (
@@ -160,7 +201,27 @@ class Details extends Component {
                                 />
                             ) : null}
                         </div>
-                    ))}
+                    )) : (
+                        <Fragment>
+                            <span>Season </span>
+                            <select
+                                onChange={(event) => this.updateSeason(event.target.value)}
+                                value={season}
+                            >
+                                {seasons.map(season => (
+                                    <option key={season} value={season}>{season}</option>
+                                ))}
+                            </select>
+                            {episodes.length > 0 ? (
+                                episodes[season].map(episode => (
+                                    <Fragment>
+                                        <br/>
+                                        <span>{episode.title}</span>
+                                    </Fragment>
+                                ))
+                            ) : null}
+                        </Fragment>
+                    )}
                 </div>
             </div>
         );

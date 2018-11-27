@@ -74,4 +74,8 @@
         width: 8.66em;
         height: 13em;
     }
+
+    .movieCover {
+        height: 13em;
+    }
 }
