@@ -7,7 +7,7 @@ import {
 } from 'react-icons/lib/fa';
 
 import './MovieList.css';
-import Movie from './Movie';
+import Cover from './Cover';
 import Spinner from './Spinner';
 import Details from './Details';
 import TorrentList from './TorrentList';
@@ -36,8 +36,10 @@ class MovieList extends Component {
             genre: '',
             quality: 'All',
             order: 'last added',
+            type: 'movies',
             isSearching: false,
             storage: null,
+            serverStats: null,
             width: 0,
             height: 0,
             docker: true
@@ -94,7 +96,7 @@ class MovieList extends Component {
 
     updateStats() {
         axios.get('https://tv-v2.api-fetch.website/status?').then(response => {
-            this.setState({ totalMovies: response.data.totalMovies });
+            this.setState({ serverStats: response.data });
         }, error => {
             console.error(error);
         });
@@ -102,7 +104,7 @@ class MovieList extends Component {
 
     updateTorrents() {
         axios.get(this.server + '/torrents').then(response => {
-            var torrents = response.data.torrents;
+            var torrents = response.data.torrents || [];
             if (this.state.docker) {
                 torrents = response.data.torrents.filter(torrent => {
                     return torrent.downloadDir.indexOf("/data") !== -1;
@@ -147,25 +149,25 @@ class MovieList extends Component {
         });
     }
 
-    updateSearch(search, genre, order, quality, page) {
+    updateSearch(search, genre, order, quality, type, page) {
         this.setState({
             search: search,
             genre: genre,
             order: order,
             quality: quality,
+            type: type,
             page: page || this.state.page,
         }, () => this.updateData());
     }
     
     updateData() {
-        const { search, page, genre, order } = this.state;
+        const { search, page, genre, order, type } = this.state;
         
         this.setState({
             isSearching: true
         });
 
         const direction = order === 'title' ? '1' : '-1';
-        const type = 'movies';
         const params = (search.length > 0 ? '&keywords=' + search : '') +
             '&sort=' + order + '&order=' + direction +
             (genre.length > 0 ? '&genre=' + genre : '');
@@ -345,7 +347,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            totalMovies, started, width, storage
+            serverStats, started, width, storage
         } = this.state;
 
         if (error) {
@@ -398,14 +400,15 @@ class MovieList extends Component {
                         genre={this.state.genre}
                         quality={this.state.quality}
                         order={this.state.order}
+                        type={this.state.type}
                         page={this.state.page}
                     />
 
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
                             movies.map(movie => (
-                                movie.torrents ? (
-                                    <Movie
+                                movie.torrents || this.state.type === "shows" ? (
+                                    <Cover
                                         key={movie._id}
                                         movie={movie}
                                         click={this.onOpenModal}
@@ -451,8 +454,8 @@ class MovieList extends Component {
                     <div className="footer">
                         <hr/>
 
-                        {totalMovies ? (
-                            <p>Total Movies: {totalMovies}</p>
+                        {serverStats ? (
+                            <p>Total Movies: {serverStats.totalMovies}, Total Shows: {serverStats.totalShows}</p>
                         ) : null}
                         {location ? (
                             <p>Server Location: {location}</p>

@@ -16,33 +16,31 @@ class Search extends Component {
     }
 
     toggle3D() {
-        let { search, genre, order, quality, page, updateSearch } = this.props;
-        updateSearch(search, genre, order, quality === "All" ? "3D" : "All", page);
+        let { search, genre, order, quality, type, page, updateSearch } = this.props;
+        updateSearch(search, genre, order, quality === "All" ? "3D" : "All", type, page);
     }
 
     render() {
-        let { search, genre, order, quality, page, isSearching, updateSearch } = this.props;
-        let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "date_added" || page !== 1;
+        let { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
+        let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "date_added" || type !== "movies" || page !== 1;
 
         return (
-            < div className="search" >
+            <div className="search">
                 <div className="form">
                     <div className="searchItem">
                         <span>Search</span>
                         <DebounceInput
-                            disabled={order === "popularity"}
                             value={search}
                             debounceTimeout={500}
-                            onChange={(event) => updateSearch(event.target.value, genre, order, quality)}
+                            onChange={(event) => updateSearch(event.target.value, genre, order, quality, type)}
                         />
                     </div>
 
                     <div className="searchItem">
                         <span>Genre</span>
                         <select
-                            onChange={(event) => updateSearch(search, event.target.value, order, quality)}
+                            onChange={(event) => updateSearch(search, event.target.value, order, quality, type)}
                             value={genre}
-                            disabled={order === "popularity"}
                         >
                             {Genre.map(genre => (
                                 <option
@@ -58,7 +56,7 @@ class Search extends Component {
                     <div className="searchItem">
                         <span>Order</span>
                         <select
-                            onChange={(event) => updateSearch(search, genre, event.target.value, quality)}
+                            onChange={(event) => updateSearch(search, genre, event.target.value, quality, type)}
                             value={order}
                         >
                             {Order.map(order => (
@@ -73,6 +71,14 @@ class Search extends Component {
                     </div>
 
                     <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>
+
+                    <div className="searchItem">
+                        <span>Type</span>
+                        <select onChange={(event) => updateSearch(search, genre, order, quality, event.target.value)} value={type} >
+                            <option key="movies" value="movies">Movies</option>
+                            <option key="tv" value="shows">TV</option>
+                        </select>
+                    </div>
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaClose /></button>
                 </div>

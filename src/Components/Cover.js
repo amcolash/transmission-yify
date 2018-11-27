@@ -3,11 +3,11 @@ import {
     FaDownload, FaTrash, FaFilm
 } from 'react-icons/lib/fa';
 import axios from 'axios';
-import './Movie.css';
+import './Cover.css';
 import Spinner from './Spinner';
 import ScrollReveal from '../ScrollReveal';
 
-class Movie extends Component {
+class Cover extends Component {
     constructor(props) {
         super(props);
         this.state = { movie: props.movie };
@@ -103,4 +103,4 @@ class Movie extends Component {
     }
 }
 
-export default Movie;
+export default Cover;

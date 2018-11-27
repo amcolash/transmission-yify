@@ -79,7 +79,7 @@ class Details extends Component {
                         {movie.year}, {this.convertTime(movie.runtime)}
                         <div className="mpaa-rating">{mpaa}</div>
                     </h4>
-                    <p>{movie.synopsis}</p>
+                    <p>{movie.synopsis ? movie.synopsis : (moreData ? moreData.Plot : "")}</p>
                     {movie.genres ? (
                         <Fragment>
                             <span className="capitalize">
@@ -88,13 +88,12 @@ class Details extends Component {
                                     JSON.stringify(movie.genres).replace(/[[\]"]/g, '').replace(/,/g, ', ')
                                 }
                             </span>
+                            <br/>
                         </Fragment>
                     ) : null}
                     
                     {moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
                         <Fragment>
-                            <br/>
-                            {moreData.Ratings.length > 0 ? <br/> : null}
                             {moreData.Ratings.map(rating => (
                                 <Fragment key={rating.Source}>
                                     {rating.Source === "Internet Movie Database" ? (
@@ -109,8 +108,12 @@ class Details extends Component {
                                 </Fragment>
                             ))}
                             <hr/>
-                            <span>{moreData.Director.indexOf(",") !== -1 ? "Directors" : "Director"}: {moreData.Director}</span>
-                            <br/>
+                            {(moreData.Director.indexOf("N/A") === -1) ? (
+                                <Fragment>
+                                    <span>{moreData.Director.indexOf(",") !== -1 ? "Directors" : "Director"}: {moreData.Director}</span>
+                                    <br/>
+                                </Fragment>
+                            ) : null}
                             <span>{moreData.Writer.indexOf(",") !== -1 ? "Writers" : "Writer"}: {moreData.Writer}</span>
                             <br/>
                             <span>Actors: {moreData.Actors}</span>
