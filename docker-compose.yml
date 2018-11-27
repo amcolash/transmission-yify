@@ -17,6 +17,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA_DIR}:/data
+      - ${VIDEO_DIR}:/Videos
       - ./get_ip.sh:/scripts/transmission-post-start.sh:ro
     env_file:
       - .env
