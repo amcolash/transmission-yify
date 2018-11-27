@@ -37,3 +37,12 @@ services:
       - ${DATA_DIR}:/data
     env_file:
       - .env
+
+  ouroboros:
+    image: circa10a/ouroboros
+    container_name: ouroboros
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --monitor transmission client
