@@ -13,6 +13,7 @@ import Details from './Details';
 import TorrentList from './TorrentList';
 import Plex from './Plex';
 import Search from './Search';
+import Beta from './Beta';
 
 const searchCache = [];
 const hashMapping = {};
@@ -390,6 +391,8 @@ class MovieList extends Component {
             return (
                 <Fragment>
                     <Plex server={this.server}/>
+                    {this.state.type === "shows" ? <Beta/> : null}
+
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800}>
                         <Details
                             movie={movie}
