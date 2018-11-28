@@ -25,7 +25,7 @@ class Details extends Component {
 
         if (this.props.movie.num_seasons) {
             axios.get('https://tv-v2.api-fetch.website/show/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
-                this.setState({ tvData: response.data });
+                this.setState({ tvData: response.data, season: response.data.num_seasons });
             }, error => {
                 console.error(error);
             });
@@ -191,40 +191,47 @@ class Details extends Component {
                             />
                         ))
                     ) : (
-                        <Fragment>
-                            <h3 className="season">Season
-                                <select
-                                    onChange={(event) => this.updateSeason(event.target.value)}
-                                    value={season}
-                                >
-                                    {seasons.map(season => (
-                                        <option key={season} value={season}>{season}</option>
-                                    ))}
-                                </select>
-                            </h3>
-                            <div className="episodeList">
-                                {episodes.length > 0 ? (
-                                    episodes[season].map(episode => (
-                                        <Fragment key={episode.episode}>
-                                            <h4 className="episode">{episode.episode} - {episode.title}</h4>
+                        !tvData ? (
+                            <Fragment>
+                                Loading additional data...
+                                <Spinner visible/>
+                            </Fragment>
+                        ) : (
+                            <Fragment>
+                                <h3 className="season">Season
+                                    <select
+                                        onChange={(event) => this.updateSeason(event.target.value)}
+                                        value={season}
+                                    >
+                                        {seasons.map(season => (
+                                            <option key={season} value={season}>{season}</option>
+                                        ))}
+                                    </select>
+                                </h3>
+                                <div className="episodeList">
+                                    {(episodes.length > 0 && episodes[season]) ? (
+                                        episodes[season].map(episode => (
+                                            <Fragment key={episode.episode}>
+                                                <h4 className="episode">{episode.episode} - {episode.title}</h4>
 
-                                            {getVersions(episode).map(version => (
-                                                <Version
-                                                    key={version.hashString}
-                                                    version={version}
-                                                    started={started}
-                                                    getProgress={getProgress}
-                                                    getLink={getLink}
-                                                    getTorrent={getTorrent}
-                                                    downloadTorrent={downloadTorrent}
-                                                    cancelTorrent={cancelTorrent}
-                                                />
-                                            ))}
-                                        </Fragment>
-                                    ))
-                                ) : null}
-                            </div>
-                        </Fragment>
+                                                {getVersions(episode).map(version => (
+                                                    <Version
+                                                        key={version.hashString}
+                                                        version={version}
+                                                        started={started}
+                                                        getProgress={getProgress}
+                                                        getLink={getLink}
+                                                        getTorrent={getTorrent}
+                                                        downloadTorrent={downloadTorrent}
+                                                        cancelTorrent={cancelTorrent}
+                                                    />
+                                                ))}
+                                            </Fragment>
+                                        ))
+                                    ) : null}
+                                </div>
+                            </Fragment>
+                        )
                     )}
                 </div>
             </div>

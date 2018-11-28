@@ -33,6 +33,8 @@ app.get('/ip', function (req, res) {
             promise = axios.get("http://ipinfo.io/ip");
         }
 
+        if (!promise) res.send("unknown");
+
         promise.then(ip => {
             if (!IS_DOCKER) ip = ip.data;
             axios.get('https://api.ipdata.co/' + ip.trim() + "?api-key=" + process.env.IP_KEY).then(response => {

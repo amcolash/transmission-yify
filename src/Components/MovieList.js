@@ -17,6 +17,7 @@ import Search from './Search';
 const searchCache = [];
 const hashMapping = {};
 const alternateVersion = {};
+var torrentUpdateTimer;
 
 class MovieList extends Component {
 
@@ -36,7 +37,7 @@ class MovieList extends Component {
             genre: '',
             quality: 'All',
             order: 'last added',
-            type: 'shows',
+            type: 'movies',
             isSearching: false,
             storage: null,
             serverStats: null,
@@ -103,10 +104,12 @@ class MovieList extends Component {
     }
 
     updateTorrents() {
+        if (torrentUpdateTimer) clearTimeout(torrentUpdateTimer);
+
         axios.get(this.server + '/torrents').then(response => {
             var torrents = response.data.torrents || [];
             if (this.state.docker) {
-                torrents = response.data.torrents.filter(torrent => {
+                torrents = torrents.filter(torrent => {
                     return torrent.downloadDir.indexOf("/data") !== -1;
                 });
             }
@@ -130,10 +133,10 @@ class MovieList extends Component {
                 started: started
             });
 
-            setTimeout(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
+            torrentUpdateTimer = setTimeout(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
         }, error => {
             console.error(error);
-            setTimeout(() => this.updateTorrents(), 60000); // Poll again in 1 minute since it seems server is down
+            torrentUpdateTimer = setTimeout(() => this.updateTorrents(), 60000); // Poll again in 1 minute since it seems server is down
         });
 
         // Additionally get storage info here
@@ -269,7 +272,7 @@ class MovieList extends Component {
             console.error(error);
         });
 
-        this.torrentList.expand();
+        // this.torrentList.expand();
     }
 
     getVersions = (movie) => {
