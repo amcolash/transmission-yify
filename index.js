@@ -80,11 +80,15 @@ app.get('/themoviedb/:id', function (req, res) {
 
 app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
 app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
+app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
 app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, true, (err, data) => handleResponse(res, err, data)); });
-app.post('/torrents', function (req, res) { transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data)); });
-app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
+
+app.post('/torrents', function (req, res) {
+    var dir = req.body.tv ? process.env.TV_DIR : process.env.DATA_DIR;
+    transmission.addUrl(req.body.url, { "download-dir": dir }, (err, data) => handleResponse(res, err, data));
+});
 
 // Single handler for all of the transmission wrapper responses
 function handleResponse(res, err, data) {
