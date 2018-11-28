@@ -88,8 +88,11 @@ app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.has
 app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, true, (err, data) => handleResponse(res, err, data)); });
 
 app.post('/torrents', function (req, res) {
-    var dir = req.body.tv ? process.env.TV_DIR : process.env.DATA_DIR;
-    transmission.addUrl(req.body.url, { "download-dir": dir }, (err, data) => handleResponse(res, err, data));
+    if (req.body.tv) {
+        transmission.addUrl(req.body.url, { "download-dir": "/TV" }, (err, data) => handleResponse(res, err, data));
+    } else {
+        transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data));
+    }
 });
 
 // Single handler for all of the transmission wrapper responses
