@@ -263,7 +263,7 @@ class MovieList extends Component {
 
         hashMapping[version.hashString] = version.title;
 
-        axios.post(this.server + '/torrents', { url: version.url }).then(response => {
+        axios.post(this.server + '/torrents', { url: version.url, tv: version.tv }).then(response => {
             this.updateTorrents();
         }, error => {
             console.error(error);
@@ -275,6 +275,29 @@ class MovieList extends Component {
     getVersions = (movie) => {
         var versions = {};
 
+        // TV Episode
+        if (movie.episode && movie.torrents) {
+            for (const [quality, torrent] of Object.entries(movie.torrents)) {
+                if (quality === "0") continue;
+                let version = {
+                    quality: quality,
+                    sort: quality === "1080p" ? 2 : (quality === "720p" ? 1 : 0),
+                    url: torrent.url,
+                    hashString: torrent.hash || magnet.decode(torrent.url).infoHash.toLowerCase(),
+                    tv: true
+                };
+
+                if (!versions[quality] || versions[quality].ratio < version.ratio) {
+                    versions[quality] = version;
+                }
+            }
+
+            return Object.values(versions).sort(function(a, b) {
+                return a.sort - b.sort;
+            });
+        }
+
+        // Normal movie
         if (movie.torrents && movie.torrents.en) {
             if (this.state.quality === "3D" && alternateVersion[movie.imdb_id] && alternateVersion[movie.imdb_id].hash) {
                 const version = alternateVersion[movie.imdb_id];
@@ -283,7 +306,8 @@ class MovieList extends Component {
                     seed: version.seeds,
                     url: version.url,
                     hash: version.hash.toLowerCase(),
-                    filesize: version.size
+                    filesize: version.size,
+                    movie: true
                 };
             } else {
                 delete movie.torrents.en["3D"];

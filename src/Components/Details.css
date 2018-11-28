@@ -58,6 +58,23 @@ h4 {
     font-weight: bolder;
 }
 
+.inline {
+    display: inline-block;
+}
+
+.episodeList {
+    max-height: 30em;
+    overflow-y: scroll;
+}
+
+.season select {
+    margin-left: 0.5em;
+}
+
+.episode {
+    padding-top: 1em;
+}
+
 @media (max-width: 680px) {
     .right {
         max-width: 100%;

@@ -177,52 +177,93 @@ class Details extends Component {
 
                     <hr/>
 
-                    {!movie.num_seasons ? versions.map(version => (
-                        <div className="version" key={version.url}>
-                            <b>{version.quality}</b>
-                            {getProgress(version.hashString) ? null : (
-                                <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
-                                    {started.indexOf(version.hashString) !== -1 ? (
-                                        <Spinner visible noMargin button />
-                                    ) : (
-                                        <FaDownload/>
-                                    )}
-                                </button>
-                            )}
-                            <span> {version.size}, (Peers: {version.peers}, Seeds: {version.seeds}, Ratio: {version.ratio})</span>
-                            <br/>
-                            {getProgress(version.hashString) ? (
-                                <Progress
-                                    torrent={getTorrent(version.hashString)}
-                                    getLink={getLink}
-                                    cancelTorrent={cancelTorrent}
-                                    getProgress={getProgress}
-                                    fullName
-                                />
-                            ) : null}
-                        </div>
-                    )) : (
+                    {!movie.num_seasons ? (
+                        versions.map(version => (
+                            <Version
+                                key={version.hashString}
+                                version={version}
+                                started={started}
+                                getProgress={getProgress}
+                                getLink={getLink}
+                                getTorrent={getTorrent}
+                                downloadTorrent={downloadTorrent}
+                                cancelTorrent={cancelTorrent}
+                            />
+                        ))
+                    ) : (
                         <Fragment>
-                            <span>Season </span>
-                            <select
-                                onChange={(event) => this.updateSeason(event.target.value)}
-                                value={season}
-                            >
-                                {seasons.map(season => (
-                                    <option key={season} value={season}>{season}</option>
-                                ))}
-                            </select>
-                            {episodes.length > 0 ? (
-                                episodes[season].map(episode => (
-                                    <Fragment>
-                                        <br/>
-                                        <span>{episode.title}</span>
-                                    </Fragment>
-                                ))
-                            ) : null}
+                            <h3 className="season">Season
+                                <select
+                                    onChange={(event) => this.updateSeason(event.target.value)}
+                                    value={season}
+                                >
+                                    {seasons.map(season => (
+                                        <option key={season} value={season}>{season}</option>
+                                    ))}
+                                </select>
+                            </h3>
+                            <div className="episodeList">
+                                {episodes.length > 0 ? (
+                                    episodes[season].map(episode => (
+                                        <Fragment key={episode.episode}>
+                                            <h4 className="episode">{episode.episode} - {episode.title}</h4>
+
+                                            {getVersions(episode).map(version => (
+                                                <Version
+                                                    key={version.hashString}
+                                                    version={version}
+                                                    started={started}
+                                                    getProgress={getProgress}
+                                                    getLink={getLink}
+                                                    getTorrent={getTorrent}
+                                                    downloadTorrent={downloadTorrent}
+                                                    cancelTorrent={cancelTorrent}
+                                                />
+                                            ))}
+                                        </Fragment>
+                                    ))
+                                ) : null}
+                            </div>
                         </Fragment>
                     )}
                 </div>
+            </div>
+        );
+    }
+}
+
+class Version extends Component {
+    render() {
+        const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent } = this.props;
+
+        return (
+            <div className={"version" + (version.peers ? "" : " inline")} key={version.url}>
+                <b>{version.quality}</b>
+                {getProgress(version.hashString) ? null : (
+                    <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
+                        {started.indexOf(version.hashString) !== -1 ? (
+                            <Spinner visible noMargin button />
+                        ) : (
+                            <FaDownload/>
+                        )}
+                    </button>
+                )}
+                <span>{version.size ? version.size + "," : ""}</span>
+                {version.peers && version.seeds && version.ratio ? (
+                    <Fragment>
+                        <span>Peers: {version.peers}, Seeds: {version.seeds}, Ratio: {version.ratio})</span>
+                        <br/>
+                    </Fragment>
+                ): null}
+                {getProgress(version.hashString) ? (
+                    <Progress
+                        torrent={getTorrent(version.hashString)}
+                        getLink={getLink}
+                        cancelTorrent={cancelTorrent}
+                        getProgress={getProgress}
+                        fullName
+                    />
+                ) : null}
             </div>
         );
     }
