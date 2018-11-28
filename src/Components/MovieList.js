@@ -111,7 +111,7 @@ class MovieList extends Component {
             var torrents = response.data.torrents || [];
             if (this.state.docker) {
                 torrents = torrents.filter(torrent => {
-                    return torrent.downloadDir.indexOf("/data") !== -1;
+                    return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
                 });
             }
 
