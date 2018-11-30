@@ -292,11 +292,13 @@ class MovieList extends Component {
                     default: sort = 0; break;
                 }
 
+                var mag = magnet.decode(torrent.url).infoHash ? magnet.decode(torrent.url).infoHash.toLowerCase() : torrent.url;
+
                 let version = {
                     quality: quality,
                     sort: sort,
                     url: torrent.url,
-                    hashString: torrent.hash || magnet.decode(torrent.url).infoHash.toLowerCase(),
+                    hashString: torrent.hash || mag,
                     tv: true
                 };
 
@@ -417,7 +419,7 @@ class MovieList extends Component {
             return (
                 <Fragment>
                     <Plex server={this.server}/>
-                    {this.state.type === "shows" ? <Beta/> : null}
+                    {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800}>
                         <Details
@@ -463,7 +465,7 @@ class MovieList extends Component {
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
                             movies.map(movie => (
-                                movie.torrents || this.state.type === "shows" ? (
+                                movie.torrents || this.state.type !== "movies" ? (
                                     <Cover
                                         key={movie._id}
                                         movie={movie}

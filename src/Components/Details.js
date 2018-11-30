@@ -16,18 +16,23 @@ class Details extends Component {
     }
 
     componentDidMount() {
-        axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
-            this.setState({ moreData: response.data });
-        }, error => {
-            console.error(error);
-            this.setState({ moreData: "ERROR" });
-        });
-
         if (this.props.movie.num_seasons) {
-            axios.get('https://tv-v2.api-fetch.website/show/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
-                this.setState({ tvData: response.data, season: response.data.num_seasons });
+            var endpoint = 'https://tv-v2.api-fetch.website/show/'  + this.props.movie.imdb_id;
+            if (this.props.movie.mal_id) endpoint = 'https://tv-v2.api-fetch.website/anime/' + this.props.movie._id;
+
+            axios.get(endpoint, { timeout: 10000 }).then(response => {
+                this.setState({ tvData: response.data, season: response.data.num_seasons, moreData: "ERROR" });
             }, error => {
                 console.error(error);
+            });
+        }
+
+        if (!this.props.movie.mal_id) {
+            axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
+                this.setState({ moreData: response.data });
+            }, error => {
+                console.error(error);
+                this.setState({ moreData: "ERROR" });
             });
         }
     }
@@ -75,7 +80,7 @@ class Details extends Component {
 
         var mpaa = movie.certification;
         if (!mpaa || mpaa === "N/A") {
-            if (moreData && moreData.Rated !== "N/A") {
+            if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
                 mpaa = moreData.Rated;
             } else {
                 mpaa = "NR";
@@ -123,7 +128,7 @@ class Details extends Component {
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
                     </h4>
-                    <p>{movie.synopsis ? movie.synopsis : (moreData ? moreData.Plot : "")}</p>
+                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.synopsis) ? tvData.synopsis : (movie.synopsis ? movie.synopsis : ""))}</p>
                     {movie.genres || tvData ? (
                         <Fragment>
                             <span className="capitalize">

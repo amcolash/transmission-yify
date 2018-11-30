@@ -53,8 +53,12 @@ class Cover extends Component {
         }
 
         if (!movie.images || !movie.images.poster) {
-        //     this.coverError();
             movie.images.poster = "broken image";
+        } else {
+            // Fix no longer existent site path
+            if (movie.images.poster.indexOf("hummingbird.me") !== -1) {
+                movie.images.poster = "https://media.kitsu.io/anime/poster_images/" + movie._id + "/large.jpg";
+            }
         }
 
         return (

@@ -62,8 +62,8 @@ h4 {
     display: inline-block;
 }
 
-.episodeList {
-    max-height: 30em;
+.episodeList, .plot {
+    max-height: 35vh;
     overflow-y: scroll;
 }
 
@@ -76,7 +76,7 @@ h4 {
 }
 
 .padLeft {
-    padding-left: 1em;
+    padding-left: 0.85em;
 }
 
 @media (max-width: 680px) {

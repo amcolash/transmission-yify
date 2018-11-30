@@ -76,7 +76,8 @@ class Search extends Component {
                         <span>Type</span>
                         <select onChange={(event) => updateSearch(search, genre, order, quality, event.target.value)} value={type} >
                             <option key="movies" value="movies">Movies</option>
-                            <option key="tv" value="shows">TV</option>
+                            <option key="shows" value="shows">TV</option>
+                            <option key="animes" value="animes">Anime</option>
                         </select>
                     </div>
 
