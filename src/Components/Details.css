@@ -75,6 +75,10 @@ h4 {
     padding-top: 1em;
 }
 
+.padLeft {
+    padding-left: 1em;
+}
+
 @media (max-width: 680px) {
     .right {
         max-width: 100%;

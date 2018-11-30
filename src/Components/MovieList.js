@@ -278,18 +278,31 @@ class MovieList extends Component {
 
     getVersions = (movie) => {
         var versions = {};
+        var hashes = {};
 
         // TV Episode
         if (movie.episode && movie.torrents) {
-            for (const [quality, torrent] of Object.entries(movie.torrents)) {
-                if (quality === "0") continue;
+            for (let [quality, torrent] of Object.entries(movie.torrents)) {
+                if (quality === "0") quality = "480p";
+                let sort = 0;
+                switch (quality) {
+                    case "1080p": sort = 3; break;
+                    case "720p": sort = 2; break;
+                    case "480p": sort = 1; break;
+                    default: sort = 0; break;
+                }
+
                 let version = {
                     quality: quality,
-                    sort: quality === "1080p" ? 2 : (quality === "720p" ? 1 : 0),
+                    sort: sort,
                     url: torrent.url,
                     hashString: torrent.hash || magnet.decode(torrent.url).infoHash.toLowerCase(),
                     tv: true
                 };
+
+                // Prevent the same torrent from being added
+                if (hashes[version.hashString]) continue;
+                hashes[version.hashString] = quality;
 
                 if (!versions[quality] || versions[quality].ratio < version.ratio) {
                     versions[quality] = version;
@@ -297,7 +310,7 @@ class MovieList extends Component {
             }
 
             return Object.values(versions).sort(function(a, b) {
-                return a.sort - b.sort;
+                return b.sort - a.sort;
             });
         }
 
@@ -317,10 +330,19 @@ class MovieList extends Component {
                 delete movie.torrents.en["3D"];
             }
 
-            for (const [quality, torrent] of Object.entries(movie.torrents.en)) {
+            for (let [quality, torrent] of Object.entries(movie.torrents.en)) {
+                if (quality === "0") quality = "480p";
+                let sort = 0;
+                switch (quality) {
+                    case "1080p": sort = 3; break;
+                    case "720p": sort = 2; break;
+                    case "480p": sort = 1; break;
+                    default: sort = 0; break;
+                }
+
                 let version = {
                     quality: quality,
-                    sort: quality === "1080p" ? 2 : (quality === "720p" ? 1 : 0),
+                    sort: sort,
                     peers: torrent.peer.toFixed(0),
                     seeds: torrent.seed.toFixed(0),
                     ratio: torrent.peer > 0 ? (torrent.seed / torrent.peer).toFixed(3) : 0,
@@ -329,6 +351,10 @@ class MovieList extends Component {
                     size: torrent.filesize,
                     title: movie.title + " (" + movie.year + ") [" + quality + "]"
                 };
+
+                // Prevent the same torrent from being added
+                if (hashes[version.hashString]) continue;
+                hashes[version.hashString] = true;
 
                 if (!versions[quality] || versions[quality].ratio < version.ratio) {
                     versions[quality] = version;

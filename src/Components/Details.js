@@ -244,7 +244,7 @@ class Version extends Component {
         const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent } = this.props;
 
         return (
-            <div className={"version" + (version.peers ? "" : " inline")} key={version.url}>
+            <div className={"version" + (version.peers ? "" : " inline padLeft")} key={version.url}>
                 <b>{version.quality}</b>
                 {getProgress(version.hashString) ? null : (
                     <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
