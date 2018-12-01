@@ -1,8 +1,8 @@
 const express = require('express');
-const { spawn } = require('child_process');
+const spawn = require('child_process').spawn;
 
 // Get env vars
-require('dotenv').config();
+//require('dotenv').config();
 const UPGRADE_KEY = process.env.UPGRADE_KEY;
 
 // Make server
