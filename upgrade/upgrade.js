@@ -14,12 +14,13 @@ console.log(`Running on port ${PORT}`);
 // Handle upgrade
 app.get('/upgrade', function (req, res) {
     if (req.query.upgradeKey === UPGRADE_KEY) {
+        res.send("starting upgrade, remember to check the logs ;)")
+
         const proc = spawn('sh', ['upgrade.sh'], { cwd: './' });
         proc.stdout.on('data', data => console.log(data.toString()));
         proc.stderr.on('data', data => console.error(data.toString()));
         proc.on('exit', code => {
             console.log("upgrade exited with code " + code);
-            res.send("all done!");
         });
     } else {
         res.send("invalid upgrade key!");
