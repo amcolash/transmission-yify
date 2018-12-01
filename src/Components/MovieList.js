@@ -292,7 +292,9 @@ class MovieList extends Component {
                     default: sort = 0; break;
                 }
 
-                var mag = magnet.decode(torrent.url).infoHash ? magnet.decode(torrent.url).infoHash.toLowerCase() : torrent.url;
+                if (torrent.url) {
+                    var mag = magnet.decode(torrent.url).infoHash ? magnet.decode(torrent.url).infoHash.toLowerCase() : torrent.url;
+                }
 
                 let version = {
                     quality: quality,
@@ -303,7 +305,7 @@ class MovieList extends Component {
                 };
 
                 // Prevent the same torrent from being added
-                if (hashes[version.hashString]) continue;
+                if (!version.hashString || hashes[version.hashString]) continue;
                 hashes[version.hashString] = quality;
 
                 if (!versions[quality] || versions[quality].ratio < version.ratio) {

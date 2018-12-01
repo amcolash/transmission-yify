@@ -123,7 +123,7 @@ class Details extends Component {
                             {!movie.num_seasons ? (
                                 <span>{movie.year}, {this.convertTime(movie.runtime)}</span>
                             ) : (
-                                <span>{moreData ? moreData.Year : movie.year} ({movie.num_seasons} Seasons)</span>
+                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({movie.num_seasons} Seasons)</span>
                             )}
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
@@ -203,16 +203,18 @@ class Details extends Component {
                             </Fragment>
                         ) : (
                             <Fragment>
-                                <h3 className="season">Season
-                                    <select
-                                        onChange={(event) => this.updateSeason(event.target.value)}
-                                        value={season}
-                                    >
-                                        {seasons.map(season => (
-                                            <option key={season} value={season}>{season}</option>
-                                        ))}
-                                    </select>
-                                </h3>
+                                {seasons.length > 1 ? (
+                                    <h3 className="season">Season
+                                        <select
+                                            onChange={(event) => this.updateSeason(event.target.value)}
+                                            value={season}
+                                        >
+                                            {seasons.map(season => (
+                                                <option key={season} value={season}>{season}</option>
+                                            ))}
+                                        </select>
+                                    </h3>
+                                ) : null}
                                 <div className="episodeList">
                                     {(episodes.length > 0 && episodes[season]) ? (
                                         episodes[season].map(episode => (
