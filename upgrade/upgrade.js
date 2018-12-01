@@ -16,7 +16,7 @@ app.post('/upgrade', function (req, res) {
     if (req.query.upgradeKey === UPGRADE_KEY) {
         res.send("starting upgrade, remember to check the logs ;)")
 
-        const proc = spawn('sh', ['upgrade.sh'], { cwd: './' });
+        const proc = spawn('sh', ['./upgrade/upgrade.sh'], { cwd: './' });
         proc.stdout.on('data', data => console.log(data.toString()));
         proc.stderr.on('data', data => console.error(data.toString()));
         proc.on('exit', code => {
