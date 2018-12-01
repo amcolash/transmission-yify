@@ -12,7 +12,7 @@ app.listen(PORT);
 console.log(`Running on port ${PORT}`);
 
 // Handle upgrade
-app.get('/upgrade', function (req, res) {
+app.post('/upgrade', function (req, res) {
     if (req.query.upgradeKey === UPGRADE_KEY) {
         res.send("starting upgrade, remember to check the logs ;)")
 
