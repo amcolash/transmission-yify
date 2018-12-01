@@ -12,9 +12,10 @@ button {
     background-color: #777;
     border: none;
     color: white;
-    padding: 0.1em 0.3em;
+    padding: 0.2em 0.3em;
     font-size: 1em;   
     margin: 0.5em 0.3em;
+    line-height: 1em;
 }
 
 button:focus {

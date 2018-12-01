@@ -52,6 +52,14 @@ class Details extends Component {
         this.setState({ season: season });
     }
 
+    downloadSeason(episodes) {
+        episodes.map(episode => {
+            var versions = this.props.getVersions(episode);
+            if (versions.length > 0) this.props.downloadTorrent(versions[0]);
+            return null;
+        });
+    }
+
     render() {
         const { movie, downloadTorrent, cancelTorrent, getLink, getVersions, getTorrent, getProgress, started } = this.props;
         const { moreData, showCover, tvData, season } = this.state;
@@ -203,8 +211,8 @@ class Details extends Component {
                             </Fragment>
                         ) : (
                             <Fragment>
-                                {seasons.length > 1 ? (
-                                    <h3 className="season">Season
+                                <h3 className="season">Season
+                                    {seasons.length > 1 ? (
                                         <select
                                             onChange={(event) => this.updateSeason(event.target.value)}
                                             value={season}
@@ -213,13 +221,22 @@ class Details extends Component {
                                                 <option key={season} value={season}>{season}</option>
                                             ))}
                                         </select>
-                                    </h3>
-                                ) : null}
+                                    ) : " 1"}
+                                    {(episodes.length > 0 && episodes[season]) ? (
+                                        <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
+                                            <FaDownload/>
+                                        </button>
+                                    ) : null}
+                                </h3>
                                 <div className="episodeList">
                                     {(episodes.length > 0 && episodes[season]) ? (
                                         episodes[season].map(episode => (
                                             <Fragment key={episode.episode}>
-                                                <h4 className="episode">{episode.episode} - {episode.title}</h4>
+                                                {episode.title === "Episode " + episode.episode ? (
+                                                    <h4 className="episode">{episode.title}</h4>
+                                                ) : (
+                                                    <h4 className="episode">{episode.episode} - {episode.title}</h4>
+                                                )}
 
                                                 {getVersions(episode).map(version => (
                                                     <Version
