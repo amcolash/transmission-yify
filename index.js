@@ -13,10 +13,21 @@ require('dotenv').config();
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
 
+// Set up data dir if not in docker environment
+if (!IS_DOCKER) {
+    fs.access(process.env.DATA_DIR, (err) => {
+        fs.mkdir(process.env.DATA_DIR, { recursive: true }, (err) => {
+            if (err) console.error(err);
+        });
+    });
+}
+
 // App
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+var cache = {};
 
 // Transmission wrapper, conditional host based on if running from a docker container
 const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0' });
@@ -63,8 +74,15 @@ app.get('/storage', function (req, res) {
 });
 
 app.get('/omdb/:id', function(req, res) {
-    axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id, { timeout: 10000 }).then(response => {
+    let url ='http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
+    if (cache[url]) {
+        res.send(cache[url]);
+        return;
+    }
+
+    axios.get(url, { timeout: 10000 }).then(response => {
         res.send(response.data);
+        cache[url] = response.data;
     }, error => {
         console.error(error);
         res.send(error);
@@ -72,8 +90,15 @@ app.get('/omdb/:id', function(req, res) {
 });
 
 app.get('/themoviedb/:id', function (req, res) {
-    axios.get('https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY, { timeout: 10000 }).then(response => {
+    let url = 'https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY;
+    if (cache[url]) {
+        res.send(cache[url]);
+        return;
+    }
+
+    axios.get(url, { timeout: 10000 }).then(response => {
         res.send(response.data);
+        cache[url] = response.data;
     }, error => {
         console.error(error);
         res.send(error);

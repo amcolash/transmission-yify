@@ -90,7 +90,11 @@ class MovieList extends Component {
 
     updateLocation() {
         axios.get(this.server + '/ip').then(response => {
-            this.setState({ location: response.data.city + ', ' + response.data.country_name });
+            if (response.data.city && response.data.country_name) {
+                this.setState({ location: response.data.city + ', ' + response.data.country_name });
+            } else {
+                this.setState({ location: undefined });
+            }
         }, error => {
             console.error(error);
         });
@@ -438,7 +442,7 @@ class MovieList extends Component {
                         />
                     </Modal>
             
-                    {location === "Seattle, United States" ? (
+                    {!location || location === "Seattle, United States" ? (
                         <span className="warning red">
                             <FaExclamationTriangle/>
                             <span>Server not secure</span>
@@ -517,9 +521,7 @@ class MovieList extends Component {
                         {serverStats ? (
                             <p>Total Movies: {serverStats.totalMovies}, Total Shows: {serverStats.totalShows}</p>
                         ) : null}
-                        {location ? (
-                            <p>Server Location: {location}</p>
-                        ) : null}
+                        <p>Server Location: {location ? location : "Unknown"}</p>
                         {storage ? (
                             <p>
                                 <span>Disk Usage: {storage}%</span>
