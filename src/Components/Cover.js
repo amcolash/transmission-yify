@@ -25,7 +25,7 @@ class Cover extends Component {
     }
 
     coverError() {
-        axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
+        axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_id).then(response => {
             const data = response.data.movie_results;
             if (data.length > 0) {
                 // if this breaks, consider doing things the right way as described here:
@@ -58,6 +58,10 @@ class Cover extends Component {
             // Fix no longer existent site path
             if (movie.images.poster.indexOf("hummingbird.me") !== -1) {
                 movie.images.poster = "https://media.kitsu.io/anime/poster_images/" + movie._id + "/large.jpg";
+            }
+            // Things seem to be broken with this site, use omdb instead
+            if (movie.images.poster.indexOf("fanart.tv") !== -1) {
+                movie.images.poster = "broken image";
             }
         }
 
