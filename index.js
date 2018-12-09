@@ -28,13 +28,13 @@ app.use(express.json());
 app.use(cors());
 
 var cache = {};
-fs.access('cache.json', (err) => {
+fs.access((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
     if (err) {
-        fs.writeFile('cache.json', JSON.stringify({}), (err) => {
+        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), (err) => {
             if (err) console.error(err);
         });
     } else {
-        cache = require('./cache');
+        cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
     }
 });
 
@@ -88,7 +88,7 @@ function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
         res.send(response.data);
         cache[url] = response.data;
-        fs.writeFile('cache.json', JSON.stringify(cache), (err) => {
+        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
             if (err) console.error(err);
         });
     }, error => {
