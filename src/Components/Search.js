@@ -12,7 +12,7 @@ import Order from '../Data/Order';
 class Search extends Component {
 
     clearSearch() {
-        this.props.updateSearch("", "", "last added", "All", this.props.type, 1);
+        this.props.updateSearch("", "", "trending", "All", this.props.type, 1);
     }
 
     toggle3D() {
@@ -22,7 +22,7 @@ class Search extends Component {
 
     render() {
         let { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
-        let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "last added" || page !== 1;
+        let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "trending" || page !== 1;
 
         return (
             <div className="search">

@@ -37,7 +37,7 @@ class MovieList extends Component {
             search: '',
             genre: '',
             quality: 'All',
-            order: 'last added',
+            order: 'trending',
             type: 'movies',
             isSearching: false,
             storage: null,
