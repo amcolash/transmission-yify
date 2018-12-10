@@ -47,30 +47,28 @@ app.use('/', express.static('build'));
 
 app.get('/ip', function (req, res) {
     try {
-        var promise;
         if (IS_DOCKER) {
-            promise = fs.readFile("/data/ip.txt", "utf8");
+            let ip = fs.readFileSync("/data/ip.txt", "utf8");
+            handleIP(ip, res);
         } else {
-            promise = axios.get("http://ipinfo.io/ip");
-        }
-
-        if (!promise) res.send("unknown");
-
-        promise.then(ip => {
-            if (!IS_DOCKER) ip = ip.data;
-            axios.get('https://api.ipdata.co/' + ip.trim() + "?api-key=" + process.env.IP_KEY).then(response => {
-                res.send(response.data);
-            }, error => {
-                console.error(error);
-                res.send(ip);
+            axios.get("http://ipinfo.io/ip").then(response => {
+                handleIP(response.data, res);
             });
-        });
-
+        }
     } catch(err) {
         console.error(err);
         res.send("unknown");
     }
 });
+
+function handleIP(ip, res) {
+    axios.get('https://api.ipdata.co/' + ip.trim() + "?api-key=" + process.env.IP_KEY).then(response => {
+        res.send(response.data);
+    }, error => {
+        console.error(error);
+        res.send(ip);
+    });
+}
 
 app.get('/storage', function (req, res) {
     exec("df " + (IS_DOCKER ? "/data" : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
