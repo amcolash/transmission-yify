@@ -175,7 +175,7 @@ class MovieList extends Component {
             order: order,
             quality: quality,
             type: type,
-            page: page || this.state.page,
+            page: page || 1, // reset page if not provided
         }, () => this.updateData());
     }
     
