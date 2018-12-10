@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo Waiting a moment, just for the dust to settle
+sleep 20
+
 git pull
 
 docker-compose down
