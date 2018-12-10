@@ -3,7 +3,7 @@ import axios from 'axios';
 import magnet from 'magnet-uri';
 import Modal from 'react-responsive-modal';
 import {
-    FaAngleDoubleRight, FaAngleDoubleLeft, FaAngleRight, FaAngleLeft, FaExclamationTriangle
+    FaExclamationTriangle
 } from 'react-icons/lib/fa';
 
 import './MovieList.css';
@@ -14,6 +14,7 @@ import TorrentList from './TorrentList';
 import Plex from './Plex';
 import Search from './Search';
 import Beta from './Beta';
+import Pager from './Pager';
 
 const searchCache = [];
 const hashMapping = {};
@@ -44,6 +45,7 @@ class MovieList extends Component {
             serverStats: null,
             width: 0,
             height: 0,
+            scroll: 0,
             docker: true
         }
 
@@ -70,6 +72,10 @@ class MovieList extends Component {
         // Update window size
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
+
+        // Update window scroll
+        this.updateScroll();
+        window.addEventListener('scroll', this.updateScroll);
     }
     
     componentWillUnmount() {
@@ -78,6 +84,11 @@ class MovieList extends Component {
 
     updateWindowDimensions() {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    updateScroll = () => {
+        let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight);
+        if (!isNaN(scroll)) this.setState({ scroll: scroll });
     }
 
     updateDocker() {
@@ -397,7 +408,7 @@ class MovieList extends Component {
         this.setState({ modal: false });
     };
 
-    changePage(direction) {
+    changePage = (direction) => {
         const page= this.state.page;
         var newPage = direction + page;
         if (page === newPage) return;
@@ -409,7 +420,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            serverStats, started, width, storage
+            serverStats, started, width, storage, scroll
         } = this.state;
 
         if (error) {
@@ -491,29 +502,8 @@ class MovieList extends Component {
                         }
                     </div>
 
-                    <div className="pager">
-                        <FaAngleDoubleLeft
-                            className="arrow"
-                            style={{ display: page > 1 ? "inline-block" : "none" }}
-                            onClick={() => this.changePage(-5)}
-                        />
-                        <FaAngleLeft
-                            className="arrow"
-                            style={{ display: page > 1 ? "inline-block" : "none" }}
-                            onClick={() => this.changePage(-1)}
-                        />
-                        <span>{page}</span>
-                        <FaAngleRight
-                            className="arrow"
-                            style={{ display: movies.length === 50 ? "inline-block" : "none" }}
-                            onClick={() => this.changePage(1)}
-                        />
-                        <FaAngleDoubleRight
-                            className="arrow"
-                            style={{ display: movies.length === 50 ? "inline-block" : "none" }}
-                            onClick={() => this.changePage(5)}
-                        />
-                    </div>
+                    <Pager changePage={this.changePage} page={page} movies={movies} type={"floating " + (scroll < 0.97 ? "" : "hidden")}/>
+                    <Pager changePage={this.changePage} page={page} movies={movies}/>
 
                     <div className="footer">
                         <hr/>

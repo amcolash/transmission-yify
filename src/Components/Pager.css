@@ -1,0 +1,24 @@
+.pager {
+    z-index: 1;
+    padding: 0.5em;
+    opacity: 1;
+    transition: all 0.5s ease;
+}
+
+.pager.floating {
+    border: solid 2px white;
+    background-color: rgba(30,30,30,0.9);
+    border-radius: 0.25em;
+    position: fixed;
+    bottom: 0.5em;
+    right: 0.5em;
+}
+
+.pager.hidden {
+    opacity: 0;
+}
+
+.pager span {
+    padding: 0.25em;
+    vertical-align: bottom;
+}

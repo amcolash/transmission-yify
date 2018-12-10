@@ -27,22 +27,6 @@
     cursor: pointer;
 }
 
-.pager {
-    z-index: 1;
-    padding: 0.5em;
-    position: fixed;
-    bottom: 0.5em;
-    right: 0.5em;
-    background-color: rgba(30,30,30,0.9);
-    border-radius: 0.25em;
-    border: solid 2px white;
-}
-
-.pager span {
-    padding: 0.25em;
-    vertical-align: bottom;
-}
-
 .footer {
     font-size: 0.85em;
 }
