@@ -1,9 +1,8 @@
 const express = require('express');
 const spawn = require('child_process').spawn;
+const fs = require('fs');
 
-// Get env vars
-//require('dotenv').config();
-const UPGRADE_KEY = process.env.UPGRADE_KEY;
+const UPGRADE_KEY = fs.readFileSync('./upgrade/.key').toString().trim();
 
 // Make server
 const PORT = 9001;
@@ -27,4 +26,8 @@ app.post('/upgrade', function (req, res) {
         res.send("invalid upgrade key!");
         console.error("invalid upgrade key");
     }
+});
+
+app.get('/upgrade', function (req, res) {
+    res.send("please POST to this endpoint with your upgrade key");
 });
