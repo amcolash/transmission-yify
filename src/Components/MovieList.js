@@ -438,7 +438,12 @@ class MovieList extends Component {
         } = this.state;
 
         if (error) {
-            return <div className="message">Error: {error.message}</div>;
+            return (
+                <div className="message">
+                    Error: {error.message}
+                    <button onClick={() => document.location.reload()}>Reload Page</button>
+                </div>
+            );
         } else if (!isLoaded) {
             return (
             <div className="message">
