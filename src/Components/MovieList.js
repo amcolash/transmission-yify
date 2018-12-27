@@ -294,7 +294,7 @@ class MovieList extends Component {
     addMagnet = () => {
         var url = window.prompt("Url or magnet?", "");
 
-        if (url) {
+        if (url && url.length > 0) {
             var tv = window.confirm("Is this a tv show?");
     
             axios.post(this.server + '/torrents', { url: url, tv: tv }).then(response => {
