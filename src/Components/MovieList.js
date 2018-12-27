@@ -3,7 +3,7 @@ import axios from 'axios';
 import magnet from 'magnet-uri';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle
+    FaExclamationTriangle, FaMagnet
 } from 'react-icons/lib/fa';
 
 import './MovieList.css';
@@ -291,6 +291,20 @@ class MovieList extends Component {
         // this.torrentList.expand();
     }
 
+    addMagnet = () => {
+        var url = window.prompt("Url or magnet?", "");
+
+        if (url) {
+            var tv = window.confirm("Is this a tv show?");
+    
+            axios.post(this.server + '/torrents', { url: url, tv: tv }).then(response => {
+                this.updateTorrents();
+            }, error => {
+                console.error(error);
+            });
+        }
+    }
+
     getVersions = (movie) => {
         var versions = {};
         var hashes = {};
@@ -504,6 +518,8 @@ class MovieList extends Component {
 
                     <Pager changePage={this.changePage} page={page} movies={movies} type={"floating " + (scroll < 0.97 ? "" : "hidden")}/>
                     <Pager changePage={this.changePage} page={page} movies={movies}/>
+
+                    <FaMagnet className="pointer" onClick={this.addMagnet}/>
 
                     <div className="footer">
                         <hr/>
