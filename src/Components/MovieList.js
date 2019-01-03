@@ -216,6 +216,7 @@ class MovieList extends Component {
         var now = new Date().getFullYear();
         data.map(movie => {
             movie.year = Math.min(now, movie.year);
+            movie.title = movie.title.replace(/&amp;/g, '&');
             return movie;
         });
 
@@ -437,6 +438,9 @@ class MovieList extends Component {
             serverStats, started, width, storage, scroll
         } = this.state;
 
+        const pagerVisibility = page !== 1 || movies.length === 50;
+        const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
+
         if (error) {
             return (
                 <div className="message">
@@ -521,8 +525,8 @@ class MovieList extends Component {
                         }
                     </div>
 
-                    <Pager changePage={this.changePage} page={page} movies={movies} type={"floating " + (scroll < 0.97 ? "" : "hidden")}/>
-                    <Pager changePage={this.changePage} page={page} movies={movies}/>
+                    <Pager changePage={this.changePage} page={page} movies={movies} type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
+                    <Pager changePage={this.changePage} page={page} movies={movies} type={pagerVisibility ? "" : "hidden"}/>
 
                     <FaMagnet className="pointer" onClick={this.addMagnet}/>
 
@@ -530,7 +534,7 @@ class MovieList extends Component {
                         <hr/>
 
                         {serverStats ? (
-                            <p>Total Movies: {serverStats.totalMovies}, Total Shows: {serverStats.totalShows}</p>
+                            <p>Total Movies: {serverStats.totalMovies}, Total Shows: {serverStats.totalShows}, Total Animes: {serverStats.totalAnimes}</p>
                         ) : null}
                         <p>Server Location: {location ? location : "Unknown"}</p>
                         {storage ? (
