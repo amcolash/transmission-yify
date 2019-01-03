@@ -21,13 +21,16 @@ class Details extends Component {
             if (this.props.movie.mal_id) endpoint = 'https://tv-v2.api-fetch.website/anime/' + this.props.movie._id;
 
             axios.get(endpoint, { timeout: 10000 }).then(response => {
-                this.setState({ tvData: response.data, season: response.data.num_seasons, moreData: "ERROR" });
+                this.setState({ tvData: response.data, season: response.data.num_seasons });
             }, error => {
                 console.error(error);
             });
         }
 
-        if (!this.props.movie.mal_id) {
+        // If anime, no extra data
+        if (this.props.movie.mal_id) {
+            this.setState({ moreData: "ERROR" });
+        } else {
             axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
                 this.setState({ moreData: response.data });
             }, error => {
