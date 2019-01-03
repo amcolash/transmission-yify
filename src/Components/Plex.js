@@ -9,11 +9,24 @@ class Plex extends Component {
     }
 
     componentDidMount() {
-        axios.get(this.props.server + '/plex').then(response => {
+        var self = this;
+
+        axios.get(this.props.server + '/plex', {
+            cancelToken: new axios.CancelToken(function executor(c) {
+                self._cancel = c;
+            })
+        }).then(response => {
             this.setState({plexServer: response.data});
         }, error => {
-            console.error(error);
+            if (!axios.isCancel(error)) {
+                console.error(error);
+            }
         });
+    }
+
+    componentWillUnmount() {
+        // Cancel request if unmounted so that we do not set state on an unmounted component
+        this._cancel();
     }
 
     render() {

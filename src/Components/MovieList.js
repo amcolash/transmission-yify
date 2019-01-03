@@ -79,6 +79,8 @@ class MovieList extends Component {
     }
     
     componentWillUnmount() {
+        if (torrentUpdateTimer) clearTimeout(torrentUpdateTimer);
+        window.removeEventListener('scroll', this.updateWindowDimensions);
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
 
@@ -123,31 +125,38 @@ class MovieList extends Component {
         if (torrentUpdateTimer) clearTimeout(torrentUpdateTimer);
 
         axios.get(this.server + '/torrents').then(response => {
-            var torrents = response.data.torrents || [];
-            if (this.state.docker) {
-                torrents = torrents.filter(torrent => {
-                    return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
+            if (response.data.errno === "ECONNREFUSED") {
+                this.setState({ error: { message: "Cannot access transmission" }});
+            } else {
+                var torrents = response.data.torrents || [];
+                if (this.state.docker) {
+                    torrents = torrents.filter(torrent => {
+                        return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
+                    });
+                }
+    
+                torrents.map(torrent => {
+                    if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
+                        torrent.name = hashMapping[torrent.hashString];
+                    }
+                    return torrent;
+                });
+    
+                const started = this.state.started.filter(hashString => {
+                    for (var i = 0; i < torrents.length; i++) {
+                        if (torrents[i].hashString === hashString) return false;
+                    }
+                    return true;
+                });
+    
+                var resetError = (this.state.error && this.state.error.message === "Cannot access transmission");
+
+                this.setState({
+                    torrents: torrents,
+                    started: started,
+                    error: resetError ? null : this.state.error
                 });
             }
-
-            torrents.map(torrent => {
-                if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
-                    torrent.name = hashMapping[torrent.hashString];
-                }
-                return torrent;
-            });
-
-            const started = this.state.started.filter(hashString => {
-                for (var i = 0; i < torrents.length; i++) {
-                    if (torrents[i].hashString === hashString) return false;
-                }
-                return true;
-            });
-
-            this.setState({
-                torrents: torrents,
-                started: started
-            });
 
             torrentUpdateTimer = setTimeout(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
         }, error => {
@@ -445,6 +454,7 @@ class MovieList extends Component {
             return (
                 <div className="message">
                     Error: {error.message}
+                    <br/>
                     <button onClick={() => document.location.reload()}>Reload Page</button>
                 </div>
             );
