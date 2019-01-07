@@ -27,12 +27,15 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+var server = require('http').createServer(app);  
+var io = require('socket.io')(server);
+
+var currentTorrents, currentStorage;
+
 var cache = {};
 fs.access((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
     if (err) {
-        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), (err) => {
-            if (err) console.error(err);
-        });
+        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}));
     } else {
         cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
     }
@@ -48,21 +51,21 @@ app.use('/', express.static('build'));
 app.get('/ip', function (req, res) {
     try {
         if (IS_DOCKER) {
-            let ip = fs.readFileSync("/data/ip.txt", "utf8");
+            let ip = fs.readFileSync('/data/ip.txt', 'utf8');
             handleIP(ip, res);
         } else {
-            axios.get("http://ipinfo.io/ip").then(response => {
+            axios.get('http://ipinfo.io/ip').then(response => {
                 handleIP(response.data, res);
             });
         }
     } catch(err) {
         console.error(err);
-        res.send("unknown");
+        res.send('unknown');
     }
 });
 
 function handleIP(ip, res) {
-    axios.get('https://api.ipdata.co/' + ip.trim() + "?api-key=" + process.env.IP_KEY).then(response => {
+    axios.get('https://api.ipdata.co/' + ip.trim() + '?api-key=' + process.env.IP_KEY).then(response => {
         res.send(response.data);
     }, error => {
         console.error(error);
@@ -71,16 +74,21 @@ function handleIP(ip, res) {
 }
 
 app.get('/storage', function (req, res) {
-    exec("df " + (IS_DOCKER ? "/data" : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
-        if (err) {
-            console.error(err);
-            res.send("unknown");
-        } else {
-            res.send({ used: output.replace("%", "").trim() });
-        }
+    getStorage(data => {
+        res.send(data);
     });
 });
 
+function getStorage(cb) {
+    exec('df ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
+        if (err) {
+            console.error(err);
+            cb('unknown');
+        } else {
+            cb({ used: output.replace('%', '').trim() });
+        }
+    });
+}
 
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
@@ -126,7 +134,7 @@ app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.para
 
 app.post('/torrents', function (req, res) {
     if (req.body.tv) {
-        transmission.addUrl(req.body.url, { "download-dir": "/TV" }, (err, data) => handleResponse(res, err, data));
+        transmission.addUrl(req.body.url, { 'download-dir': '/TV' }, (err, data) => handleResponse(res, err, data));
     } else {
         transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data));
     }
@@ -154,7 +162,7 @@ function autoPrune() {
 
                 if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
                     // Soft remove (keep data but stop uploading)
-                    console.log("removing complete torrent: " + torrent.name + (uploadComplete ? ", upload complete" : "") + (expired ? ", expired" : ""));
+                    console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
 
                     transmission.remove(torrent.hashString, false, (err) => {
                         if (err) console.error(err);
@@ -163,17 +171,49 @@ function autoPrune() {
             });
         }
     });
+
+    // Auto prune every minute
+    setTimeout(autoPrune, 1000 * 60);
+}
+
+io.on('connection', client => {  
+    client.on('subscribe', data => {
+        client.join(data);
+
+        if (data === 'storage') client.emit('storage', currentStorage);
+        if (data === 'torrents') client.emit('torrents', currentTorrents);
+    })
+});
+
+function initWatchers() {
+    setInterval(() => getStorage(data => {
+        if (JSON.stringify(currentStorage) !== JSON.stringify(data)) {
+            // console.log('storage changed');
+            currentStorage = data;
+            io.sockets.in('storage').emit('storage', currentStorage);
+        }
+    }), 1000);
+
+    setInterval(() => transmission.get((err, data) => {
+        if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
+            (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
+            // console.log('torrents changed');
+            currentTorrents = data || err;
+            io.sockets.in('torrents').emit('torrents', currentTorrents);
+        }
+    }), 1000);
 }
 
 // Get this party started!
 try {
-    app.listen(PORT);
+    server.listen(PORT);
     console.log(`Running on port ${PORT}`);
 
     // Autoprune on start
     autoPrune();
-    // Autoprune every minute after
-    setInterval(autoPrune, 1000 * 60);
+
+    // Init socket watchers
+    initWatchers();
 } catch (err) {
     console.error(err);
 }

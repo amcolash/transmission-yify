@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import magnet from 'magnet-uri';
+import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet
@@ -19,7 +20,6 @@ import Pager from './Pager';
 const searchCache = [];
 const hashMapping = {};
 const alternateVersion = {};
-var torrentUpdateTimer;
 
 class MovieList extends Component {
 
@@ -66,9 +66,6 @@ class MovieList extends Component {
         this.updateLocation();
         this.updateDocker();
 
-        // First update for torrents
-        this.updateTorrents();
-
         // Update window size
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
@@ -76,10 +73,24 @@ class MovieList extends Component {
         // Update window scroll
         this.updateScroll();
         window.addEventListener('scroll', this.updateScroll);
+
+        var socket = openSocket(this.server);
+        socket.on('connect', data => {
+            // console.log("connected to socket");
+            socket.emit('subscribe', 'torrents');
+            socket.emit('subscribe', 'storage');
+        });
+
+        socket.on('torrents', data => {
+            if (data) this.updateTorrents(data);
+        });
+
+        socket.on('storage', data => {
+            if (data) this.updateStorage(data);
+        });
     }
     
     componentWillUnmount() {
-        if (torrentUpdateTimer) clearTimeout(torrentUpdateTimer);
         window.removeEventListener('scroll', this.updateWindowDimensions);
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
@@ -111,6 +122,9 @@ class MovieList extends Component {
         }, error => {
             console.error(error);
         });
+
+        // Update every hour, don't need sockets here
+        setTimeout(this.updateLocation, 60 * 60 * 1000);
     }
 
     updateStats() {
@@ -119,51 +133,47 @@ class MovieList extends Component {
         }, error => {
             console.error(error);
         });
+
+        // Update every hour, don't need sockets here
+        setTimeout(this.updateStats, 60 * 60 * 1000);
     }
 
-    updateTorrents() {
-        if (torrentUpdateTimer) clearTimeout(torrentUpdateTimer);
-
-        axios.get(this.server + '/torrents').then(response => {
-            if (response.data.errno === "ECONNREFUSED") {
-                this.setState({ error: { message: "Cannot access transmission" }});
-            } else {
-                var torrents = response.data.torrents || [];
-                if (this.state.docker) {
-                    torrents = torrents.filter(torrent => {
-                        return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
-                    });
-                }
-    
-                torrents.map(torrent => {
-                    if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
-                        torrent.name = hashMapping[torrent.hashString];
-                    }
-                    return torrent;
-                });
-    
-                const started = this.state.started.filter(hashString => {
-                    for (var i = 0; i < torrents.length; i++) {
-                        if (torrents[i].hashString === hashString) return false;
-                    }
-                    return true;
-                });
-    
-                var resetError = (this.state.error && this.state.error.message === "Cannot access transmission");
-
-                this.setState({
-                    torrents: torrents,
-                    started: started,
-                    error: resetError ? null : this.state.error
+    updateTorrents(data) {
+        if (data.errno === "ECONNREFUSED") {
+            this.setState({ error: { message: "Cannot access transmission" }});
+        } else {
+            var torrents = data.torrents || [];
+            if (this.state.docker) {
+                torrents = torrents.filter(torrent => {
+                    return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
                 });
             }
 
-            torrentUpdateTimer = setTimeout(() => this.updateTorrents(), 5000); // Poll torrents every 5 seconds (might be overkill)
-        }, error => {
-            console.error(error);
-            torrentUpdateTimer = setTimeout(() => this.updateTorrents(), 60000); // Poll again in 1 minute since it seems server is down
-        });
+            torrents.map(torrent => {
+                if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
+                    torrent.name = hashMapping[torrent.hashString];
+                }
+                return torrent;
+            });
 
+            const started = this.state.started.filter(hashString => {
+                for (var i = 0; i < torrents.length; i++) {
+                    if (torrents[i].hashString === hashString) return false;
+                }
+                return true;
+            });
+
+            var resetError = (this.state.error && this.state.error.message === "Cannot access transmission");
+
+            this.setState({
+                torrents: torrents,
+                started: started,
+                error: resetError ? null : this.state.error
+            });
+        }
+    }
+
+    updateStorage(data) {
         // Additionally get storage info here
         axios.get(this.server + '/storage').then(response => {
             var percent = response.data.used;
@@ -278,9 +288,7 @@ class MovieList extends Component {
     }
 
     cancelTorrent = (hashString) => {
-        axios.delete(this.server + '/torrents/' + hashString).then(response => {
-            this.updateTorrents();
-        }, error => {
+        axios.delete(this.server + '/torrents/' + hashString).catch(error => {
             console.error(error);
         });
     }
@@ -292,9 +300,7 @@ class MovieList extends Component {
 
         hashMapping[version.hashString] = version.title;
 
-        axios.post(this.server + '/torrents', { url: version.url, tv: version.tv }).then(response => {
-            this.updateTorrents();
-        }, error => {
+        axios.post(this.server + '/torrents', { url: version.url, tv: version.tv }).catch(error => {
             console.error(error);
         });
 
@@ -307,9 +313,7 @@ class MovieList extends Component {
         if (url && url.length > 0) {
             var tv = window.confirm("Is this a tv show?");
     
-            axios.post(this.server + '/torrents', { url: url, tv: tv }).then(response => {
-                this.updateTorrents();
-            }, error => {
+            axios.post(this.server + '/torrents', { url: url, tv: tv }).catch(error => {
                 console.error(error);
             });
         }
