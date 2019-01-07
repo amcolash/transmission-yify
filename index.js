@@ -185,10 +185,9 @@ io.on('connection', client => {
     })
 });
 
-function initWatchers() {
+function initSocketDataWatchers() {
     setInterval(() => getStorage(data => {
         if (JSON.stringify(currentStorage) !== JSON.stringify(data)) {
-            // console.log('storage changed');
             currentStorage = data;
             io.sockets.in('storage').emit('storage', currentStorage);
         }
@@ -197,7 +196,6 @@ function initWatchers() {
     setInterval(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
-            // console.log('torrents changed');
             currentTorrents = data || err;
             io.sockets.in('torrents').emit('torrents', currentTorrents);
         }
@@ -213,7 +211,7 @@ try {
     autoPrune();
 
     // Init socket watchers
-    initWatchers();
+    initSocketDataWatchers();
 } catch (err) {
     console.error(err);
 }

@@ -76,7 +76,6 @@ class MovieList extends Component {
 
         var socket = openSocket(this.server);
         socket.on('connect', data => {
-            // console.log("connected to socket");
             socket.emit('subscribe', 'torrents');
             socket.emit('subscribe', 'storage');
         });
@@ -458,8 +457,12 @@ class MovieList extends Component {
             return (
                 <div className="message">
                     Error: {error.message}
-                    <br/>
-                    <button onClick={() => document.location.reload()}>Reload Page</button>
+                    {(error.message !== "Cannot access transmission") ? (
+                        <Fragment>
+                            <br/>
+                            <button onClick={() => document.location.reload()}>Reload Page</button>
+                        </Fragment>
+                    ) : null}
                 </div>
             );
         } else if (!isLoaded) {
