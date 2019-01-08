@@ -116,10 +116,11 @@ class MovieList extends Component {
             if (response.data.city && response.data.country_name) {
                 this.setState({ location: response.data.city + ', ' + response.data.country_name });
             } else {
-                this.setState({ location: undefined });
+                this.setState({ location: "ERROR" });
             }
         }, error => {
             console.error(error);
+            this.setState({ location: "ERROR" });
         });
 
         // Update every hour, don't need sockets here
@@ -493,7 +494,7 @@ class MovieList extends Component {
                         />
                     </Modal>
             
-                    {!location || location === "Seattle, United States" ? (
+                    {location && (location === "ERROR" || location === "Seattle, United States") ? (
                         <span className="warning red">
                             <FaExclamationTriangle/>
                             <span>Server not secure</span>
