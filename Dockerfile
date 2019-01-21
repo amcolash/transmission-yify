@@ -1,5 +1,5 @@
 # Dependency Stage
-FROM mhart/alpine-node:8 AS dependencies
+FROM mhart/alpine-node:10 AS dependencies
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -13,7 +13,7 @@ RUN npm ci
 ##########################################################################
 
 # App Build Stage
-FROM mhart/alpine-node:8 AS build
+FROM mhart/alpine-node:10 AS build
 
 # Create app directory
 WORKDIR /usr/src/app
