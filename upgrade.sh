@@ -1,7 +1,7 @@
 #!/bin/sh
 
-echo Waiting a moment, just for the dust to settle
-sleep 60
+# echo Waiting a moment, just for the dust to settle
+# sleep 60
 
 git pull
 

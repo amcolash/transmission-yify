@@ -1,6 +1,0 @@
-{
-    "apps" : [{
-        "name" : "UpgradeTransmission",
-        "script" : "./upgrade/upgrade.js"
-    }]
-}
