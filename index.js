@@ -9,41 +9,55 @@ const transmissionWrapper = require('transmission');
 
 require('dotenv').config();
 
-// Constants
+// Init vars
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
 
-// Set up data dir if not in docker environment
-if (!IS_DOCKER) {
-    fs.access(process.env.DATA_DIR, (err) => {
-        fs.mkdir(process.env.DATA_DIR, { recursive: true }, (err) => {
-            if (err) console.error(err);
-        });
-    });
-}
+var currentTorrents, currentStorage;
+var cache = {};
 
 // App
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-var server = require('http').createServer(app);  
-var io = require('socket.io')(server);
-
-var currentTorrents, currentStorage;
-
-var cache = {};
-fs.access((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
-    if (err) {
-        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}));
-    } else {
-        cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
-    }
-});
-
+const server = require('http').createServer(app);  
+const io = require('socket.io')(server);
 
 // Transmission wrapper, conditional host based on if running from a docker container
 const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0' });
+
+// Get this party started!
+try {
+    // Set up data dir if not in docker environment
+    if (!IS_DOCKER) {
+        fs.access(process.env.DATA_DIR, (err) => {
+            fs.mkdir(process.env.DATA_DIR, { recursive: true }, (err) => {
+                if (err) console.error(err);
+            });
+        });
+    }
+
+    // Setup cache
+    fs.access((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
+        if (err) {
+            fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}));
+        } else {
+            cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
+        }
+    });    
+
+    server.listen(PORT);
+    console.log(`Running on port ${PORT}`);
+
+    // Autoprune on start
+    autoPrune();
+
+    // Init socket watchers
+    initSocketDataWatchers();
+} catch (err) {
+    console.error(err);
+}
 
 // Set up static content
 app.use('/', express.static('build'));
@@ -90,39 +104,14 @@ function getStorage(cb) {
     });
 }
 
-function cacheRequest(url, res, shouldRetry) {
-    axios.get(url, { timeout: 10000 }).then(response => {
-        res.send(response.data);
-        cache[url] = response.data;
-        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
-            if (err) console.error(err);
-        });
-    }, error => {
-        if (shouldRetry) {
-            setTimeout(() => cacheRequest(url, res, false), 10000);
-        } else {
-            console.error(error);
-            res.send(error);
-        }
-    });
-}
-
 app.get('/omdb/:id', function(req, res) {
     let url ='http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
-    if (cache[url]) {
-        res.send(cache[url]);
-    } else {
-        cacheRequest(url, res, true);
-    }
+    checkCache(url, res, true);
 });
 
 app.get('/themoviedb/:id', function (req, res) {
     let url = 'https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY;
-    if (cache[url]) {
-        res.send(cache[url]);
-    } else {
-        cacheRequest(url, res, true);
-    }
+    checkCache(url, res, true);
 });
 
 app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
@@ -139,6 +128,55 @@ app.post('/torrents', function (req, res) {
         transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data));
     }
 });
+
+// app.get('/upgrade', function (req, res) { res.send("Please POST to this endpoint with your upgrade key") });
+// app.post('/upgrade', function (req, res) {
+//     try {
+//         if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
+//         if (!UPGRADE_KEY || UPGRADE_KEY.length === 0) throw new Error('No upgrade key has been set, canceling upgrade');
+//         if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key');
+
+//         res.send("starting upgrade, remember to check the logs ;)")
+//         console.log("starting upgrade");
+
+//         const proc = spawn('sh', ['./upgrade/upgrade.sh'], { cwd: './' });
+//         proc.stdout.on('data', data => console.log(data.toString()));
+//         proc.stderr.on('data', data => console.error(data.toString()));
+//         proc.on('exit', code => {
+//             console.log("upgrade exited with code " + code);
+//         });
+//     } catch (e) {
+//         res.send(e);
+//         console.error(e);
+//     }
+// });
+
+// Check if the cache has data, else grab it
+function checkCache(url, res, shouldRetry) {
+    if (cache[url]) {
+        res.send(cache[url]);
+    } else {
+        cacheRequest(url, res, shouldRetry);
+    }
+}
+
+// Stick things into a cache
+function cacheRequest(url, res, shouldRetry) {
+    axios.get(url, { timeout: 10000 }).then(response => {
+        res.send(response.data);
+        cache[url] = response.data;
+        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
+            if (err) console.error(err);
+        });
+    }, error => {
+        if (shouldRetry) {
+            setTimeout(() => cacheRequest(url, res, false), 10000);
+        } else {
+            console.error(error);
+            res.send(error);
+        }
+    });
+}
 
 // Single handler for all of the transmission wrapper responses
 function handleResponse(res, err, data) {
@@ -200,18 +238,4 @@ function initSocketDataWatchers() {
             io.sockets.in('torrents').emit('torrents', currentTorrents);
         }
     }), 1000);
-}
-
-// Get this party started!
-try {
-    server.listen(PORT);
-    console.log(`Running on port ${PORT}`);
-
-    // Autoprune on start
-    autoPrune();
-
-    // Init socket watchers
-    initSocketDataWatchers();
-} catch (err) {
-    console.error(err);
 }
