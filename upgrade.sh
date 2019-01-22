@@ -19,7 +19,7 @@ sleep 60
 
 git pull
 
-docker-compose build
+docker-compose pull
 docker-compose down
 docker-compose up -d
 
