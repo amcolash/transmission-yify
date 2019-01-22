@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# If on synology, start entware first
+if [ -f /opt/etc/profile ]; then
+    # Load Entware Profile
+    . /opt/etc/profile
+fi
+
 # Move into the root of the app directory
 cd $(dirname "$0")
 
