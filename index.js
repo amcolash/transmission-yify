@@ -165,6 +165,7 @@ app.post('/upgrade', function (req, res) {
         });
     } catch (e) {
         console.error(e);
+        res.status(500);
         res.send("Error: " + e.message);
     }
 });
