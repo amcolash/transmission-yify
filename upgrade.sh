@@ -14,7 +14,7 @@ echo "----------------"
 echo $(date)
 echo "Starting Upgrade"
 
-echo Waiting a moment for the dust to settle
+echo "Waiting a moment for the dust to settle"
 sleep 60
 
 git pull

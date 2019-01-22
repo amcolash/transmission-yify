@@ -135,7 +135,7 @@ app.post('/upgrade', function (req, res) {
         if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
         const UPGRADE_KEY = process.env.UPGRADE_KEY;
         if (!UPGRADE_KEY || UPGRADE_KEY.length === 0) throw new Error('No upgrade key has been set, canceling upgrade');
-        if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key, got: ' + req.query.upgradeKey + ', expected: ' + UPGRADE_KEY);
+        if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key');
 
         console.log("starting upgrade");
         res.send("starting upgrade, remember to check the logs ;)");
@@ -143,7 +143,7 @@ app.post('/upgrade', function (req, res) {
         exec("ip route | awk '/default/ { print $3 }'", (error, stdout, stderr) => {
             if (!stderr) {
                 const ip = stdout.trim();
-                const ssh = "ssh -oStrictHostKeyChecking=no andrew@" + ip;
+                const ssh = "ssh -oStrictHostKeyChecking=no " + process.env.USERNAME + "@" + ip;
                 const command = " 'nohup " + process.env.APP_DIR + "/upgrade.sh &'";
                 console.log("running command: " + ssh + command);
                 exec(ssh + command, (error, stdout, stderr) => {
