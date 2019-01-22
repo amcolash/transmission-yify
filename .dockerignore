@@ -3,5 +3,5 @@ npm-debug.log
 build
 .env
 .git
-upgrade
 .ssh
+*.log

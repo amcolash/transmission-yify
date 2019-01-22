@@ -129,27 +129,36 @@ app.post('/torrents', function (req, res) {
     }
 });
 
-// app.get('/upgrade', function (req, res) { res.send("Please POST to this endpoint with your upgrade key") });
-// app.post('/upgrade', function (req, res) {
-//     try {
-//         if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
-//         if (!UPGRADE_KEY || UPGRADE_KEY.length === 0) throw new Error('No upgrade key has been set, canceling upgrade');
-//         if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key');
+app.get('/upgrade', function (req, res) { res.send("Please POST to this endpoint with your upgrade key") });
+app.post('/upgrade', function (req, res) {
+    try {
+        if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
+        const UPGRADE_KEY = process.env.UPGRADE_KEY;
+        if (!UPGRADE_KEY || UPGRADE_KEY.length === 0) throw new Error('No upgrade key has been set, canceling upgrade');
+        if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key, got: ' + req.query.upgradeKey + ', expected: ' + UPGRADE_KEY);
 
-//         res.send("starting upgrade, remember to check the logs ;)")
-//         console.log("starting upgrade");
+        console.log("starting upgrade");
+        res.send("starting upgrade, remember to check the logs ;)");
 
-//         const proc = spawn('sh', ['./upgrade/upgrade.sh'], { cwd: './' });
-//         proc.stdout.on('data', data => console.log(data.toString()));
-//         proc.stderr.on('data', data => console.error(data.toString()));
-//         proc.on('exit', code => {
-//             console.log("upgrade exited with code " + code);
-//         });
-//     } catch (e) {
-//         res.send(e);
-//         console.error(e);
-//     }
-// });
+        exec("ip route | awk '/default/ { print $3 }'", (error, stdout, stderr) => {
+            if (!stderr) {
+                const ip = stdout.trim();
+                const ssh = "ssh -oStrictHostKeyChecking=no andrew@" + ip;
+                const command = " 'nohup " + process.env.APP_DIR + "/upgrade.sh &'";
+                console.log("running command: " + ssh + command);
+                exec(ssh + command, (error, stdout, stderr) => {
+                    console.log(stdout);
+                    if (stderr) console.error(stderr);
+                });
+            } else {
+                console.error(stderr);
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        res.send("Error: " + e.message);
+    }
+});
 
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
