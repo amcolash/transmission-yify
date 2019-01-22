@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Fail script if anything fails, maybe not the best...
+set -o errexit
+
 # If on synology, start entware first
 if [ -f /opt/etc/profile ]; then
     # Load Entware Profile
@@ -11,11 +14,9 @@ fi
 cd $(dirname "$0")
 
 # Redirect all output to log file
-set -o errexit
 readonly LOG_FILE="upgrade.log"
 touch $LOG_FILE
-exec 1>$LOG_FILE
-exec 2>&1
+exec >> $LOG_FILE 2>&1 && tail $LOG_FILE
 
 echo "----------------"
 echo $(date)

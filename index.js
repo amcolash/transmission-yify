@@ -15,6 +15,7 @@ const PORT = 9000;
 
 var currentTorrents, currentStorage;
 var cache = {};
+var isUpgrading = false;
 
 // App
 const app = express();
@@ -136,6 +137,10 @@ app.post('/upgrade', function (req, res) {
         const UPGRADE_KEY = process.env.UPGRADE_KEY;
         if (!UPGRADE_KEY || UPGRADE_KEY.length === 0) throw new Error('No upgrade key has been set, canceling upgrade');
         if (req.query.upgradeKey !== UPGRADE_KEY) throw new Error('Invalid upgrade key');
+        if (isUpgrading) throw new Error('Already upgrading, please wait a bit and try again');
+
+        // We are now in the upgrading state
+        isUpgrading = true;
 
         console.log("starting upgrade");
         res.send("starting upgrade, remember to check the logs ;)");
@@ -146,6 +151,10 @@ app.post('/upgrade', function (req, res) {
                 const ssh = "ssh -oStrictHostKeyChecking=no " + process.env.USERNAME + "@" + ip;
                 const command = " 'nohup " + process.env.APP_DIR + "/upgrade.sh &'";
                 console.log("running command: " + ssh + command);
+
+                // Wait 2 minutes until another upgrade is allowed
+                setTimeout(() => isUpgrading = false, 1000 * 120);
+
                 exec(ssh + command, (error, stdout, stderr) => {
                     console.log(stdout);
                     if (stderr) console.error(stderr);
