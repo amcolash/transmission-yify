@@ -4,6 +4,7 @@
 if [ -f /opt/etc/profile ]; then
     # Load Entware Profile
     . /opt/etc/profile
+    export PATH=/usr/local/bin:$PATH
 fi
 
 # Move into the root of the app directory
