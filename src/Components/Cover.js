@@ -66,9 +66,13 @@ class Cover extends Component {
         }
 
         var hasFile = false;
-        files.map(file => {
-            hasFile = (file.indexOf(movie.title) !== -1 && file.indexOf(movie.year) !== -1);
-        });
+        for (i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.indexOf(movie.title.toLowerCase()) !== -1 && file.indexOf(movie.year) !== -1) {
+                hasFile = true;
+                break;
+            }
+        }
 
         return (
             <div className="movie" ref='movieCover'>

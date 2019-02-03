@@ -36,23 +36,21 @@ const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' 
 try {
     // Set up data dir if not in docker environment
     if (!IS_DOCKER) {
-        fs.accessSync(process.env.DATA_DIR, (err) => {
-            fs.mkdirSync(process.env.DATA_DIR, { recursive: true }, (err) => {
-                if (err) console.error(err);
-            });
+        fs.mkdirSync(process.env.DATA_DIR, { recursive: true }, (err) => {
+            if (err) console.error(err);
         });
     }
 
     // Setup cache
-    fs.accessSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
-        if (err) {
-            fs.writeFileSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), err => {
-                if (err) console.error(err);
-            });
-        } else {
+    try {
+        fs.accessSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
             cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
-        }
-    });    
+        });
+    } catch (err) {
+        fs.writeFileSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), error => {
+            console.log(error);
+        });
+    }
 
     server.listen(PORT);
     console.log(`Running on port ${PORT}`);
@@ -113,12 +111,16 @@ function getFiles(cb) {
             console.log(err);
             cb([]);
         } else {
-            var file_list = stdout.split('\n');
-            var files = [];
+            let file_list = stdout.split('\n');
+            let files = [];
             file_list.map(file => {
-                const f = path.basename(file);
-                if (f.length > 0) files.push(f.replace(/\./g, ' '))
+                let f = path.basename(file);
+                if (f.length > 0) {
+                    f = f.replace(/\./g, ' ').replace(/\[|\]|\(|\)s/g, '').toLowerCase();
+                    files.push(f);
+                }
             });
+
             cb(files);
         }
     });
@@ -273,7 +275,7 @@ function initSocketDataWatchers() {
     setInterval(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
-            currentTorrents = data || []; // NO_COMMIT
+            currentTorrents = data || err;
             io.sockets.in('torrents').emit('torrents', currentTorrents);
         }
     }), interval);
