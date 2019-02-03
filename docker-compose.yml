@@ -39,6 +39,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA_DIR}:/data
+      - ${VIDEO_DIR}:/Videos
       - .ssh:/root/.ssh
     env_file:
       - .env
