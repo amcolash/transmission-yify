@@ -5,6 +5,7 @@ const cors = require('cors');
 const { exec } = require('child_process');
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const transmissionWrapper = require('transmission');
 
 require('dotenv').config();
@@ -13,7 +14,10 @@ require('dotenv').config();
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
 
-var currentTorrents, currentStorage;
+var currentTorrents = [];
+var currentStorage;
+var currentFiles = [];
+
 var cache = {};
 var isUpgrading = false;
 
@@ -26,23 +30,25 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
 // Transmission wrapper, conditional host based on if running from a docker container
-const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '0.0.0.0' });
+const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '127.0.0.1' });
 
 // Get this party started!
 try {
     // Set up data dir if not in docker environment
     if (!IS_DOCKER) {
-        fs.access(process.env.DATA_DIR, (err) => {
-            fs.mkdir(process.env.DATA_DIR, { recursive: true }, (err) => {
+        fs.accessSync(process.env.DATA_DIR, (err) => {
+            fs.mkdirSync(process.env.DATA_DIR, { recursive: true }, (err) => {
                 if (err) console.error(err);
             });
         });
     }
 
     // Setup cache
-    fs.access((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
+    fs.accessSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
         if (err) {
-            fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}));
+            fs.writeFileSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), err => {
+                if (err) console.error(err);
+            });
         } else {
             cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
         }
@@ -88,11 +94,7 @@ function handleIP(ip, res) {
     });
 }
 
-app.get('/storage', function (req, res) {
-    getStorage(data => {
-        res.send(data);
-    });
-});
+app.get('/storage', function (req, res) { getStorage(data => res.send(data)); });
 
 function getStorage(cb) {
     exec('df ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
@@ -101,6 +103,23 @@ function getStorage(cb) {
             cb('unknown');
         } else {
             cb({ used: output.replace('%', '').trim() });
+        }
+    });
+}
+
+function getFiles(cb) {
+    exec('find ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR), function(err, stdout, stderr) {
+        if (err) {
+            console.log(err);
+            cb([]);
+        } else {
+            var file_list = stdout.split('\n');
+            var files = [];
+            file_list.map(file => {
+                const f = path.basename(file);
+                if (f.length > 0) files.push(f.replace(/\./g, ' '))
+            });
+            cb(files);
         }
     });
 }
@@ -208,26 +227,24 @@ function handleResponse(res, err, data) {
 }
 
 function autoPrune() {
-    transmission.get((err, data) => {
-        if (!err) {
-            // Max wait time after complete is 3 days
-            const maxWait = 60 * 60 * 24 * 3;
-            
-            data.torrents.map(torrent => {
-                let uploadComplete = torrent.uploadRatio > 3.0;
-                let expired = (Date.now() / 1000) > (torrent.doneDate + maxWait);
+    // Max wait time after complete is 3 days
+    const maxWait = 60 * 60 * 24 * 3;
 
-                if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
-                    // Soft remove (keep data but stop uploading)
-                    console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
-
-                    transmission.remove(torrent.hashString, false, (err) => {
-                        if (err) console.error(err);
-                    });
-                }
-            });
-        }
-    });
+    if (currentTorrents.length > 0) {
+        currentTorrents.map(torrent => {
+            let uploadComplete = torrent.uploadRatio > 3.0;
+            let expired = (Date.now() / 1000) > (torrent.doneDate + maxWait);
+    
+            if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
+                // Soft remove (keep data but stop uploading)
+                console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
+    
+                transmission.remove(torrent.hashString, false, (err) => {
+                    if (err) console.error(err);
+                });
+            }
+        });
+    }
 
     // Auto prune every minute
     setTimeout(autoPrune, 1000 * 60);
@@ -239,22 +256,32 @@ io.on('connection', client => {
 
         if (data === 'storage') client.emit('storage', currentStorage);
         if (data === 'torrents') client.emit('torrents', currentTorrents);
+        if (data === 'files') client.emit('files', currentFiles);
     })
 });
 
 function initSocketDataWatchers() {
+    const interval = 2000;
+
     setInterval(() => getStorage(data => {
         if (JSON.stringify(currentStorage) !== JSON.stringify(data)) {
             currentStorage = data;
             io.sockets.in('storage').emit('storage', currentStorage);
         }
-    }), 1000);
+    }), interval);
 
     setInterval(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
-            currentTorrents = data || err;
+            currentTorrents = data || []; // NO_COMMIT
             io.sockets.in('torrents').emit('torrents', currentTorrents);
         }
-    }), 1000);
+    }), interval);
+
+    setInterval(() => getFiles(data => {
+        if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
+            currentFiles = data;
+            io.sockets.in('files').emit('files', currentFiles);
+        }
+    }), interval);
 }

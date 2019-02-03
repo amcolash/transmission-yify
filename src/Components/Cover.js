@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-    FaDownload, FaTrash, FaFilm
+    FaDownload, FaTrash, FaFilm, FaCheck
 } from 'react-icons/lib/fa';
 import axios from 'axios';
 import './Cover.css';
@@ -43,7 +43,7 @@ class Cover extends Component {
     }
 
     render() {
-        const { click, downloadTorrent, cancelTorrent, getVersions, getProgress, started } = this.props;
+        const { click, downloadTorrent, cancelTorrent, getVersions, getProgress, started, files } = this.props;
         const movie = this.state.movie;
 
         const versions = getVersions(movie);
@@ -65,6 +65,11 @@ class Cover extends Component {
             }
         }
 
+        var hasFile = false;
+        files.map(file => {
+            hasFile = (file.indexOf(movie.title) !== -1 && file.indexOf(movie.year) !== -1);
+        });
+
         return (
             <div className="movie" ref='movieCover'>
                 <div
@@ -75,6 +80,11 @@ class Cover extends Component {
                     <div className="movieIcon">
                         <FaFilm />
                     </div>
+                    {hasFile ? (
+                        <div className="fileExists">
+                            <FaCheck />
+                        </div>
+                    ) : null}
                     <div className="quality">
                         {versions.map(version => (
                             <Fragment

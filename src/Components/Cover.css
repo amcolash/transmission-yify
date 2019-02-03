@@ -60,6 +60,15 @@
     border-radius: 0.2em;
 }
 
+.fileExists {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 0.25em;
+    background-color: #e5a00d;
+    border-top-right-radius: 0.2em;
+}
+
 .quality button {
     margin: 0.3em; 
 }

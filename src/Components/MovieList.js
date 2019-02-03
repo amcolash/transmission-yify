@@ -46,7 +46,8 @@ class MovieList extends Component {
             width: 0,
             height: 0,
             scroll: 0,
-            docker: true
+            docker: true,
+            files: []
         }
 
         this.updateSearch = this.updateSearch.bind(this);
@@ -78,6 +79,7 @@ class MovieList extends Component {
         socket.on('connect', data => {
             socket.emit('subscribe', 'torrents');
             socket.emit('subscribe', 'storage');
+            socket.emit('subscribe', 'files');
         });
 
         socket.on('torrents', data => {
@@ -86,6 +88,10 @@ class MovieList extends Component {
 
         socket.on('storage', data => {
             if (data) this.updateStorage(data);
+        });
+
+        socket.on('files', data => {
+            if (data) this.updateFiles(data);
         });
     }
     
@@ -174,17 +180,16 @@ class MovieList extends Component {
     }
 
     updateStorage(data) {
-        // Additionally get storage info here
-        axios.get(this.server + '/storage').then(response => {
-            var percent = response.data.used;
-            try {
-                this.setState({ storage: parseFloat(percent).toFixed(1) });
-            } catch (err) {
-                console.error(err);
-            }
-        }, error => {
-            console.error(error);
-        });
+        try {
+            var percent = data.used;
+            this.setState({ storage: parseFloat(percent).toFixed(1) });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    updateFiles(data) {
+        this.setState({files: data});
     }
 
     updateSearch(search, genre, order, quality, type, page) {
@@ -535,6 +540,7 @@ class MovieList extends Component {
                                         getProgress={this.getProgress}
                                         getVersions={this.getVersions}
                                         server={this.server}
+                                        files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
                                     />
                                 ) : null
                             ))
