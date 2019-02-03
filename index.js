@@ -106,7 +106,7 @@ function getStorage(cb) {
 }
 
 function getFiles(cb) {
-    exec('find ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR), function(err, stdout, stderr) {
+    exec('find ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR) + ' ' + process.env.EXTRA_MOVIES_DIR, function(err, stdout, stderr) {
         if (err) {
             console.log(err);
             cb([]);
@@ -270,7 +270,7 @@ function initSocketDataWatchers() {
             currentStorage = data;
             io.sockets.in('storage').emit('storage', currentStorage);
         }
-    }), interval);
+    }), interval * 3);
 
     setInterval(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
@@ -285,5 +285,5 @@ function initSocketDataWatchers() {
             currentFiles = data;
             io.sockets.in('files').emit('files', currentFiles);
         }
-    }), interval);
+    }), interval * 3);
 }
