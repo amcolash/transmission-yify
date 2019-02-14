@@ -105,7 +105,7 @@ class Cover extends Component {
                                     <button className="orange download" onClick={(e) => {
                                         e.stopPropagation();
                                         e.nativeEvent.stopImmediatePropagation();
-                                        downloadTorrent(version);
+                                        if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
                                     }}>
                                         {started.indexOf(version.hashString) !== -1 ? (
                                             <Spinner visible noMargin button />
