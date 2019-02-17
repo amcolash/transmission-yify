@@ -232,11 +232,11 @@ function autoPrune() {
     // Max wait time after complete is 3 days
     const maxWait = 60 * 60 * 24 * 3;
 
-    if (currentTorrents.length > 0) {
-        currentTorrents.map(torrent => {
+    if (currentTorrents && currentTorrents.torrents) {
+        currentTorrents.torrents.map(torrent => {
             let uploadComplete = torrent.uploadRatio > 3.0;
             let expired = (Date.now() / 1000) > (torrent.doneDate + maxWait);
-    
+
             if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
                 // Soft remove (keep data but stop uploading)
                 console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
@@ -272,6 +272,7 @@ function initSocketDataWatchers() {
         }
     }), interval * 3);
 
+    // TODO: Give a few failed attempts before killing UI because we cannot connect to transmission
     setInterval(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
@@ -280,6 +281,7 @@ function initSocketDataWatchers() {
         }
     }), interval);
 
+    // TODO: Use plex-api (npm) to query instead of looking at files, cache results (?)
     setInterval(() => getFiles(data => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
             currentFiles = data;
