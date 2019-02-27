@@ -10,6 +10,18 @@ const transmissionWrapper = require('transmission');
 
 require('dotenv').config();
 
+const PlexAPI = require("plex-api");
+
+const client = new PlexAPI({
+    hostname: process.env.PLEX_HOSTNAME, // could be different than plex link
+    username: process.env.PLEX_USERNAME,
+    password: process.env.PLEX_PASSWORD,
+    options: {
+        identifier: "transmission-yify",
+        deviceName: "Transmission-Yify"
+    }
+});
+
 // Init vars
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
@@ -47,9 +59,7 @@ try {
             cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
         });
     } catch (err) {
-        fs.writeFileSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify({}), error => {
-            console.log(error);
-        });
+        writeCache();
     }
 
     server.listen(PORT);
@@ -106,22 +116,32 @@ function getStorage(cb) {
 }
 
 function getFiles(cb) {
-    exec('find ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR) + ' ' + process.env.EXTRA_MOVIES_DIR, function(err, stdout, stderr) {
-        if (err) {
-            console.log(err);
-            cb([]);
-        } else {
-            let file_list = stdout.split('\n');
-            let files = [];
-            file_list.map(file => {
-                let f = path.basename(file);
-                if (f.length > 0) {
-                    f = f.replace(/\./g, ' ').replace(/\[|\]|\(|\)s/g, '').toLowerCase();
-                    files.push(f);
-                }
-            });
+    client.query("/library/sections").then(response => {
+        const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
+        const promises = [];
 
+        for (var i = 0; i < sections.length; i++) {
+            promises.push(client.query("/library/sections/" + sections[i].key + "/all"));
+        }
+
+        Promise.all(promises).then(values => {
+            const files = [];
+            for (var i = 0; i < values.length; i++) {
+                const data = values[i].MediaContainer.Metadata;
+                for (var j = 0; j < data.length; j++) {
+                    files.push({title: data[j].title, year: data[j].year});
+                }
+            }
             cb(files);
+        });
+    }, function (err) {
+        console.error("Could not connect to server", err);
+        
+        // If plex goes offline, keep in-memory copy living on
+        if (currentFiles.length > 0) {
+            cb(currentFiles);
+        } else {
+            cb([]);
         }
     });
 }
@@ -205,9 +225,7 @@ function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
         res.send(response.data);
         cache[url] = response.data;
-        fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
-            if (err) console.error(err);
-        });
+        writeCache();
     }, error => {
         if (shouldRetry) {
             setTimeout(() => cacheRequest(url, res, false), 10000);
@@ -215,6 +233,12 @@ function cacheRequest(url, res, shouldRetry) {
             console.error(error);
             res.send(error);
         }
+    });
+}
+
+function writeCache() {
+    fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
+        if (err) console.error(err);
     });
 }
 
@@ -262,10 +286,15 @@ io.on('connection', client => {
     })
 });
 
+function setIntervalImmediately(func, interval) {
+    func();
+    return setInterval(func, interval);
+}
+
 function initSocketDataWatchers() {
     const interval = 2000;
 
-    setInterval(() => getStorage(data => {
+    setIntervalImmediately(() => getStorage(data => {
         if (JSON.stringify(currentStorage) !== JSON.stringify(data)) {
             currentStorage = data;
             io.sockets.in('storage').emit('storage', currentStorage);
@@ -273,7 +302,7 @@ function initSocketDataWatchers() {
     }), interval * 3);
 
     // TODO: Give a few failed attempts before killing UI because we cannot connect to transmission
-    setInterval(() => transmission.get((err, data) => {
+    setIntervalImmediately(() => transmission.get((err, data) => {
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
             currentTorrents = data || err;
@@ -281,11 +310,10 @@ function initSocketDataWatchers() {
         }
     }), interval);
 
-    // TODO: Use plex-api (npm) to query instead of looking at files, cache results (?)
-    setInterval(() => getFiles(data => {
+    setIntervalImmediately(() => getFiles(data => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
             currentFiles = data;
             io.sockets.in('files').emit('files', currentFiles);
         }
-    }), interval * 3);
+    }), interval * 30);
 }

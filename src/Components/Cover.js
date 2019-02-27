@@ -3,6 +3,7 @@ import {
     FaDownload, FaTrash, FaFilm, FaCheck
 } from 'react-icons/lib/fa';
 import axios from 'axios';
+import levenshtein from 'js-levenshtein';
 import './Cover.css';
 import Spinner from './Spinner';
 import ScrollReveal from '../ScrollReveal';
@@ -68,7 +69,10 @@ class Cover extends Component {
         var hasFile = false;
         for (i = 0; i < files.length; i++) {
             const file = files[i];
-            if (file.indexOf(movie.title.toLowerCase()) !== -1 && file.indexOf(movie.year) !== -1) {
+            const lev = levenshtein(file.title.toLowerCase(), movie.title.toLowerCase());
+            const match = (1 - (lev / Math.max(file.title.length, movie.title.length)));
+
+            if (match > 0.95 && file.year === movie.year) {
                 hasFile = true;
                 break;
             }
