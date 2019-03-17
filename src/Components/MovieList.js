@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet
+    FaExclamationTriangle, FaMagnet, FaSearch
 } from 'react-icons/lib/fa';
 
 import './MovieList.css';
@@ -47,7 +47,8 @@ class MovieList extends Component {
             height: 0,
             scroll: 0,
             docker: true,
-            files: []
+            files: [],
+            pb: null
         }
 
         this.updateSearch = this.updateSearch.bind(this);
@@ -66,6 +67,7 @@ class MovieList extends Component {
         // Get data from server
         this.updateLocation();
         this.updateDocker();
+        this.updatePBLink();
 
         // Update window size
         this.updateWindowDimensions();
@@ -142,6 +144,14 @@ class MovieList extends Component {
 
         // Update every hour, don't need sockets here
         setTimeout(this.updateStats, 60 * 60 * 1000);
+    }
+
+    updatePBLink() {
+        axios.get(this.server + '/pb').then(response => {
+            this.setState({ pb: response.data });
+        }, error => {
+            console.error(error);
+        });
     }
 
     updateTorrents(data) {
@@ -324,6 +334,17 @@ class MovieList extends Component {
         }
     }
 
+    searchPB = () => {
+        var search = window.prompt("Search Term?", "");
+        var win = window.open('', '_blank');
+        if (search && search.length > 0) {
+            win.location.href = this.state.pb + '/search/' + search;
+            win.focus();
+        } else {
+            win.close();
+        }
+    }
+
     getVersions = (movie) => {
         var versions = {};
         var hashes = {};
@@ -453,7 +474,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            serverStats, started, width, storage, scroll
+            serverStats, started, width, storage, scroll, pb
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length === 50;
@@ -553,6 +574,9 @@ class MovieList extends Component {
                     <Pager changePage={this.changePage} page={page} movies={movies} type={pagerVisibility ? "" : "hidden"}/>
 
                     <FaMagnet className="pointer" onClick={this.addMagnet}/>
+                    {pb ? (
+                        <FaSearch className="pointer marginLeft" onClick={this.searchPB}/>
+                    ) : null}
 
                     <div className="footer">
                         <hr/>

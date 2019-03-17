@@ -5,7 +5,7 @@ const cors = require('cors');
 const { exec } = require('child_process');
 const express = require('express');
 const fs = require('fs');
-const path = require('path');
+const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
 
 require('dotenv').config();
@@ -32,6 +32,8 @@ var currentFiles = [];
 
 var cache = {};
 var isUpgrading = false;
+
+var pirateBay;
 
 // App
 const app = express();
@@ -83,9 +85,7 @@ app.get('/ip', function (req, res) {
             let ip = fs.readFileSync('/data/ip.txt', 'utf8');
             handleIP(ip, res);
         } else {
-            axios.get('http://ipinfo.io/ip').then(response => {
-                handleIP(response.data, res);
-            });
+            handleIP(null, res);
         }
     } catch(err) {
         console.error(err);
@@ -94,7 +94,7 @@ app.get('/ip', function (req, res) {
 });
 
 function handleIP(ip, res) {
-    axios.get('https://api.ipdata.co/' + ip.trim() + '?api-key=' + process.env.IP_KEY).then(response => {
+    axios.get('https://api.ipdata.co/' + (ip ? ip.trim() : '') + '?api-key=' + process.env.IP_KEY).then(response => {
         res.send(response.data);
     }, error => {
         console.error(error);
@@ -158,6 +158,7 @@ app.get('/themoviedb/:id', function (req, res) {
 
 app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
 app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
+app.get('/pb', function (req, res) { res.send(pirateBay); });
 app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
@@ -316,4 +317,13 @@ function initSocketDataWatchers() {
             io.sockets.in('files').emit('files', currentFiles);
         }
     }), interval * 30);
+
+    // Grab piratebay proxy list every 30 minutes
+    setIntervalImmediately(() => axios.get('https://proxybay.ist/').then(response => {
+        // console.log(data);
+        const links = $('.t1', response.data);
+        pirateBay = links.attr('href');
+    }).catch(err => {
+        pirateBay = undefined;
+    }), 1000 * 60 * 30);
 }
