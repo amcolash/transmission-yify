@@ -20,6 +20,7 @@ services:
       - ${TV_DIR}:/TV
       - ${VIDEO_DIR}:/Videos
       - ./get_ip.sh:/scripts/transmission-post-start.sh:ro
+      - ./CA\ Toronto.ovpn:/etc/openvpn/tiger/CA\ Toronto.ovpn:ro
     env_file:
       - .env
     environment:
