@@ -12,6 +12,7 @@
     position: fixed;
     bottom: 0.5em;
     right: 0.5em;
+    padding: 0.5em 0;
 }
 
 .pager.hidden {
