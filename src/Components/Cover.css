@@ -67,6 +67,8 @@
     padding: 0.25em;
     background-color: #e5a00d;
     border-top-right-radius: 0.2em;
+    border-top: 0.1em solid white;
+    border-right: 0.1em solid white;
 }
 
 .quality button {
