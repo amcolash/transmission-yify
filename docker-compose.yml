@@ -19,6 +19,7 @@ services:
       - ${DATA_DIR}:/data
       - ${TV_DIR}:/TV
       - ${VIDEO_DIR}:/Videos
+      - ./clean_logs.sh:/scripts/transmission-pre-start.sh:ro
       - ./get_ip.sh:/scripts/transmission-post-start.sh:ro
     env_file:
       - .env
@@ -27,6 +28,7 @@ services:
       - LOCAL_NETWORK=192.168.0.0/24
       - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=15
       - TRANSMISSION_PEER_PORT_RANDOM_ON_START=true
+      - TRANSMISSION_MAX_PEERS_GLOBAL=400
       - TRANSMISSION_PEER_LIMIT_GLOBAL=400
       - TRANSMISSION_PEER_LIMIT_PER_TORRENT=150
 
