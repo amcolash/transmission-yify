@@ -14,26 +14,25 @@ class Progress extends Component {
         const name = (fullName || torrent.name.indexOf(")") === -1) ? torrent.name : torrent.name.substring(0, torrent.name.indexOf(")") + 1) + (type ? " [" + type + "]" : "");
         const speed = (torrent.rateDownload / 1024 / 1024).toFixed(2);
         const progress = getProgress(torrent.hashString);
+        const peers = torrent.peersSendingToUs;
 
         return (
-            (torrent && torrent.name) ? (
-                <div className="progress">
-                    <span>{name}</span>
-                    <progress value={progress > 1 ? progress : null } max="100" />
-                    <span>{progress}% </span>
-                    {progress < 95 ? (
-                        <span className={speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red"}>
-                            {speed < 0.15 ? (
-                                <FaExclamationCircle
-                                    style={{ paddingRight: "0.25em" }}
-                                />
-                            ) : null}
-                            [{speed} MB/s]
-                        </span>
-                    ) : null}
-                    <button className="red" onClick={() => cancelTorrent(torrent.hashString)}><FaTrash/></button>
-                </div>
-            ) : null
+            <div className="progress">
+                <span>{name}</span>
+                <progress value={progress > 1 ? progress : null } max="100" />
+                <span>{progress}% </span>
+                {progress < 99 ? (
+                    <span className={speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red"}>
+                        {speed < 0.15 ? (
+                            <FaExclamationCircle
+                                style={{ paddingRight: "0.25em" }}
+                            />
+                        ) : null}
+                        [{speed} MB/s], peers: {peers}
+                    </span>
+                ) : null}
+                <button className="red" onClick={() => cancelTorrent(torrent.hashString)}><FaTrash/></button>
+            </div>
         );
     }
 }

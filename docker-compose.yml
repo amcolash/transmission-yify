@@ -26,6 +26,9 @@ services:
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings
       - LOCAL_NETWORK=192.168.0.0/24
       - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=15
+      - TRANSMISSION_PEER_PORT_RANDOM_ON_START=true
+      - TRANSMISSION_PEER_LIMIT_GLOBAL=400
+      - TRANSMISSION_PEER_LIMIT_PER_TORRENT=150
 
   client:
     image: amcolash/transmission-yify
