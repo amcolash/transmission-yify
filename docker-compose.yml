@@ -46,5 +46,6 @@ services:
       - ${DATA_DIR}:/data
       - ${VIDEO_DIR}:/Videos
       - .ssh:/root/.ssh
+      - .cert:/usr/src/app/.cert
     env_file:
       - .env
