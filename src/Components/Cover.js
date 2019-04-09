@@ -64,6 +64,11 @@ class Cover extends Component {
             if (movie.images.poster.indexOf("fanart.tv") !== -1) {
                 movie.images.poster = "broken image";
             }
+
+            // Fix insecure images
+            if (movie.images.poster.indexOf("http://image.tmdb") !== -1) {
+                movie.images.poster = movie.images.poster.replace("http://image.tmdb", "https://image.tmdb");
+            }
         }
 
         var hasFile = false;

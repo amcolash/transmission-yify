@@ -152,7 +152,7 @@ function getFiles(cb) {
 }
 
 app.get('/omdb/:id', function(req, res) {
-    let url ='http://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
+    let url ='https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
     checkCache(url, res, true);
 });
 
