@@ -35,12 +35,17 @@ var isUpgrading = false;
 
 var pirateBay;
 
-// App
+// App Server
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const server = require('http').createServer(app);  
+const credentials = {
+    key: fs.readFileSync('./.cert/privatekey.pem'),
+    cert: fs.readFileSync('./.cert/certificate.pem')
+};
+
+const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
 
 // Transmission wrapper, conditional host based on if running from a docker container

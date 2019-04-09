@@ -56,7 +56,7 @@ class MovieList extends Component {
         this.getProgress = this.getProgress.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
-        this.server = "http://" + window.location.hostname + ":9000";
+        this.server = "https://" + window.location.hostname + ":9000";
     }
     
     componentDidMount() {
