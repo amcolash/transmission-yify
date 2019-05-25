@@ -4,6 +4,7 @@ const axios = require('axios');
 const cors = require('cors');
 const { exec } = require('child_process');
 const express = require('express');
+const proxy = require('express-http-proxy');
 const fs = require('fs');
 const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
@@ -39,6 +40,9 @@ var pirateBay;
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// proxy remote commands through
+app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
 
 const credentials = {
     key: fs.readFileSync('./.cert/privatekey.pem'),
