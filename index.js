@@ -45,8 +45,8 @@ app.use(cors());
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
 
 const credentials = {
-    key: fs.readFileSync('./.cert/privatekey.pem'),
-    cert: fs.readFileSync('./.cert/certificate.pem')
+    key: fs.readFileSync('./.cert/privkey.pem'),
+    cert: fs.readFileSync('./.cert/cert.pem')
 };
 
 const server = require('https').createServer(credentials, app);
@@ -145,7 +145,7 @@ function getFiles(cb) {
         });
     }, function (err) {
         console.error("Could not connect to server", err);
-        
+
         // If plex goes offline, keep in-memory copy living on
         if (currentFiles.length > 0) {
             cb(currentFiles);
@@ -274,7 +274,7 @@ function autoPrune() {
             if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
                 // Soft remove (keep data but stop uploading)
                 console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
-    
+
                 transmission.remove(torrent.hashString, false, (err) => {
                     if (err) console.error(err);
                 });
@@ -286,7 +286,7 @@ function autoPrune() {
     setTimeout(autoPrune, 1000 * 60);
 }
 
-io.on('connection', client => {  
+io.on('connection', client => {
     client.on('subscribe', data => {
         client.join(data);
 
