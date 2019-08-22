@@ -12,6 +12,7 @@
     "js-levenshtein": "^1.1.6",
     "magnet-uri": "^5.2.4",
     "plex-api": "^5.2.2",
+    "react-device-detect": "^1.7.5",
     "socket.io": "^2.2.0",
     "transmission": "^0.4.9"
   },

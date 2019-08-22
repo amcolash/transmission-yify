@@ -6,6 +6,7 @@ import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet, FaSearch
 } from 'react-icons/lib/fa';
+import {isMobile} from 'react-device-detect';
 
 import './MovieList.css';
 import Cover from './Cover';
@@ -338,7 +339,12 @@ class MovieList extends Component {
         var search = window.prompt("Search Term?", "");
         var win = window.open('', '_blank');
         if (search && search.length > 0) {
-            win.location.href = this.state.pb + '/search/' + search;
+            // mobile has a different address than the desktop version :(
+            if (isMobile) {
+                win.location.href = this.state.pb + '/mobileproxy/search/' + search + '/0/0/0';
+            } else {
+                win.location.href = this.state.pb + '/search/' + search;
+            }
             win.focus();
         } else {
             win.close();
