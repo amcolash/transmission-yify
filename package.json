@@ -17,6 +17,8 @@
     "transmission": "^0.4.9"
   },
   "devDependencies": {
+    "concurrently": "^4.1.2",
+    "nodemon": "^1.19.1",
     "react": "^16.8.6",
     "react-debounce-input": "^3.2.0",
     "react-dom": "^16.8.6",
@@ -26,11 +28,13 @@
     "scrollreveal": "^3.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently -k \"npm run server\" \"npm run client\"",
+    "client": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "docker": "node index.js"
+    "docker": "node index.js",
+    "server": "nodemon index.js"
   },
   "browserslist": [
     ">0.2%",
