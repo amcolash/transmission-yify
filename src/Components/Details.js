@@ -133,7 +133,7 @@ class Details extends Component {
                             {!movie.num_seasons ? (
                                 <span>{movie.year}, {this.convertTime(movie.runtime)}</span>
                             ) : (
-                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({movie.num_seasons} Seasons)</span>
+                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({movie.num_seasons + (movie.num_seasons > 1 ? ' Seasons' : ' Season')})</span>
                             )}
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>

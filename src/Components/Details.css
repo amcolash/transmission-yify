@@ -64,7 +64,7 @@ h4 {
 
 .episodeList, .plot {
     max-height: 35vh;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .season select {
