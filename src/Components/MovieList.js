@@ -316,8 +316,17 @@ class MovieList extends Component {
 
         hashMapping[version.hashString] = version.title;
 
-        axios.post(this.server + '/torrents', { url: version.url, tv: version.tv }).catch(error => {
+        // fix dead links
+        let url = version.url;
+        if (url.indexOf('nyaa.se') !== -1) url = url.replace('nyaa.se', 'nyaa.si').replace('?page=download', 'download/').replace('&tid=', '') + '.torrent';
+
+        axios.post(this.server + '/torrents', { url: url, tv: version.tv }).catch(error => {
             console.error(error);
+
+            // Reset started state if download failed
+            this.setState({
+                started: this.state.started.filter(item => item !== version.hashString)
+            });
         });
 
         // this.torrentList.expand();

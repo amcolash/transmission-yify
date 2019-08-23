@@ -256,6 +256,7 @@ function writeCache() {
 function handleResponse(res, err, data) {
     if (err) {
         console.error(err);
+        res.status(500);
         res.send(err);
     } else {
         res.send(data);
