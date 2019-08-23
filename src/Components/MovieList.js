@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch
+    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
 } from 'react-icons/lib/fa';
 import {isMobile} from 'react-device-detect';
 
@@ -360,6 +360,17 @@ class MovieList extends Component {
         }
     }
 
+    upgrade = () => {
+        var password = window.prompt("Password?", "");
+        axios.post(this.server + '/upgrade?upgradeKey=' + password).then(response => {
+            console.log(response.data);
+            alert('Starting upgrade');
+        }).catch(err => {
+            console.error(err);
+            alert('Something went wrong...')
+        });
+    }
+
     getVersions = (movie) => {
         var versions = {};
         var hashes = {};
@@ -592,6 +603,7 @@ class MovieList extends Component {
                     {pb ? (
                         <FaSearch className="pointer marginLeft" onClick={this.searchPB}/>
                     ) : null}
+                    <FaPowerOff className="pointer marginLeft" onClick={this.upgrade}/>
 
                     <div className="footer">
                         <hr/>
