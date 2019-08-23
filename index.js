@@ -267,7 +267,7 @@ function autoPrune() {
     const maxWait = 60 * 60 * 24 * 3;
 
     if (currentTorrents && currentTorrents.torrents) {
-        currentTorrents.torrents.map(torrent => {
+        currentTorrents.torrents.forEach(torrent => {
             let uploadComplete = torrent.uploadRatio > 3.0;
             let expired = (Date.now() / 1000) > (torrent.doneDate + maxWait);
 

@@ -56,10 +56,9 @@ class Details extends Component {
     }
 
     downloadSeason(episodes) {
-        episodes.map(episode => {
+        episodes.forEach(episode => {
             var versions = this.props.getVersions(episode);
             if (versions.length > 0) this.props.downloadTorrent(versions[0]);
-            return null;
         });
     }
 
