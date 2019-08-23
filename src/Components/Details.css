@@ -62,11 +62,6 @@ h4 {
     display: inline-block;
 }
 
-.episodeList, .plot {
-    max-height: 35vh;
-    overflow-y: auto;
-}
-
 .season select {
     margin-left: 0.5em;
 }
@@ -75,8 +70,9 @@ h4 {
     padding-top: 1em;
 }
 
-.padLeft {
-    padding-left: 0.85em;
+.padding {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
 }
 
 @media (max-width: 680px) {

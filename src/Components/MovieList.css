@@ -42,3 +42,8 @@
 .marginLeft {
     margin-left: 1.25em;
 }
+
+#modal {
+    max-height: 90vh;
+    overflow-y: auto;
+}

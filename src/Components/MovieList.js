@@ -520,7 +520,7 @@ class MovieList extends Component {
                     <Plex server={this.server}/>
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
-                    <Modal open={modal} onClose={this.onCloseModal} center={width > 800}>
+                    <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
                         <Details
                             movie={movie}
                             server={this.server}
