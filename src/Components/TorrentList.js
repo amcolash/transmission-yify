@@ -30,10 +30,14 @@ class TorrentList extends Component {
 
         if (torrents.length === 0) return null;
 
+        const sorted = torrents.sort((a, b) => {
+            return getProgress(a.hashString) - getProgress(b.hashString);
+        });
+
         return (
             <div className="torrentList">
                 <h3>
-                    <span>Downloads ({torrents.length})</span>
+                    <span>Downloads ({sorted.length})</span>
                     <button onClick={ () => this.toggleCollapse() }>
                         {this.state.collapsed ? <FaPlus/> : <FaMinus/>}
                     </button>
@@ -41,7 +45,7 @@ class TorrentList extends Component {
 
                 {!this.state.collapsed ? (
                     <div>
-                        {(torrents.map(torrent => (
+                        {(sorted.map(torrent => (
                             <Progress
                                 key={torrent.hashString}
                                 torrent={torrent}
