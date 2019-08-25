@@ -142,7 +142,7 @@ class MovieList extends Component {
     updateStats() {
         axios.get('https://tv-v2.api-fetch.website/status?').then(response => {
             this.setState({ serverStats: response.data });
-        }, error => {s
+        }, error => {
             console.error(error);
         });
 
