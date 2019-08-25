@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {
     FaTrash, FaExclamationCircle
 } from 'react-icons/lib/fa';
+import * as  ptn  from 'parse-torrent-name';
 
 class Progress extends Component {
     
@@ -10,8 +11,14 @@ class Progress extends Component {
 
         if (!torrent || !torrent.name) return null;
 
-        const type = torrent.name.indexOf("720") !== -1 ? "720p" : (torrent.name.indexOf("1080") !== -1 ? "1080p" : (torrent.name.indexOf("3D") !== -1 ? "3D" : null));
-        const name = (fullName || torrent.name.indexOf(")") === -1) ? torrent.name : torrent.name.substring(0, torrent.name.indexOf(")") + 1) + (type ? " [" + type + "]" : "");
+        const parsed = ptn(torrent.name);
+        const season = parsed.season ? `S${parsed.season.toString().padStart(2, '0')}` : '';
+        const episode = parsed.season ? `E${parsed.episode.toString().padStart(2, '0')} ` : '';
+        const year = parsed.year ? ` (${parsed.year})` : '';
+        const resolution = parsed.resolution ? ` [${parsed.resolution}]` : (parsed.excess && parsed.excess.includes('[3D]') ? '[3D]' : '');
+        const parsedName = `${parsed.title} ${season}${episode} ${year} ${resolution}`.replace(/\s+/g,' ').trim(); // Add it all up and trim extra spaces
+
+        const name = fullName ? torrent.name : parsedName;//torrent.name.substring(0, torrent.name.indexOf(")") + 1) + (type ? " [" + type + "]" : "");
         const speed = (torrent.rateDownload / 1024 / 1024).toFixed(2);
         const progress = getProgress(torrent.hashString);
         const peers = torrent.peersSendingToUs;
