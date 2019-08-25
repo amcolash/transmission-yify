@@ -32,10 +32,10 @@ services:
       - TRANSMISSION_PEER_LIMIT_GLOBAL=400
       - TRANSMISSION_PEER_LIMIT_PER_TORRENT=150
 
-  client:
+  server:
     image: amcolash/transmission-yify
     build: ./
-    container_name: client
+    container_name: server
     restart: unless-stopped
     links:
       - transmission
