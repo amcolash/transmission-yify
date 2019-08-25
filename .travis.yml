@@ -1,0 +1,30 @@
+sudo: required
+services:
+  - docker
+
+env:
+  global:
+    - REGISTRY_USER=amcolash
+    # REGISTRY_PASS Below
+    - secure: AcZxPkjT1H96CGLqtY5APx5NLFQXt3q88cJ6768/A1YhH4HrzfvxuymEzEkK8dr1xLKYOBOz/wF1kVWVs1SA9igLn/jUDZVeqtyGqBHu+92VH1ik/D0kIZSdWdTk3SzWIloqO1NwPl84typIblPrScB30e0Yj0xt3/UAx09XWWSHHmc0S6ZLvuOaP7u62QfM/qKtIx9Whc/gq+w6z9TCNAFA1MG/xU6B50ZAtwl7zSe/S4NNMIeQUtiXsy37bJnO0+gD1W2IyLN4NzohQzi1AaJGwE7dZ1fqdLbjUt1cOTvjuKQxi81wt/vb9ytAcLVCLz6zQW5qDdfRSgtInfIfkf+x5CXNrkzEs86QHnfJZMF1ueNhb9M1l4uIiZywOBFKCpUl45FBpdHttD8GtiZSD797Y6S0h15VuTYDcnauGwvvf8zYcBD1bfBqaXcsnIuHD8w7m6yE6Ew3PGRbXvj4/SBInoJ6TkIKZitxCj1pulc2CXFdgeNdAOK4JUYg0ew8K2iv/3rCFrUtoyinhE5y7BIkvTTdndciZ0H9/BLpXswYvVFQ8VceSIyoKZQ8O4BriabYxjFGTp/8cYbdXNlCGfJWbFtGPQo4+Lj6zfG0q22Wa2BUvOYdmhv/xPRpUK1jYFC9MRkwoZmxg2pXXuO9l6bxApKiP7Vo+yDFQjUtOos=
+
+before_script:
+  - docker pull amcolash/transmission-yify || true
+
+script:
+  - docker build --pull --cache-from amcolash/transmission-yify --tag amcolash/transmission-yify
+
+after_script:
+  - docker images
+
+before_deploy:
+  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+
+deploy:
+  provider: script
+  script: docker push amcolash/transmission-yify
+  on:
+    branch: master
+
+after_deploy:
+  - curl -d "password=$UPGRADE_PASSWORD" -X POST $SERVER
