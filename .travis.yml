@@ -12,7 +12,7 @@ before_script:
   - docker pull amcolash/transmission-yify || true
 
 script:
-  - docker build --pull --cache-from amcolash/transmission-yify --tag amcolash/transmission-yify
+  - docker build --pull --cache-from amcolash/transmission-yify --tag amcolash/transmission-yify .
 
 after_script:
   - docker images
