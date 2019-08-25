@@ -16,7 +16,7 @@ RUN npm ci
 FROM mhart/alpine-node:10 AS build
 
 # Install openssh client
-RUN apk add openssh
+RUN apk add --no-cache openssh
 
 # Create app directory
 WORKDIR /usr/src/app
