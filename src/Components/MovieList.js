@@ -281,7 +281,7 @@ class MovieList extends Component {
     }
 
     get3D(movies) {
-            const YIFY_ENDPOINT = 'https://yts.am/api/v2/list_movies.json?query_term=';
+            const YIFY_ENDPOINT = 'https://yts.lt/api/v2/list_movies.json?query_term=';
             
             var promises = [];
             for (var i = 0; i < movies.length; i++) {
