@@ -30,7 +30,7 @@
     "scrollreveal": "^3.4.0"
   },
   "scripts": {
-    "start": "concurrently -k \"npm run server\" \"npm run client\"",
+    "start": "concurrently -k \"npm run server\" \"npm run client\" \"transmission-gtk\"",
     "client": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
