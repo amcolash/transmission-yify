@@ -44,11 +44,19 @@ app.use(cors());
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
 
-const credentials = {
-    key: fs.readFileSync('./.cert/privkey.pem'),
-    cert: fs.readFileSync('./.cert/cert.pem')
-};
+// HTTPS setup
+const credentials = {};
+credentials.key = fs.readFileSync('./.cert/privkey.pem');
 
+// Try to fix let's encrypt stuff based on this post
+// https://community.letsencrypt.org/t/facebook-dev-error-curl-error-60-ssl-cacert/72782
+if (fs.existsSync('./.cert/fullchain.pem')) {
+    credentials.cert = fs.readFileSync('./.cert/fullchain.pem');
+} else {
+    credentials.cert = fs.readFileSync('./.cert/cert.pem');
+}
+
+// Make the server
 const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
 

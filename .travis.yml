@@ -27,4 +27,4 @@ deploy:
     branch: master
 
 after_deploy:
-  - curl -d "password=$UPGRADE_PASSWORD" -X POST $SERVER
+  - curl -X POST $UPGRADE_SERVER
