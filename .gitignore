@@ -85,3 +85,4 @@ yarn-error.log*
 
 .ssh
 .cert
+build_time

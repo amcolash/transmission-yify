@@ -38,6 +38,9 @@ RUN npm ci --production
 # Copy everything else over to docker image
 COPY ./ ./
 
+# Put the docker build time/date into the image
+RUN date > ./build_time
+
 # Set things up
 EXPOSE 9000
 CMD [ "npm", "run", "docker" ]

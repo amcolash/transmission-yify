@@ -49,7 +49,8 @@ class MovieList extends Component {
             scroll: 0,
             docker: true,
             files: [],
-            pb: null
+            pb: null,
+            build: null
         }
 
         this.updateSearch = this.updateSearch.bind(this);
@@ -68,7 +69,6 @@ class MovieList extends Component {
         // Get data from server
         this.updateLocation();
         this.updateDocker();
-        this.updatePBLink();
 
         // Update window size
         this.updateWindowDimensions();
@@ -132,27 +132,34 @@ class MovieList extends Component {
             this.setState({ location: "ERROR" });
         });
 
-        // Update every hour, don't need sockets here
-        setTimeout(this.updateLocation, 60 * 60 * 1000);
+        // Update every minute (to make sure we are ok without a full refresh of page)
+        // We don't need sockets here at the moment, but adding all stats to a socket
+        // wouldn't be a bad idea at some point...
+        setTimeout(this.updateLocation, 60 * 1000);
     }
 
+    // Update a bunch of stats (popcorn data, pb link, build time)
     updateStats() {
         axios.get('https://tv-v2.api-fetch.website/status?').then(response => {
             this.setState({ serverStats: response.data });
+        }, error => {s
+            console.error(error);
+        });
+
+        axios.get(this.server + '/pb').then(response => {
+            this.setState({ pb: response.data });
+        }, error => {
+            console.error(error);
+        });
+
+        axios.get(this.server + '/build').then(response => {
+            this.setState({ build: response.data });
         }, error => {
             console.error(error);
         });
 
         // Update every hour, don't need sockets here
         setTimeout(this.updateStats, 60 * 60 * 1000);
-    }
-
-    updatePBLink() {
-        axios.get(this.server + '/pb').then(response => {
-            this.setState({ pb: response.data });
-        }, error => {
-            console.error(error);
-        });
     }
 
     updateTorrents(data) {
@@ -500,7 +507,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            serverStats, started, width, storage, scroll, pb
+            serverStats, started, width, storage, scroll, pb, build
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length === 50;
@@ -612,6 +619,7 @@ class MovieList extends Component {
                             <p>Total Movies: {serverStats.totalMovies}, Total Shows: {serverStats.totalShows}, Total Animes: {serverStats.totalAnimes}</p>
                         ) : null}
                         <p>Server Location: {location ? location : "Unknown"}</p>
+                        {(build && build.indexOf('Dev Build') === -1) ? <p><span>Build Time: {new Date(build).toLocaleString()}</span></p> : null}
                         {storage ? (
                             <p>
                                 <span>Disk Usage: {storage}%</span>

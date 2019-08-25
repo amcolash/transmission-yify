@@ -28,6 +28,11 @@ const client = new PlexAPI({
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
 
+let BUILD_TIME = 'Dev Build';
+if (fs.existsSync('./build_time') && IS_DOCKER) {
+    BUILD_TIME = new Date(fs.readFileSync('./build_time'));
+}
+
 var currentTorrents = [];
 var currentStorage;
 var currentFiles = [];
@@ -85,6 +90,7 @@ try {
 
     server.listen(PORT);
     console.log(`Running on port ${PORT}`);
+    if (typeof(BUILD_TIME) !== 'string') console.log(`Docker image build time ${BUILD_TIME}`);
 
     // Autoprune on start
     autoPrune();
@@ -175,6 +181,7 @@ app.get('/themoviedb/:id', function (req, res) {
     checkCache(url, res, true);
 });
 
+app.get('/build', function (req, res) { res.send(BUILD_TIME); });
 app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
 app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
 app.get('/pb', function (req, res) { res.send(pirateBay); });
