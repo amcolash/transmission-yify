@@ -135,7 +135,7 @@ class MovieList extends Component {
         // Update every minute (to make sure we are ok without a full refresh of page)
         // We don't need sockets here at the moment, but adding all stats to a socket
         // wouldn't be a bad idea at some point...
-        setTimeout(this.updateLocation, 60 * 1000);
+        setTimeout(() => this.updateLocation, 60 * 1000);
     }
 
     // Update a bunch of stats (popcorn data, pb link, build time)
@@ -159,7 +159,7 @@ class MovieList extends Component {
         });
 
         // Update every hour, don't need sockets here
-        setTimeout(this.updateStats, 60 * 60 * 1000);
+        setTimeout(() => this.updateStats, 60 * 60 * 1000);
     }
 
     updateTorrents(data) {
