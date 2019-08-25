@@ -5,6 +5,7 @@ const cors = require('cors');
 const { exec } = require('child_process');
 const express = require('express');
 const proxy = require('express-http-proxy');
+const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
 const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
@@ -40,6 +41,7 @@ var pirateBay;
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(redirectToHTTPS());
 
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
