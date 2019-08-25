@@ -31,7 +31,11 @@ class TorrentList extends Component {
         if (torrents.length === 0) return null;
 
         const sorted = torrents.sort((a, b) => {
-            return getProgress(a.hashString) - getProgress(b.hashString);
+            const progressA = getProgress(a.hashString);
+            const progressB = getProgress(b.hashString);
+
+            if (progressA === progressB) return a.name.localeCompare(b.name);
+            else return progressA - progressB;
         });
 
         return (
