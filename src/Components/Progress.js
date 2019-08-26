@@ -13,7 +13,7 @@ class Progress extends Component {
 
         const parsed = ptn(torrent.name);
         const season = parsed.season ? `S${parsed.season.toString().padStart(2, '0')}` : '';
-        const episode = parsed.season ? `E${parsed.episode.toString().padStart(2, '0')} ` : '';
+        const episode = parsed.episode ? `E${parsed.episode.toString().padStart(2, '0')} ` : '';
         const year = parsed.year ? ` (${parsed.year})` : '';
         const resolution = parsed.resolution ? ` [${parsed.resolution}]` : (parsed.excess && parsed.excess.includes('[3D]') ? '[3D]' : '');
         const parsedName = `${parsed.title} ${season}${episode} ${year} ${resolution}`.replace(/\s+/g,' ').trim(); // Add it all up and trim extra spaces
