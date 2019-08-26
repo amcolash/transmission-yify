@@ -7,8 +7,6 @@ A react app + express server that show info and download from the popcorn and yi
 
 This is an educational testing ground of using real life apis and technologies. Don't pirate copyrighted content.
 
----
-
 ## Setup
 No matter how you get set up, you will need to clone the repo
 `git clone https://github.com/amcolash/transmission-yify.git`
