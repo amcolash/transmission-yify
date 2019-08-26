@@ -15,7 +15,6 @@ RUN npm ci
 
 # Copy only react source code (to keep cache alive if nothing changed here)
 COPY ./public/ ./public
-COPY ./package.json ./package-lock.json ./
 COPY ./src/ ./src
 
 # Build react app
