@@ -1,4 +1,8 @@
 # transmission-yify
+[![Travis (.org)](https://img.shields.io/travis/amcolash/transmission-yify.svg)](https://travis-ci.org/amcolash/transmission-yify)
+
+A react app, an Express server and a torrent client walk into a container...
+
 A react app + express server that show info and download from the popcorn and yify apis.
 
 This is an educational testing ground of using real life apis and technologies. Don't pirate copyrighted content.
