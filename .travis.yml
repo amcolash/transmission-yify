@@ -28,9 +28,9 @@ after_script:
   # Send upgrade command to current (and then add newline to output for travis)
   - curl -X POST $UPGRADE_SERVER; echo
   - docker run --rm \
-      -v ${PWD}/README.md:/data/README.md \
-      -e DOCKERHUB_USERNAME="$REGISTRY_USER" \
-      -e DOCKERHUB_PASSWORD="$REGISTRY_PASS" \
-      -e DOCKERHUB_REPO_PREFIX=amcolash \
-      -e DOCKERHUB_REPO_NAME=transmission-yify \
-      sheogorath/readme-to-dockerhub
+    -v ${PWD}/README.md:/data/README.md \
+    -e DOCKERHUB_USERNAME="${REGISTRY_USER}" \
+    -e DOCKERHUB_PASSWORD="${REGISTRY_PASS}" \
+    -e DOCKERHUB_REPO_PREFIX=amcolash \
+    -e DOCKERHUB_REPO_NAME=transmission-yify \
+    sheogorath/readme-to-dockerhub

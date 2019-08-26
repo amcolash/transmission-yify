@@ -1,5 +1,8 @@
-# Dependency Stage
-FROM mhart/alpine-node:10 AS dependencies
+# Use node
+FROM mhart/alpine-node:10
+
+# Install openssh client
+RUN apk add --no-cache openssh
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -9,20 +12,6 @@ COPY package.json package-lock.json ./
 
 # Install deps
 RUN npm ci
-
-##########################################################################
-
-# App Build Stage
-FROM mhart/alpine-node:10 AS build
-
-# Install openssh client
-RUN apk add --no-cache openssh
-
-# Create app directory
-WORKDIR /usr/src/app
-
-# Copy dependencies over
-COPY --from=dependencies /usr/src/app/node_modules/ ./node_modules
 
 # Copy only react source code (to keep cache alive if nothing changed here)
 COPY ./public/ ./public
