@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import {
-    FaDownload, FaCircle, FaPlayCircle
-} from 'react-icons/lib/fa';
+import { FaDownload, FaCircle, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
 
 import './Details.css';

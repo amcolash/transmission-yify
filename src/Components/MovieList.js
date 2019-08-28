@@ -5,7 +5,7 @@ import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
-} from 'react-icons/lib/fa';
+} from 'react-icons/fa';
 import {isMobile} from 'react-device-detect';
 
 import './MovieList.css';
@@ -384,7 +384,7 @@ class MovieList extends Component {
 
         // TV Episode
         if (movie.episode && movie.torrents) {
-            for (let [quality, torrent] of Object.entries(movie.torrents)) {
+            for (let [quality, torrent] of Object.entries(movie.torrents)) { // eslint-disable-line no-unused-vars
                 if (quality === "0") quality = "480p";
                 let sort = 0;
                 switch (quality) {
@@ -436,7 +436,7 @@ class MovieList extends Component {
                 delete movie.torrents.en["3D"];
             }
 
-            for (let [quality, torrent] of Object.entries(movie.torrents.en)) {
+            for (let [quality, torrent] of Object.entries(movie.torrents.en)) { // eslint-disable-line no-unused-vars
                 if (quality === "0") quality = "480p";
                 let sort = 0;
                 switch (quality) {

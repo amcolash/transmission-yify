@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import {
-    FaDownload, FaTrash, FaFilm, FaCheck
-} from 'react-icons/lib/fa';
+import { FaDownload, FaTrash, FaFilm, FaCheck } from 'react-icons/fa';
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
 import './Cover.css';

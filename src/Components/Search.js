@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { DebounceInput } from 'react-debounce-input';
-import {
-    FaClose
-} from 'react-icons/lib/fa';
+import { FaTimes } from 'react-icons/fa';
 import './Search.css';
 import Spinner from './Spinner';
 
@@ -21,8 +19,8 @@ class Search extends Component {
     }
 
     render() {
-        let { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
-        let clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "trending" || page !== 1;
+        const { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
+        const clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "trending" || page !== 1;
 
         return (
             <div className="search">
@@ -81,7 +79,7 @@ class Search extends Component {
                         </select>
                     </div>
 
-                    <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaClose /></button>
+                    <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
                 </div>
 
                 <Spinner visible={isSearching} />

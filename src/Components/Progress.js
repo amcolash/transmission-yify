@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import {
-    FaTrash, FaExclamationCircle
-} from 'react-icons/lib/fa';
+import { FaTrash, FaExclamationCircle } from 'react-icons/fa';
 import * as  ptn  from 'parse-torrent-name';
 
 class Progress extends Component {

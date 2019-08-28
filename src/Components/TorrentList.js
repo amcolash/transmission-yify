@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import {
-    FaPlus, FaMinus
-} from 'react-icons/lib/fa';
+import { FaPlus, FaMinus } from 'react-icons/fa';
 
 import Progress from './Progress';
 import './TorrentList.css';
