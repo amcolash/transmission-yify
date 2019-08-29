@@ -14,15 +14,20 @@ require('dotenv').config();
 
 const PlexAPI = require("plex-api");
 
-const client = new PlexAPI({
-    hostname: process.env.PLEX_HOSTNAME, // could be different than plex link
-    username: process.env.PLEX_USERNAME,
-    password: process.env.PLEX_PASSWORD,
-    options: {
-        identifier: "transmission-yify",
-        deviceName: "Transmission-Yify"
-    }
-});
+let plexClient;
+try {
+    plexClient = new PlexAPI({
+        hostname: process.env.PLEX_HOSTNAME, // could be different than plex link
+        username: process.env.PLEX_USERNAME,
+        password: process.env.PLEX_PASSWORD,
+        options: {
+            identifier: "transmission-yify",
+            deviceName: "Transmission-Yify"
+        }
+    });
+} catch (error) {
+    console.log(error);
+}
 
 // Init vars
 const IS_DOCKER = fs.existsSync('/.dockerenv');
@@ -73,7 +78,7 @@ const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' 
 // Get this party started!
 try {
     // Set up data dir if not in docker environment
-    if (!IS_DOCKER) {
+    if (!IS_DOCKER && !fs.existsSync(process.env.DATA_DIR)) {
         fs.mkdirSync(process.env.DATA_DIR, { recursive: true }, (err) => {
             if (err) console.error(err);
         });
@@ -141,12 +146,14 @@ function getStorage(cb) {
 }
 
 function getFiles(cb) {
-    client.query("/library/sections").then(response => {
+    if (!plexClient) cb([]);
+
+    plexClient.query("/library/sections").then(response => {
         const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
         const promises = [];
 
         for (var i = 0; i < sections.length; i++) {
-            promises.push(client.query("/library/sections/" + sections[i].key + "/all"));
+            promises.push(plexClient.query("/library/sections/" + sections[i].key + "/all"));
         }
 
         Promise.all(promises).then(values => {
