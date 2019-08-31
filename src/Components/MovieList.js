@@ -616,7 +616,7 @@ class MovieList extends Component {
                         <hr/>
 
                         {serverStats ? (
-                            <p>Popcorn Stats: {serverStats.totalMovies} Movies, {serverStats.totalShows} TV Shows, Animes {serverStats.totalAnimes} Animes</p>
+                            <p>Popcorn Stats: {serverStats.totalMovies} Movies, {serverStats.totalShows} TV Shows, {serverStats.totalAnimes} Animes</p>
                         ) : null}
                         <p>Server Location: {location ? location : "Unknown"}</p>
                         {(build && build.indexOf('Dev Build') === -1) ? <p><span>Build Time: {new Date(build).toLocaleString()}</span></p> : null}
