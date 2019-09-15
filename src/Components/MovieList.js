@@ -357,7 +357,7 @@ class MovieList extends Component {
         if (search && search.length > 0) {
             // mobile has a different address than the desktop version :(
             if (isMobile) {
-                win.location.href = this.state.pb + '/mobileproxy/search/' + search + '/0/0/0';
+                win.location.href = 'm.' + this.state.pb + '/search/' + search;
             } else {
                 win.location.href = this.state.pb + '/search/' + search;
             }
