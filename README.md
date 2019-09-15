@@ -24,6 +24,9 @@ To build the react client, simply run `npm build`.
 ### Local Dev
 The local dev flow has a script to start all necessary bits in a dev environment (server, client, transmission) `npm start`.
 
+## Icons
+All icons in the application are from [Font Awesome](https://fontawesome.com/icons/). The app icon was created by myself in inkscape.
+
 ---
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
