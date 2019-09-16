@@ -514,9 +514,13 @@ class MovieList extends Component {
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
         if (error) {
+            // TODO: Remove error message when popcorn api fixed
             return (
                 <div className="message">
-                    Error: {error.message}
+                    {error.message === 'Network Error' ? <span>The popcorn time api server went down some time around September 10, 2019. Since this
+                        application relies on that data, it is now broken until the server is fixed by the maintainers or I
+                        rewrite parts of this application. Sorry about that :(</span>
+                    : <span>Error: {error.message}</span>}
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
                             <br/>
