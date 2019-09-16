@@ -9,6 +9,7 @@ const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
 const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
+const request = require('request');
 
 require('dotenv').config();
 
@@ -55,6 +56,30 @@ app.use(redirectToHTTPS());
 
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
+
+// proxy all popcorn api calls for now...
+app.get('/popcorn_proxy/*', function (req, res) {
+    var options = {
+        uri: 'https://cloudflare.com/' + req.params[0],
+        json: true,
+        headers: {
+            'Host': 'tv-v2.api-fetch.website'
+        }
+	};
+
+	request(options, function(err, response, data) {
+		if (err || res.statusCode >= 400) {
+			console.error('MovieAPI endpoint failed.');
+            res.send('Error').status(res.statusCode);
+		} else if (!data || data.error) {
+			err = data ? data.status_message : 'No data returned';
+			console.error('API error:', err);
+			res.send('Error').status(data.error);
+		} else {
+			res.send(data);
+		}
+	});
+});
 
 // HTTPS setup
 const credentials = {};

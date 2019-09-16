@@ -59,6 +59,7 @@ class MovieList extends Component {
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
+        this.popcornapi = this.server + '/popcorn_proxy';
     }
     
     componentDidMount() {
@@ -140,7 +141,7 @@ class MovieList extends Component {
 
     // Update a bunch of stats (popcorn data, pb link, build time)
     updateStats() {
-        axios.get('https://tv-v2.api-fetch.website/status?').then(response => {
+        axios.get(this.popcornapi + '/status').then(response => {
             this.setState({ serverStats: response.data });
         }, error => {
             console.error(error);
@@ -232,7 +233,7 @@ class MovieList extends Component {
         const params = (search.length > 0 ? '&keywords=' + search : '') +
             '&sort=' + order + '&order=' + direction +
             (genre.length > 0 ? '&genre=' + genre : '');
-        const ENDPOINT = 'https://tv-v2.api-fetch.website/' + type + '/' + page + '?' + params;
+        const ENDPOINT = this.popcornapi + '/' + type + '/' + page + '?' + params;
 
         if (searchCache[ENDPOINT]) {
             this.handleData(searchCache[ENDPOINT]);
