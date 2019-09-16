@@ -50,7 +50,8 @@ class MovieList extends Component {
             docker: true,
             files: [],
             pb: null,
-            build: null
+            build: null,
+            popcornModal: window.localStorage.getItem('popcornfaq') === null
         }
 
         this.updateSearch = this.updateSearch.bind(this);
@@ -257,24 +258,32 @@ class MovieList extends Component {
 
         // fix weird years (since it seems the year can vary based on region released first)
         var now = new Date().getFullYear();
-        data.map(movie => {
-            movie.year = Math.min(now, movie.year);
-            movie.title = movie.title.replace(/&amp;/g, '&');
-            return movie;
-        });
-
-        // Only show movies with enough ratings to be useful
-        if (this.state.order === 'rating') {
-            data = data.filter(movie => {
-                return movie.rating.votes > 10;
+        
+        if (data.map) {
+            data.map(movie => {
+                movie.year = Math.min(now, movie.year);
+                movie.title = movie.title.replace(/&amp;/g, '&');
+                return movie;
             });
-        }
-
-        if (this.state.quality === "3D") {
-            this.get3D(data);
+    
+            // Only show movies with enough ratings to be useful
+            if (this.state.order === 'rating') {
+                data = data.filter(movie => {
+                    return movie.rating.votes > 10;
+                });
+            }
+    
+            if (this.state.quality === "3D") {
+                this.get3D(data);
+            } else {
+                this.setState({
+                    movies: data,
+                    isLoaded: true,
+                    isSearching: false
+                });
+            }
         } else {
             this.setState({
-                movies: data,
                 isLoaded: true,
                 isSearching: false
             });
@@ -496,6 +505,11 @@ class MovieList extends Component {
         this.setState({ modal: false });
     };
 
+    onClosePopcornModal = () => {
+        this.setState({ popcornModal: false });
+        window.localStorage.setItem('popcornfaq', true);
+    };
+
     changePage = (direction) => {
         const page= this.state.page;
         var newPage = direction + page;
@@ -508,7 +522,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            serverStats, started, width, storage, scroll, pb, build
+            serverStats, started, width, storage, scroll, pb, build, popcornModal
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length === 50;
@@ -518,9 +532,9 @@ class MovieList extends Component {
             // TODO: Remove error message when popcorn api fixed
             return (
                 <div className="message">
-                    {error.message === 'Network Error' ? <span>The popcorn time api server went down some time around September 10, 2019. Since this
-                        application relies on that data, it is now broken until the server is fixed by the maintainers or I
-                        rewrite parts of this application. Sorry about that.<br/><FaSadTear/></span>
+                    {error.message === 'Network Error' ? <span>The Popcorn Time api server went down some time around September 10, 2019.
+                        Since this application relies on that data, it is now broken until the server is fixed by the maintainers or I
+                        rewrite parts of this application. I'm sorry about that.<br/><FaSadTear/></span>
                     : <span>Error: {error.message}</span>}
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
@@ -543,6 +557,33 @@ class MovieList extends Component {
                 <Fragment>
                     <Plex server={this.server}/>
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
+
+                    <div id="popcornTop" onClick={() => this.setState({popcornModal: true})}>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Popcorn_Time_logo.png" alt="popcorntime logo"></img>
+                        <span>Popcorn Time<br/>API Issues</span>
+                    </div>
+
+                    <Modal open={popcornModal} onClose={this.onClosePopcornModal} center={width > 800} modalId='popcornModal'>
+                        <p>
+                            The Popcorn Time api server went down some time around September 10, 2019. Since this
+                            application relies on that data, it is now broken until the server is fixed by the maintainers or I
+                            rewrite parts of this application.
+                        </p>
+                        <p>
+                            For now, you can page through movies but the search and filter functionality is severely broken.
+                            I have added in some nasty hacks to let certain aspects of the application still function properly,
+                            but it is far from a solution and hopefully things get resolved with Popcorn Time quickly.
+                        </p>
+                        <p>
+                            Hopefully things as a user won't be too bad for the interim, but I am sorry that I didn't have a
+                            backup plan for this scenario. It is already very time intensive to maintain this passion project
+                            so I didn't have plans of writing a whole new torrent scraping layer as well. Send me a line if
+                            there isn't enough populated in the plex library and you want something specific and I will see
+                            what I can do for you.
+                        </p>
+
+                        <FaSadTear size={'2em'}/>
+                    </Modal>
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
                         <Details
