@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
+    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear
 } from 'react-icons/fa';
 import {isMobile} from 'react-device-detect';
 
@@ -519,7 +519,7 @@ class MovieList extends Component {
                 <div className="message">
                     {error.message === 'Network Error' ? <span>The popcorn time api server went down some time around September 10, 2019. Since this
                         application relies on that data, it is now broken until the server is fixed by the maintainers or I
-                        rewrite parts of this application. Sorry about that :(</span>
+                        rewrite parts of this application. Sorry about that.<br/><FaSadTear/></span>
                     : <span>Error: {error.message}</span>}
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
@@ -532,8 +532,9 @@ class MovieList extends Component {
         } else if (!isLoaded) {
             return (
             <div className="message">
-                <span>Loading...</span>
-                <Spinner visible/>
+                <span>Loading...
+                    <Spinner visible/>
+                </span>
             </div>
             );
         } else {
