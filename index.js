@@ -329,6 +329,14 @@ function autoPrune() {
                     if (err) console.error(err);
                 });
             }
+
+            // Auto resume paused torrents (not sure why things are getting paused)
+            if (!torrent.isFinished && torrent.status === transmission.status.STOPPED) {
+                console.log(`trying to restart paused torrent: ${torrent.name}`);
+                transmission.start(torrent.hashString, (err, arg) => {
+                    if (err) console.error(err);
+                });
+            }
         });
     }
 
