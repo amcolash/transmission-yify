@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear
+    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear, FaGrinBeam
 } from 'react-icons/fa';
 import {isMobile} from 'react-device-detect';
 
@@ -51,8 +51,11 @@ class MovieList extends Component {
             files: [],
             pb: null,
             build: null,
-            popcornModal: window.localStorage.getItem('popcornfaq') === null
+            popcornModal: window.localStorage.getItem('popcornfaq1') === null
         }
+
+        // Clean up old faq flag
+        window.localStorage.removeItem('popcornfaq');
 
         this.updateSearch = this.updateSearch.bind(this);
         this.getTorrent = this.getTorrent.bind(this);
@@ -60,7 +63,8 @@ class MovieList extends Component {
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
-        this.popcornapi = this.server + '/popcorn_proxy';
+        this.popcornapi = 'https://tv-v2.api-fetch.website';
+        this.popcornapi_proxy = this.server + '/popcorn_proxy';
     }
     
     componentDidMount() {
@@ -145,7 +149,12 @@ class MovieList extends Component {
         axios.get(this.popcornapi + '/status').then(response => {
             this.setState({ serverStats: response.data });
         }, error => {
-            console.error(error);
+            console.log('Failed request with main server for stats, falling back to proxy', error);
+            axios.get(this.popcornapi_proxy + '/status').then(response => {
+                this.setState({ serverStats: response.data });
+            }).catch(error => {
+                console.error(error);
+            });
         });
 
         axios.get(this.server + '/pb').then(response => {
@@ -234,20 +243,31 @@ class MovieList extends Component {
         const params = (search.length > 0 ? '&keywords=' + search : '') +
             '&sort=' + order + '&order=' + direction +
             (genre.length > 0 ? '&genre=' + genre : '');
+        
         const ENDPOINT = this.popcornapi + '/' + type + '/' + page + '?' + params;
+        const ENDPOINT_PROXY = this.popcornapi_proxy + '/' + type + '/' + page + '?' + params;
 
         if (searchCache[ENDPOINT]) {
             this.handleData(searchCache[ENDPOINT]);
+        } else if (searchCache[ENDPOINT_PROXY]) {
+            this.handleData(searchCache[ENDPOINT_PROXY]);
         } else {
             axios.get(ENDPOINT).then(response => {
                 searchCache[ENDPOINT] = response.data;
                 this.handleData(response.data);
-            }, error => {
-                this.setState({
-                    error: error,
-                    isLoaded: true,
-                    isSearching: false,
-                });
+            }).catch(error => {
+                console.log('Failed request with main server for search, falling back to proxy', error);
+                axios.get(ENDPOINT_PROXY).then(response => {
+                    searchCache[ENDPOINT_PROXY] = response.data;
+                    this.handleData(response.data);
+                }).catch(error => {
+                    console.error(error);
+                    this.setState({
+                        error: error,
+                        isLoaded: true,
+                        isSearching: false,
+                    });
+                })
             });
         }
     }
@@ -507,7 +527,7 @@ class MovieList extends Component {
 
     onClosePopcornModal = () => {
         this.setState({ popcornModal: false });
-        window.localStorage.setItem('popcornfaq', true);
+        window.localStorage.setItem('popcornfaq1', true);
     };
 
     changePage = (direction) => {
@@ -565,24 +585,23 @@ class MovieList extends Component {
 
                     <Modal open={popcornModal} onClose={this.onClosePopcornModal} center={width > 800} modalId='popcornModal'>
                         <p>
-                            The Popcorn Time api server went down some time around September 10, 2019. Since this
-                            application relies on that data, it is now broken until the server is fixed by the maintainers or I
-                            rewrite parts of this application.
+                            Update (9/18/2019): It looks like the Popcorn Time api server is doing well and back to actually handling
+                            requests properly again. I have turned back on a connection to the live server for now and will continue
+                            to monitor to see if things stay green for the near future.
                         </p>
                         <p>
-                            For now, you can page through movies but the search and filter functionality is severely broken.
-                            I have added in some nasty hacks to let certain aspects of the application still function properly,
-                            but it is far from a solution and hopefully things get resolved with Popcorn Time quickly.
+                            The site has been updated to use the real api and fall back to a cached version that should ensure that
+                            at least basic functionality (though limited) still exists on the page. Again, sorry about the pain and
+                            if the popcorn time server goes down again, I think it will be time to rethink things.
                         </p>
                         <p>
-                            Hopefully things as a user won't be too bad for the interim, but I am sorry that I didn't have a
-                            backup plan for this scenario. It is already very time intensive to maintain this passion project
-                            so I didn't have plans of writing a whole new torrent scraping layer as well. Send me a line if
-                            there isn't enough populated in the plex library and you want something specific and I will see
-                            what I can do for you.
+                            Until then, happy watching and hopefully things will be back to normal from here on out. Sorry about the
+                            hiccups over the past week and I hope we are in a much better place now. I will also be working on getting
+                            some more cacheing implemented on my server so that there is at least one level of fallback in case things
+                            go down in the future.
                         </p>
 
-                        <FaSadTear size={'2em'}/>
+                        <FaGrinBeam size={'2em'}/>
                     </Modal>
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
