@@ -67,6 +67,9 @@ class Cover extends Component {
             if (movie.images.poster.indexOf("http://image.tmdb") !== -1) {
                 movie.images.poster = movie.images.poster.replace("http://image.tmdb", "https://image.tmdb");
             }
+            if (movie.images.poster.indexOf("http://thetvdb.com") !== -1) {
+                movie.images.poster = movie.images.poster.replace("http://thetvdb.com", "https://thetvdb.com");
+            }
         }
 
         var hasFile = false;
