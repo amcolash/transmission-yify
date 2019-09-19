@@ -51,7 +51,8 @@ class MovieList extends Component {
             files: [],
             pb: null,
             build: null,
-            popcornModal: window.localStorage.getItem('popcornfaq1') === null
+            popcornModal: window.localStorage.getItem('popcornfaq1') === null,
+            popcornIcon: false
         }
 
         // Clean up old faq flag
@@ -151,7 +152,7 @@ class MovieList extends Component {
         }, error => {
             console.log('Failed request with main server for stats, falling back to proxy', error);
             axios.get(this.popcornapi_proxy + '/status').then(response => {
-                this.setState({ serverStats: response.data });
+                this.setState({ serverStats: response.data, popcornIcon: true });
             }).catch(error => {
                 console.error(error);
             });
@@ -260,6 +261,7 @@ class MovieList extends Component {
                 axios.get(ENDPOINT_PROXY).then(response => {
                     searchCache[ENDPOINT_PROXY] = response.data;
                     this.handleData(response.data);
+                    this.setState({popcornIcon: true});
                 }).catch(error => {
                     console.error(error);
                     this.setState({
@@ -581,10 +583,12 @@ class MovieList extends Component {
                     <Plex server={this.server}/>
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
-                    <div id="popcornTop" onClick={() => this.setState({popcornModal: true})}>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Popcorn_Time_logo.png" alt="popcorntime logo"></img>
-                        <span>Popcorn Time<br/>API Issues</span>
-                    </div>
+                    {this.state.popcornIcon ? (
+                        <div id="popcornTop" onClick={() => this.setState({popcornModal: true})}>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Popcorn_Time_logo.png" alt="popcorntime logo"></img>
+                            <span>Popcorn Time<br/>API Issues</span>
+                        </div>
+                    ) : null}
 
                     <Modal open={popcornModal} onClose={this.onClosePopcornModal} center={width > 800} modalId='popcornModal'>
                         <p>
