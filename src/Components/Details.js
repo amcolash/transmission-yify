@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { FaDownload, FaCircle, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
+import * as  ptn  from 'parse-torrent-name';
 
 import './Details.css';
 import Progress from './Progress';
@@ -10,16 +11,39 @@ class Details extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { moreData: null, tvData: null, season: 1, showCover: true };
+        this.state = { moreData: null, tvData: null, eztv: null, season: 1, maxSeason: 1, showCover: true };
     }
 
     componentDidMount() {
         if (this.props.movie.num_seasons) {
             var endpoint = 'https://tv-v2.api-fetch.website/show/'  + this.props.movie.imdb_id;
-            if (this.props.movie.mal_id) endpoint = 'https://tv-v2.api-fetch.website/anime/' + this.props.movie._id;
+            if (this.props.movie.mal_id) {
+                endpoint = 'https://tv-v2.api-fetch.website/anime/' + this.props.movie._id;
+            } else {
+                // Not anime, get additional data
+                const imdb = this.props.movie.imdb_id.replace('tt', '');
+                axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
+                    // Make sure that the show was found and we are not just getting
+                    // the newest shows on the site. This is a bad api design for them :(
+                    if (response.data.torrents_count < 2000) {
+                        const data = response.data;
+                        let maxSeason = this.state.maxSeason;
+                        data.torrents.forEach(t => {
+                            const s = parseInt(t.season);
+                            if (s > maxSeason) maxSeason = s;
+                        });
+
+                        this.setState({ eztv: response.data, season: maxSeason, maxSeason: maxSeason });
+                    } else {
+                        this.setState({ eztv: { torrents: [] }});
+                    }
+                }, error => {
+                    console.error(error);
+                });    
+            }
 
             axios.get(endpoint, { timeout: 10000 }).then(response => {
-                this.setState({ tvData: response.data, season: response.data.num_seasons });
+                this.setState({ tvData: response.data, season: response.data.num_seasons, maxSeason: response.data.num_seasons });
             }, error => {
                 console.error(error);
             });
@@ -62,27 +86,52 @@ class Details extends Component {
 
     render() {
         const { movie, downloadTorrent, cancelTorrent, getLink, getVersions, getTorrent, getProgress, started } = this.props;
-        const { moreData, showCover, tvData, season } = this.state;
+        const { moreData, showCover, tvData, eztv, season, maxSeason } = this.state;
 
         var versions = getVersions(movie);
 
         var seasons = [];
         var episodes = [];
         if (movie.num_seasons) {
-            for (var i = 1; i < movie.num_seasons + 1; i++) {
+            for (let i = 1; i < maxSeason + 1; i++) {
                 seasons.push(i);
             }
             if (tvData) {
-                tvData.episodes.map(episode => {
+                tvData.episodes.forEach(episode => {
                     episodes[episode.season] = episodes[episode.season] || [];
                     episodes[episode.season][episode.episode] = episode;
-                    return episode;
+                });
+            }
+            if (eztv) {
+                eztv.torrents.forEach(torrent => {
+                    const parsed = ptn(torrent.filename);
+                    parsed.resolution = parsed.resolution || '480p';
+
+                    // Bail if we weren't able to parse season/episode
+                    if (parsed.season === 0 || parsed.episode === 0) return;
+
+                    episodes[parsed.season] = episodes[parsed.season] || [];
+                    episodes[parsed.season][parsed.episode] = episodes[parsed.season][parsed.episode] || {
+                        title: `Episode ${parsed.episode}`,
+                        episode: parsed.episode,
+                        season: parsed.season,
+                        torrents: {}
+                    };
+                    
+                    const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
+                    if (!existing || torrent.seeds > existing.seeds) {
+                        episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
+                            seeds: torrent.seeds,
+                            peers: torrent.peers,
+                            url: torrent.magnet_url || torrent.torrent_url
+                        };
+                    }
                 });
             }
         }
 
         var hasPeers = false;
-        for (i = 0; i < versions.length; i++) {
+        for (let i = 0; i < versions.length; i++) {
             if (versions[i].peers > 0) hasPeers = true;
         }
 
@@ -131,7 +180,7 @@ class Details extends Component {
                             {!movie.num_seasons ? (
                                 <span>{movie.year}, {this.convertTime(movie.runtime)}</span>
                             ) : (
-                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({movie.num_seasons + (movie.num_seasons > 1 ? ' Seasons' : ' Season')})</span>
+                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
                             )}
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
@@ -204,7 +253,7 @@ class Details extends Component {
                             />
                         ))
                     ) : (
-                        !tvData ? (
+                        !tvData || (!eztv && !movie.mal_id) ? (
                             <Fragment>
                                 Loading additional data...
                                 <Spinner visible/>
