@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear, FaGrinBeam
+    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear
 } from 'react-icons/fa';
 // import {isMobile} from 'react-device-detect';
 
@@ -51,12 +51,13 @@ class MovieList extends Component {
             files: [],
             pb: null,
             build: null,
-            popcornModal: window.localStorage.getItem('popcornfaq1') === null,
+            popcornModal: window.localStorage.getItem('popcornfaq2') === null,
             popcornIcon: false
         }
 
         // Clean up old faq flag
         window.localStorage.removeItem('popcornfaq');
+        window.localStorage.removeItem('popcornfaq1');
 
         this.updateSearch = this.updateSearch.bind(this);
         this.getTorrent = this.getTorrent.bind(this);
@@ -532,7 +533,7 @@ class MovieList extends Component {
 
     onClosePopcornModal = () => {
         this.setState({ popcornModal: false });
-        window.localStorage.setItem('popcornfaq1', true);
+        window.localStorage.setItem('popcornfaq2', true);
     };
 
     changePage = (direction) => {
@@ -557,9 +558,9 @@ class MovieList extends Component {
             // TODO: Remove error message when popcorn api fixed
             return (
                 <div className="message">
-                    {error.message === 'Network Error' ? <span>The Popcorn Time api server went down some time around September 10, 2019.
-                        Since this application relies on that data, it is now broken until the server is fixed by the maintainers or I
-                        rewrite parts of this application. I'm sorry about that.<br/><FaSadTear/></span>
+                    {error.message === 'Network Error' ? <span>The Popcorn Time api server went down some time around September 10, 2019
+                        and has been flakey ever since. Because this application relies on that data, it is now broken until the server
+                        is fixed by the maintainers or I rewrite parts of this application. I'm sorry about that.<br/><FaSadTear/></span>
                     : <span>Error: {error.message}</span>}
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
@@ -592,23 +593,23 @@ class MovieList extends Component {
 
                     <Modal open={popcornModal} onClose={this.onClosePopcornModal} center={width > 800} modalId='popcornModal'>
                         <p>
-                            Update (9/18/2019): It looks like the Popcorn Time api server is doing well and back to actually handling
-                            requests properly again. I have turned back on a connection to the live server for now and will continue
-                            to monitor to see if things stay green for the near future.
+                            Update (9/21/2019): The Popcorn Time api server is back to being broken. It looks like I will need to
+                            do some digging and probably stop relying on that api and rewrite this application. Since it really is
+                            a passion project and there is no incentive for me to do so, it may take a bit of time. I am sorry that
+                            the search has been so unreliable for the past weel and a half (since 9/10/2019).
                         </p>
                         <p>
-                            The site has been updated to use the real api and fall back to a cached version that should ensure that
-                            at least basic functionality (though limited) still exists on the page. Again, sorry about the pain and
-                            if the popcorn time server goes down again, I think it will be time to rethink things.
+                            In happier news, this weekend I added in support for better fetching of TV show episodes which should make
+                            downloading new episodes far easier to do (of course once the search is back working). Until I get that
+                            search fully back to normal, there will be issues other than simply paging through results.
                         </p>
                         <p>
-                            Until then, happy watching and hopefully things will be back to normal from here on out. Sorry about the
-                            hiccups over the past week and I hope we are in a much better place now. I will also be working on getting
-                            some more cacheing implemented on my server so that there is at least one level of fallback in case things
-                            go down in the future.
+                            Unfoortunately there is not too much that we can do, but cross our fingers and hope that things get stable.
+                            Since things have been broken for nearly 2 weeks at this point though, I think it is safe to say that I will
+                            most likely re-write large portions of the coodebase to harden things permanently from future breakages.
                         </p>
 
-                        <FaGrinBeam size={'2em'}/>
+                        <FaSadTear size={'2em'}/>
                     </Modal>
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
