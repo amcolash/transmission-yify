@@ -2,6 +2,7 @@ version: '3.2'
 services:
   vpn:
     image: dperson/openvpn-client
+    container_name: openvpn-client
     # cap_add, security_opt, and volume required for the image to function
     cap_add:
       - net_admin
@@ -15,13 +16,14 @@ services:
     security_opt:
       - label:disable
     volumes:
-      # - /dev/net:/dev/net:z # not sure if this one is needed
+      - /dev/net:/dev/net:z
       - ./vpn:/vpn
     ports:
       - 9091:9091
 
   transmission:
     image: dperson/transmission
+    container_name: transmission
     depends_on:
       - vpn
     environment:
