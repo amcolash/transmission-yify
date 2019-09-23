@@ -1,37 +1,45 @@
 version: '3.2'
 services:
-  transmission:
-    image: haugene/transmission-openvpn
-    container_name: transmission
+  vpn:
+    image: dperson/openvpn-client
+    # cap_add, security_opt, and volume required for the image to function
     cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
+      - net_admin
+    networks:
+      - vpn_network
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
     restart: unless-stopped
-    ports:
-      - "9091:9091"
-      - "8888:8888"
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    security_opt:
+      - label:disable
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DATA_DIR}:/data
+      # - /dev/net:/dev/net:z # not sure if this one is needed
+      - ./vpn:/vpn
+    ports:
+      - 9091:9091
+
+  transmission:
+    image: dperson/transmission
+    depends_on:
+      - vpn
+    environment:
+      - TR_DOWNLOAD_QUEUE_SIZE=30
+      - TR_PEER_PORT_RANDOM_ON_START=true
+      - TR_MAX_PEERS_GLOBAL=800
+      - TR_PEER_LIMIT_GLOBAL=800
+      - TR_PEER_LIMIT_PER_TORRENT=200
+    network_mode: "service:vpn"
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR}:/var/lib/transmission-daemon
       - ${TV_DIR}:/TV
-      - ${VIDEO_DIR}:/Videos
-      - ./clean_logs.sh:/scripts/transmission-pre-start.sh:ro
-      - ./get_ip.sh:/scripts/transmission-post-start.sh:ro
+      - ./scripts/start.sh:/scripts/start.sh:ro
     env_file:
       - .env
-    environment:
-      - CREATE_TUN_DEVICE=true
-      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings
-      - LOCAL_NETWORK=192.168.0.0/24
-      - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=30
-      - TRANSMISSION_PEER_PORT_RANDOM_ON_START=true
-      - TRANSMISSION_MAX_PEERS_GLOBAL=800
-      - TRANSMISSION_PEER_LIMIT_GLOBAL=800
-      - TRANSMISSION_PEER_LIMIT_PER_TORRENT=200
+    entrypoint: ["/sbin/tini",  "--"]
+    command: ["/scripts/start.sh"]
 
   server:
     image: amcolash/transmission-yify
@@ -39,14 +47,18 @@ services:
     container_name: server
     restart: unless-stopped
     links:
-      - transmission
+      - vpn:transmission
+    networks:
+      - vpn_network
     ports:
       - 9000:9000
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA_DIR}:/data
-      - ${VIDEO_DIR}:/Videos
       - .ssh:/root/.ssh
       - .cert:/usr/src/app/.cert
     env_file:
       - .env
+
+networks:
+  vpn_network:

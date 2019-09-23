@@ -5,3 +5,5 @@ build
 .git
 .ssh
 *.log
+docker-compose.yml
+.travis.yml

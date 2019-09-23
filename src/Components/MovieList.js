@@ -180,11 +180,13 @@ class MovieList extends Component {
             this.setState({ error: { message: "Cannot access transmission" }});
         } else {
             var torrents = data.torrents || [];
-            if (this.state.docker) {
-                torrents = torrents.filter(torrent => {
-                    return torrent.downloadDir.indexOf("/data") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
-                });
-            }
+
+            // Not sure if this is useful anymore?
+            // if (this.state.docker) {
+            //     torrents = torrents.filter(torrent => {
+            //         return torrent.downloadDir.indexOf("/downloads") !== -1 || torrent.downloadDir.indexOf("/TV") !== -1;
+            //     });
+            // }
 
             torrents.map(torrent => {
                 if (torrent.eta < 0 && hashMapping[torrent.hashString]) {

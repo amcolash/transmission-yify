@@ -98,7 +98,8 @@ const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
 
 // Transmission wrapper, conditional host based on if running from a docker container
-const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '127.0.0.1' });
+const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '127.0.0.1',
+    username: process.env.TRUSER, password: process.env.TRPASSWD });
 
 // Get this party started!
 try {
@@ -249,7 +250,7 @@ app.post('/upgrade', function (req, res) {
             if (!stderr) {
                 const ip = stdout.trim();
                 const ssh = "ssh -oStrictHostKeyChecking=no " + process.env.USERNAME + "@" + ip;
-                const command = " 'nohup " + process.env.APP_DIR + "/upgrade.sh &'";
+                const command = " 'nohup " + process.env.APP_DIR + "/scripts/upgrade.sh &'";
                 console.log("running command: " + ssh + command);
 
                 // Wait 2 minutes until another upgrade is allowed

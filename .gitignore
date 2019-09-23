@@ -61,14 +61,11 @@ upgrade/.key
 
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-
 # testing
-/coverage
+coverage/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -79,12 +76,10 @@ upgrade/.key
 *.swp
 cache.json
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-.ssh
-.cert
+.ssh/
+.cert/
 build_time
 
-/db_dumps
+db_dumps/
+
+vpn/auth.txt
