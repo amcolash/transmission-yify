@@ -18,64 +18,65 @@ class Details extends Component {
     componentDidMount() {
         const movie = this.props.movie;
 
-        if (movie.num_seasons) {
-            var endpoint = 'https://tv-v2.api-fetch.website/show/'  + movie.imdb_id;
-            if (movie.mal_id) {
-                endpoint = 'https://tv-v2.api-fetch.website/anime/' + movie._id;
-            } else {
-                // Not anime, get additional data
-                const imdb = movie.imdb_id.replace('tt', '');
-                axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
-                    // Make sure that the show was found and we are not just getting
-                    // the newest shows on the site. This is a bad api design for them :(
-                    if (response.data.torrents_count < 2000) {
-                        const data = response.data;
-                        let maxSeason = this.state.maxSeason;
-                        data.torrents.forEach(t => {
-                            const s = parseInt(t.season);
-                            if (s > maxSeason) maxSeason = s;
-                        });
-
-                        this.setState({ eztv: response.data, season: maxSeason, maxSeason: maxSeason });
-                    } else {
-                        this.setState({ eztv: { torrents: [] }});
-                    }
-                }, error => {
-                    console.error(error);
-                });    
-            }
-
-            axios.get(endpoint, { timeout: 10000 }).then(response => {
-                this.setState({ tvData: response.data, season: response.data.num_seasons, maxSeason: response.data.num_seasons });
-            }, error => {
-                console.error(error);
-            });
-        }
-
         // If anime, no extra data
         if (movie.mal_id) {
             this.setState({ moreData: "ERROR" });
         } else {
-            axios.get(this.props.server + '/tmdbid/' + movie.id, { timeout: 10000 }).then(response => {
+            axios.get(this.props.server + '/tmdbid/' + (movie.num_seasons ? 'tv/' : 'movie/') + movie.id, { timeout: 10000 }).then(response => {
                 this.setState({ tmdbData: response.data });
 
-                axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
-                    this.setState({ moreData: response.data });
-                }).catch(error => {
-                    console.error(error);
-                    this.setState({ moreData: "ERROR" });
-                });
+                if (movie.num_seasons) {
+                    this.setState({ tvData: response.data });
+                    if (movie.mal_id) {
+                        axios.get('https://tv-v2.api-fetch.website/anime/' + movie._id, { timeout: 10000 }).then(response => {
+                            this.setState({ tvData: response.data, season: response.data.num_seasons, maxSeason: response.data.num_seasons });
+                        }, error => {
+                            console.error(error);
+                        });
+                    } else {
+                        // Not anime, get additional data
+                        axios.get(this.props.server + '/tmdbid_external/tv/' + movie.id, { timeout: 10000 }).then(response => {
+                            const imdb = response.data.imdb_id.replace('tt', '');
+                            axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
+                                // Make sure that the show was found and we are not just getting
+                                // the newest shows on the site. This is a bad api design for them :(
+                                if (response.data.torrents_count < 2000) {
+                                    const data = response.data;
+                                    let maxSeason = this.state.maxSeason;
+                                    data.torrents.forEach(t => {
+                                        const s = parseInt(t.season);
+                                        if (s > maxSeason) maxSeason = s;
+                                    });
+            
+                                    this.setState({ eztv: response.data, season: maxSeason, maxSeason: maxSeason });
+                                } else {
+                                    this.setState({ eztv: { torrents: [] }});
+                                }
+                            }).catch(err => {
+                                console.error(err);
+                            })
+                        }, error => {
+                            console.error(error);
+                        });    
+                    }
+                } else {
+                    axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
+                        this.setState({ moreData: response.data });
+                    }).catch(error => {
+                        console.error(error);
+                        this.setState({ moreData: "ERROR" });
+                    });
+
+                    axios.get(this.props.server + '/pirate/' + movie.title + ' ' + movie.year).then(response => {
+                        this.setState({pb: response.data});
+                    }).catch(err => {
+                        console.error(err);
+                    });
+                }
             }).catch(error => {
                 console.error(error);
                 this.setState({ moreData: "ERROR" });
             });
-
-            // Try to find torrents from the pirate bay
-            axios.get(this.props.server + '/pirate/' + movie.title + ' ' + movie.year).then(response => {
-                this.setState({pb: response.data});
-            }).catch(err => {
-                console.error(err);
-            })
         }
     }
 
@@ -116,7 +117,7 @@ class Details extends Component {
             for (let i = 1; i < maxSeason + 1; i++) {
                 seasons.push(i);
             }
-            if (tvData) {
+            if (tvData && tvData.episodes) {
                 tvData.episodes.forEach(episode => {
                     episodes[episode.season] = episodes[episode.season] || [];
                     episodes[episode.season][episode.episode] = episode;
@@ -152,7 +153,6 @@ class Details extends Component {
 
         if (pb) {
             let extras = {};
-
             pb.forEach(t => {
                 const parsed = ptn(t.name);
                 if (!parsed.quality || !parsed.resolution) return;
@@ -259,7 +259,7 @@ class Details extends Component {
                         </Fragment>
                     ) : null}
                     
-                    {moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
+                    {!movie.num_seasons ? moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
                         <Fragment>
                             {moreData.Ratings.map(rating => (
                                 <Fragment key={rating.Source}>
@@ -299,7 +299,7 @@ class Details extends Component {
                                 </Fragment>
                             )}
                         </Fragment>
-                    )}
+                    ) : null}
 
                     <hr/>
 
@@ -328,7 +328,7 @@ class Details extends Component {
                     ) : (
                         !tvData || (!eztv && !movie.mal_id) ? (
                             <Fragment>
-                                Loading additional data...
+                                Loading torrent data...
                                 <Spinner visible/>
                             </Fragment>
                         ) : (

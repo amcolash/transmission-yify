@@ -44,7 +44,6 @@ class Cover extends Component {
     render() {
         const { click, downloadTorrent, cancelTorrent, getVersions, getProgress, started, files } = this.props;
         const movie = this.state.movie;
-        movie.year = new Date(movie.release_date).getFullYear();
 
         const versions = getVersions(movie);
 

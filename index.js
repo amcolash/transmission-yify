@@ -187,9 +187,14 @@ app.get('/omdb/:id', function(req, res) {
     checkCache(url, res, true);
 });
 
-app.get('/tmdbid/:id', function(req, res) {
-    let url = 'https://api.themoviedb.org/3/movie/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY;
-    checkCache(url, res, true); 
+app.get('/tmdbid/:type/:id', function(req, res) {
+    let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY;
+    checkCache(url, res, true);    
+});
+
+app.get('/tmdbid_external/:type/:id', function(req, res) {
+    let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '/external_ids?api_key=' + process.env.THE_MOVIE_DB_KEY;
+    checkCache(url, res, true);    
 });
 
 app.get('/themoviedb/:id', function (req, res) {
@@ -202,6 +207,10 @@ app.get('/search/:type/:page', function (req, res) {
     switch(req.params.type) {
         case 'movies':
             url = 'https://api.themoviedb.org/3/search/movie/?' + querystring.stringify(req.query) + '&page=' + req.params.page +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+            break;
+        case 'shows':
+            url = 'https://api.themoviedb.org/3/search/tv/?' + querystring.stringify(req.query) + '&page=' + req.params.page +
                     '&api_key=' + process.env.THE_MOVIE_DB_KEY;
             break;
         default:
@@ -228,9 +237,21 @@ app.get('/discover/:type/:page', function (req, res) {
                 if (req.query.genre) url += '&with_genres=' + req.query.genre;
             }
             break;
-            default:
-                break;
+        case 'shows':
+            if (sort === 'trending' && !req.query.genre) {
+                url = 'https://api.themoviedb.org/3/trending/tv/week?&page=' + req.params.page +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+            } else {
+                if (sort === 'trending') sort = 'popularity.desc';
+                url = 'https://api.themoviedb.org/3/discover/tv/?page=' + req.params.page + '&sort_by=' + sort +
+                    '&include_adult=false&include_video=false&vote_count.gte=100&release_date.lte=' + new Date().toISOString().split('T')[0] +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+                if (req.query.genre) url += '&with_genres=' + req.query.genre;
             }
+            break;
+        default:
+            break;
+    }
 
     if (!url) {
         res.send([]);
