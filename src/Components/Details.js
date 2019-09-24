@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { FaDownload, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
 import * as  ptn  from 'parse-torrent-name';
+import PirateBay from 'thepiratebay';
 
 import './Details.css';
 import Version from './Version';
@@ -11,17 +12,19 @@ class Details extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { moreData: null, tvData: null, eztv: null, season: 1, maxSeason: 1, showCover: true };
+        this.state = { tmdbData: null, moreData: null, tvData: null, pb: null, eztv: null, season: 1, maxSeason: 1, showCover: true };
     }
 
     componentDidMount() {
-        if (this.props.movie.num_seasons) {
-            var endpoint = 'https://tv-v2.api-fetch.website/show/'  + this.props.movie.imdb_id;
-            if (this.props.movie.mal_id) {
-                endpoint = 'https://tv-v2.api-fetch.website/anime/' + this.props.movie._id;
+        const movie = this.props.movie;
+
+        if (movie.num_seasons) {
+            var endpoint = 'https://tv-v2.api-fetch.website/show/'  + movie.imdb_id;
+            if (movie.mal_id) {
+                endpoint = 'https://tv-v2.api-fetch.website/anime/' + movie._id;
             } else {
                 // Not anime, get additional data
-                const imdb = this.props.movie.imdb_id.replace('tt', '');
+                const imdb = movie.imdb_id.replace('tt', '');
                 axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
                     // Make sure that the show was found and we are not just getting
                     // the newest shows on the site. This is a bad api design for them :(
@@ -50,19 +53,41 @@ class Details extends Component {
         }
 
         // If anime, no extra data
-        if (this.props.movie.mal_id) {
+        if (movie.mal_id) {
             this.setState({ moreData: "ERROR" });
         } else {
-            axios.get(this.props.server + '/omdb/' + this.props.movie.imdb_id, { timeout: 10000 }).then(response => {
-                this.setState({ moreData: response.data });
-            }, error => {
+            axios.get(this.props.server + '/tmdbid/' + movie.id, { timeout: 10000 }).then(response => {
+                this.setState({ tmdbData: response.data });
+
+                axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
+                    this.setState({ moreData: response.data });
+                }).catch(error => {
+                    console.error(error);
+                    this.setState({ moreData: "ERROR" });
+                });
+            }).catch(error => {
                 console.error(error);
                 this.setState({ moreData: "ERROR" });
             });
+
+            // Try to find torrents from the pirate bay
+            
+            PirateBay.search(movie.title + ' ' + movie.year, {
+                category: 'video',
+                orderBy: 'seeds',
+                sortBy: 'desc'
+            }).then(response => {
+                console.log(response);
+            }).catch(err => {
+                console.error(err);
+            })
         }
     }
 
     convertTime(min) {
+        if (!min) return '';
+        min = Number.parseInt(min.replace(' min', ''));
+
         const hours = Math.floor(min / 60);
         const minutes = Math.floor(((min / 60) - hours) * 60);
         
@@ -86,7 +111,7 @@ class Details extends Component {
 
     render() {
         const { movie, downloadTorrent, cancelTorrent, getLink, getVersions, getTorrent, getProgress, started } = this.props;
-        const { moreData, showCover, tvData, eztv, season, maxSeason } = this.state;
+        const { tmdbData, moreData, showCover, tvData, eztv, pb, season, maxSeason } = this.state;
 
         var versions = getVersions(movie);
 
@@ -139,11 +164,15 @@ class Details extends Component {
             }
         }
 
-        var genres = movie.genres;
-        if (tvData) genres = tvData.genres;
-        if (genres) {
+        let genres;
+
+        if (tmdbData) {
+            genres = tmdbData.genres.map(g => g.name);
+            genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
+        } else if (tvData) {
+            genres = tvData.genres;
             genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
-            JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
+                JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
         }
 
         return (
@@ -151,7 +180,7 @@ class Details extends Component {
                 {showCover ? (
                     <div className="left">
                         <img
-                            src={movie.images.poster}
+                            src={movie.poster_path}
                             alt={movie.title}
                             onError={this.imageError.bind(this)}
                         />
@@ -170,7 +199,7 @@ class Details extends Component {
                     <h4>
                         <Fragment>
                             {!movie.num_seasons ? (
-                                <span>{movie.year}, {this.convertTime(movie.runtime)}</span>
+                                <span>{movie.year}{moreData ? ', ' + this.convertTime(moreData.Runtime) : null}</span>
                             ) : (
                                 <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
                             )}
@@ -178,7 +207,7 @@ class Details extends Component {
                         </Fragment>
                     </h4>
                     <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.synopsis) ? tvData.synopsis : (movie.synopsis ? movie.synopsis : ""))}</p>
-                    {movie.genres || tvData ? (
+                    {genres ? (
                         <Fragment>
                             <span className="capitalize">
                                 {genres}

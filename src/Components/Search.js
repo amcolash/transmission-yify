@@ -68,8 +68,6 @@ class Search extends Component {
                         </select>
                     </div>
 
-                    <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>
-
                     <div className="searchItem">
                         <span>Type</span>
                         <select onChange={(event) => updateSearch(search, genre, order, quality, event.target.value)} value={type} >
@@ -78,6 +76,9 @@ class Search extends Component {
                             <option key="animes" value="animes">Anime</option>
                         </select>
                     </div>
+
+                    {type === 'movies' ? (
+                        <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>) : null }
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
                 </div>

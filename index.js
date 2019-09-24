@@ -9,7 +9,7 @@ const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
 const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
-const request = require('request');
+const querystring = require('querystring');
 
 require('dotenv').config();
 
@@ -56,30 +56,6 @@ app.use(redirectToHTTPS());
 
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
-
-// proxy all popcorn api calls for now...
-app.get('/popcorn_proxy/*', function (req, res) {
-    var options = {
-        uri: 'https://cloudflare.com/' + req.params[0],
-        json: true,
-        headers: {
-            'Host': 'tv-v2.api-fetch.website'
-        }
-	};
-
-	request(options, function(err, response, data) {
-		if (err || res.statusCode >= 400) {
-			console.error('MovieAPI endpoint failed.');
-            res.send('Error').status(res.statusCode);
-		} else if (!data || data.error) {
-			err = data ? data.status_message : 'No data returned';
-			console.error('API error:', err);
-			res.send('Error').status(data.error);
-		} else {
-			res.send(data);
-		}
-	});
-});
 
 // HTTPS setup
 const credentials = {};
@@ -209,9 +185,60 @@ app.get('/omdb/:id', function(req, res) {
     checkCache(url, res, true);
 });
 
+app.get('/tmdbid/:id', function(req, res) {
+    let url = 'https://api.themoviedb.org/3/movie/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY;
+    checkCache(url, res, true); 
+});
+
 app.get('/themoviedb/:id', function (req, res) {
     let url = 'https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY;
     checkCache(url, res, true);
+});
+
+app.get('/search/:type/:page', function (req, res) {
+    let url;
+    switch(req.params.type) {
+        case 'movies':
+            url = 'https://api.themoviedb.org/3/search/movie/?' + querystring.stringify(req.query) + '&page=' + req.params.page +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+            break;
+        default:
+            break;
+    }
+    if (!url) res.send([]);
+
+    axios.get(url).then(response => res.send(response.data)).catch(err => { console.error(err); res.send([]); });
+});
+
+app.get('/discover/:type/:page', function (req, res) {
+    let url;
+    let sort = req.query.sort;
+    switch(req.params.type) {
+        case 'movies':
+            if (sort === 'trending' && !req.query.genre) {
+                url = 'https://api.themoviedb.org/3/trending/movie/week?&page=' + req.params.page +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+            } else {
+                if (sort === 'trending') sort = 'popularity.desc';
+                url = 'https://api.themoviedb.org/3/discover/movie/?page=' + req.params.page + '&sort_by=' + sort +
+                    '&include_adult=false&include_video=false&vote_count.gte=100&release_date.lte=' + new Date().toISOString().split('T')[0] +
+                    '&api_key=' + process.env.THE_MOVIE_DB_KEY;
+                if (req.query.genre) url += '&with_genres=' + req.query.genre;
+            }
+            break;
+            default:
+                break;
+            }
+    console.log(url)
+    if (!url) {
+        res.send([]);
+    } else {
+        axios.get(url).then(response => {
+            res.send(response.data)
+        }).catch(err => {
+            console.error(err); res.send([]);
+        });
+    }
 });
 
 app.get('/build', function (req, res) { res.send(BUILD_TIME); });

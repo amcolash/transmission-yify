@@ -44,6 +44,7 @@ class Cover extends Component {
     render() {
         const { click, downloadTorrent, cancelTorrent, getVersions, getProgress, started, files } = this.props;
         const movie = this.state.movie;
+        movie.year = new Date(movie.release_date).getFullYear();
 
         const versions = getVersions(movie);
 
@@ -51,24 +52,28 @@ class Cover extends Component {
             versions[i].progress = getProgress(versions[i].hashString);
         }
 
-        if (!movie.images || !movie.images.poster) {
-            movie.images.poster = "broken image";
+        if (!movie.poster_path) {
+            movie.poster_path = "broken image";
         } else {
+            if (movie.poster_path.indexOf('http') === -1) {
+                movie.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + movie.poster_path;
+            }
+
             // Fix no longer existent site path
-            if (movie.images.poster.indexOf("hummingbird.me") !== -1) {
-                movie.images.poster = "https://media.kitsu.io/anime/poster_images/" + movie._id + "/large.jpg";
+            if (movie.poster_path.indexOf("hummingbird.me") !== -1) {
+                movie.poster_path = "https://media.kitsu.io/anime/poster_images/" + movie._id + "/large.jpg";
             }
             // Things seem to be broken with this site, use omdb instead
-            if (movie.images.poster.indexOf("fanart.tv") !== -1) {
-                movie.images.poster = "broken image";
+            if (movie.poster_path.indexOf("fanart.tv") !== -1) {
+                movie.poster_path = "broken image";
             }
 
             // Fix insecure images
-            if (movie.images.poster.indexOf("http://image.tmdb") !== -1) {
-                movie.images.poster = movie.images.poster.replace("http://image.tmdb", "https://image.tmdb");
+            if (movie.poster_path.indexOf("http://image.tmdb") !== -1) {
+                movie.poster_path = movie.poster_path.replace("http://image.tmdb", "https://image.tmdb");
             }
-            if (movie.images.poster.indexOf("http://thetvdb.com") !== -1) {
-                movie.images.poster = movie.images.poster.replace("http://thetvdb.com", "https://thetvdb.com");
+            if (movie.poster_path.indexOf("http://thetvdb.com") !== -1) {
+                movie.poster_path = movie.poster_path.replace("http://thetvdb.com", "https://thetvdb.com");
             }
         }
 
@@ -90,7 +95,7 @@ class Cover extends Component {
                     className="cover"
                     onClick={(e) => click(movie)}
                 >
-                    <img className="movieCover" src={this.state.altCover || movie.images.poster} alt="" onError={this.coverError.bind(this)} />
+                    <img className="movieCover" src={this.state.altCover || movie.poster_path} alt="" onError={this.coverError.bind(this)} />
                     <div className="movieIcon">
                         <FaFilm />
                     </div>
