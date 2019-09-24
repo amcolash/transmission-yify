@@ -533,7 +533,7 @@ class MovieList extends Component {
             started, width, storage, scroll, pb, build
         } = this.state;
 
-        const pagerVisibility = page !== 1 || movies.length === 50;
+        const pagerVisibility = page !== 1 || movies.length >= 20;
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
         if (error) {

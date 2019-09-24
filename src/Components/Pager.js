@@ -22,12 +22,12 @@ class Pager extends Component {
                 <span>{page}</span>
                 <FaAngleRight
                     className="arrow"
-                    style={{ display: movies.length === 50 ? "inline-block" : "none" }}
+                    style={{ display: movies.length >= 20 ? "inline-block" : "none" }}
                     onClick={() => changePage(1)}
                 />
                 <FaAngleDoubleRight
                     className="arrow"
-                    style={{ display: movies.length === 50 ? "inline-block" : "none" }}
+                    style={{ display: movies.length >= 20 ? "inline-block" : "none" }}
                     onClick={() => changePage(5)}
                 />
             </div>
