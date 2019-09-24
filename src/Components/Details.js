@@ -198,8 +198,6 @@ class Details extends Component {
             });
         }
 
-        console.log(versions);
-
         var mpaa = movie.certification;
         if (!mpaa || mpaa === "N/A") {
             if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
@@ -307,18 +305,20 @@ class Details extends Component {
 
                     {!movie.num_seasons ? (
                         pb ? (
-                            versions.map(version => (
-                                <Version
-                                    key={version.hashString}
-                                    version={version}
-                                    started={started}
-                                    getProgress={getProgress}
-                                    getLink={getLink}
-                                    getTorrent={getTorrent}
-                                    downloadTorrent={downloadTorrent}
-                                    cancelTorrent={cancelTorrent}
-                                />
-                            ))
+                            versions.length > 0 ? (
+                                versions.map(version => (
+                                    <Version
+                                        key={version.hashString}
+                                        version={version}
+                                        started={started}
+                                        getProgress={getProgress}
+                                        getLink={getLink}
+                                        getTorrent={getTorrent}
+                                        downloadTorrent={downloadTorrent}
+                                        cancelTorrent={cancelTorrent}
+                                    />
+                                ))
+                            ) : <h4>No Torrents Found</h4>
                         ) : (
                             <span>
                                 Loading torrent data...
