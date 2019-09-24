@@ -45,6 +45,7 @@ var currentStorage;
 var currentFiles = [];
 
 var cache = {};
+var pbCache = {};
 var isUpgrading = false;
 
 var pirateBay;
@@ -243,18 +244,26 @@ app.get('/discover/:type/:page', function (req, res) {
 });
 
 app.get('/pirate/:search', function(req, res) {
+    const search = req.params.search;
+
     // Use the scraped PB from proxy for the search endpoint
     process.env.THEPIRATEBAY_DEFAULT_ENDPOINT = pirateBay;
 
-    PirateBay.search(req.params.search, {
-        category: 'video',
-        orderBy: 'seeds',
-        sortBy: 'desc'
-    }).then(response => {
-        res.send(response);
-    }).catch(err => {
-        console.error('pb', err);
-    })
+    // Add a simple cache here to make things faster on the client
+    if (pbCache[search]) {
+        res.send(pbCache[search]);
+    } else {
+        PirateBay.search(req.params.search, {
+            category: 'video',
+            orderBy: 'seeds',
+            sortBy: 'desc'
+        }).then(response => {
+            pbCache[search] = response;
+            res.send(response);
+        }).catch(err => {
+            console.error('pb', err);
+        });
+    }
 });
 
 app.get('/build', function (req, res) { res.send(BUILD_TIME); });
