@@ -77,8 +77,8 @@ class Search extends Component {
                         </select>
                     </div>
 
-                    {type === 'movies' ? (
-                        <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>) : null }
+                    {/* {type === 'movies' ? (
+                        <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>) : null } */}
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
                 </div>
