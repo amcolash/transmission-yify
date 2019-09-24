@@ -35,29 +35,25 @@ class Details extends Component {
                         });
                     } else {
                         // Not anime, get additional data
-                        axios.get(this.props.server + '/tmdbid_external/tv/' + movie.id, { timeout: 10000 }).then(response => {
-                            const imdb = response.data.imdb_id.replace('tt', '');
-                            axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
-                                // Make sure that the show was found and we are not just getting
-                                // the newest shows on the site. This is a bad api design for them :(
-                                if (response.data.torrents_count < 2000) {
-                                    const data = response.data;
-                                    let maxSeason = this.state.maxSeason;
-                                    data.torrents.forEach(t => {
-                                        const s = parseInt(t.season);
-                                        if (s > maxSeason) maxSeason = s;
-                                    });
-            
-                                    this.setState({ eztv: response.data, season: maxSeason, maxSeason: maxSeason });
-                                } else {
-                                    this.setState({ eztv: { torrents: [] }});
-                                }
-                            }).catch(err => {
-                                console.error(err);
-                            })
-                        }, error => {
-                            console.error(error);
-                        });    
+                        const imdb = response.data.external_ids.imdb_id.replace('tt', '');
+                        axios.get(`https://eztv.io/api/get-torrents?limit=100&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
+                            // Make sure that the show was found and we are not just getting
+                            // the newest shows on the site. This is a bad api design for them :(
+                            if (response.data.torrents_count < 2000) {
+                                const data = response.data;
+                                let maxSeason = this.state.maxSeason;
+                                data.torrents.forEach(t => {
+                                    const s = parseInt(t.season);
+                                    if (s > maxSeason) maxSeason = s;
+                                });
+        
+                                this.setState({ eztv: response.data, season: maxSeason, maxSeason: maxSeason });
+                            } else {
+                                this.setState({ eztv: { torrents: [] }});
+                            }
+                        }).catch(err => {
+                            console.error(err);
+                        });
                     }
                 } else {
                     axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
@@ -249,7 +245,8 @@ class Details extends Component {
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
                     </h4>
-                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.synopsis) ? tvData.synopsis : (movie.synopsis ? movie.synopsis : ""))}</p>
+                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.overview) ? tvData.overview :
+                        (movie.synopsis ? movie.synopsis : ""))}</p>
                     {genres ? (
                         <Fragment>
                             <span className="capitalize">
