@@ -28,7 +28,8 @@
     "react-icons": "^3.7.0",
     "react-responsive-modal": "^4.0.1",
     "react-scripts": "^3.1.1",
-    "scrollreveal": "^4.0.5"
+    "scrollreveal": "^4.0.5",
+    "thepiratebay": "^1.4.7"
   },
   "scripts": {
     "start": "concurrently -k \"npm run server\" \"npm run client\" \"transmission-gtk\"",

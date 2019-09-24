@@ -1,7 +1,7 @@
 export default [
-    { value: 'trending', label: 'Popularity' },
-    { value: 'last added', label: 'Date Added' },
-    { value: 'title', label: 'Title' },
-    { value: 'year', label: 'Year' },
-    { value: 'rating', label: 'Rating' },
+    { value: 'trending.desc', label: 'Trending' },
+    { value: 'popularity.desc', label: 'Popularity' },
+    { value: 'release_date.desc', label: 'Release Date' },
+    { value: 'original_title.desc', label: 'Title' },
+    { value: 'vote_average.desc', label: 'Rating' },
 ]

@@ -4,7 +4,7 @@ import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff, FaSadTear
+    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
 } from 'react-icons/fa';
 // import {isMobile} from 'react-device-detect';
 
@@ -43,7 +43,6 @@ class MovieList extends Component {
             type: 'movies',
             isSearching: false,
             storage: null,
-            serverStats: null,
             width: 0,
             height: 0,
             scroll: 0,
@@ -51,13 +50,12 @@ class MovieList extends Component {
             files: [],
             pb: null,
             build: null,
-            popcornModal: window.localStorage.getItem('popcornfaq2') === null,
-            popcornIcon: false
         }
 
         // Clean up old faq flag
         window.localStorage.removeItem('popcornfaq');
         window.localStorage.removeItem('popcornfaq1');
+        window.localStorage.removeItem('popcornfaq2');
 
         this.updateSearch = this.updateSearch.bind(this);
         this.getTorrent = this.getTorrent.bind(this);
@@ -65,8 +63,6 @@ class MovieList extends Component {
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
-        this.popcornapi = 'https://tv-v2.api-fetch.website';
-        this.popcornapi_proxy = this.server + '/popcorn_proxy';
     }
     
     componentDidMount() {
@@ -146,19 +142,8 @@ class MovieList extends Component {
         setTimeout(() => this.updateLocation, 60 * 1000);
     }
 
-    // Update a bunch of stats (popcorn data, pb link, build time)
+    // Update a bunch of stats (pb link, build time)
     updateStats() {
-        axios.get(this.popcornapi + '/status').then(response => {
-            this.setState({ serverStats: response.data });
-        }, error => {
-            console.log('Failed request with main server for stats, falling back to proxy', error);
-            axios.get(this.popcornapi_proxy + '/status').then(response => {
-                this.setState({ serverStats: response.data, popcornIcon: true });
-            }).catch(error => {
-                console.error(error);
-            });
-        });
-
         axios.get(this.server + '/pb').then(response => {
             this.setState({ pb: response.data });
         }, error => {
@@ -243,36 +228,30 @@ class MovieList extends Component {
             isSearching: true
         });
 
-        const direction = order === 'title' ? '1' : '-1';
-        const params = (search.length > 0 ? '&keywords=' + search : '') +
-            '&sort=' + order + '&order=' + direction +
-            (genre.length > 0 ? '&genre=' + genre : '');
+        // const direction = order === 'title' ? '1' : '-1';
+        // const params = (search.length > 0 ? '&query=' + search : ('&sort=' + order + '&order=' + direction +
+        //     (genre.length > 0 ? '&genre=' + genre : '')));
         
-        const ENDPOINT = this.popcornapi + '/' + type + '/' + page + '?' + params;
-        const ENDPOINT_PROXY = this.popcornapi_proxy + '/' + type + '/' + page + '?' + params;
+        let ENDPOINT = this.server;
+        if (search.length > 0) {
+            ENDPOINT += '/search/' + type + '/' + page + '?query=' + search;
+        } else {
+            ENDPOINT += '/discover/' + type + '/' + page + '?sort=' + order + (genre ? '&genre=' + genre : '');
+        }
 
         if (searchCache[ENDPOINT]) {
             this.handleData(searchCache[ENDPOINT]);
-        } else if (searchCache[ENDPOINT_PROXY]) {
-            this.handleData(searchCache[ENDPOINT_PROXY]);
         } else {
             axios.get(ENDPOINT).then(response => {
                 searchCache[ENDPOINT] = response.data;
                 this.handleData(response.data);
             }).catch(error => {
-                console.log('Failed request with main server for search, falling back to proxy', error);
-                axios.get(ENDPOINT_PROXY).then(response => {
-                    searchCache[ENDPOINT_PROXY] = response.data;
-                    this.handleData(response.data);
-                    this.setState({popcornIcon: true});
-                }).catch(error => {
-                    console.error(error);
-                    this.setState({
-                        error: error,
-                        isLoaded: true,
-                        isSearching: false,
-                    });
-                })
+                console.error(error);
+                this.setState({
+                    error: error,
+                    isLoaded: true,
+                    isSearching: false,
+                });
             });
         }
     }
@@ -284,19 +263,19 @@ class MovieList extends Component {
         // fix weird years (since it seems the year can vary based on region released first)
         var now = new Date().getFullYear();
         
-        if (data.map) {
-            data.map(movie => {
+        if (data.results && data.results.map) {
+            data = data.results.map(movie => {
                 movie.year = Math.min(now, movie.year);
                 movie.title = movie.title.replace(/&amp;/g, '&');
                 return movie;
             });
     
             // Only show movies with enough ratings to be useful
-            if (this.state.order === 'rating') {
-                data = data.filter(movie => {
-                    return movie.rating.votes > 10;
-                });
-            }
+            // if (this.state.order === 'rating') {
+            //     data = data.filter(movie => {
+            //         return movie.rating.votes > 10;
+            //     });
+            // }
     
             if (this.state.quality === "3D") {
                 this.get3D(data);
@@ -533,11 +512,6 @@ class MovieList extends Component {
         this.setState({ modal: false });
     };
 
-    onClosePopcornModal = () => {
-        this.setState({ popcornModal: false });
-        window.localStorage.setItem('popcornfaq2', true);
-    };
-
     changePage = (direction) => {
         const page= this.state.page;
         var newPage = direction + page;
@@ -550,26 +524,21 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, movie, page, torrents, location,
-            serverStats, started, width, storage, scroll, pb, build, popcornModal
+            started, width, storage, scroll, pb, build
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length === 50;
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
         if (error) {
-            // TODO: Remove error message when popcorn api fixed
             return (
                 <div className="message">
-                    {error.message === 'Network Error' ? <span>The Popcorn Time api server went down some time around September 10, 2019
-                        and has been flakey ever since. Because this application relies on that data, it is now broken until the server
-                        is fixed by the maintainers or I rewrite parts of this application. I'm sorry about that.<br/><FaSadTear/></span>
-                    : <span>Error: {error.message}</span>}
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
                             <br/>
                             <button onClick={() => document.location.reload()}>Reload Page</button>
                         </Fragment>
-                    ) : null}
+                    ) : <span>Error: {error.message}</span>}
                 </div>
             );
         } else if (!isLoaded) {
@@ -585,34 +554,6 @@ class MovieList extends Component {
                 <Fragment>
                     <Plex server={this.server}/>
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
-
-                    {this.state.popcornIcon ? (
-                        <div id="popcornTop" onClick={() => this.setState({popcornModal: true})}>
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Popcorn_Time_logo.png" alt="popcorntime logo"></img>
-                            <span>Popcorn Time<br/>API Issues</span>
-                        </div>
-                    ) : null}
-
-                    <Modal open={popcornModal} onClose={this.onClosePopcornModal} center={width > 800} modalId='popcornModal'>
-                        <p>
-                            Update (9/21/2019): The Popcorn Time api server is back to being broken. It looks like I will need to
-                            do some digging and probably stop relying on that api and rewrite this application. Since it really is
-                            a passion project and there is no incentive for me to do so, it may take a bit of time. I am sorry that
-                            the search has been so unreliable for the past weel and a half (since 9/10/2019).
-                        </p>
-                        <p>
-                            In happier news, this weekend I added in support for better fetching of TV show episodes which should make
-                            downloading new episodes far easier to do (of course once the search is back working). Until I get that
-                            search fully back to normal, there will be issues other than simply paging through results.
-                        </p>
-                        <p>
-                            Unfoortunately there is not too much that we can do, but cross our fingers and hope that things get stable.
-                            Since things have been broken for nearly 2 weeks at this point though, I think it is safe to say that I will
-                            most likely re-write large portions of the coodebase to harden things permanently from future breakages.
-                        </p>
-
-                        <FaSadTear size={'2em'}/>
-                    </Modal>
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
                         <Details
@@ -658,9 +599,9 @@ class MovieList extends Component {
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
                             movies.map(movie => (
-                                movie.torrents || this.state.type !== "movies" ? (
+                                // movie.torrents || this.state.type !== "movies" ? (
                                     <Cover
-                                        key={movie._id}
+                                        key={movie.id}
                                         movie={movie}
                                         click={this.onOpenModal}
                                         downloadTorrent={this.downloadTorrent}
@@ -672,7 +613,7 @@ class MovieList extends Component {
                                         server={this.server}
                                         files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
                                     />
-                                ) : null
+                                // ) : null
                             ))
                         ) :
                             <h1>No Results</h1>
@@ -691,9 +632,6 @@ class MovieList extends Component {
                     <div className="footer">
                         <hr/>
 
-                        {serverStats ? (
-                            <p>Popcorn Stats: {serverStats.totalMovies} Movies, {serverStats.totalShows} TV Shows, {serverStats.totalAnimes} Animes</p>
-                        ) : null}
                         <p>Server Location: {location ? location : "Unknown"}</p>
                         {(build && build.indexOf('Dev Build') === -1) ? <p><span>Build Time: {new Date(build).toLocaleString()}</span></p> : null}
                         {storage ? (
