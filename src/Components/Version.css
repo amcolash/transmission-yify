@@ -1,0 +1,27 @@
+.version {
+  display: flex;
+  justify-content: center;
+  padding: 0.25em 0;
+}
+
+.qualityPeers {
+  display: flex;
+  flex-direction: column;
+  width: 3em;
+}
+
+.peers {
+  font-size: 1.5em;
+  padding-left: 0.2em;
+  line-height: 0.5em;
+}
+
+.peers svg {
+  stroke: white;
+  stroke-width: 5px;
+}
+
+.download {
+  font-weight: bolder;
+  margin-left: 0.8em;
+}

@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from 'react';
-import { FaDownload, FaCircle, FaPlayCircle } from 'react-icons/fa';
+import { FaDownload, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
 import * as  ptn  from 'parse-torrent-name';
 
 import './Details.css';
-import Progress from './Progress';
+import Version from './Version';
 import Spinner from './Spinner';
 
 class Details extends Component {
@@ -130,11 +130,6 @@ class Details extends Component {
             }
         }
 
-        var hasPeers = false;
-        for (let i = 0; i < versions.length; i++) {
-            if (versions[i].peers > 0) hasPeers = true;
-        }
-
         var mpaa = movie.certification;
         if (!mpaa || mpaa === "N/A") {
             if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
@@ -170,9 +165,6 @@ class Details extends Component {
                 ) : null }
                 <div className="right">
                     <h3>
-                        {!movie.num_seasons ? (
-                            <span className={hasPeers ? "status green" : "status red"}><FaCircle/></span>
-                        ) : null}
                         {movie.title}
                     </h3>
                     <h4>
@@ -307,43 +299,6 @@ class Details extends Component {
                         )
                     )}
                 </div>
-            </div>
-        );
-    }
-}
-
-class Version extends Component {
-    render() {
-        const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent } = this.props;
-
-        return (
-            <div className={"version" + (version.peers ? "" : " inline padding")} key={version.url}>
-                <b>{version.quality}</b>
-                {getProgress(version.hashString) ? null : (
-                    <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
-                        {started.indexOf(version.hashString) !== -1 ? (
-                            <Spinner visible noMargin button />
-                        ) : (
-                            <FaDownload/>
-                        )}
-                    </button>
-                )}
-                <span>{version.size ? version.size + "," : ""}</span>
-                {version.peers && version.seeds && version.ratio ? (
-                    <Fragment>
-                        <span>Peers: {version.peers}, Seeds: {version.seeds}, Ratio: {version.ratio})</span>
-                        <br/>
-                    </Fragment>
-                ): null}
-                {getProgress(version.hashString) ? (
-                    <Progress
-                        torrent={getTorrent(version.hashString)}
-                        getLink={getLink}
-                        cancelTorrent={cancelTorrent}
-                        getProgress={getProgress}
-                        fullName
-                    />
-                ) : null}
             </div>
         );
     }
