@@ -57,7 +57,9 @@ class Search extends Component {
                             onChange={(event) => updateSearch(search, genre, event.target.value, quality, type)}
                             value={order}
                         >
-                            {Order.map(order => (
+                            {Order.filter(order =>
+                                (type === 'movies' || order.value === 'popularity.desc' || order.value === 'vote_average.desc')
+                            ).map(order => (
                                 <option
                                     key={order.label}
                                     value={order.value}

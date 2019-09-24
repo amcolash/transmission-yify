@@ -265,8 +265,14 @@ class MovieList extends Component {
         
         if (data.results && data.results.map) {
             data = data.results.map(movie => {
-                movie.year = Math.min(now, movie.year);
+                movie.year = movie.year || movie.release_date || movie.first_air_date;
+                movie.year = Math.min(now, new Date(movie.year || 9999).getFullYear());
+                movie.title = movie.title || movie.name;
                 movie.title = movie.title.replace(/&amp;/g, '&');
+
+                // Fake tv data
+                if (this.state.type !== 'movies') movie.num_seasons = 1;
+
                 return movie;
             });
     
