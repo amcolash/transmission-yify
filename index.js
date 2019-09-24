@@ -10,6 +10,7 @@ const fs = require('fs');
 const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
+const PirateBay = require('thepiratebay');
 
 require('dotenv').config();
 
@@ -27,7 +28,7 @@ try {
         }
     });
 } catch (error) {
-    console.log(error);
+    console.error(error);
 }
 
 // Init vars
@@ -229,7 +230,7 @@ app.get('/discover/:type/:page', function (req, res) {
             default:
                 break;
             }
-    console.log(url)
+
     if (!url) {
         res.send([]);
     } else {
@@ -239,6 +240,21 @@ app.get('/discover/:type/:page', function (req, res) {
             console.error(err); res.send([]);
         });
     }
+});
+
+app.get('/pirate/:search', function(req, res) {
+    // Use the scraped PB from proxy for the search endpoint
+    process.env.THEPIRATEBAY_DEFAULT_ENDPOINT = pirateBay;
+
+    PirateBay.search(req.params.search, {
+        category: 'video',
+        orderBy: 'seeds',
+        sortBy: 'desc'
+    }).then(response => {
+        res.send(response);
+    }).catch(err => {
+        console.error('pb', err);
+    })
 });
 
 app.get('/build', function (req, res) { res.send(BUILD_TIME); });
