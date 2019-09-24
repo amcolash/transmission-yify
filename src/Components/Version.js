@@ -15,7 +15,7 @@ class Version extends Component {
                   <b>{version.quality}</b>
                   {version.peers && version.seeds && version.ratio ? (
                     <span className='peers'>
-                          {version.peers < 20 ? <FaBatteryQuarter className='red'/> : version.peers < 50 ? <FaBatteryHalf className='orange'/> : <FaBatteryFull className='green'/>}
+                          {version.seeds < 20 ? <FaBatteryQuarter className='red'/> : version.seeds < 50 ? <FaBatteryHalf className='orange'/> : <FaBatteryFull className='green'/>}
                       </span>
                   ) : null}
               </div>

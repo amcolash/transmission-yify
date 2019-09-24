@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { FaDownload, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
+import magnet from 'magnet-uri';
 import * as  ptn  from 'parse-torrent-name';
-import PirateBay from 'thepiratebay';
 
 import './Details.css';
 import Version from './Version';
@@ -71,13 +71,8 @@ class Details extends Component {
             });
 
             // Try to find torrents from the pirate bay
-            
-            PirateBay.search(movie.title + ' ' + movie.year, {
-                category: 'video',
-                orderBy: 'seeds',
-                sortBy: 'desc'
-            }).then(response => {
-                console.log(response);
+            axios.get(this.props.server + '/pirate/' + movie.title + ' ' + movie.year).then(response => {
+                this.setState({pb: response.data});
             }).catch(err => {
                 console.error(err);
             })
@@ -154,6 +149,56 @@ class Details extends Component {
                 });
             }
         }
+
+        if (pb) {
+            let extras = {};
+
+            pb.forEach(t => {
+                const parsed = ptn(t.name);
+                if (!parsed.quality || !parsed.resolution) return;
+
+                let shouldAdd = true;
+                if (parsed.resolution === '2160p' || parsed.quality.toLowerCase().indexOf('cam') !== -1) {
+                    shouldAdd = false;
+                }
+
+                if (shouldAdd) {
+                    let sort = 0;
+
+                    // Not going to show 2160p since they are UUUUGE
+                    switch (parsed.resolution) {
+                        case "1080p": sort = 3; break;
+                        case "720p": sort = 2; break;
+                        case "480p": sort = 1; break;
+                        default: sort = 0; break;
+                    }
+
+                    if (sort === 0 || (extras[parsed.resolution] && extras[parsed.resolution].seeds > t.seeders)) return;
+
+                    extras[parsed.resolution] = {
+                        quality: parsed.resolution,
+                        sort: sort,
+                        peers: t.leechers,
+                        seeds: t.seeders,
+                        ratio: t.leechers > 0 ? (t.seeders / t.leechers).toFixed(3) : 0,
+                        url: t.magnetLink,
+                        hashString: magnet.decode(t.magnetLink).infoHash.toLowerCase(),
+                        size: t.size,
+                        title: movie.title + " (" + movie.year + ") [" + parsed.resolution + "]"
+                    };
+                }
+            });
+
+            // Add new torrents to the version array
+            versions = versions.concat(Object.values(extras));
+
+            // Sort it again
+            versions = Object.values(versions).sort(function(a, b) {
+                return b.sort - a.sort;
+            });
+        }
+
+        console.log(versions);
 
         var mpaa = movie.certification;
         if (!mpaa || mpaa === "N/A") {
@@ -261,18 +306,25 @@ class Details extends Component {
                     <hr/>
 
                     {!movie.num_seasons ? (
-                        versions.map(version => (
-                            <Version
-                                key={version.hashString}
-                                version={version}
-                                started={started}
-                                getProgress={getProgress}
-                                getLink={getLink}
-                                getTorrent={getTorrent}
-                                downloadTorrent={downloadTorrent}
-                                cancelTorrent={cancelTorrent}
-                            />
-                        ))
+                        pb ? (
+                            versions.map(version => (
+                                <Version
+                                    key={version.hashString}
+                                    version={version}
+                                    started={started}
+                                    getProgress={getProgress}
+                                    getLink={getLink}
+                                    getTorrent={getTorrent}
+                                    downloadTorrent={downloadTorrent}
+                                    cancelTorrent={cancelTorrent}
+                                />
+                            ))
+                        ) : (
+                            <span>
+                                Loading torrent data...
+                                <Spinner visible/>
+                            </span>
+                        )
                     ) : (
                         !tvData || (!eztv && !movie.mal_id) ? (
                             <Fragment>
