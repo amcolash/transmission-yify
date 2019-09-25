@@ -257,11 +257,13 @@ class MovieList extends Component {
     }
 
     handleData(data) {
-        // const total = data.movie_count;
-        // const totalPages = Math.ceil(total / limit);
+        const now = new Date().getFullYear();
 
+        if (data.results && data.results.map) {
+            data = data.results.map(movie => {
         // fix weird years (since it seems the year can vary based on region released first)
-        var now = new Date().getFullYear();
+                movie.year = movie.year || movie.release_date || movie.first_air_date || 9999;
+                movie.year = Math.min(now, new Date(movie.year).getFullYear());
         
         if (data.results && data.results.map) {
             data = data.results.map(movie => {
@@ -269,6 +271,11 @@ class MovieList extends Component {
                 movie.year = Math.min(now, new Date(movie.year || 9999).getFullYear());
                 movie.title = movie.title || movie.name;
                 movie.title = movie.title.replace(/&amp;/g, '&');
+
+                // TMDB does not add an absolute url to returned poster paths
+                if (movie.poster_path.indexOf('http') === -1) {
+                    movie.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + movie.poster_path;
+                }
 
                 // Fake tv data
                 if (this.state.type !== 'movies') movie.num_seasons = 1;
