@@ -458,9 +458,12 @@ function initSocketDataWatchers() {
     // Grab piratebay proxy list every 30 minutes
     setIntervalImmediately(() => axios.get('https://piratebayproxy.info').then(response => {
         // console.log(response.data);
-        const links = $('.t1', response.data);
-        pirateBay = links.attr('href');
+        const links = $(response.data).find('.t1');
+        // choose a random link from the top half of the list
+        const rnd = Math.floor(Math.random() * links.length / 2);
+        pirateBay = $(links.get(rnd)).attr('href');
     }).catch(err => {
+        console.error(err);
         pirateBay = undefined;
     }), 1000 * 60 * 30);
 }

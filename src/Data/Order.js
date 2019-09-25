@@ -1,7 +1,18 @@
-export default [
-    { value: 'trending.desc', label: 'Trending' },
-    { value: 'popularity.desc', label: 'Popularity' },
-    { value: 'release_date.desc', label: 'Release Date' },
-    { value: 'original_title.desc', label: 'Title' },
-    { value: 'vote_average.desc', label: 'Rating' },
-]
+export default {
+    movies: [
+        { value: 'trending', label: 'Trending' },
+        { value: 'popularity.desc', label: 'Popularity' },
+        { value: 'release_date.desc', label: 'Release Date' },
+        { value: 'vote_average.desc', label: 'Rating' }
+    ],
+    tv: [
+        { value: 'popularity.desc', label: 'Popularity' },
+        { value: 'vote_average.desc', label: 'Rating' }
+    ],
+    anime: [
+        // { value: 'trending', label: 'Trending' },
+        { value: 'popularityRank', label: 'Popularity' },
+        { value: 'startDate', label: 'Release Date' },
+        { value: 'ratingRank', label: 'Rating' }
+    ]
+}

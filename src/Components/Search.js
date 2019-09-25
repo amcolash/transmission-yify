@@ -10,7 +10,7 @@ import Order from '../Data/Order';
 class Search extends Component {
 
     clearSearch() {
-        this.props.updateSearch("", "", "trending", "All", this.props.type, 1);
+        this.props.updateSearch("", "", "", "All", this.props.type, 1);
     }
 
     toggle3D() {
@@ -20,7 +20,18 @@ class Search extends Component {
 
     render() {
         const { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
-        const clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== "trending" || page !== 1;
+        const clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== '' || page !== 1;
+
+        let ordering = [];
+        if (type === 'animes') ordering = Order.anime;
+        else if (type === 'shows') ordering = Order.tv;
+        else ordering = Order.movies;
+
+        const genres = (type === 'animes' ? Genre.anime : Genre.standard).sort((a, b) => {
+            if (a.label === 'All') return -1;
+            if (b.label === 'All') return 1;
+            return a.label.localeCompare(b.label);
+        });
 
         return (
             <div className="search">
@@ -40,7 +51,7 @@ class Search extends Component {
                             onChange={(event) => updateSearch(search, event.target.value, order, quality, type)}
                             value={genre}
                         >
-                            {Genre.map(genre => (
+                            {genres.map(genre => (
                                 <option
                                     key={genre.label}
                                     value={genre.value}
@@ -57,9 +68,7 @@ class Search extends Component {
                             onChange={(event) => updateSearch(search, genre, event.target.value, quality, type)}
                             value={order}
                         >
-                            {Order.filter(order =>
-                                (type === 'movies' || order.value === 'popularity.desc' || order.value === 'vote_average.desc')
-                            ).map(order => (
+                            {ordering.map(order => (
                                 <option
                                     key={order.label}
                                     value={order.value}
