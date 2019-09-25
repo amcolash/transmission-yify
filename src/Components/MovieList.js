@@ -17,6 +17,7 @@ import Plex from './Plex';
 import Search from './Search';
 import Beta from './Beta';
 import Pager from './Pager';
+import Order from '../Data/Order';
 
 const searchCache = [];
 const hashMapping = {};
@@ -39,8 +40,8 @@ class MovieList extends Component {
             search: '',
             genre: '',
             quality: 'All',
-            order: 'trending',
-            type: 'movies',
+            order: '',
+            type: 'animes',
             isSearching: false,
             storage: null,
             width: 0,
@@ -222,21 +223,36 @@ class MovieList extends Component {
     }
     
     updateData() {
-        const { search, page, genre, order, type } = this.state;
+        const { search, page, genre, type } = this.state;
         
         this.setState({
             isSearching: true
         });
 
+        let order = this.state.order;
+        if (type === 'movies') order = order || Order.movies[0].value;
+        if (type === 'shows') order = order || Order.tv[0].value;
+        if (type === 'animes') order = order || Order.anime[0].value;
+
         // const direction = order === 'title' ? '1' : '-1';
         // const params = (search.length > 0 ? '&query=' + search : ('&sort=' + order + '&order=' + direction +
         //     (genre.length > 0 ? '&genre=' + genre : '')));
+        let ENDPOINT;
         
-        let ENDPOINT = this.server;
-        if (search.length > 0) {
-            ENDPOINT += '/search/' + type + '/' + page + '?query=' + search;
+        if (type === 'animes') {
+            const offset = (page - 1) * 20 + (page > 1 ? 1 : 0);
+            const ordering = order === 'startDate' ? '-' : '';
+
+            ENDPOINT = `https://kitsu.io/api/edge/anime?page[limit]=20&page[offset]=${offset}`;
+            ENDPOINT += `&sort=${ordering}${order || Order.anime[0].value}`;
+            if (search.length > 0) ENDPOINT += `&filter[text]=${search}`;
         } else {
-            ENDPOINT += '/discover/' + type + '/' + page + '?sort=' + order + (genre ? '&genre=' + genre : '');
+            if (search.length > 0) {
+                ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
+            } else {
+                ENDPOINT = `${this.server}/discover/${type}/${page}?sort=${order}`;
+                if (genre) ENDPOINT += `&genre=${genre}`;
+            }
         }
 
         if (searchCache[ENDPOINT]) {
@@ -258,37 +274,36 @@ class MovieList extends Component {
 
     handleData(data) {
         const now = new Date().getFullYear();
-
-        if (data.results && data.results.map) {
-            data = data.results.map(movie => {
-        // fix weird years (since it seems the year can vary based on region released first)
-                movie.year = movie.year || movie.release_date || movie.first_air_date || 9999;
-                movie.year = Math.min(now, new Date(movie.year).getFullYear());
         
-        if (data.results && data.results.map) {
-            data = data.results.map(movie => {
-                movie.year = movie.year || movie.release_date || movie.first_air_date;
-                movie.year = Math.min(now, new Date(movie.year || 9999).getFullYear());
-                movie.title = movie.title || movie.name;
-                movie.title = movie.title.replace(/&amp;/g, '&');
+        if (data.data) data.results = data.data;
 
+        if (data.results && data.results.map) {
+            data = data.results.map(media => {
+                // used for anime
+                const attributes = media.attributes;
+                if (attributes) {
+                    media.title = attributes.canonicalTitle;
+                    media.year = attributes.startDate;
+                    if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
+                }
+
+                // fix weird years (since it seems the year can vary based on region released first)
+                media.year = media.year || media.release_date || media.first_air_date || 9999;
+                media.year = Math.min(now, new Date(media.year).getFullYear());
+
+                media.title = media.title || media.name || '?';
+                media.title = media.title.replace(/&amp;/g, '&');
+                
                 // TMDB does not add an absolute url to returned poster paths
-                if (movie.poster_path.indexOf('http') === -1) {
-                    movie.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + movie.poster_path;
+                if (media.poster_path && media.poster_path.indexOf('http') === -1) {
+                    media.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + media.poster_path;
                 }
 
                 // Fake tv data
-                if (this.state.type !== 'movies') movie.num_seasons = 1;
+                if (this.state.type !== 'movies') media.num_seasons = 1;
 
-                return movie;
+                return media;
             });
-    
-            // Only show movies with enough ratings to be useful
-            // if (this.state.order === 'rating') {
-            //     data = data.filter(movie => {
-            //         return movie.rating.votes > 10;
-            //     });
-            // }
     
             if (this.state.quality === "3D") {
                 this.get3D(data);
