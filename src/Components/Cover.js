@@ -23,6 +23,11 @@ class Cover extends Component {
         ScrollReveal.reveal(this.refs.movieCover, config);
     }
 
+    componentWillUnmount() {
+        // Need to do this to fix some random bugs when unmount/mount happens
+        ScrollReveal.sync();
+    }
+
     coverError() {
         axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_id).then(response => {
             const data = response.data.movie_results;
