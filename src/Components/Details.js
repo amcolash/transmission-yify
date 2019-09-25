@@ -46,6 +46,26 @@ class Details extends Component {
         });
     }
 
+    getNyaa(title, page) {
+        const limit = 50;
+
+        axios.get(`https://nyaa.pantsu.cat/api/search?q=${title}&limit=${limit}&page=${page}`, { timeout: 20000 }).then(response => {
+            const data = response.data;
+            
+            let nyaa = this.state.nyaa || response.data;
+            if (nyaa !== response.data) response.data.torrents.forEach(t => nyaa.torrents.push(t));
+
+            this.setState({nyaa: nyaa}, () => {
+                // If there are more pages, get them
+                if (page * limit < data.totalRecordCount) {
+                    this.getNyaa(title, page + 1);
+                }
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+
     componentDidMount() {
         const movie = this.props.movie;
 
@@ -59,11 +79,8 @@ class Details extends Component {
                 if (movie.num_seasons) {
                     this.setState({ tvData: response.data });
                     if (movie.mal_id) {
-                        axios.get('https://tv-v2.api-fetch.website/anime/' + movie._id, { timeout: 10000 }).then(response => {
-                            this.setState({ tvData: response.data, season: response.data.num_seasons, maxSeason: response.data.num_seasons });
-                        }, error => {
-                            console.error(error);
-                        });
+                        // Anime block
+                        // this.getEztv(movie.title, 1);
                     } else {
                         // Not anime, get additional data
                         const imdb = response.data.external_ids.imdb_id.replace('tt', '');

@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
+import levenshtein from 'js-levenshtein';
 import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
@@ -242,6 +243,7 @@ class MovieList extends Component {
 
             ENDPOINT = `https://kitsu.io/api/edge/anime?page[limit]=20&page[offset]=${offset}`;
             ENDPOINT += `&sort=${ordering}${order || Order.anime[0].value}`;
+            if (genre) ENDPOINT += `&filter[genres]=${genre}`;
             if (search.length > 0) ENDPOINT += `&filter[text]=${search}`;
         } else {
             if (search.length > 0) {
@@ -271,6 +273,7 @@ class MovieList extends Component {
 
     handleData(data) {
         const now = new Date().getFullYear();
+        const { search, type } = this.state;
         
         if (data.data) data.results = data.data;
 
@@ -297,10 +300,19 @@ class MovieList extends Component {
                 }
 
                 // Fake tv data
-                if (this.state.type !== 'movies') media.num_seasons = 1;
+                if (type !== 'movies') media.num_seasons = 1;
 
                 return media;
             });
+            
+            // The search filtering is not great for kitsu :(
+            if (type === 'animes' && search.length > 0) {
+                data = data.filter(media => {
+                    const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
+                    const match = (1 - (lev / Math.max(search.length, media.title.length)));
+                    return match > 0.75;
+                });
+            }
     
             this.setState({
                 movies: data,
