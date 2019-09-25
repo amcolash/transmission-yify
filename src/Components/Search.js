@@ -13,14 +13,9 @@ class Search extends Component {
         this.props.updateSearch("", "", "", "All", this.props.type, 1);
     }
 
-    toggle3D() {
-        let { search, genre, order, quality, type, page, updateSearch } = this.props;
-        updateSearch(search, genre, order, quality === "All" ? "3D" : "All", type, page);
-    }
-
     render() {
-        const { search, genre, order, quality, type, page, isSearching, updateSearch } = this.props;
-        const clearVisible = search.length > 0 || genre.length > 0 || quality !== "All" || order !== '' || page !== 1;
+        const { search, genre, order, type, page, isSearching, updateSearch } = this.props;
+        const clearVisible = search.length > 0 || genre.length > 0 || order !== '' || page !== 1;
 
         let ordering = [];
         if (type === 'animes') ordering = Order.anime;
@@ -41,14 +36,14 @@ class Search extends Component {
                         <DebounceInput
                             value={search}
                             debounceTimeout={500}
-                            onChange={(event) => updateSearch(event.target.value, genre, order, quality, type)}
+                            onChange={(event) => updateSearch(event.target.value, genre, order, type)}
                         />
                     </div>
 
                     <div className="searchItem">
                         <span>Genre</span>
                         <select
-                            onChange={(event) => updateSearch(search, event.target.value, order, quality, type)}
+                            onChange={(event) => updateSearch(search, event.target.value, order, type)}
                             value={genre}
                         >
                             {genres.map(genre => (
@@ -65,7 +60,7 @@ class Search extends Component {
                     <div className="searchItem">
                         <span>Order</span>
                         <select
-                            onChange={(event) => updateSearch(search, genre, event.target.value, quality, type)}
+                            onChange={(event) => updateSearch(search, genre, event.target.value, type)}
                             value={order}
                         >
                             {ordering.map(order => (
@@ -81,15 +76,12 @@ class Search extends Component {
 
                     <div className="searchItem">
                         <span>Type</span>
-                        <select onChange={(event) => updateSearch(search, genre, order, quality, event.target.value)} value={type} >
+                        <select onChange={(event) => updateSearch(search, genre, order, event.target.value)} value={type} >
                             <option key="movies" value="movies">Movies</option>
                             <option key="shows" value="shows">TV</option>
                             <option key="animes" value="animes">Anime</option>
                         </select>
                     </div>
-
-                    {/* {type === 'movies' ? (
-                        <button className={quality === "All" ? "gray" : "green"} onClick={() => this.toggle3D()}>3D</button>) : null } */}
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
                 </div>

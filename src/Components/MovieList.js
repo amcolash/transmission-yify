@@ -21,7 +21,6 @@ import Order from '../Data/Order';
 
 const searchCache = [];
 const hashMapping = {};
-const alternateVersion = {};
 
 class MovieList extends Component {
 
@@ -39,7 +38,6 @@ class MovieList extends Component {
             started: [],
             search: '',
             genre: '',
-            quality: 'All',
             order: '',
             type: 'animes',
             isSearching: false,
@@ -211,12 +209,11 @@ class MovieList extends Component {
         this.setState({files: data});
     }
 
-    updateSearch(search, genre, order, quality, type, page) {
+    updateSearch(search, genre, order, type, page) {
         this.setState({
             search: search,
             genre: genre,
             order: order,
-            quality: quality,
             type: type,
             page: page || 1, // reset page if not provided
         }, () => this.updateData());
@@ -305,51 +302,17 @@ class MovieList extends Component {
                 return media;
             });
     
-            if (this.state.quality === "3D") {
-                this.get3D(data);
-            } else {
-                this.setState({
-                    movies: data,
-                    isLoaded: true,
-                    isSearching: false
-                });
-            }
+            this.setState({
+                movies: data,
+                isLoaded: true,
+                isSearching: false
+            });
         } else {
             this.setState({
                 isLoaded: true,
                 isSearching: false
             });
         }
-    }
-
-    get3D(movies) {
-            const YIFY_ENDPOINT = 'https://yts.lt/api/v2/list_movies.json?query_term=';
-            
-            var promises = [];
-            for (var i = 0; i < movies.length; i++) {
-                const id = movies[i].imdb_id;
-                if (!alternateVersion[id]) promises.push(axios.get(YIFY_ENDPOINT + id));
-            }
-
-            axios.all(promises).then(results => {
-                for (var i = 0; i < results.length; i++) {
-                    const data = results[i].data;
-                    if (data && data.data && data.data.movies) {
-                        const movie = data.data.movies[0];
-                        alternateVersion[movie.imdb_code] = {};
-                        for (var j = 0; j < movie.torrents.length; j++) {
-                            const version = movie.torrents[j];
-                            if (version.quality === "3D") alternateVersion[movie.imdb_code] = version;
-                        }
-                    }
-                }
-
-                this.setState({
-                    movies: movies,
-                    isLoaded: true,
-                    isSearching: false
-                });
-            });
     }
 
     cancelTorrent = (hashString) => {
@@ -467,20 +430,6 @@ class MovieList extends Component {
 
         // Normal movie
         if (movie.torrents && movie.torrents.en) {
-            if (this.state.quality === "3D" && alternateVersion[movie.imdb_id] && alternateVersion[movie.imdb_id].hash) {
-                const version = alternateVersion[movie.imdb_id];
-                movie.torrents.en["3D"] = {
-                    peer: version.peers,
-                    seed: version.seeds,
-                    url: version.url,
-                    hash: version.hash.toLowerCase(),
-                    filesize: version.size,
-                    movie: true
-                };
-            } else {
-                delete movie.torrents.en["3D"];
-            }
-
             for (let [quality, torrent] of Object.entries(movie.torrents.en)) { // eslint-disable-line no-unused-vars
                 if (quality === "0") quality = "480p";
                 let sort = 0;
