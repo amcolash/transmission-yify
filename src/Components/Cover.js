@@ -51,30 +51,8 @@ class Cover extends Component {
             versions[i].progress = getProgress(versions[i].hashString);
         }
 
-        if (!movie.poster_path) {
-            movie.poster_path = "broken image";
-        } else {
-            if (movie.poster_path.indexOf('http') === -1) {
-                movie.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + movie.poster_path;
-            }
-
-            // Fix no longer existent site path
-            if (movie.poster_path.indexOf("hummingbird.me") !== -1) {
-                movie.poster_path = "https://media.kitsu.io/anime/poster_images/" + movie._id + "/large.jpg";
-            }
-            // Things seem to be broken with this site, use omdb instead
-            if (movie.poster_path.indexOf("fanart.tv") !== -1) {
-                movie.poster_path = "broken image";
-            }
-
-            // Fix insecure images
-            if (movie.poster_path.indexOf("http://image.tmdb") !== -1) {
-                movie.poster_path = movie.poster_path.replace("http://image.tmdb", "https://image.tmdb");
-            }
-            if (movie.poster_path.indexOf("http://thetvdb.com") !== -1) {
-                movie.poster_path = movie.poster_path.replace("http://thetvdb.com", "https://thetvdb.com");
-            }
-        }
+        //if (!movie.poster_path) movie.poster_path = "broken image";
+        if (!movie.poster_path) movie.poster_path = "broken image";
 
         var hasFile = false;
         for (i = 0; i < files.length; i++) {
