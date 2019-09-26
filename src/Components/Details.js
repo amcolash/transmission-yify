@@ -77,7 +77,7 @@ class Details extends Component {
         const type = this.props.type;
 
         if (type === 'animes') {
-            axios.get(`https://kitsu.io/api/edge/anime/${media.id}?include=genres`).then(response => {
+            axios.get(`${this.props.server}/kitsu/${media.id}`).then(response => {
                 const data = response.data.data;
                 this.setState({moreData: {
                     Plot: data.attributes.synopsis,
@@ -148,6 +148,13 @@ class Details extends Component {
     getMovies() {
         const media = this.props.media;
         const pb = this.state.pb;
+        
+        // Only show cams if there are not other versions
+        let hasNonCam = false;
+        pb.forEach(t => {
+            const parsed = ptn(t.name);
+            if (parsed.quality && parsed.resolution) hasNonCam |= parsed.quality.toLowerCase().indexOf('cam') === -1;
+        });
 
         let versions = [];
 
@@ -156,7 +163,8 @@ class Details extends Component {
             if (!parsed.quality || !parsed.resolution) return;
 
             let shouldAdd = true;
-            if (parsed.resolution === '2160p' || parsed.quality.toLowerCase().indexOf('cam') !== -1) {
+            let isCam = parsed.quality.toLowerCase().indexOf('cam') !== -1;
+            if (parsed.resolution === '2160p' || (hasNonCam && isCam)) {
                 shouldAdd = false;
             }
 
@@ -174,7 +182,7 @@ class Details extends Component {
                 if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeders)) return;
 
                 versions[parsed.resolution] = {
-                    quality: parsed.resolution,
+                    quality: `${parsed.resolution} ${isCam ? '(CAM)' : ''}`,
                     sort: sort,
                     peers: t.leechers,
                     seeds: t.seeders,
