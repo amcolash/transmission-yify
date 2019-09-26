@@ -13,13 +13,13 @@ class Details extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { tmdbData: null, moreData: null, tvData: null, pb: null, eztv: null, season: 1, maxSeason: 1, showCover: true };
+        this.state = { tmdbData: null, moreData: null, tvData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true };
     }
 
     getEztv(imdb, page) {
         const limit = 50;
 
-        axios.get(`https://eztv.io/api/get-torrents?limit=${limit}&page=${page}&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
+        axios.get(`${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
             // Make sure that the show was found and we are not just getting
             // the newest shows on the site. This is a bad api design for them :(
             if (response.data.torrents_count < 2000) {
@@ -55,7 +55,7 @@ class Details extends Component {
     getNyaa(title, page) {
         const limit = 50;
 
-        axios.get(`https://nyaa.pantsu.cat/api/search?q=${title}&limit=${limit}&page=${page}`, { timeout: 20000 }).then(response => {
+        axios.get(`${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`, { timeout: 20000 }).then(response => {
             const data = response.data;
             
             let nyaa = this.state.nyaa || response.data;
@@ -79,13 +79,14 @@ class Details extends Component {
         if (type === 'animes') {
             axios.get(`https://kitsu.io/api/edge/anime/${media.id}?include=genres`).then(response => {
                 const data = response.data.data;
-                this.setState({
-                    moreData: {
-                        Plot: data.attributes.synopsis,
-                        Rated: data.attributes.rating,
-                        Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label)
-                    }
-                });
+                this.setState({moreData: {
+                    Plot: data.attributes.synopsis,
+                    Rated: data.attributes.rating,
+                    Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
+                    EpisodeCount: data.attributes.episodeCount
+                }});
+
+                this.getNyaa(media.title, 1);
             }).catch(err => {
                 console.error(err);
                 this.setState({ moreData: "ERROR" });
@@ -193,34 +194,44 @@ class Details extends Component {
     }
 
     getEpisodes() {
-        const { tvData, eztv } = this.state;
+        const { tvData, eztv, nyaa, moreData } = this.state;
+        const type = this.props.type;
+
         let episodes = [];
 
-            if (tvData && tvData.episodes) {
-                tvData.episodes.forEach(episode => {
-                    episodes[episode.season] = episodes[episode.season] || [];
-                    episodes[episode.season][episode.episode] = episode;
-                });
-            }
-            if (eztv) {
-                eztv.torrents.forEach(torrent => {
-                    const parsed = ptn(torrent.filename);
-                    parsed.resolution = parsed.resolution || '480p';
+        if (tvData && tvData.episodes) {
+            tvData.episodes.forEach(episode => {
+                episodes[episode.season] = episodes[episode.season] || [];
+                episodes[episode.season][episode.episode] = episode;
+            });
+        }
 
-                    // Bail if we weren't able to parse season/episode
-                    if (parsed.season === 0 || parsed.episode === 0) return;
+        if (eztv || nyaa) {
+            const torrents = eztv || nyaa;
+            torrents.torrents.forEach(torrent => {
+                // console.log(torrent);
 
-                    episodes[parsed.season] = episodes[parsed.season] || [];
-                    episodes[parsed.season][parsed.episode] = episodes[parsed.season][parsed.episode] || {
-                        title: `Episode ${parsed.episode}`,
-                        episode: parsed.episode,
-                        season: parsed.season,
-                        torrents: {}
-                    };
-                    
-                    const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
-                    if (!existing || torrent.seeds > existing.seeds) {
-                    const url = torrent.magnet_url || torrent.torrent_url;
+                const parsed = ptn(torrent.filename || torrent.name);
+                parsed.resolution = parsed.resolution || '480p';
+                if (type === 'animes') parsed.season = 1; // keep anime in 1 season
+
+                // Bail if we weren't able to parse season/episode
+                if (parsed.season === 0 || parsed.episode === 0 || (moreData && parsed.episode > moreData.EpisodeCount)) return;
+
+                episodes[parsed.season] = episodes[parsed.season] || [];
+                episodes[parsed.season][parsed.episode] = episodes[parsed.season][parsed.episode] || {
+                    title: `Episode ${parsed.episode}`,
+                    episode: parsed.episode,
+                    season: parsed.season,
+                    torrents: {}
+                };
+
+                const seeds = torrent.seeds || torrent.seeders;
+                const peers = torrent.peers || torrent.leechers;
+                
+                const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
+                if (!existing || seeds > existing.seeds) {
+                    const url = torrent.magnet_url || torrent.torrent_url || torrent.magnet;
                     const hash = magnet.decode(url).infoHash.toLowerCase();
 
                     let sort = 0;
@@ -232,8 +243,8 @@ class Details extends Component {
                     }
 
                     episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
-                        seeds: torrent.seeds,
-                        peers: torrent.peers,
+                        seeds: seeds,
+                        peers: peers,
                         url: url,
                         hashString: hash,
                         sort: sort,
@@ -255,17 +266,24 @@ class Details extends Component {
 
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
-        const { tmdbData, moreData, showCover, tvData, eztv, pb, season, maxSeason } = this.state;
+        const { tmdbData, moreData, showCover, tvData, eztv, nyaa, pb, season, maxSeason } = this.state;
 
         let versions = [];
         let seasons = [];
         let episodes = [];
 
-        if (type === 'shows') {
-            for (let i = 1; i < maxSeason + 1; i++) {
-                seasons.push(i);
+        if (type === 'shows' || type === 'animes') {
+            if (type === 'shows') {
+                for (let i = 1; i < maxSeason + 1; i++) {
+                    seasons.push(i);
+                }
+            } else {
+                seasons.push(1);
             }
+
             episodes = this.getEpisodes();
+
+            console.log(episodes)
         }
 
         if (type === 'movies' && pb) {
@@ -404,7 +422,7 @@ class Details extends Component {
                             </span>
                         )
                     ) : (
-                        !tvData || (!eztv && !media.mal_id) ? (
+                        (!tvData && !eztv && !nyaa) ? (
                             <Fragment>
                                 Loading torrent data...
                                 <Spinner visible/>

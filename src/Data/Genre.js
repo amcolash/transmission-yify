@@ -22,6 +22,7 @@ export default {
         { value: 37, label: 'Western' },  
     ],
     anime: [
+        { value: '', label: 'All', id: '0' },
         { value: 'action', label: 'Action', id: '1' },
         { value: 'adventure', label: 'Adventure', id: '2' },
         { value: 'comedy', label: 'Comedy', id: '3' },
