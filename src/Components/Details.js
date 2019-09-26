@@ -108,7 +108,8 @@ class Details extends Component {
                         this.setState({ moreData: "ERROR" });
                     });
     
-                    axios.get(this.props.server + '/pirate/' + media.title + ' ' + media.year).then(response => {
+                    const cleanedTitle = media.title.replace(/&/g, '');
+                    axios.get(this.props.server + '/pirate/' + cleanedTitle + ' ' + media.year).then(response => {
                         this.setState({pb: response.data});
                     }).catch(err => {
                         console.error(err);
@@ -290,8 +291,6 @@ class Details extends Component {
             }
 
             episodes = this.getEpisodes();
-
-            console.log(episodes)
         }
 
         if (type === 'movies' && pb) {
