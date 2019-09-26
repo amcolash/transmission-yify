@@ -11,6 +11,7 @@ const $ = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const PirateBay = require('thepiratebay');
+const CronJob = require('cron').CronJob;
 
 require('dotenv').config();
 
@@ -37,7 +38,11 @@ const PORT = 9000;
 
 let BUILD_TIME = 'Dev Build';
 if (fs.existsSync('./build_time') && IS_DOCKER) {
-    BUILD_TIME = new Date(fs.readFileSync('./build_time'));
+    try {
+        BUILD_TIME = new Date(fs.readFileSync('./build_time'));
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 var currentTorrents = [];
@@ -70,6 +75,12 @@ if (fs.existsSync('./.cert/fullchain.pem')) {
 } else {
     credentials.cert = fs.readFileSync('./.cert/cert.pem');
 }
+
+// Auto clean tracker cache daily at 5am
+new CronJob('00 00 05 * * *', function() {
+    console.log('scheduled clearing of tracker cache');
+    this.trackerCache = {};
+}, null, true, 'America/Los_Angeles');
 
 // Make the server
 const server = require('https').createServer(credentials, app);

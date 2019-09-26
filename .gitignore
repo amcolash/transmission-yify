@@ -57,8 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
-upgrade/.key
-
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 # testing
@@ -77,6 +75,7 @@ build/
 cache.json
 
 .ssh/
+.cert
 .cert/
 build_time
 
