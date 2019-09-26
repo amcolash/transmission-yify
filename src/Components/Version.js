@@ -14,12 +14,12 @@ class Version extends Component {
                 <div className='qualityPeers'>
                     <b>{version.quality}</b>
                     <span className='peers'>
-                    {version.seeds ? (
-                        version.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
-                        version.seeds < 20 ? <FaBatteryQuarter className='red'/> :
-                        version.seeds < 50 ? <FaBatteryHalf className='orange'/> :
-                        <FaBatteryFull className='green'/>
-                    ) : null }
+                        {
+                            version.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
+                            version.seeds < 20 ? <FaBatteryQuarter className='red'/> :
+                            version.seeds < 50 ? <FaBatteryHalf className='orange'/> :
+                                                <FaBatteryFull className='green'/>
+                        }
                     </span>
                 </div>
                 {getProgress(version.hashString) ? (

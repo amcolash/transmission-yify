@@ -45,7 +45,7 @@ var currentStorage;
 var currentFiles = [];
 
 var cache = {};
-var pbCache = {};
+var trackerCache = {};
 var isUpgrading = false;
 
 var pirateBay;
@@ -260,6 +260,30 @@ app.get('/discover/:type/:page', function (req, res) {
     }
 });
 
+function checkTrackerCache(url, res) {
+    if (trackerCache[url]) {
+        res.send(trackerCache[url]);
+    } else {
+        axios.get(url).then(response => {
+            trackerCache[url] = response.data;
+            res.send(response.data);
+        }).catch(err => {
+            console.error(err);
+            res.send([]);
+        });
+    }
+}
+
+app.get('/eztv/', function(req, res) {
+    const url = `https://eztv.io/api/get-torrents?${querystring.stringify(req.query)}`;
+    checkTrackerCache(url, res);
+});
+
+app.get('/nyaa/', function(req, res) {
+    const url = `https://nyaa.pantsu.cat/api/search?${querystring.stringify(req.query)}`;
+    checkTrackerCache(url, res);
+});
+
 app.get('/pirate/:search', function(req, res) {
     const search = req.params.search;
 
@@ -267,15 +291,15 @@ app.get('/pirate/:search', function(req, res) {
     process.env.THEPIRATEBAY_DEFAULT_ENDPOINT = pirateBay;
 
     // Add a simple cache here to make things faster on the client
-    if (pbCache[search]) {
-        res.send(pbCache[search]);
+    if (trackerCache[search]) {
+        res.send(trackerCache[search]);
     } else {
         PirateBay.search(req.params.search, {
             category: 'video',
             orderBy: 'seeds',
             sortBy: 'desc'
         }).then(response => {
-            pbCache[search] = response;
+            trackerCache[search] = response;
             res.send(response);
         }).catch(err => {
             console.error('pb', err);
