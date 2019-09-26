@@ -5,6 +5,11 @@ services:
   - docker
 language: minimal # All of our build happens inside docker, so no extra support needed
 
+# Only run travis on master
+branches:
+  only:
+  - master
+
 env:
   global:
     - REGISTRY_USER=amcolash
