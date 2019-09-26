@@ -67,25 +67,20 @@ class Details extends Component {
     }
 
     componentDidMount() {
-        const movie = this.props.movie;
+        const media = this.props.media;
+        const type = this.props.type;
 
-        // If anime, no extra data
-        if (movie.mal_id) {
-            this.setState({ moreData: "ERROR" });
+        if (type === 'animes') {
+
         } else {
-            axios.get(this.props.server + '/tmdbid/' + (movie.num_seasons ? 'tv/' : 'movie/') + movie.id, { timeout: 10000 }).then(response => {
+            axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id, { timeout: 10000 }).then(response => {
                 this.setState({ tmdbData: response.data });
-
-                if (movie.num_seasons) {
+    
+                if (type === 'shows') {
                     this.setState({ tvData: response.data });
-                    if (movie.mal_id) {
-                        // Anime block
-                        // this.getEztv(movie.title, 1);
-                    } else {
-                        // Not anime, get additional data
-                        const imdb = response.data.external_ids.imdb_id.replace('tt', '');
-                        this.getEztv(imdb, 1);
-                    }
+                    const imdb = response.data.external_ids.imdb_id.replace('tt', '');
+    
+                    this.getEztv(imdb, 1);
                 } else {
                     axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
                         this.setState({ moreData: response.data });
@@ -93,8 +88,8 @@ class Details extends Component {
                         console.error(error);
                         this.setState({ moreData: "ERROR" });
                     });
-
-                    axios.get(this.props.server + '/pirate/' + movie.title + ' ' + movie.year).then(response => {
+    
+                    axios.get(this.props.server + '/pirate/' + media.title + ' ' + media.year).then(response => {
                         this.setState({pb: response.data});
                     }).catch(err => {
                         console.error(err);
@@ -133,14 +128,14 @@ class Details extends Component {
     }
 
     render() {
-        const { movie, downloadTorrent, cancelTorrent, getLink, getVersions, getTorrent, getProgress, started } = this.props;
+        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
         const { tmdbData, moreData, showCover, tvData, eztv, pb, season, maxSeason } = this.state;
 
-        var versions = getVersions(movie);
+        let versions = [];
+        let seasons = [];
+        let episodes = [];
 
-        var seasons = [];
-        var episodes = [];
-        if (movie.num_seasons) {
+        if (type === 'shows') {
             for (let i = 1; i < maxSeason + 1; i++) {
                 seasons.push(i);
             }
@@ -178,8 +173,9 @@ class Details extends Component {
             }
         }
 
-        if (pb) {
-            let extras = {};
+        console.log(episodes);
+
+        if (type === 'movies' && pb) {
             pb.forEach(t => {
                 const parsed = ptn(t.name);
                 if (!parsed.quality || !parsed.resolution) return;
@@ -200,9 +196,9 @@ class Details extends Component {
                         default: sort = 0; break;
                     }
 
-                    if (sort === 0 || (extras[parsed.resolution] && extras[parsed.resolution].seeds > t.seeders)) return;
+                    if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeders)) return;
 
-                    extras[parsed.resolution] = {
+                    versions[parsed.resolution] = {
                         quality: parsed.resolution,
                         sort: sort,
                         peers: t.leechers,
@@ -211,21 +207,18 @@ class Details extends Component {
                         url: t.magnetLink,
                         hashString: magnet.decode(t.magnetLink).infoHash.toLowerCase(),
                         size: t.size,
-                        title: movie.title + " (" + movie.year + ") [" + parsed.resolution + "]"
+                        title: media.title + " (" + media.year + ") [" + parsed.resolution + "]"
                     };
                 }
             });
 
-            // Add new torrents to the version array
-            versions = versions.concat(Object.values(extras));
-
-            // Sort it again
+            // Sort the versions
             versions = Object.values(versions).sort(function(a, b) {
                 return b.sort - a.sort;
             });
         }
 
-        var mpaa = movie.certification;
+        var mpaa = media.certification;
         if (!mpaa || mpaa === "N/A") {
             if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
                 mpaa = moreData.Rated;
@@ -250,34 +243,34 @@ class Details extends Component {
                 {showCover ? (
                     <div className="left">
                         <img
-                            src={movie.poster_path}
-                            alt={movie.title}
+                            src={media.poster_path}
+                            alt={media.title}
                             onError={this.imageError.bind(this)}
                         />
-                        {movie.trailer ? (
+                        {media.trailer ? (
                             <Fragment>
                                 <hr/>
-                                <a href={movie.trailer} target="_blank" rel="noopener noreferrer"><FaPlayCircle />Trailer</a>
+                                <a href={media.trailer} target="_blank" rel="noopener noreferrer"><FaPlayCircle />Trailer</a>
                             </Fragment>
                         ) : null}
                     </div>
                 ) : null }
                 <div className="right">
                     <h3>
-                        {movie.title}
+                        {media.title}
                     </h3>
                     <h4>
                         <Fragment>
-                            {!movie.num_seasons ? (
-                                <span>{movie.year}{moreData ? ', ' + this.convertTime(moreData.Runtime) : null}</span>
+                            {type === 'movies' ? (
+                                <span>{media.year}{moreData ? ', ' + this.convertTime(moreData.Runtime) : null}</span>
                             ) : (
-                                <span>{(moreData && moreData.year) ? moreData.Year : movie.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
+                                <span>{(moreData && moreData.year) ? moreData.Year : media.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
                             )}
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
                     </h4>
                     <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.overview) ? tvData.overview :
-                        (movie.synopsis ? movie.synopsis : ""))}</p>
+                        (media.synopsis ? media.synopsis : ""))}</p>
                     {genres ? (
                         <Fragment>
                             <span className="capitalize">
@@ -287,13 +280,13 @@ class Details extends Component {
                         </Fragment>
                     ) : null}
                     
-                    {!movie.num_seasons ? moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
+                    {type === 'movies' ? moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
                         <Fragment>
                             {moreData.Ratings.map(rating => (
                                 <Fragment key={rating.Source}>
                                     {rating.Source === "Internet Movie Database" ? (
                                         <Fragment>
-                                            <a href={"https://www.imdb.com/title/" + movie.imdb_id} target="_blank" rel="noopener noreferrer">IMDB Rating</a>
+                                            <a href={"https://www.imdb.com/title/" + media.imdb_id} target="_blank" rel="noopener noreferrer">IMDB Rating</a>
                                             <span>: {rating.Value}</span>
                                         </Fragment>
                                     ) : (
@@ -331,7 +324,7 @@ class Details extends Component {
 
                     <hr/>
 
-                    {!movie.num_seasons ? (
+                    {type === 'movies' ? (
                         pb ? (
                             versions.length > 0 ? (
                                 versions.map(version => (
@@ -354,7 +347,7 @@ class Details extends Component {
                             </span>
                         )
                     ) : (
-                        !tvData || (!eztv && !movie.mal_id) ? (
+                        !tvData || (!eztv && !media.mal_id) ? (
                             <Fragment>
                                 Loading torrent data...
                                 <Spinner visible/>
@@ -388,7 +381,7 @@ class Details extends Component {
                                                     <h4 className="episode">{episode.episode} - {episode.title}</h4>
                                                 )}
 
-                                                {getVersions(episode).map(version => (
+                                                {episode.torrents.map(version => (
                                                     <Version
                                                         key={version.hashString}
                                                         version={version}

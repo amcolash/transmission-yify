@@ -1,17 +1,11 @@
-import React, { Component, Fragment } from 'react';
-import { FaDownload, FaTrash, FaFilm, FaCheck } from 'react-icons/fa';
-import axios from 'axios';
+import React, { Component } from 'react';
+import { FaFilm, FaCheck } from 'react-icons/fa';
 import levenshtein from 'js-levenshtein';
 import './Cover.css';
-import Spinner from './Spinner';
+// import Spinner from './Spinner';
 import ScrollReveal from '../ScrollReveal';
 
 class Cover extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { movie: props.movie };
-    }
-
     componentDidMount() {
         const config = {
             duration: 300,
@@ -20,7 +14,7 @@ class Cover extends Component {
             easing: 'ease'
         }
 
-        ScrollReveal.reveal(this.refs.movieCover, config);
+        ScrollReveal.reveal(this.refs.mediaCover, config);
     }
 
     componentWillUnmount() {
@@ -28,56 +22,30 @@ class Cover extends Component {
         ScrollReveal.sync();
     }
 
-    coverError() {
-        axios.get(this.props.server + '/themoviedb/' + this.props.movie.imdb_id).then(response => {
-            const data = response.data.movie_results;
-            if (data.length > 0) {
-                // if this breaks, consider doing things the right way as described here:
-                // https://developers.themoviedb.org/3/configuration/get-api-configuration
-                const image = 'https://image.tmdb.org/t/p/w342' + data[0].poster_path;
-                
-                var movie = this.state.movie;
-                movie.images.poster = image;
-                this.setState({ movie: movie });
-            }
-        }, error => {
-            // no image if this happens
-            console.error(error);
-        });
-    }
-
     render() {
-        const { click, downloadTorrent, cancelTorrent, getVersions, getProgress, started, files } = this.props;
-        const movie = this.state.movie;
+        const { click, files, media } = this.props;
 
-        const versions = getVersions(movie);
-
-        for (var i = 0; i < versions.length; i++) {
-            versions[i].progress = getProgress(versions[i].hashString);
-        }
-
-        //if (!movie.poster_path) movie.poster_path = "broken image";
-        if (!movie.poster_path) movie.poster_path = "broken image";
+        if (!media.poster_path) media.poster_path = "broken image";
 
         var hasFile = false;
-        for (i = 0; i < files.length; i++) {
+        for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const lev = levenshtein(file.title.toLowerCase(), movie.title.toLowerCase());
-            const match = (1 - (lev / Math.max(file.title.length, movie.title.length)));
+            const lev = levenshtein(file.title.toLowerCase(), media.title.toLowerCase());
+            const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
 
-            if (match > 0.95 && file.year === movie.year) {
+            if (match > 0.95 && file.year === media.year) {
                 hasFile = true;
                 break;
             }
         }
 
         return (
-            <div className="movie" ref='movieCover'>
+            <div className="movie" ref='mediaCover'>
                 <div
                     className="cover"
-                    onClick={(e) => click(movie)}
+                    onClick={(e) => click(media)}
                 >
-                    <img className="movieCover" src={this.state.altCover || movie.poster_path} alt="" onError={this.coverError.bind(this)} />
+                    <img className="movieCover" src={media.poster_path} alt="" />
                     <div className="movieIcon">
                         <FaFilm />
                     </div>
@@ -87,7 +55,7 @@ class Cover extends Component {
                         </div>
                     ) : null}
                     <div className="quality">
-                        {versions.map(version => (
+                        {/* {versions.map(version => (
                             <Fragment
                                 key={version.hashString}
                             >
@@ -113,10 +81,10 @@ class Cover extends Component {
                                 )}
                                 <br/>
                             </Fragment>
-                        ))}
+                        ))} */}
                     </div>
                 </div>
-                <span onClick={(e) => click(movie)}>{movie.title} ({movie.year})</span>
+                <span onClick={(e) => click(media)}>{media.title} ({media.year})</span>
             </div>
         );
     }

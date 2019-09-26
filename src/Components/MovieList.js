@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import axios from 'axios';
-import magnet from 'magnet-uri';
 import openSocket from 'socket.io-client';
 import levenshtein from 'js-levenshtein';
 import Modal from 'react-responsive-modal';
@@ -34,13 +33,13 @@ class MovieList extends Component {
             movies: [],
             page: 1,
             modal: false,
-            movie: {},
+            media: {},
             torrents: [],
             started: [],
             search: '',
             genre: '',
             order: '',
-            type: 'animes',
+            type: 'shows',
             isSearching: false,
             storage: null,
             width: 0,
@@ -58,8 +57,8 @@ class MovieList extends Component {
         window.localStorage.removeItem('popcornfaq2');
 
         this.updateSearch = this.updateSearch.bind(this);
-        this.getTorrent = this.getTorrent.bind(this);
         this.getProgress = this.getProgress.bind(this);
+        this.getTorrent = this.getTorrent.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
@@ -401,87 +400,6 @@ class MovieList extends Component {
         });
     }
 
-    getVersions = (movie) => {
-        var versions = {};
-        var hashes = {};
-
-        // TV Episode
-        if (movie.episode && movie.torrents) {
-            for (let [quality, torrent] of Object.entries(movie.torrents)) { // eslint-disable-line no-unused-vars
-                if (quality === "0") quality = "480p";
-                let sort = 0;
-                switch (quality) {
-                    case "1080p": sort = 3; break;
-                    case "720p": sort = 2; break;
-                    case "480p": sort = 1; break;
-                    default: sort = 0; break;
-                }
-
-                if (torrent.url) {
-                    var mag = magnet.decode(torrent.url).infoHash ? magnet.decode(torrent.url).infoHash.toLowerCase() : torrent.url;
-                }
-
-                let version = {
-                    quality: quality,
-                    sort: sort,
-                    url: torrent.url,
-                    hashString: torrent.hash || mag,
-                    tv: true
-                };
-
-                // Prevent the same torrent from being added
-                if (!version.hashString || hashes[version.hashString]) continue;
-                hashes[version.hashString] = quality;
-
-                if (!versions[quality] || versions[quality].ratio < version.ratio) {
-                    versions[quality] = version;
-                }
-            }
-
-            return Object.values(versions).sort(function(a, b) {
-                return b.sort - a.sort;
-            });
-        }
-
-        // Normal movie
-        if (movie.torrents && movie.torrents.en) {
-            for (let [quality, torrent] of Object.entries(movie.torrents.en)) { // eslint-disable-line no-unused-vars
-                if (quality === "0") quality = "480p";
-                let sort = 0;
-                switch (quality) {
-                    case "1080p": sort = 3; break;
-                    case "720p": sort = 2; break;
-                    case "480p": sort = 1; break;
-                    default: sort = 0; break;
-                }
-
-                let version = {
-                    quality: quality,
-                    sort: sort,
-                    peers: torrent.peer.toFixed(0),
-                    seeds: torrent.seed.toFixed(0),
-                    ratio: torrent.peer > 0 ? (torrent.seed / torrent.peer).toFixed(3) : 0,
-                    url: torrent.url,
-                    hashString: torrent.hash || magnet.decode(torrent.url).infoHash.toLowerCase(),
-                    size: torrent.filesize,
-                    title: movie.title + " (" + movie.year + ") [" + quality + "]"
-                };
-
-                // Prevent the same torrent from being added
-                if (hashes[version.hashString]) continue;
-                hashes[version.hashString] = true;
-
-                if (!versions[quality] || versions[quality].ratio < version.ratio) {
-                    versions[quality] = version;
-                }
-            }
-        }
-
-        return Object.values(versions).sort(function(a, b) {
-            return a.sort - b.sort;
-        });
-    }
-
     getTorrent(hashString) {
         for (var i = 0; i < this.state.torrents.length; i++) {
             const torrent = this.state.torrents[i];
@@ -490,14 +408,14 @@ class MovieList extends Component {
 
         return null;
     }
-
+    
     getProgress(hashString) {
         const torrent = this.getTorrent(hashString);
         return (torrent !== null) ? (torrent.percentDone * 100).toFixed(0) : null;
     }
 
-    onOpenModal = (movie) => {
-        this.setState({ movie: movie, modal: true });
+    onOpenModal = (media) => {
+        this.setState({ media: media, modal: true });
     };
 
     onCloseModal = () => {
@@ -515,8 +433,8 @@ class MovieList extends Component {
 
     render() {
         const {
-            error, isLoaded, movies, modal, movie, page, torrents, location,
-            started, width, storage, scroll, pb, build
+            error, isLoaded, movies, modal, media, page, torrents, location,
+            started, width, storage, scroll, pb, build, type
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length >= 20;
@@ -549,7 +467,8 @@ class MovieList extends Component {
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
                         <Details
-                            movie={movie}
+                            media={media}
+                            type={type}
                             server={this.server}
                             torrents={torrents}
                             started={started}
@@ -558,7 +477,6 @@ class MovieList extends Component {
                             downloadTorrent={this.downloadTorrent}
                             getProgress={this.getProgress}
                             getTorrent={this.getTorrent}
-                            getVersions={this.getVersions}
                         />
                     </Modal>
             
@@ -590,18 +508,17 @@ class MovieList extends Component {
 
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
-                            movies.map(movie => (
+                            movies.map(media => (
                                 // movie.torrents || this.state.type !== "movies" ? (
                                     <Cover
-                                        key={movie.id}
-                                        movie={movie}
+                                        key={media.id}
+                                        media={media}
                                         click={this.onOpenModal}
                                         downloadTorrent={this.downloadTorrent}
                                         cancelTorrent={this.cancelTorrent}
                                         torrents={this.torrents}
                                         started={started}
                                         getProgress={this.getProgress}
-                                        getVersions={this.getVersions}
                                         server={this.server}
                                         files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
                                     />
