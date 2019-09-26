@@ -7,6 +7,7 @@ import * as  ptn  from 'parse-torrent-name';
 import './Details.css';
 import Version from './Version';
 import Spinner from './Spinner';
+import Genre from '../Data/Genre';
 
 class Details extends Component {
 
@@ -76,7 +77,19 @@ class Details extends Component {
         const type = this.props.type;
 
         if (type === 'animes') {
-
+            axios.get(`https://kitsu.io/api/edge/anime/${media.id}?include=genres`).then(response => {
+                const data = response.data.data;
+                this.setState({
+                    moreData: {
+                        Plot: data.attributes.synopsis,
+                        Rated: data.attributes.rating,
+                        Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label)
+                    }
+                });
+            }).catch(err => {
+                console.error(err);
+                this.setState({ moreData: "ERROR" });
+            });
         } else {
             axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id, { timeout: 10000 }).then(response => {
                 this.setState({ tmdbData: response.data });
@@ -273,8 +286,11 @@ class Details extends Component {
         if (tmdbData) {
             genres = tmdbData.genres.map(g => g.name);
             genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
-        } else if (tvData) {
-            genres = tvData.genres;
+        } else if (tvData || moreData) {
+            if (tvData && tvData.genres) genres = tvData.genres;
+            else if (moreData && moreData.Genres) genres = moreData.Genres;
+            else genres = [];
+
             genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
                 JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
         }
@@ -305,7 +321,7 @@ class Details extends Component {
                             {type === 'movies' ? (
                                 <span>{media.year}{moreData ? ', ' + this.convertTime(moreData.Runtime) : null}</span>
                             ) : (
-                                <span>{(moreData && moreData.year) ? moreData.Year : media.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
+                                <span>{(moreData && moreData.Year) ? moreData.Year : media.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
                             )}
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
@@ -321,7 +337,7 @@ class Details extends Component {
                         </Fragment>
                     ) : null}
                     
-                    {type === 'movies' ? moreData !== "ERROR" && moreData !== null && !moreData.Error ? (
+                    {type === 'movies' ? moreData !== "ERROR" && moreData !== null ? (
                         <Fragment>
                             {moreData.Ratings.map(rating => (
                                 <Fragment key={rating.Source}>
@@ -349,7 +365,7 @@ class Details extends Component {
                         </Fragment>
                     ) : (
                         <Fragment>
-                            {moreData === "ERROR" || (moreData !== null && moreData.Error) ? (
+                            {moreData === "ERROR" || moreData !== null ? (
                                 null
                             ) : (
                                 <Fragment>
