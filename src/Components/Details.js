@@ -17,11 +17,16 @@ class Details extends Component {
 
     getEztv(imdb, page) {
         const limit = 50;
+
         axios.get(`https://eztv.io/api/get-torrents?limit=${limit}&page=${page}&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
             // Make sure that the show was found and we are not just getting
             // the newest shows on the site. This is a bad api design for them :(
             if (response.data.torrents_count < 2000) {
                 const data = response.data;
+                data.torrents = data.torrents.filter(torrent => {
+                    return ptn(torrent.filename).title.toLowerCase() === this.props.media.title.toLowerCase();
+                });
+
                 let maxSeason = this.state.maxSeason;
                 let newMax = false;
                 data.torrents.forEach(t => {
@@ -122,23 +127,62 @@ class Details extends Component {
 
     downloadSeason(episodes) {
         episodes.forEach(episode => {
-            var versions = this.props.getVersions(episode);
-            if (versions.length > 0) this.props.downloadTorrent(versions[0]);
+            if (episode.torrents.length > 0) this.props.downloadTorrent(episode.torrents[0]);
         });
     }
 
-    render() {
-        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
-        const { tmdbData, moreData, showCover, tvData, eztv, pb, season, maxSeason } = this.state;
+    getMovies() {
+        const media = this.props.media;
+        const pb = this.state.pb;
 
         let versions = [];
-        let seasons = [];
+
+        pb.forEach(t => {
+            const parsed = ptn(t.name);
+            if (!parsed.quality || !parsed.resolution) return;
+
+            let shouldAdd = true;
+            if (parsed.resolution === '2160p' || parsed.quality.toLowerCase().indexOf('cam') !== -1) {
+                shouldAdd = false;
+            }
+
+            if (shouldAdd) {
+                let sort = 0;
+
+                // Not going to show 2160p since they are UUUUGE
+                switch (parsed.resolution) {
+                    case "1080p": sort = 3; break;
+                    case "720p": sort = 2; break;
+                    case "480p": sort = 1; break;
+                    default: sort = 0; break;
+                }
+
+                if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeders)) return;
+
+                versions[parsed.resolution] = {
+                    quality: parsed.resolution,
+                    sort: sort,
+                    peers: t.leechers,
+                    seeds: t.seeders,
+                    ratio: t.leechers > 0 ? (t.seeders / t.leechers).toFixed(3) : 0,
+                    url: t.magnetLink,
+                    hashString: magnet.decode(t.magnetLink).infoHash.toLowerCase(),
+                    size: t.size,
+                    title: media.title + " (" + media.year + ") [" + parsed.resolution + "]"
+                };
+            }
+        });
+
+        // Sort the versions
+        return Object.values(versions).sort(function(a, b) {
+            return b.sort - a.sort;
+        });
+    }
+
+    getEpisodes() {
+        const { tvData, eztv } = this.state;
         let episodes = [];
 
-        if (type === 'shows') {
-            for (let i = 1; i < maxSeason + 1; i++) {
-                seasons.push(i);
-            }
             if (tvData && tvData.episodes) {
                 tvData.episodes.forEach(episode => {
                     episodes[episode.season] = episodes[episode.season] || [];
@@ -163,32 +207,10 @@ class Details extends Component {
                     
                     const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
                     if (!existing || torrent.seeds > existing.seeds) {
-                        episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
-                            seeds: torrent.seeds,
-                            peers: torrent.peers,
-                            url: torrent.magnet_url || torrent.torrent_url
-                        };
-                    }
-                });
-            }
-        }
+                    const url = torrent.magnet_url || torrent.torrent_url;
+                    const hash = magnet.decode(url).infoHash.toLowerCase();
 
-        console.log(episodes);
-
-        if (type === 'movies' && pb) {
-            pb.forEach(t => {
-                const parsed = ptn(t.name);
-                if (!parsed.quality || !parsed.resolution) return;
-
-                let shouldAdd = true;
-                if (parsed.resolution === '2160p' || parsed.quality.toLowerCase().indexOf('cam') !== -1) {
-                    shouldAdd = false;
-                }
-
-                if (shouldAdd) {
                     let sort = 0;
-
-                    // Not going to show 2160p since they are UUUUGE
                     switch (parsed.resolution) {
                         case "1080p": sort = 3; break;
                         case "720p": sort = 2; break;
@@ -196,26 +218,45 @@ class Details extends Component {
                         default: sort = 0; break;
                     }
 
-                    if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeders)) return;
-
-                    versions[parsed.resolution] = {
-                        quality: parsed.resolution,
+                    episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
+                        seeds: torrent.seeds,
+                        peers: torrent.peers,
+                        url: url,
+                        hashString: hash,
                         sort: sort,
-                        peers: t.leechers,
-                        seeds: t.seeders,
-                        ratio: t.leechers > 0 ? (t.seeders / t.leechers).toFixed(3) : 0,
-                        url: t.magnetLink,
-                        hashString: magnet.decode(t.magnetLink).infoHash.toLowerCase(),
-                        size: t.size,
-                        title: media.title + " (" + media.year + ") [" + parsed.resolution + "]"
+                        quality: parsed.resolution,
+                        tv: true
                     };
                 }
             });
 
-            // Sort the versions
-            versions = Object.values(versions).sort(function(a, b) {
-                return b.sort - a.sort;
+            episodes.forEach(season => {
+                season.forEach(episode => {
+                    episode.torrents = Object.values(episode.torrents).sort((a, b) => b.sort - a.sort);
+                });
             });
+        }
+
+        return episodes;
+    }
+
+    render() {
+        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
+        const { tmdbData, moreData, showCover, tvData, eztv, pb, season, maxSeason } = this.state;
+
+        let versions = [];
+        let seasons = [];
+        let episodes = [];
+
+        if (type === 'shows') {
+            for (let i = 1; i < maxSeason + 1; i++) {
+                seasons.push(i);
+            }
+            episodes = this.getEpisodes();
+        }
+
+        if (type === 'movies' && pb) {
+            versions = this.getMovies();
         }
 
         var mpaa = media.certification;
@@ -374,6 +415,7 @@ class Details extends Component {
                                 <div className="episodeList">
                                     {(episodes.length > 0 && episodes[season]) ? (
                                         episodes[season].map(episode => (
+                                            episode ? (
                                             <Fragment key={episode.episode}>
                                                 {episode.title === "Episode " + episode.episode ? (
                                                     <h4 className="episode">{episode.title}</h4>
@@ -381,7 +423,7 @@ class Details extends Component {
                                                     <h4 className="episode">{episode.episode} - {episode.title}</h4>
                                                 )}
 
-                                                {episode.torrents.map(version => (
+                                                    {episode.torrents ? episode.torrents.map(version => (
                                                     <Version
                                                         key={version.hashString}
                                                         version={version}
@@ -392,8 +434,9 @@ class Details extends Component {
                                                         downloadTorrent={downloadTorrent}
                                                         cancelTorrent={cancelTorrent}
                                                     />
-                                                ))}
+                                                    )) : null}
                                             </Fragment>
+                                            ) : null
                                         ))
                                     ) : null}
                                 </div>

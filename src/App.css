@@ -40,6 +40,7 @@ progress {
 .green { color: greenyellow; }
 .red { color: red; }
 .orange { color: #e5a00d; } /* Plex orange */
+.gray { color: gray; }
 
 .react-icons {
     vertical-align: middle;
