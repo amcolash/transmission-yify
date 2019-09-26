@@ -242,9 +242,12 @@ class MovieList extends Component {
             const ordering = order === 'startDate' ? '-' : '';
 
             ENDPOINT = `https://kitsu.io/api/edge/anime?page[limit]=20&page[offset]=${offset}`;
-            ENDPOINT += `&sort=${ordering}${order || Order.anime[0].value}`;
             if (genre) ENDPOINT += `&filter[genres]=${genre}`;
-            if (search.length > 0) ENDPOINT += `&filter[text]=${search}`;
+            if (search.length > 0) {
+                ENDPOINT += `&filter[text]=${search}`;
+            } else {
+                ENDPOINT += `&sort=${ordering}${order || Order.anime[0].value}`;
+            }
         } else {
             if (search.length > 0) {
                 ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
@@ -306,11 +309,11 @@ class MovieList extends Component {
             });
             
             // The search filtering is not great for kitsu :(
-            if (type === 'animes' && search.length > 0) {
-                data = data.filter(media => {
+                if (type === 'animes' && search.length > 0) {
+                    data = data.filter(media => {
                     const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
                     const match = (1 - (lev / Math.max(search.length, media.title.length)));
-                    return match > 0.75;
+                    return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
                 });
             }
     
