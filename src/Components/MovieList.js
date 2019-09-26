@@ -198,8 +198,7 @@ class MovieList extends Component {
 
     updateStorage(data) {
         try {
-            var percent = data.used;
-            this.setState({ storage: parseFloat(percent).toFixed(1) });
+            this.setState({ storage: data });
         } catch (err) {
             console.error(err);
         }
@@ -544,10 +543,15 @@ class MovieList extends Component {
                         <p>Server Location: {location ? location : "Unknown"}</p>
                         {(build && build.indexOf('Dev Build') === -1) ? <p><span>Build Time: {new Date(build).toLocaleString()}</span></p> : null}
                         {storage ? (
-                            <p>
-                                <span>Disk Usage: {storage}%</span>
-                                <progress value={storage} max="100"/>
-                            </p>
+                            <Fragment>
+                                <p>
+                                    <span>Disk Usage: {parseFloat(storage.used).toFixed(1)}%</span>
+                                    <progress value={storage.used} max="100"/>
+                                </p>
+                                <p>
+                                    <span>Cache Size: {storage.cache}</span>
+                                </p>
+                            </Fragment>
                         ) : null}
                     </div>
                 </Fragment>

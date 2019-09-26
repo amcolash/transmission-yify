@@ -35,6 +35,7 @@ try {
 // Init vars
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
+const CACHE_FILE = process.env.DATA_DIR + '/cache.json';
 
 let BUILD_TIME = 'Dev Build';
 if (fs.existsSync('./build_time') && IS_DOCKER) {
@@ -72,7 +73,7 @@ credentials.key = fs.readFileSync('./.cert/privkey.pem');
 // https://community.letsencrypt.org/t/facebook-dev-error-curl-error-60-ssl-cacert/72782
 if (fs.existsSync('./.cert/fullchain.pem')) {
     credentials.cert = fs.readFileSync('./.cert/fullchain.pem');
-} else {
+} else if (fs.existsSync('./.cert/cert.pem')) {
     credentials.cert = fs.readFileSync('./.cert/cert.pem');
 }
 
@@ -101,8 +102,8 @@ try {
 
     // Setup cache
     try {
-        fs.accessSync((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', (err) => {
-            cache = require((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache');
+        fs.accessSync(CACHE_FILE, (err) => {
+            cache = require(CACHE_FILE);
         });
     } catch (err) {
         writeCache();
@@ -155,7 +156,14 @@ function getStorage(cb) {
             console.error(err);
             cb('unknown');
         } else {
-            cb({ used: output.replace('%', '').trim() });
+            try {
+                const stats = fs.statSync(CACHE_FILE);
+                const fileSizeInBytes = stats["size"];
+                const fileSizeInMegabytes = (fileSizeInBytes / Math.pow(1024, 2)).toFixed(1);
+                cb({ used: output.replace('%', '').trim(), cache: `${fileSizeInMegabytes} MB` });
+            } catch (err) {
+                cb({ used: output.replace('%', '').trim() });
+            }
         }
     });
 }
@@ -206,6 +214,11 @@ app.get('/tmdbid/:type/:id', function(req, res) {
 
 app.get('/themoviedb/:id', function (req, res) {
     let url = 'https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY;
+    checkCache(url, res, true);
+});
+
+app.get('/kitsu/:id', function (req, res) {
+    let url = `https://kitsu.io/api/edge/anime/${req.params.id}?include=genres`;
     checkCache(url, res, true);
 });
 
@@ -401,7 +414,7 @@ function cacheRequest(url, res, shouldRetry) {
 }
 
 function writeCache() {
-    fs.writeFile((IS_DOCKER ? '/data' : process.env.DATA_DIR) + '/cache.json', JSON.stringify(cache), (err) => {
+    fs.writeFile(CACHE_FILE, JSON.stringify(cache), (err) => {
         if (err) console.error(err);
     });
 }
