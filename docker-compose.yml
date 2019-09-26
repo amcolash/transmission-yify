@@ -1,38 +1,20 @@
 version: '3.2'
 services:
-  vpn:
-    image: dperson/openvpn-client
-    container_name: openvpn-client
-    # cap_add, security_opt, and volume required for the image to function
-    cap_add:
-      - net_admin
-    networks:
-      - vpn_network
-    read_only: true
-    tmpfs:
-      - /run
-      - /tmp
-    restart: unless-stopped
-    security_opt:
-      - label:disable
-    volumes:
-      - /dev/net:/dev/net:z
-      - ./vpn:/vpn
-    ports:
-      - 9091:9091
+  # vpn was moved out from docker to host OS recently
 
   transmission:
     image: dperson/transmission
     container_name: transmission
-    depends_on:
-      - vpn
     environment:
       - TR_DOWNLOAD_QUEUE_SIZE=30
       - TR_PEER_PORT_RANDOM_ON_START=true
       - TR_MAX_PEERS_GLOBAL=800
       - TR_PEER_LIMIT_GLOBAL=800
       - TR_PEER_LIMIT_PER_TORRENT=200
-    network_mode: "service:vpn"
+      - TR_INCOMPLETE_DIR_ENABLED=true
+      - TR_DOWNLOAD_DIR=/var/lib/transmission-daemon/completed
+    ports:
+      - 9091:9091
     restart: unless-stopped
     volumes:
       - ${DATA_DIR}:/var/lib/transmission-daemon
@@ -49,9 +31,7 @@ services:
     container_name: server
     restart: unless-stopped
     links:
-      - vpn:transmission
-    networks:
-      - vpn_network
+      - transmission:transmission
     ports:
       - 9000:9000
     volumes:
@@ -61,6 +41,3 @@ services:
       - .cert:/usr/src/app/.cert
     env_file:
       - .env
-
-networks:
-  vpn_network:
