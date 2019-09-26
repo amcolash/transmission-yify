@@ -35,7 +35,8 @@ try {
 // Init vars
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
-const CACHE_FILE = process.env.DATA_DIR + '/cache.json';
+const DATA = (IS_DOCKER ? '/data' : process.env.DATA_DIR);
+const CACHE_FILE = DATA + '/cache.json';
 
 let BUILD_TIME = 'Dev Build';
 if (fs.existsSync('./build_time') && IS_DOCKER) {
@@ -94,8 +95,8 @@ const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' 
 // Get this party started!
 try {
     // Set up data dir if not in docker environment
-    if (!IS_DOCKER && !fs.existsSync(process.env.DATA_DIR)) {
-        fs.mkdirSync(process.env.DATA_DIR, { recursive: true }, (err) => {
+    if (!IS_DOCKER && !fs.existsSync(DATA)) {
+        fs.mkdirSync(DATA, { recursive: true }, (err) => {
             if (err) console.error(err);
         });
     }
@@ -128,7 +129,7 @@ app.use('/', express.static('build'));
 app.get('/ip', function (req, res) {
     try {
         if (IS_DOCKER) {
-            let ip = fs.readFileSync('/data/ip.txt', 'utf8');
+            let ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
             handleIP(ip, res);
         } else {
             handleIP(null, res);
@@ -151,7 +152,7 @@ function handleIP(ip, res) {
 app.get('/storage', function (req, res) { getStorage(data => res.send(data)); });
 
 function getStorage(cb) {
-    exec('df ' + (IS_DOCKER ? '/data' : process.env.DATA_DIR) + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
+    exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
         if (err) {
             console.error(err);
             cb('unknown');
