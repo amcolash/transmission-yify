@@ -7,10 +7,9 @@ const express = require('express');
 const proxy = require('express-http-proxy');
 const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
-const $ = require('cheerio');
+const cheerio = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
-const PirateBay = require('thepiratebay');
 const CronJob = require('cron').CronJob;
 
 require('dotenv').config();
@@ -309,6 +308,56 @@ app.get('/nyaa/', function(req, res) {
     checkTrackerCache(url, res);
 });
 
+function searchPirateBay(query, endpoint) {
+    return new Promise((resolve, reject) => {
+        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/1/99/200`;
+        console.log(url);
+        axios.get(url).then(response => {
+            const $ = cheerio.load(response.data);
+            const torrents = [];
+            
+            const table = $('#searchResult tbody').html();
+            const rows = $('tr', table);
+            
+            const sizeRegex = new RegExp(/(\d|\.)+\s(KiB|MiB|GiB)/);
+            const fullDateRegex = new RegExp(/\d{2}-\d{2}\s*\d{4}/);
+            const partialDateRegex = new RegExp(/\d{2}-\d{2}/);
+            
+            rows.each((i, row) => {
+                const name = $('.detName', row).text().trim();
+                if (!name) return;
+            
+                const link = $('.detLink', row).attr('href');
+                const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
+                const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
+                const seeds = $('[align="right"]', row).eq(0).text();
+                const leeches = $('[align="right"]', row).eq(1).text();
+
+                let date;
+                let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
+                let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
+                if (fullDateMatched) date = fullDateMatched[0];
+                else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
+            
+                torrents.push({
+                    name,
+                    link,
+                    magnetLink,
+                    size: sizeMatched ? sizeMatched[0] : undefined,
+                    date: date,
+                    seeds,
+                    leeches
+                });
+            });
+
+            resolve(torrents);
+        }).catch(err => {
+            console.error(err);
+            reject();
+        });
+    });
+}
+
 app.get('/pirate/:search', function(req, res) {
     const search = req.params.search;
 
@@ -319,16 +368,32 @@ app.get('/pirate/:search', function(req, res) {
     if (trackerCache[search]) {
         res.send(trackerCache[search]);
     } else {
-        PirateBay.search(req.params.search, {
-            category: 'video',
-            orderBy: 'seeds',
-            sortBy: 'desc'
-        }).then(response => {
-            trackerCache[search] = response;
-            res.send(response);
+        searchPirateBay(search, 'https://thepiratebay0.org/').then(results => {
+            trackerCache[search];
+            res.send(results);
         }).catch(err => {
-            console.error('pb', err);
+            res.send([]);
         });
+
+        // PirateBay.search(req.params.search, {
+        //     category: 'video',
+        //     orderBy: 'seeds',
+        //     sortBy: 'desc'
+        // }).then(response => {
+        //     trackerCache[search] = response;
+        //     res.send(response);
+        // }).catch(err => {
+        //     console.error('pb', err);
+        // });
+
+        // petrus.baseUrl = pirateBay;
+        // petrus.search(req.params.search).then(response => {
+        //     trackerCache[search] = response;
+        //     res.send(response);
+        // }).catch(err => {
+        //     res.send([]);
+        //     console.error(err);
+        // });
     }
 });
 
@@ -506,11 +571,11 @@ function initSocketDataWatchers() {
 
     // Grab piratebay proxy list every 30 minutes
     setIntervalImmediately(() => axios.get('https://piratebayproxy.info').then(response => {
-        // console.log(response.data);
-        const links = $(response.data).find('.t1');
+        const $ = cheerio.load(response.data);
+        const links = $('.t1');
         // choose a random link from the top half of the list
         const rnd = Math.floor(Math.random() * links.length / 2);
-        pirateBay = $(links.get(rnd)).attr('href');
+        pirateBay = links.eq(rnd).attr('href');
     }).catch(err => {
         console.error(err);
         pirateBay = undefined;
