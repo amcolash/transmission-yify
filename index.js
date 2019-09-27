@@ -286,32 +286,34 @@ app.get('/discover/:type/:page', function (req, res) {
 
 function checkTrackerCache(url, res) {
     if (trackerCache[url]) {
-        res.send(trackerCache[url]);
+        if (res) res.send(trackerCache[url]);
     } else {
         axios.get(url).then(response => {
             trackerCache[url] = response.data;
-            res.send(response.data);
+            if (res) res.send(response.data);
         }).catch(err => {
             console.error(err);
-            res.send([]);
+            if (res) res.send([]);
         });
     }
 }
 
-app.get('/eztv/', function(req, res) {
+app.get('/eztv/:precache?', function(req, res) {
     const url = `https://eztv.io/api/get-torrents?${querystring.stringify(req.query)}`;
-    checkTrackerCache(url, res);
+    checkTrackerCache(url, req.params.precache ? undefined : res);
+    if (req.params.precache) res.sendStatus(200);
 });
 
-app.get('/nyaa/', function(req, res) {
+app.get('/nyaa/:precache?', function(req, res) {
     const url = `https://nyaa.pantsu.cat/api/search?${querystring.stringify(req.query)}`;
-    checkTrackerCache(url, res);
+    checkTrackerCache(url, req.params.precache ? undefined : res);
+    if (req.params.precache) res.sendStatus(200);
 });
 
 function searchPirateBay(query, endpoint) {
     return new Promise((resolve, reject) => {
         const url = `${endpoint.replace(/\/$/, '')}/search/${query}/1/99/200`;
-        console.log(url);
+
         axios.get(url).then(response => {
             const $ = cheerio.load(response.data);
             const torrents = [];
@@ -358,42 +360,23 @@ function searchPirateBay(query, endpoint) {
     });
 }
 
-app.get('/pirate/:search', function(req, res) {
+app.get('/pirate/:search/:precache?', function(req, res) {
     const search = req.params.search;
+    if (req.params.precache) res.sendStatus(200);
 
     // Use the scraped PB from proxy for the search endpoint
     process.env.THEPIRATEBAY_DEFAULT_ENDPOINT = pirateBay;
 
     // Add a simple cache here to make things faster on the client
     if (trackerCache[search]) {
-        res.send(trackerCache[search]);
+        if (!req.params.precache) res.send(trackerCache[search]);
     } else {
         searchPirateBay(search, 'https://thepiratebay0.org/').then(results => {
             trackerCache[search];
-            res.send(results);
+            if (!req.params.precache) res.send(results);
         }).catch(err => {
-            res.send([]);
+            if (!req.params.precache) res.send([]);
         });
-
-        // PirateBay.search(req.params.search, {
-        //     category: 'video',
-        //     orderBy: 'seeds',
-        //     sortBy: 'desc'
-        // }).then(response => {
-        //     trackerCache[search] = response;
-        //     res.send(response);
-        // }).catch(err => {
-        //     console.error('pb', err);
-        // });
-
-        // petrus.baseUrl = pirateBay;
-        // petrus.search(req.params.search).then(response => {
-        //     trackerCache[search] = response;
-        //     res.send(response);
-        // }).catch(err => {
-        //     res.send([]);
-        //     console.error(err);
-        // });
     }
 });
 

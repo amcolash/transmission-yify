@@ -6,6 +6,7 @@ export default {
         { value: 'vote_average.desc', label: 'Rating' }
     ],
     tv: [
+        { value: 'trending', label: 'Trending' },
         { value: 'popularity.desc', label: 'Popularity' },
         { value: 'vote_average.desc', label: 'Rating' }
     ],
