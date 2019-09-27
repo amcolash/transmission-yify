@@ -6,7 +6,6 @@ import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
 } from 'react-icons/fa';
-// import {isMobile} from 'react-device-detect';
 
 import '../css/MovieList.css';
 import Cover from './Cover';
@@ -221,18 +220,13 @@ class MovieList extends Component {
     updateData() {
         const { search, page, genre, type } = this.state;
         
-        this.setState({
-            isSearching: true
-        });
+        this.setState({isSearching: true});
 
         let order = this.state.order;
         if (type === 'movies') order = order || Order.movies[0].value;
         if (type === 'shows') order = order || Order.tv[0].value;
         if (type === 'animes') order = order || Order.anime[0].value;
 
-        // const direction = order === 'title' ? '1' : '-1';
-        // const params = (search.length > 0 ? '&query=' + search : ('&sort=' + order + '&order=' + direction +
-        //     (genre.length > 0 ? '&genre=' + genre : '')));
         let ENDPOINT;
         
         if (type === 'animes') {
@@ -373,14 +367,6 @@ class MovieList extends Component {
         var search = window.prompt("Search Term?", "");
         var win = window.open('', '_blank');
         if (search && search.length > 0) {
-            // mobile has a different address than the desktop version :(
-            // if (isMobile) {
-            //     win.location.href = 'm.' + this.state.pb + '/search/' + search;
-            // } else {
-            // win.location.href = this.state.pb + '/search/' + search;
-            // }
-
-            // Skip the mobile specific code for now
             win.location.href = this.state.pb + '/search/' + search;
             win.focus();
         } else {
@@ -508,29 +494,27 @@ class MovieList extends Component {
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
                             movies.map(media => (
-                                // movie.torrents || this.state.type !== "movies" ? (
-                                    <Cover
-                                        key={media.id}
-                                        media={media}
-                                        type={type}
-                                        click={this.onOpenModal}
-                                        downloadTorrent={this.downloadTorrent}
-                                        cancelTorrent={this.cancelTorrent}
-                                        torrents={this.torrents}
-                                        started={started}
-                                        getProgress={this.getProgress}
-                                        server={this.server}
-                                        files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
-                                    />
-                                // ) : null
+                                <Cover
+                                    key={media.id}
+                                    media={media}
+                                    type={type}
+                                    click={this.onOpenModal}
+                                    downloadTorrent={this.downloadTorrent}
+                                    cancelTorrent={this.cancelTorrent}
+                                    torrents={this.torrents}
+                                    started={started}
+                                    getProgress={this.getProgress}
+                                    server={this.server}
+                                    files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                />
                             ))
                         ) :
                             <h1>No Results</h1>
                         }
                     </div>
 
-                    <Pager changePage={this.changePage} page={page} movies={movies} type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
-                    <Pager changePage={this.changePage} page={page} movies={movies} type={pagerVisibility ? "" : "hidden"}/>
+                    <Pager changePage={this.changePage} page={page} media={movies} type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
+                    <Pager changePage={this.changePage} page={page} media={movies} type={pagerVisibility ? "" : "hidden"}/>
 
                     <FaMagnet className="pointer" onClick={this.addMagnet}/>
                     {pb ? (
