@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { FaDownload, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
-import * as  ptn  from 'parse-torrent-name';
 
 import '../css/Details.css';
 import Version from './Version';
@@ -17,22 +16,22 @@ class Details extends Component {
     }
 
     getEztv(imdb, page) {
-        const limit = 50;
+        const tvData = this.state.tvData;
 
-        axios.get(`${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`, { timeout: 20000 }).then(response => {
+        const limit = 50;
+        const url = `${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`;
+        
+        axios.get(url).then(response => {
             // Make sure that the show was found and we are not just getting
             // the newest shows on the site. This is a bad api design for them :(
             if (response.data.torrents_count < 2000) {
                 const data = response.data;
-                data.torrents = data.torrents.filter(torrent => {
-                    return ptn(torrent.filename).title.toLowerCase() === this.props.media.title.toLowerCase();
-                });
 
                 let maxSeason = this.state.maxSeason;
                 let newMax = false;
                 data.torrents.forEach(t => {
                     const s = parseInt(t.season);
-                    if (s > maxSeason) { maxSeason = s; newMax = true; }
+                    if (s > maxSeason && tvData && s <= tvData.seasons.length) { maxSeason = s; newMax = true; }
                 });
                 
                 let eztv = this.state.eztv || response.data;
@@ -54,8 +53,9 @@ class Details extends Component {
 
     getNyaa(title, page) {
         const limit = 50;
+        const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
-        axios.get(`${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`, { timeout: 20000 }).then(response => {
+        axios.get(url).then(response => {
             const data = response.data;
             
             let nyaa = this.state.nyaa || response.data;
@@ -92,7 +92,7 @@ class Details extends Component {
                 this.setState({ moreData: "ERROR" });
             });
         } else {
-            axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id, { timeout: 10000 }).then(response => {
+            axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id).then(response => {
                 this.setState({ tmdbData: response.data });
     
                 if (type === 'shows') {
@@ -101,7 +101,7 @@ class Details extends Component {
     
                     this.getEztv(imdb, 1);
                 } else {
-                    axios.get(this.props.server + '/omdb/' + response.data.imdb_id, { timeout: 10000 }).then(response => {
+                    axios.get(this.props.server + '/omdb/' + response.data.imdb_id).then(response => {
                         this.setState({ moreData: response.data });
                     }).catch(error => {
                         console.error(error);
@@ -157,7 +157,7 @@ class Details extends Component {
         if (type === 'shows' || type === 'animes') {
             if (type === 'shows') {
                 for (let i = 1; i < maxSeason + 1; i++) {
-                    seasons.push(i);
+                    if (tvData && i <= tvData.seasons.length) seasons.push(i);
                 }
             } else {
                 seasons.push(1);
