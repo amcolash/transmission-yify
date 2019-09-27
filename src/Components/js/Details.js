@@ -313,7 +313,7 @@ class Details extends Component {
                             </span>
                         )
                     ) : (
-                        (!moreData && !eztv && !nyaa) ? (
+                        (!eztv && !nyaa) ? (
                             <Fragment>
                                 Loading torrent data...
                                 <Spinner visible/>
@@ -332,17 +332,17 @@ class Details extends Component {
                                                 ))}
                                             </select>
                                         ) : " 1"}
-                                        {(episodes.length > 0 && episodes[season]) ? (
+                                        {(episodes[season]) ? (
                                             <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
                                                 <FaDownload/>
                                             </button>
                                         ) : null}
                                     </h3>
-                                    {moreData && moreData.seasons[season-1] ? (
+                                    {type === 'shows' && moreData && moreData.seasons && moreData.seasons[season-1] ? (
                                         <span>{moreData.seasons[season-1].overview}</span>
                                     ) : null}
                                     <div className="episodeList">
-                                        {(episodes.length > 0 && episodes[season]) ? (
+                                        {(episodes[season] && episodes[season].length > 0) ? (
                                             episodes[season].map(episode => (
                                                 episode ? (
                                                 <Fragment key={episode.episode}>
