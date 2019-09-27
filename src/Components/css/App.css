@@ -42,6 +42,9 @@ progress {
 .orange { color: #e5a00d; } /* Plex orange */
 .gray { color: gray; }
 
+.medium { font-size: 1.5em; }
+.large { font-size: 2em; }
+
 .react-icons {
     vertical-align: middle;
 }
