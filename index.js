@@ -317,9 +317,9 @@ app.get('/nyaa/:precache?', function(req, res) {
     if (req.params.precache) res.sendStatus(200);
 });
 
-function searchPirateBay(query, endpoint) {
+function searchPirateBay(query, page, filter, endpoint) {
     return new Promise((resolve, reject) => {
-        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/1/99/200`;
+        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/${page}${filter}`;
 
         axios.get(url).then(response => {
             const $ = cheerio.load(response.data);
@@ -382,7 +382,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
             res.send(trackerCache[search]);
         }
     } else {
-        searchPirateBay(search, 'https://thepiratebay0.org/').then(results => {
+        searchPirateBay(search, 1, req.query.all ? '' : '/99/200', 'https://thepiratebay0.org/').then(results => {
             if (!req.params.precache) {
                 // cache for 1 hour
                 res.set('Cache-Control', 'public, max-age=3600');

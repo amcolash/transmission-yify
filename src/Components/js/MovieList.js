@@ -4,7 +4,7 @@ import openSocket from 'socket.io-client';
 import levenshtein from 'js-levenshtein';
 import Modal from 'react-responsive-modal';
 import {
-    FaExclamationTriangle, FaMagnet, FaSearch, FaPowerOff
+    FaExclamationTriangle, FaMagnet, FaPowerOff
 } from 'react-icons/fa';
 
 import '../css/MovieList.css';
@@ -242,7 +242,8 @@ class MovieList extends Component {
                 this.setState({movies: [], isSearching: false});
                 return;
             }
-            ENDPOINT = `${this.server}/pirate/${search}`;
+            // use all so that we do not filter here
+            ENDPOINT = `${this.server}/pirate/${search}?all=true`;
         } else {
             if (search.length > 0) {
                 ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
