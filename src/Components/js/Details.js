@@ -12,11 +12,11 @@ class Details extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { tmdbData: null, moreData: null, tvData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true };
+        this.state = { tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true };
     }
 
     getEztv(imdb, page) {
-        const tvData = this.state.tvData;
+        const moreData = this.state.moreData;
 
         const limit = 50;
         const url = `${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`;
@@ -31,7 +31,7 @@ class Details extends Component {
                 let newMax = false;
                 data.torrents.forEach(t => {
                     const s = parseInt(t.season);
-                    if (s > maxSeason && tvData && s <= tvData.seasons.length) { maxSeason = s; newMax = true; }
+                    if (s > maxSeason && moreData && s <= moreData.seasons.length) { maxSeason = s; newMax = true; }
                 });
                 
                 let eztv = this.state.eztv || response.data;
@@ -96,7 +96,7 @@ class Details extends Component {
                 this.setState({ tmdbData: response.data });
     
                 if (type === 'shows') {
-                    this.setState({ tvData: response.data });
+                    this.setState({ moreData: response.data });
                     const imdb = response.data.external_ids.imdb_id.replace('tt', '');
     
                     this.getEztv(imdb, 1);
@@ -148,7 +148,9 @@ class Details extends Component {
 
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
-        const { tmdbData, moreData, showCover, tvData, eztv, nyaa, pb, season, maxSeason } = this.state;
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason } = this.state;
+
+        console.log(moreData, eztv)
 
         let versions = [];
         let seasons = [];
@@ -157,13 +159,13 @@ class Details extends Component {
         if (type === 'shows' || type === 'animes') {
             if (type === 'shows') {
                 for (let i = 1; i < maxSeason + 1; i++) {
-                    if (tvData && i <= tvData.seasons.length) seasons.push(i);
+                    if (moreData && i <= moreData.seasons.length) seasons.push(i);
                 }
             } else {
                 seasons.push(1);
             }
 
-            episodes = getEpisodes(eztv || nyaa, moreData, tvData, type);
+            episodes = getEpisodes(eztv || nyaa, moreData, type);
         }
 
         if (type === 'movies' && pb) {
@@ -184,9 +186,8 @@ class Details extends Component {
         if (tmdbData) {
             genres = tmdbData.genres.map(g => g.name);
             genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
-        } else if (tvData || moreData) {
-            if (tvData && tvData.genres) genres = tvData.genres;
-            else if (moreData && moreData.Genres) genres = moreData.Genres;
+        } else if (moreData) {
+            if (moreData) genres = moreData.genres || moreData.Genres;
             else genres = [];
 
             genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
@@ -224,8 +225,8 @@ class Details extends Component {
                             <div className="mpaa-rating">{mpaa}</div>
                         </Fragment>
                     </h4>
-                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((tvData && tvData.overview) ? tvData.overview :
-                        (media.synopsis ? media.synopsis : ""))}</p>
+                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
+                        moreData.overview : (media.synopsis ? media.synopsis : ""))}</p>
                     {genres ? (
                         <Fragment>
                             <span className="capitalize">
@@ -302,7 +303,7 @@ class Details extends Component {
                             </span>
                         )
                     ) : (
-                        (!tvData && !eztv && !nyaa) ? (
+                        (!moreData && !eztv && !nyaa) ? (
                             <Fragment>
                                 Loading torrent data...
                                 <Spinner visible/>
@@ -326,6 +327,9 @@ class Details extends Component {
                                         </button>
                                     ) : null}
                                 </h3>
+                                {moreData && moreData.seasons[season-1] ? (
+                                    <span>{moreData.seasons[season-1].overview}</span>
+                                ) : null}
                                 <div className="episodeList">
                                     {(episodes.length > 0 && episodes[season]) ? (
                                         episodes[season].map(episode => (
