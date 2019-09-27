@@ -12,6 +12,7 @@ fi
 
 # Move into the root of the app directory
 cd $(dirname "$0")
+cd ../
 
 # Redirect all output to log file
 readonly LOG_FILE="upgrade.log"
