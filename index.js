@@ -243,7 +243,7 @@ app.get('/search/:type/:page', function (req, res) {
     }
     if (!url) res.send([]);
 
-    axios.get(url).then(response => res.send(response.data)).catch(err => { console.error(err); res.send([]); });
+    checkTrackerCache(url, res);
 });
 
 app.get('/discover/:type/:page', function (req, res) {
@@ -278,15 +278,9 @@ app.get('/discover/:type/:page', function (req, res) {
             break;
     }
 
-    if (!url) {
-        res.send([]);
-    } else {
-        axios.get(url).then(response => {
-            res.send(response.data)
-        }).catch(err => {
-            console.error(err); res.send([]);
-        });
-    }
+    if (!url) res.send([]);
+    
+    checkCache(url, res);
 });
 
 function checkTrackerCache(url, res) {
