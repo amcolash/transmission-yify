@@ -512,6 +512,7 @@ class MovieList extends Component {
                                     <Cover
                                         key={media.id}
                                         media={media}
+                                        type={type}
                                         click={this.onOpenModal}
                                         downloadTorrent={this.downloadTorrent}
                                         cancelTorrent={this.cancelTorrent}

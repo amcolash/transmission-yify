@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { FaFilm, FaCheck } from 'react-icons/fa';
 import levenshtein from 'js-levenshtein';
+import axios from 'axios';
 import '../css/Cover.css';
 // import Spinner from './Spinner';
 import ScrollReveal from '../../Util/ScrollReveal';
@@ -15,6 +16,16 @@ class Cover extends Component {
         }
 
         ScrollReveal.reveal(this.refs.mediaCover, config);
+
+        if (this.props.type === 'movies') {
+            const media = this.props.media;
+            const cleanedTitle = media.title.replace(/(&|\+)/g, '');
+            axios.get(`${this.props.server}/pirate/${cleanedTitle} ${media.year}/precache`).then(response => {
+                this.setState({pb: response.data});
+            }).catch(err => {
+                console.error(err);
+            });
+        }
     }
 
     componentWillUnmount() {
