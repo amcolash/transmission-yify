@@ -3,7 +3,7 @@ import  { FaDownload, FaBatteryEmpty, FaBatteryQuarter, FaBatteryHalf, FaBattery
 
 import Spinner from './Spinner';
 import Progress from './Progress';
-import './Version.css';
+import '../css/Version.css';
 
 class Version extends Component {
     render() {

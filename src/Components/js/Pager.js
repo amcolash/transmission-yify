@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FaAngleDoubleRight, FaAngleDoubleLeft, FaAngleRight, FaAngleLeft } from 'react-icons/fa';
 
-import './Pager.css';
+import '../css/Pager.css';
 
 class Pager extends Component {
     render() {

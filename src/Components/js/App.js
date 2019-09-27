@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import MovieList from './Components/MovieList';
+import MovieList from './MovieList';
 import { IconContext } from 'react-icons';
-import './App.css';
+import '../css/App.css';
 
 class App extends Component {
     render() {

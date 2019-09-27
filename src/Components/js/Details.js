@@ -3,11 +3,11 @@ import { FaDownload, FaPlayCircle } from 'react-icons/fa';
 import axios from 'axios';
 import * as  ptn  from 'parse-torrent-name';
 
-import './Details.css';
+import '../css/Details.css';
 import Version from './Version';
 import Spinner from './Spinner';
-import Genre from '../Data/Genre';
-import { getMovies, getEpisodes } from '../Util/Parse';
+import Genre from '../../Data/Genre';
+import { getMovies, getEpisodes } from '../../Util/Parse';
 
 class Details extends Component {
 

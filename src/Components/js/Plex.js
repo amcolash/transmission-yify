@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './Plex.css';
+import '../css/Plex.css';
 
 class Plex extends Component {
     constructor(props) {
