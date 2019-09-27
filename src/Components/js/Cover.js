@@ -75,7 +75,7 @@ class Cover extends Component {
     }
 
     render() {
-        const { click, files, media, started, downloadTorrent, cancelTorrent } = this.props;
+        const { click, files, media, started, downloadTorrent, cancelTorrent, type } = this.props;
         const pb = this.state.pb;
 
         if (!media.poster_path) media.poster_path = "broken image";
@@ -142,9 +142,10 @@ class Cover extends Component {
                                     <br/>
                                 </Fragment>
                             ))
-                        )
-                        : (
-                            pb ? <span className="red medium"><FaExclamationCircle /></span> : <Spinner visible noMargin button />
+                        ) : (
+                            type === 'movies' ? (
+                                pb ? <span className="red medium"><FaExclamationCircle /></span> : <Spinner visible noMargin button />
+                            ) : null
                         )}
                     </div>
                 </div>

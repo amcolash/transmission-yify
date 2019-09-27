@@ -39,31 +39,7 @@
     margin-left: 1.25em;
 }
 
-#modal, #popcornModal {
+#modal {
     max-height: 90vh;
     overflow-y: auto;
-}
-
-#popcornModal {
-    padding-top: 2.5em;
-    color: black;
-}
-
-#popcornTop {
-    display: flex;
-    align-items: center;
-    font-size: 1.5em;
-    color: #FC6600;
-    position: absolute;
-    top: 0.5em;
-    left: 0.3em;
-    cursor: pointer;
-    text-align: left;
-    text-decoration: underline;
-}
-
-#popcornTop img {
-    padding-right: 0.25em;
-    width: 2em;
-    height: 2em;
 }

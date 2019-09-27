@@ -6,8 +6,8 @@ TODO
 - [DONE] Clear cache every day
 - [DONE (for movies)] Server Pre-Cache Torrents on Request
 - [DONE] TV Episode Names
-- Make the download buttons on covers work again
+- [DONE] Make the download buttons on covers work again
 - Analytics (views, downloads, ip locations, etc)
-- Pirate Bay Search UI
+- [DONE] Pirate Bay Search UI
 - Move all server data into the storage socket and rename to stats
 - Redo UI to make it prettier

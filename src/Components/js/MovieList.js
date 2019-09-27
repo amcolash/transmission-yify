@@ -17,6 +17,7 @@ import Search from './Search';
 import Beta from './Beta';
 import Pager from './Pager';
 import Order from '../../Data/Order';
+import Pirate from './Pirate';
 
 const searchCache = [];
 const hashMapping = {};
@@ -46,7 +47,6 @@ class MovieList extends Component {
             scroll: 0,
             docker: true,
             files: [],
-            pb: null,
             build: null,
         }
 
@@ -140,14 +140,8 @@ class MovieList extends Component {
         setTimeout(() => this.updateLocation, 60 * 1000);
     }
 
-    // Update a bunch of stats (pb link, build time)
+    // Update build time stats
     updateStats() {
-        axios.get(this.server + '/pb').then(response => {
-            this.setState({ pb: response.data });
-        }, error => {
-            console.error(error);
-        });
-
         axios.get(this.server + '/build').then(response => {
             this.setState({ build: response.data });
         }, error => {
@@ -243,6 +237,12 @@ class MovieList extends Component {
             } else {
                 ENDPOINT += `&sort=${ordering}${order || Order.anime[0].value}`;
             }
+        } else if (type === 'pirate') {
+            if (search.length === 0) {
+                this.setState({movies: [], isSearching: false});
+                return;
+            }
+            ENDPOINT = `${this.server}/pirate/${search}`;
         } else {
             if (search.length > 0) {
                 ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
@@ -272,6 +272,16 @@ class MovieList extends Component {
     handleData(data) {
         const { search, type } = this.state;
         
+        if (type === 'pirate') {
+            this.setState({
+                movies: data,
+                isLoaded: true,
+                isSearching: false
+            });
+
+            return;
+        }
+
         if (data.data) data.results = data.data;
 
         if (data.results && data.results.map) {
@@ -283,7 +293,6 @@ class MovieList extends Component {
                     media.year = attributes.startDate;
                     if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
                 }
-
                 
                 // fix weird years (since it seems the year can vary based on region released first)
                 media.year = media.year || media.release_date || media.first_air_date;
@@ -368,17 +377,6 @@ class MovieList extends Component {
         }
     }
 
-    searchPB = () => {
-        var search = window.prompt("Search Term?", "");
-        var win = window.open('', '_blank');
-        if (search && search.length > 0) {
-            win.location.href = this.state.pb + '/search/' + search;
-            win.focus();
-        } else {
-            win.close();
-        }
-    }
-
     upgrade = () => {
         var password = window.prompt("Password?", "");
         axios.post(this.server + '/upgrade?upgradeKey=' + password).then(response => {
@@ -424,7 +422,7 @@ class MovieList extends Component {
     render() {
         const {
             error, isLoaded, movies, modal, media, page, torrents, location,
-            started, width, storage, scroll, pb, build, type
+            started, width, storage, scroll, build, type
         } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length >= 20;
@@ -498,33 +496,52 @@ class MovieList extends Component {
 
                     <div className="movie-list">
                         {(movies && movies.length > 0) ? (
-                            movies.map(media => (
-                                <Cover
-                                    key={media.id}
-                                    media={media}
-                                    type={type}
-                                    click={this.onOpenModal}
-                                    downloadTorrent={this.downloadTorrent}
-                                    cancelTorrent={this.cancelTorrent}
-                                    torrents={this.torrents}
-                                    started={started}
-                                    getProgress={this.getProgress}
-                                    server={this.server}
-                                    files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
-                                />
+                            type === 'pirate' ? (
+                                <div className="pirateList">
+                                    {movies.map(media => (
+                                        <Pirate
+                                            key={media.name || media.id}
+                                            media={media}
+                                            started={started}
+                                            downloadTorrent={this.downloadTorrent}
+                                            cancelTorrent={this.cancelTorrent}
+                                            getLink={this.getLink}
+                                            getProgress={this.getProgress}
+                                            getTorrent={this.getTorrent}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                movies.map(media => (
+                                    <Cover
+                                        key={media.id}
+                                        media={media}
+                                        type={type}
+                                        click={this.onOpenModal}
+                                        downloadTorrent={this.downloadTorrent}
+                                        cancelTorrent={this.cancelTorrent}
+                                        torrents={this.torrents}
+                                        started={started}
+                                        getProgress={this.getProgress}
+                                        server={this.server}
+                                        files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                    />
                             ))
-                        ) :
-                            <h1>No Results</h1>
+                        )) : type !== 'pirate' ? <h1>No Results</h1> : null
                         }
                     </div>
 
-                    <Pager changePage={this.changePage} page={page} media={movies} type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
-                    <Pager changePage={this.changePage} page={page} media={movies} type={pagerVisibility ? "" : "hidden"}/>
+                    {type !== 'pirate' ? (
+                        <Fragment>
+                            <Pager changePage={this.changePage} page={page} media={movies}
+                                type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
+        
+                            <Pager changePage={this.changePage} page={page} media={movies}
+                                type={pagerVisibility ? "" : "hidden"}/>
+                        </Fragment>
+                    ) : null}
 
                     <FaMagnet className="pointer" onClick={this.addMagnet}/>
-                    {pb ? (
-                        <FaSearch className="pointer marginLeft" onClick={this.searchPB}/>
-                    ) : null}
                     <FaPowerOff className="pointer marginLeft" onClick={this.upgrade}/>
 
                     <div className="footer">

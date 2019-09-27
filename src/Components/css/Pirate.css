@@ -1,0 +1,35 @@
+.pirateList {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.pirateRow {
+  padding: 0.3em;
+  margin: 0.75em 0;
+  background-color: #555;
+  display: flex;
+  align-items: center;
+  width: 90vw;
+  max-width: 900px;
+}
+
+.pirateRow .title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pirateRow div {
+  margin: 0 0.5em;
+}
+
+.pirateRow .progress {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.pirateRow .spacer {
+  flex-grow: 1;
+}
