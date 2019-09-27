@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { FaPlus, FaMinus } from 'react-icons/fa';
 
 import Progress from './Progress';
-import './TorrentList.css';
+import '../css/TorrentList.css';
 
 class TorrentList extends Component {
     constructor(props) {

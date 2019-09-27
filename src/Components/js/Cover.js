@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { FaFilm, FaCheck } from 'react-icons/fa';
 import levenshtein from 'js-levenshtein';
-import './Cover.css';
+import '../css/Cover.css';
 // import Spinner from './Spinner';
-import ScrollReveal from '../Util/ScrollReveal';
+import ScrollReveal from '../../Util/ScrollReveal';
 
 class Cover extends Component {
     componentDidMount() {

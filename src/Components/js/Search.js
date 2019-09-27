@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { DebounceInput } from 'react-debounce-input';
 import { FaTimes } from 'react-icons/fa';
-import './Search.css';
+import '../css/Search.css';
 import Spinner from './Spinner';
 
-import Genre from '../Data/Genre';
-import Order from '../Data/Order';
+import Genre from '../../Data/Genre';
+import Order from '../../Data/Order';
 
 class Search extends Component {
 

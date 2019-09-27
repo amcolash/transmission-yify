@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fa';
 // import {isMobile} from 'react-device-detect';
 
-import './MovieList.css';
+import '../css/MovieList.css';
 import Cover from './Cover';
 import Spinner from './Spinner';
 import Details from './Details';
@@ -17,7 +17,7 @@ import Plex from './Plex';
 import Search from './Search';
 import Beta from './Beta';
 import Pager from './Pager';
-import Order from '../Data/Order';
+import Order from '../../Data/Order';
 
 const searchCache = [];
 const hashMapping = {};
