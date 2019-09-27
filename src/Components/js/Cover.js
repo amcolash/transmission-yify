@@ -75,7 +75,7 @@ class Cover extends Component {
     }
 
     render() {
-        const { click, files, media, started, downloadTorrent, cancelTorrent, type } = this.props;
+        const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress } = this.props;
         const pb = this.state.pb;
 
         if (!media.poster_path) media.poster_path = "broken image";
@@ -96,6 +96,7 @@ class Cover extends Component {
         if (pb) {
             versions = getMovies(media, pb);
             if (versions.length > 2) versions = versions.slice(1);
+            versions = versions.map(version => { return {...version, progress: getProgress(version.hashString)}; });
         }
 
         return (
