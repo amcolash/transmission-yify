@@ -24,8 +24,8 @@ class Details extends Component {
         axios.get(url).then(response => {
             // Make sure that the show was found and we are not just getting
             // the newest shows on the site. This is a bad api design for them :(
-            if (response.data.torrents_count < 2000) {
-                const data = response.data;
+            const data = response.data;
+            if (data.torrents_count < 2000 && data.torrents) {
 
                 let maxSeason = this.state.maxSeason;
                 let newMax = false;
@@ -309,56 +309,60 @@ class Details extends Component {
                                 <Spinner visible/>
                             </Fragment>
                         ) : (
-                            <Fragment>
-                                <h3 className="season">Season
-                                    {seasons.length > 1 ? (
-                                        <select
-                                            onChange={(event) => this.updateSeason(event.target.value)}
-                                            value={season}
-                                        >
-                                            {seasons.map(season => (
-                                                <option key={season} value={season}>{season}</option>
-                                            ))}
-                                        </select>
-                                    ) : " 1"}
-                                    {(episodes.length > 0 && episodes[season]) ? (
-                                        <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
-                                            <FaDownload/>
-                                        </button>
+                            episodes.length > 0 ? (
+                                <Fragment>
+                                    <h3 className="season">Season
+                                        {seasons.length > 1 ? (
+                                            <select
+                                                onChange={(event) => this.updateSeason(event.target.value)}
+                                                value={season}
+                                            >
+                                                {seasons.map(season => (
+                                                    <option key={season} value={season}>{season}</option>
+                                                ))}
+                                            </select>
+                                        ) : " 1"}
+                                        {(episodes.length > 0 && episodes[season]) ? (
+                                            <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
+                                                <FaDownload/>
+                                            </button>
+                                        ) : null}
+                                    </h3>
+                                    {moreData && moreData.seasons[season-1] ? (
+                                        <span>{moreData.seasons[season-1].overview}</span>
                                     ) : null}
-                                </h3>
-                                {moreData && moreData.seasons[season-1] ? (
-                                    <span>{moreData.seasons[season-1].overview}</span>
-                                ) : null}
-                                <div className="episodeList">
-                                    {(episodes.length > 0 && episodes[season]) ? (
-                                        episodes[season].map(episode => (
-                                            episode ? (
-                                            <Fragment key={episode.episode}>
-                                                {episode.title === "Episode " + episode.episode ? (
-                                                    <h4 className="episode">{episode.title}</h4>
-                                                ) : (
-                                                    <h4 className="episode">{episode.episode} - {episode.title}</h4>
-                                                )}
+                                    <div className="episodeList">
+                                        {(episodes.length > 0 && episodes[season]) ? (
+                                            episodes[season].map(episode => (
+                                                episode ? (
+                                                <Fragment key={episode.episode}>
+                                                    {episode.title === "Episode " + episode.episode ? (
+                                                        <h4 className="episode">{episode.title}</h4>
+                                                    ) : (
+                                                        <h4 className="episode">{episode.episode} - {episode.title}</h4>
+                                                    )}
 
-                                                    {episode.torrents ? episode.torrents.map(version => (
-                                                    <Version
-                                                        key={version.hashString}
-                                                        version={version}
-                                                        started={started}
-                                                        getProgress={getProgress}
-                                                        getLink={getLink}
-                                                        getTorrent={getTorrent}
-                                                        downloadTorrent={downloadTorrent}
-                                                        cancelTorrent={cancelTorrent}
-                                                    />
-                                                    )) : null}
-                                            </Fragment>
-                                            ) : null
-                                        ))
-                                    ) : null}
-                                </div>
-                            </Fragment>
+                                                        {episode.torrents ? episode.torrents.map(version => (
+                                                        <Version
+                                                            key={version.hashString}
+                                                            version={version}
+                                                            started={started}
+                                                            getProgress={getProgress}
+                                                            getLink={getLink}
+                                                            getTorrent={getTorrent}
+                                                            downloadTorrent={downloadTorrent}
+                                                            cancelTorrent={cancelTorrent}
+                                                        />
+                                                        )) : null}
+                                                </Fragment>
+                                                ) : null
+                                            ))
+                                        ) : null}
+                                    </div>
+                                </Fragment>
+                            ) : (
+                                <h4>No Torrents Found</h4>
+                            )
                         )
                     )}
                 </div>
