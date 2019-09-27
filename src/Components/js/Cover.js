@@ -148,7 +148,7 @@ class Cover extends Component {
                         )}
                     </div>
                 </div>
-                <span onClick={(e) => click(media)}>{media.title} ({media.year})</span>
+                <span onClick={(e) => click(media)}>{media.title} {media.year ? <span>({media.year})</span> : null}</span>
             </div>
         );
     }

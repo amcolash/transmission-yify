@@ -270,7 +270,6 @@ class MovieList extends Component {
     }
 
     handleData(data) {
-        const now = new Date().getFullYear();
         const { search, type } = this.state;
         
         if (data.data) data.results = data.data;
@@ -290,7 +289,7 @@ class MovieList extends Component {
                 media.year = media.year || media.release_date || media.first_air_date;
 
                 // only try to do fancy stuff if not a standard year
-                if (!media.year.toString().match(/^\d{4}$/)) media.year = Math.min(now, new Date(media.year).getFullYear());
+                if (media.year && !media.year.toString().match(/^\d{4}$/)) media.year = new Date(media.year).getFullYear();
 
                 media.title = media.title || media.name || '?';
                 media.title = media.title.replace(/&amp;/g, '&');
