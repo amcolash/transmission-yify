@@ -54,7 +54,7 @@ export function getMovies(media, pb) {
     });
 }
 
-export function getEpisodes(torrents, moreData, tvData, type) {
+export function getEpisodes(torrents, moreData, type) {
     let episodes = [];
     
     if (torrents) {
@@ -65,7 +65,7 @@ export function getEpisodes(torrents, moreData, tvData, type) {
             
             // Bail if we weren't able to parse season/episode
             if ((type === 'shows' && parsed.season === 0) || parsed.episode === 0 || (moreData && parsed.episode > moreData.EpisodeCount) ||
-                (tvData && parsed.season > tvData.seasons.length)) return;
+                ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;
             
             episodes[parsed.season] = episodes[parsed.season] || [];
             episodes[parsed.season][parsed.episode] = episodes[parsed.season][parsed.episode] || {
