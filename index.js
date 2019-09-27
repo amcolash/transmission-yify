@@ -209,7 +209,12 @@ app.get('/omdb/:id', function(req, res) {
 app.get('/tmdbid/:type/:id', function(req, res) {
     let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
         '&append_to_response=external_ids';
-    checkCache(url, res, true);    
+    checkCache(url, res, true);
+});
+
+app.get('/tmdb/seasons/:id/:season', function (req, res) {
+    let url = `https://api.themoviedb.org/3/tv/${req.params.id}/season/${req.params.season}?api_key=${process.env.THE_MOVIE_DB_KEY}`;
+    checkCache(url, res, true);
 });
 
 app.get('/themoviedb/:id', function (req, res) {

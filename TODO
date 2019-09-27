@@ -4,9 +4,10 @@ TODO
 - [DONE] Get full data from eztv
 - [DONE] Anime
 - [DONE] Clear cache every day
-- [DONE (for movies)] Server Pre-Cache on Request
-- TV Episode Names
+- [DONE (for movies)] Server Pre-Cache Torrents on Request
+- [DONE] TV Episode Names
 - Make the download buttons on covers work again
-- Analytics
+- Analytics (views, downloads, ip locations, etc)
 - Pirate Bay Search UI
+- Move all server data into the storage socket and rename to stats
 - Redo UI to make it prettier
