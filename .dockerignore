@@ -7,3 +7,4 @@ build
 *.log
 docker-compose.yml
 .travis.yml
+.cert
