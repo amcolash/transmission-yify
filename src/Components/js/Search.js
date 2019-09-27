@@ -45,6 +45,7 @@ class Search extends Component {
                         <select
                             onChange={(event) => updateSearch(search, event.target.value, order, type)}
                             value={genre}
+                            disabled={type === 'pirate'}
                         >
                             {genres.map(genre => (
                                 <option
@@ -62,6 +63,7 @@ class Search extends Component {
                         <select
                             onChange={(event) => updateSearch(search, genre, event.target.value, type)}
                             value={order}
+                            disabled={type === 'pirate'}
                         >
                             {ordering.map(order => (
                                 <option
@@ -80,6 +82,7 @@ class Search extends Component {
                             <option key="movies" value="movies">Movies</option>
                             <option key="shows" value="shows">TV</option>
                             <option key="animes" value="animes">Anime</option>
+                            <option key="pirate" value="pirate">PirateBay</option>
                         </select>
                     </div>
 
