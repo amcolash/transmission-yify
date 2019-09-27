@@ -38,7 +38,7 @@ class MovieList extends Component {
             search: '',
             genre: '',
             order: '',
-            type: 'shows',
+            type: 'movies',
             isSearching: false,
             storage: null,
             width: 0,
@@ -218,7 +218,10 @@ class MovieList extends Component {
     }
     
     updateData() {
-        const { search, page, genre, type } = this.state;
+        const { page, genre, type } = this.state;
+
+        // sanitize the search so that there are no special characters
+        let search = this.state.search.replace(/[^\w\s]/gi, ' ');
         
         this.setState({isSearching: true});
 
@@ -282,9 +285,12 @@ class MovieList extends Component {
                     if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
                 }
 
+                
                 // fix weird years (since it seems the year can vary based on region released first)
-                media.year = media.year || media.release_date || media.first_air_date || 9999;
-                media.year = Math.min(now, new Date(media.year).getFullYear());
+                media.year = media.year || media.release_date || media.first_air_date;
+
+                // only try to do fancy stuff if not a standard year
+                if (!media.year.toString().match(/^\d{4}$/)) media.year = Math.min(now, new Date(media.year).getFullYear());
 
                 media.title = media.title || media.name || '?';
                 media.title = media.title.replace(/&amp;/g, '&');

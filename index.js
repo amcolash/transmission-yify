@@ -291,11 +291,19 @@ app.get('/discover/:type/:page', function (req, res) {
 
 function checkTrackerCache(url, res) {
     if (trackerCache[url]) {
-        if (res) res.send(trackerCache[url]);
+        if (res) {
+            // cache for 1 hour
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(trackerCache[url]);
+        }
     } else {
         axios.get(url).then(response => {
+            if (res) {
+                // cache for 1 hour
+                res.set('Cache-Control', 'public, max-age=3600');
+                res.send(response.data);
+            }
             trackerCache[url] = response.data;
-            if (res) res.send(response.data);
         }).catch(err => {
             console.error(err);
             if (res) res.send([]);
@@ -374,11 +382,19 @@ app.get('/pirate/:search/:precache?', function(req, res) {
 
     // Add a simple cache here to make things faster on the client
     if (trackerCache[search]) {
-        if (!req.params.precache) res.send(trackerCache[search]);
+        if (!req.params.precache) {
+            // cache for 1 hour
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(trackerCache[search]);
+        }
     } else {
         searchPirateBay(search, 'https://thepiratebay0.org/').then(results => {
+            if (!req.params.precache) {
+                // cache for 1 hour
+                res.set('Cache-Control', 'public, max-age=3600');
+                res.send(results);
+            }
             trackerCache[search];
-            if (!req.params.precache) res.send(results);
         }).catch(err => {
             if (!req.params.precache) res.send([]);
         });
@@ -445,6 +461,8 @@ app.post('/upgrade', function (req, res) {
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
+        // cache for 1 week
+        res.set('Cache-Control', 'public, max-age=604800');
         res.send(cache[url]);
     } else {
         cacheRequest(url, res, shouldRetry);
@@ -454,6 +472,8 @@ function checkCache(url, res, shouldRetry) {
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
+        // cache for 1 week
+        res.set('Cache-Control', 'public, max-age=604800');
         res.send(response.data);
         cache[url] = response.data;
         writeCache();

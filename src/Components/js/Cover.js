@@ -1,12 +1,22 @@
-import React, { Component } from 'react';
-import { FaFilm, FaCheck } from 'react-icons/fa';
+import React, { Component, Fragment } from 'react';
+import { FaFilm, FaCheck, FaExclamationCircle, FaDownload, FaTrash } from 'react-icons/fa';
 import levenshtein from 'js-levenshtein';
 import axios from 'axios';
 import '../css/Cover.css';
-// import Spinner from './Spinner';
+import {getMovies} from '../../Util/Parse';
+import Spinner from './Spinner';
 import ScrollReveal from '../../Util/ScrollReveal';
 
+const CancelToken = axios.CancelToken;
+
 class Cover extends Component {
+    cancelToken = null;
+
+    constructor(props) {
+        super(props);
+        this.state = { pb: null };
+    }
+
     componentDidMount() {
         const config = {
             duration: 300,
@@ -15,26 +25,58 @@ class Cover extends Component {
             easing: 'ease'
         }
 
-        ScrollReveal.reveal(this.refs.mediaCover, config);
-
         if (this.props.type === 'movies') {
-            const media = this.props.media;
-            const cleanedTitle = media.title.replace(/(&|\+)/g, '');
-            axios.get(`${this.props.server}/pirate/${cleanedTitle} ${media.year}/precache`).then(response => {
-                this.setState({pb: response.data});
-            }).catch(err => {
-                console.error(err);
-            });
+            this.updatePB();
         }
+
+        ScrollReveal.reveal(this.refs.mediaCover, config);
     }
 
     componentWillUnmount() {
         // Need to do this to fix some random bugs when unmount/mount happens
         ScrollReveal.sync();
+
+        this.cancelPB();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.type === 'movies' && prevProps.media !== this.props.media) {
+            this.cancelPB();
+            this.updatePB();
+        }
+    }
+
+    cancelPB() {
+        if (this.cancelToken) {
+            console.log('canceling pb');
+            this.cancelToken.cancel();
+            this.cancelToken = null;
+        }
+    }
+
+    updatePB() {
+        const media = this.props.media;
+        const cleanedTitle = media.title.replace(/[^\w\s]/gi, ' ');
+        
+        this.cancelPB();
+
+        this.cancelToken = CancelToken.source();
+        const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
+        axios.get(url, { cancelTorrent: CancelToken.token }).then(response => {
+            this.cancelToken = null;
+
+            // Only update things if we are still actually showing the same cover
+            if (media.title === this.props.media.title) {
+                this.setState({pb: response.data});
+            }
+        }).catch(err => {
+            console.error(err);
+        });
     }
 
     render() {
-        const { click, files, media } = this.props;
+        const { click, files, media, started, downloadTorrent, cancelTorrent } = this.props;
+        const pb = this.state.pb;
 
         if (!media.poster_path) media.poster_path = "broken image";
 
@@ -48,6 +90,12 @@ class Cover extends Component {
                 hasFile = true;
                 break;
             }
+        }
+
+        let versions = [];
+        if (pb) {
+            versions = getMovies(media, pb);
+            if (versions.length > 2) versions = versions.slice(1);
         }
 
         return (
@@ -66,33 +114,38 @@ class Cover extends Component {
                         </div>
                     ) : null}
                     <div className="quality">
-                        {/* {versions.map(version => (
-                            <Fragment
-                                key={version.hashString}
-                            >
-                                <span>{version.quality}</span>
-                                {version.progress != null ? (
-                                    <button className="red" onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.nativeEvent.stopImmediatePropagation();
-                                        cancelTorrent(version.hashString);
-                                    }}><FaTrash/></button>
-                                ) : (
-                                    <button className="orange download" onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.nativeEvent.stopImmediatePropagation();
-                                        if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
-                                    }}>
-                                        {started.indexOf(version.hashString) !== -1 ? (
-                                            <Spinner visible noMargin button />
-                                        ) : (
-                                            <FaDownload />
-                                        )}
-                                    </button>
-                                )}
-                                <br/>
-                            </Fragment>
-                        ))} */}
+                        {versions.length > 0 ? (
+                            versions.map(version => (
+                                <Fragment
+                                    key={version.hashString}
+                                >
+                                    <span>{version.quality}</span>
+                                    {version.progress != null ? (
+                                        <button className="red" onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.nativeEvent.stopImmediatePropagation();
+                                            cancelTorrent(version.hashString);
+                                        }}><FaTrash/></button>
+                                    ) : (
+                                        <button className="orange download" onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.nativeEvent.stopImmediatePropagation();
+                                            if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
+                                        }}>
+                                            {started.indexOf(version.hashString) !== -1 ? (
+                                                <Spinner visible noMargin button />
+                                            ) : (
+                                                <FaDownload />
+                                            )}
+                                        </button>
+                                    )}
+                                    <br/>
+                                </Fragment>
+                            ))
+                        )
+                        : (
+                            pb ? <span className="red medium"><FaExclamationCircle /></span> : <Spinner visible noMargin button />
+                        )}
                     </div>
                 </div>
                 <span onClick={(e) => click(media)}>{media.title} ({media.year})</span>

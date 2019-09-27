@@ -120,8 +120,8 @@ class Details extends Component {
                         this.setState({ moreData: "ERROR" });
                     });
     
-                    const cleanedTitle = media.title.replace(/(&|\+)/g, '');
-                    axios.get(this.props.server + '/pirate/' + cleanedTitle + ' ' + media.year).then(response => {
+                    const cleanedTitle = media.title.replace(/[^\w\s]/gi, ' ');
+                    axios.get(`${this.props.server}/pirate/${cleanedTitle} ${media.year}`).then(response => {
                         this.setState({pb: response.data});
                     }).catch(err => {
                         console.error(err);
