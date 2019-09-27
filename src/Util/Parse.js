@@ -57,7 +57,7 @@ export function getMovies(media, pb) {
 export function getEpisodes(torrents, moreData, type) {
     let episodes = [];
     
-    if (torrents) {
+    if (torrents && torrents.torrents) {
         torrents.torrents.forEach(torrent => {
             const parsed = ptn(torrent.filename || torrent.name);
             parsed.resolution = parsed.resolution || '480p';
@@ -67,9 +67,14 @@ export function getEpisodes(torrents, moreData, type) {
             if ((type === 'shows' && parsed.season === 0) || parsed.episode === 0 || (moreData && parsed.episode > moreData.EpisodeCount) ||
                 ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;
             
+            let title = `Episode ${parsed.episode}`;
+            if (moreData && moreData.seasons && moreData.seasons[parsed.season - 1] && moreData.seasons[parsed.season - 1].episodes) {
+                title = moreData.seasons[parsed.season - 1].episodes[parsed.episode - 1].name;
+            }
+
             episodes[parsed.season] = episodes[parsed.season] || [];
             episodes[parsed.season][parsed.episode] = episodes[parsed.season][parsed.episode] || {
-                title: `Episode ${parsed.episode}`,
+                title: title,
                 episode: parsed.episode,
                 season: parsed.season,
                 torrents: {}

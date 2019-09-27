@@ -96,9 +96,21 @@ class Details extends Component {
                 this.setState({ tmdbData: response.data });
     
                 if (type === 'shows') {
-                    this.setState({ moreData: response.data });
+                    this.setState({moreData: response.data}, () => {
+                        const moreData = this.state.moreData;
+                        moreData.seasons.forEach(season => {
+                            axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
+                                if (moreData.seasons[season.season_number - 1]) {
+                                    moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
+                                    this.setState({moreData: moreData});
+                                }
+                            }).catch(err => {
+                                console.error(err);
+                            })
+                        });
+                    });
+                    
                     const imdb = response.data.external_ids.imdb_id.replace('tt', '');
-    
                     this.getEztv(imdb, 1);
                 } else {
                     axios.get(this.props.server + '/omdb/' + response.data.imdb_id).then(response => {
@@ -149,8 +161,6 @@ class Details extends Component {
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason } = this.state;
-
-        console.log(moreData, eztv)
 
         let versions = [];
         let seasons = [];
