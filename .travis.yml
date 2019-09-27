@@ -35,7 +35,7 @@ after_script:
   # List docker images after the build 
   - docker images
   # Send upgrade command to current (and then add newline to output for travis)
-  - curl -X POST $UPGRADE_SERVER; echo
+  - curl --max-time 15 -X POST $UPGRADE_SERVER; echo
   # Update the README file on docker hub
   - |
     docker run \
