@@ -82,13 +82,15 @@ class Cover extends Component {
 
         var hasFile = false;
         for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const lev = levenshtein(file.title.toLowerCase(), media.title.toLowerCase());
-            const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
-
-            if (match > 0.95 && file.year === media.year) {
-                hasFile = true;
-                break;
+            if (media && media.title && media.year) {
+                const file = files[i];
+                const lev = levenshtein(file.title.toLowerCase(), media.title.toLowerCase());
+                const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
+    
+                if (match > 0.95 && file.year === media.year) {
+                    hasFile = true;
+                    break;
+                }
             }
         }
 
