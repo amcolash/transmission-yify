@@ -5,7 +5,7 @@ import '../css/Pager.css';
 
 class Pager extends Component {
     render() {
-        const { changePage, page, movies, type } = this.props;
+        const { changePage, page, media, type } = this.props;
 
         return (
             <div className={"pager " + type}>
@@ -22,12 +22,12 @@ class Pager extends Component {
                 <span>{page}</span>
                 <FaAngleRight
                     className="arrow"
-                    style={{ display: movies.length >= 20 ? "inline-block" : "none" }}
+                    style={{ display: media.length >= 20 ? "inline-block" : "none" }}
                     onClick={() => changePage(1)}
                 />
                 <FaAngleDoubleRight
                     className="arrow"
-                    style={{ display: movies.length >= 20 ? "inline-block" : "none" }}
+                    style={{ display: media.length >= 20 ? "inline-block" : "none" }}
                     onClick={() => changePage(5)}
                 />
             </div>
