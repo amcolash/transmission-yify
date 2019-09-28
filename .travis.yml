@@ -1,47 +1,34 @@
-# This file is based off of the post: https://medium.com/mobileforgood/9cedb8348a62
-
 sudo: required
 services:
-  - docker
-language: minimal # All of our build happens inside docker, so no extra support needed
-
-# Only run travis on master
+- docker
+language: minimal
 branches:
   only:
   - master
-
 env:
   global:
-    - REGISTRY_USER=amcolash
-    # REGISTRY_PASS is the secure variable below
-    - secure: AcZxPkjT1H96CGLqtY5APx5NLFQXt3q88cJ6768/A1YhH4HrzfvxuymEzEkK8dr1xLKYOBOz/wF1kVWVs1SA9igLn/jUDZVeqtyGqBHu+92VH1ik/D0kIZSdWdTk3SzWIloqO1NwPl84typIblPrScB30e0Yj0xt3/UAx09XWWSHHmc0S6ZLvuOaP7u62QfM/qKtIx9Whc/gq+w6z9TCNAFA1MG/xU6B50ZAtwl7zSe/S4NNMIeQUtiXsy37bJnO0+gD1W2IyLN4NzohQzi1AaJGwE7dZ1fqdLbjUt1cOTvjuKQxi81wt/vb9ytAcLVCLz6zQW5qDdfRSgtInfIfkf+x5CXNrkzEs86QHnfJZMF1ueNhb9M1l4uIiZywOBFKCpUl45FBpdHttD8GtiZSD797Y6S0h15VuTYDcnauGwvvf8zYcBD1bfBqaXcsnIuHD8w7m6yE6Ew3PGRbXvj4/SBInoJ6TkIKZitxCj1pulc2CXFdgeNdAOK4JUYg0ew8K2iv/3rCFrUtoyinhE5y7BIkvTTdndciZ0H9/BLpXswYvVFQ8VceSIyoKZQ8O4BriabYxjFGTp/8cYbdXNlCGfJWbFtGPQo4+Lj6zfG0q22Wa2BUvOYdmhv/xPRpUK1jYFC9MRkwoZmxg2pXXuO9l6bxApKiP7Vo+yDFQjUtOos=
-
+  - REGISTRY_USER=amcolash
+  - secure: lDpP170LXN8lSgzhlpgYFs0bGNEYT8pQZ0u4Xa7FGGP8VDY60CSui5sc+8D6586CeCoJlHZqfV9WxoQHCp77Ie+452WGp+4Zmp5/6xWwKeHLxNzbSW97E2VjrsebvaVqU+lkTLHSzc+K54Yfubw+s/w4xtwiJulK4k2k/N2+OOrdyEGW778USBUXteXOrNMU9cRIf2Y5z26pLyC34CHny7itsHGgVtCyk73gb2eSHUH1poRXgRIgh+nDxKfMFD/5vfZDyNhEDHUGxRUnh/ariHH731jgNaMJStld0SuqsCtcVycoJ1Zx7A0VVgpEhrTt4wXp6SsbM9HJV/SuMhoCTG9sxjnh/vkpqTfmef842fDp5oX53GkqQ8S1SQtTCDWK20NtPOME2hXwI1uPmtI886hQ+z/SvY0IAWouWXwkXaT6qL6vEsjZpJXCbTmZJQ1KPUF8kAPJhfA5vcPhOlpHPQf7AH1qYmmnbJJpF2URiAIcfXWIjzTTqo3OfMFIuEzuFwZD+Y7n5wS0Xowe1ti3iTZEGqsgqolRQNzw9WLmU5qtMg+g4t5qsSn+iyjhZtZf4WxUSgDU7PpSQ2FlTVGqR7zyJsiBqoSaPuq2F8VSWj17TStFpKU/YbekAeeJvePsjFyM/kiQxlUlLFgVrIxXnHrkUlOzvzClCHEl1AFoMw8=
 before_script:
-  - docker pull amcolash/transmission-yify || true
-
+- docker pull amcolash/transmission-yify || true
 script:
-  - docker build --pull --cache-from amcolash/transmission-yify --tag amcolash/transmission-yify .
-
+- docker build --pull --cache-from amcolash/transmission-yify --tag amcolash/transmission-yify
+  .
 before_deploy:
-  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
-
+- docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
 deploy:
   provider: script
   script: docker push amcolash/transmission-yify
   on:
     branch: master
-
 after_script:
-  # List docker images after the build 
-  - docker images
-  # Send upgrade command to current (and then add newline to output for travis)
-  - curl --max-time 15 -X POST $UPGRADE_SERVER; echo
-  # Update the README file on docker hub
-  - |
-    docker run \
-    -v ${PWD}/README.md:/data/README.md \
-    -e DOCKERHUB_USERNAME="$REGISTRY_USER" \
-    -e DOCKERHUB_PASSWORD="$REGISTRY_PASS" \
-    -e DOCKERHUB_REPO_PREFIX=amcolash \
-    -e DOCKERHUB_REPO_NAME=transmission-yify \
-    sheogorath/readme-to-dockerhub
+- docker images
+- curl --max-time 15 -X POST $UPGRADE_SERVER; echo
+- |-
+  docker run \
+  -v ${PWD}/README.md:/data/README.md \
+  -e DOCKERHUB_USERNAME="$REGISTRY_USER" \
+  -e DOCKERHUB_PASSWORD="$REGISTRY_PASS" \
+  -e DOCKERHUB_REPO_PREFIX=amcolash \
+  -e DOCKERHUB_REPO_NAME=transmission-yify \
+  sheogorath/readme-to-dockerhub
