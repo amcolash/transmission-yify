@@ -1,9 +1,9 @@
 {
   "name": "Stream",
   "short_name": "Stream",
-  "theme_color": "#777777",
+  "theme_color": "#353535",
   "background_color": "#444444",
-  "display": "minimal-ui",
+  "display": "standalone",
   "Scope": "/",
   "start_url": "/index.html",
   "icons": [
