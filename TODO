@@ -10,6 +10,6 @@ TODO
 - [DONE] Pirate Bay Search UI
 - [DONE] Move all server data into the storage socket and rename to stats
 - [DONE] Add a prune button to downloads
-- Paging results for Pirate Bay
+- [DONE] Paging results for Pirate Bay
 - Analytics (views, downloads, ip locations, etc)
 - Redo UI to make it prettier

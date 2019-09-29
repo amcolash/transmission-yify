@@ -18,8 +18,15 @@ class Pirate extends Component {
         url: media.magnetLink,
         hashString
       };
+      const units = media.size.match(/[A-Za-z]+/)[0].replace('i', '');
+      let size = Number.parseFloat(media.size.match(/\d+\.?\d*/)[0]);
+      size = size < 10 ? size.toFixed(2) : size < 100 ? size.toFixed(1) : size.toFixed(0);
 
       return <div className="pirateRow">
+        <div className="categories">
+          <div className="category">{media.category}</div>
+          <div className="subcategory">{media.subCategory}</div>
+        </div>
         <div className='peers'>
           {
             media.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
@@ -31,6 +38,7 @@ class Pirate extends Component {
         
         <div className="title">{media.name}</div>
         <div className="spacer"></div>
+        <div className="size">{size + ' ' + units}</div>
 
         <div className="dl">
           {getProgress(hashString) ? (

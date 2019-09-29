@@ -30,16 +30,16 @@ class MovieList extends Component {
         this.state = {
             error: null,
             isLoaded: false,
-            movies: [],
+            results: [],
             page: 1,
             modal: false,
             media: {},
             torrents: [],
             started: [],
-            search: '',
+            search: 'hobbs and shaw',
             genre: '',
             order: '',
-            type: 'movies',
+            type: 'pirate',
             isSearching: false,
             status: null,
             width: 0,
@@ -182,7 +182,7 @@ class MovieList extends Component {
             }
         } else if (type === 'pirate') {
             if (search.length === 0) {
-                this.setState({movies: [], isSearching: false});
+                this.setState({results: [], isSearching: false});
                 return;
             }
             // use all so that we do not filter here
@@ -218,7 +218,7 @@ class MovieList extends Component {
         
         if (type === 'pirate') {
             this.setState({
-                movies: data,
+                results: data,
                 isLoaded: true,
                 isSearching: false
             });
@@ -268,7 +268,7 @@ class MovieList extends Component {
             }
     
             this.setState({
-                movies: data,
+                results: data,
                 isLoaded: true,
                 isSearching: false
             });
@@ -364,9 +364,9 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, movies, modal, media, page, torrents, started, width, status, scroll, type } = this.state;
+        const { error, isLoaded, results, modal, media, page, torrents, started, width, status, scroll, type, search } = this.state;
 
-        const pagerVisibility = page !== 1 || movies.length >= 20;
+        const pagerVisibility = page !== 1 || ((type === 'pirate' && results.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
         if (error) {
@@ -439,12 +439,12 @@ class MovieList extends Component {
                     />
 
                     <div className="movie-list">
-                        {(movies && movies.length > 0) ? (
-                            type === 'pirate' ? (
+                        {type === 'pirate' ? (
+                            results && results.torrents && results.torrents.length > 0 ? (
                                 <div className="pirateList">
-                                    {movies.map(media => (
+                                    {results.torrents.map(media => (
                                         <Pirate
-                                            key={media.name || media.id}
+                                            key={media.link}
                                             media={media}
                                             started={started}
                                             downloadTorrent={this.downloadTorrent}
@@ -455,32 +455,36 @@ class MovieList extends Component {
                                         />
                                     ))}
                                 </div>
-                            ) : (
-                                movies.map(media => (
-                                    <Cover
-                                        key={media.id}
-                                        media={media}
-                                        type={type}
-                                        click={this.onOpenModal}
-                                        downloadTorrent={this.downloadTorrent}
-                                        cancelTorrent={this.cancelTorrent}
-                                        torrents={this.torrents}
-                                        started={started}
-                                        getProgress={this.getProgress}
-                                        server={this.server}
-                                        files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
-                                    />
-                            ))
-                        )) : type !== 'pirate' ? <h1>No Results</h1> : <h2>Please enter a search term</h2>
-                        }
+                            ) : search.length === 0 ? <h2>Please enter a search term</h2> : <h1>No Results</h1>
+                        ) : (
+                            results.length === 0 ? <h1>No Results</h1> : (
+                                <div>
+                                    {results.map(media => (
+                                        <Cover
+                                            key={media.id}
+                                            media={media}
+                                            type={type}
+                                            click={this.onOpenModal}
+                                            downloadTorrent={this.downloadTorrent}
+                                            cancelTorrent={this.cancelTorrent}
+                                            torrents={this.torrents}
+                                            started={started}
+                                            getProgress={this.getProgress}
+                                            server={this.server}
+                                            files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                        />
+                                    ))}
+                                </div>
+                            )
+                        )}
                     </div>
 
                     {type !== 'pirate' ? (
                         <Fragment>
-                            <Pager changePage={this.changePage} page={page} media={movies}
+                            <Pager changePage={this.changePage} page={page} results={results}
                                 type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
         
-                            <Pager changePage={this.changePage} page={page} media={movies}
+                            <Pager changePage={this.changePage} page={page} results={results}
                                 type={pagerVisibility ? "" : "hidden"}/>
                         </Fragment>
                     ) : null}

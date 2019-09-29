@@ -400,15 +400,15 @@ function searchPirateBay(query, page, filter, endpoint) {
             
             const range = results.match(/\d+\sto\s\d+/);
             let lower = 0, upper = 0;
-            if (range && range.length === 1) {
+            if (range && range.length > 0) {
                 lower = range[0].match(/\d+/g)[0];
                 upper = range[0].match(/\d+/g)[1];
             }
             const limit = Number.parseInt(upper) - Number.parseInt(lower);
             
-            const found = Number.parseInt(results.match(/\d+\sfound/));
+            const found = results.match(/\d+\sfound/);
             let total = 0;
-            if (found && found.length === 1) total = found.match(/\d+/)[0];
+            if (found && found.length > 0) total = Number.parseInt(found[0].match(/\d+/)[0]);
             
             rows.each((i, row) => {
                 // Try/Catch on each row so that an error parsing doesn't totally destroy results
