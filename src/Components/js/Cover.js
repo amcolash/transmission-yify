@@ -48,7 +48,6 @@ class Cover extends Component {
 
     cancelPB() {
         if (this.cancelToken) {
-            console.log('canceling pb');
             this.cancelToken.cancel();
             this.cancelToken = null;
         }
