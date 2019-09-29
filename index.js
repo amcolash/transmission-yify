@@ -253,7 +253,7 @@ app.get('/status', function (req, res)  { res.send(currentStatus); });
 app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
-app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, true, (err, data) => handleResponse(res, err, data)); });
+app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, req.query.deleteFiles == 'true', (err, data) => handleResponse(res, err, data)); });
 
 app.post('/torrents', function (req, res) {
     if (req.body.tv) {

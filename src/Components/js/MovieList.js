@@ -280,8 +280,8 @@ class MovieList extends Component {
         }
     }
 
-    cancelTorrent = (hashString) => {
-        axios.delete(this.server + '/torrents/' + hashString).catch(error => {
+    cancelTorrent = (hashString, deleteFiles) => {
+        axios.delete(this.server + '/torrents/' + hashString + '?deleteFiles=' + deleteFiles).catch(error => {
             console.error(error);
         });
     }

@@ -62,7 +62,7 @@ class Cover extends Component {
 
         this.cancelToken = CancelToken.source();
         const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
-        axios.get(url, { cancelTorrent: CancelToken.token }).then(response => {
+        axios.get(url, { cancelToken: CancelToken.token }).then(response => {
             this.cancelToken = null;
 
             // Only update things if we are still actually showing the same cover
@@ -127,7 +127,7 @@ class Cover extends Component {
                                         <button className="red" onClick={(e) => {
                                             e.stopPropagation();
                                             e.nativeEvent.stopImmediatePropagation();
-                                            cancelTorrent(version.hashString);
+                                            cancelTorrent(version.hashString, true);
                                         }}><FaTrash/></button>
                                     ) : (
                                         <button className="orange download" onClick={(e) => {

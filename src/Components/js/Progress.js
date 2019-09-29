@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FaTrash, FaExclamationCircle } from 'react-icons/fa';
+import { FaTrash, FaExclamationCircle, FaArchive } from 'react-icons/fa';
 import * as  ptn  from 'parse-torrent-name';
 
 class Progress extends Component {
@@ -36,7 +36,8 @@ class Progress extends Component {
                         [{speed} MB/s], peers: {peers}
                     </span>
                 ) : null}
-                <button className="red" onClick={() => cancelTorrent(torrent.hashString)}><FaTrash/></button>
+                <button className="red" onClick={() => cancelTorrent(torrent.hashString, true)}><FaTrash/></button>
+                {progress >= 100 ? <button className="green" onClick={() => cancelTorrent(torrent.hashString, false)}><FaArchive/></button> : null}
             </div>
         );
     }
