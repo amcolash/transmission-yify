@@ -31,7 +31,7 @@ class MovieList extends Component {
             error: null,
             isLoaded: false,
             results: [],
-            page: 1,
+            page: 3,
             modal: false,
             media: {},
             torrents: [],
@@ -186,7 +186,7 @@ class MovieList extends Component {
                 return;
             }
             // use all so that we do not filter here
-            ENDPOINT = `${this.server}/pirate/${search}?all=true`;
+            ENDPOINT = `${this.server}/pirate/${search}?all=true&page=${page}`;
         } else {
             if (search.length > 0) {
                 ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
@@ -366,7 +366,7 @@ class MovieList extends Component {
     render() {
         const { error, isLoaded, results, modal, media, page, torrents, started, width, status, scroll, type, search } = this.state;
 
-        const pagerVisibility = page !== 1 || ((type === 'pirate' && results.length >= 30) || results.length >= 20);
+        const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
         if (error) {
@@ -479,15 +479,11 @@ class MovieList extends Component {
                         )}
                     </div>
 
-                    {type !== 'pirate' ? (
-                        <Fragment>
-                            <Pager changePage={this.changePage} page={page} results={results}
-                                type={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
-        
-                            <Pager changePage={this.changePage} page={page} results={results}
-                                type={pagerVisibility ? "" : "hidden"}/>
-                        </Fragment>
-                    ) : null}
+                    <Pager changePage={this.changePage} page={page} results={results} type={type}
+                        cls={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
+
+                    <Pager changePage={this.changePage} page={page} results={results} type={type}
+                        cls={pagerVisibility ? "" : "hidden"}/>
 
                     <FaMagnet className="pointer" onClick={this.addMagnet}/>
                     <FaPowerOff className="pointer marginLeft" onClick={this.upgrade}/>

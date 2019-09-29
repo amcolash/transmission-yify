@@ -238,7 +238,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
         res.set('Cache-Control', 'public, max-age=3600');
         res.send(trackerCache[search]);
     } else {
-        searchPirateBay(search, 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
+        searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
             // cache for 1 hour
             res.set('Cache-Control', 'public, max-age=3600');
             res.send(results);
@@ -398,13 +398,14 @@ function searchPirateBay(query, page, filter, endpoint) {
 
             const results = $('h2').eq(0).text();
             
-            const range = results.match(/\d+\sto\s\d+/);
-            let lower = 0, upper = 0;
-            if (range && range.length > 0) {
-                lower = range[0].match(/\d+/g)[0];
-                upper = range[0].match(/\d+/g)[1];
-            }
-            const limit = Number.parseInt(upper) - Number.parseInt(lower);
+            const limit = 30;
+            // const range = results.match(/\d+\sto\s\d+/);
+            // let lower = 0, upper = 0;
+            // if (range && range.length > 0) {
+            //     lower = range[0].match(/\d+/g)[0];
+            //     upper = range[0].match(/\d+/g)[1];
+            // }
+            // const limit = Number.parseInt(upper) - Number.parseInt(lower);
             
             const found = results.match(/\d+\sfound/);
             let total = 0;

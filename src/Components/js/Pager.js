@@ -5,11 +5,12 @@ import '../css/Pager.css';
 
 class Pager extends Component {
     render() {
-        const { changePage, page, results, type } = this.props;
-        const visible = type === 'pirate' ? results.length >= 30 : results.length >= 20;
+        const { changePage, page, results, cls, type } = this.props;
+        const visibleSingle = type === 'pirate' ? (page * results.limit < results.total) : results.length >= 20;
+        const visibleMultiple = type === 'pirate' ? ((page + 4) * results.limit < results.total) : results.length >= 20;
 
         return (
-            <div className={"pager " + type}>
+            <div className={"pager " + cls}>
                 <FaAngleDoubleLeft
                     className="arrow"
                     style={{ display: page > 1 ? "inline-block" : "none" }}
@@ -23,12 +24,12 @@ class Pager extends Component {
                 <span>{page}</span>
                 <FaAngleRight
                     className="arrow"
-                    style={{ display: visible ? "inline-block" : "none" }}
+                    style={{ display: visibleSingle ? "inline-block" : "none" }}
                     onClick={() => changePage(1)}
                 />
                 <FaAngleDoubleRight
                     className="arrow"
-                    style={{ display: visible ? "inline-block" : "none" }}
+                    style={{ display: visibleMultiple ? "inline-block" : "none" }}
                     onClick={() => changePage(5)}
                 />
             </div>
