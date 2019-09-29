@@ -2,7 +2,6 @@ import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import openSocket from 'socket.io-client';
 import levenshtein from 'js-levenshtein';
-import Modal from 'react-responsive-modal';
 import {
     FaExclamationTriangle, FaMagnet, FaPowerOff
 } from 'react-icons/fa';
@@ -10,7 +9,6 @@ import {
 import '../css/MovieList.css';
 import Cover from './Cover';
 import Spinner from './Spinner';
-import Details from './Details';
 import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
 import Plex from './Plex';
@@ -33,8 +31,7 @@ class MovieList extends Component {
             isLoaded: false,
             results: [],
             page: 1,
-            modal: false,
-            media: {},
+            media: null,
             torrents: [],
             started: [],
             search: '',
@@ -348,11 +345,11 @@ class MovieList extends Component {
     }
 
     onOpenModal = (media) => {
-        this.setState({ media: media, modal: true });
+        this.setState({ media: media });
     };
 
     onCloseModal = () => {
-        this.setState({ modal: false });
+        this.setState({ media: null });
     };
 
     changePage = (direction) => {
@@ -365,12 +362,10 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, results, modal, media, page, torrents, started, width, status, scroll, type, search } = this.state;
+        const { error, isLoaded, results, media, page, torrents, started, width, status, scroll, type, search } = this.state;
 
         const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
-
-        console.log(results)
 
         if (error) {
             return (
@@ -397,48 +392,20 @@ class MovieList extends Component {
                     {status ? <Plex plexServer={status.plex}/> : null}
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
-                    <Modal
-                        open={modal}
-                        onClose={this.onCloseModal}
-                        center={width > 800}
-                        modalId={type === 'animes' ? 'modal' : 'modalFullscreen'}
-                        overlayId='overlay'
-                        // styles={type === 'animes' ? {} : {
-                        //     backgroundImage: 'url(https://via.placeholder.com/1000)'
-                        // }}
-                        styles={{modal: {backgroundImage: `url(https://image.tmdb.org/t/p/w1280/${media.backdrop_path})`}}}
-                    >
-                        {type === 'animes' ? (
-                            <Details
-                                media={media}
-                                type={type}
-                                server={this.server}
-                                torrents={torrents}
-                                started={started}
-                                updateTorrents={this.updateTorrents}
-                                cancelTorrent={this.cancelTorrent}
-                                downloadTorrent={this.downloadTorrent}
-                                getProgress={this.getProgress}
-                                getTorrent={this.getTorrent}
-                            />
-                        ) : (
-                            results ? (
-                                <DetailsBackdrop
-                                    media={media}
-                                    type={type}
-                                    server={this.server}
-                                    torrents={torrents}
-                                    started={started}
-                                    updateTorrents={this.updateTorrents}
-                                    cancelTorrent={this.cancelTorrent}
-                                    downloadTorrent={this.downloadTorrent}
-                                    getProgress={this.getProgress}
-                                    getTorrent={this.getTorrent}
-                                    onCloseModal={this.onCloseModal}
-                                />
-                            ) : null
-                        )}
-                    </Modal>
+                    <DetailsBackdrop
+                        media={media}
+                        type={type}
+                        width={width}
+                        server={this.server}
+                        torrents={torrents}
+                        started={started}
+                        updateTorrents={this.updateTorrents}
+                        cancelTorrent={this.cancelTorrent}
+                        downloadTorrent={this.downloadTorrent}
+                        getProgress={this.getProgress}
+                        getTorrent={this.getTorrent}
+                        onCloseModal={this.onCloseModal}
+                    />
             
                     {status && (status.ip.city === "Seattle") ? (
                         <div className="warning red">
