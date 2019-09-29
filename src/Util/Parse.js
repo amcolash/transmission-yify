@@ -152,12 +152,12 @@ export function convertTime(min) {
 
 export function getDetails(media, moreData, tmdbData, type, maxSeason) {
     let genres;
-    if (tmdbData) {
+    if (tmdbData && tmdbData.genres) {
         genres = tmdbData.genres.map(g => g.name);
         genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
     } else if (moreData) {
         if (moreData) genres = moreData.genres || moreData.Genres;
-        else genres = [];
+        genres = genres || [];
         
         genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
         JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
@@ -181,7 +181,7 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
     
     let director;
     if (moreData && moreData.Director && moreData.Director.indexOf("N/A") === -1) {
-        director = (moreData.Director.indexOf(",") !== -1 ? "Directors " : "Director ") + moreData.Director;
+        director = (moreData.Director.indexOf(",") !== -1 ? "Directors: " : "Director: ") + moreData.Director;
     }
 
     let writers;
