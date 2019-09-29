@@ -186,7 +186,7 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
 
     let writers;
     if (moreData && moreData.Writer){
-        writers = (moreData.Writer.indexOf(",") !== -1 ? "Writers" : "Writer") + moreData.Writer.replace(/\s*\(.*?\)/g, '');
+        writers = (moreData.Writer.indexOf(",") !== -1 ? "Writers: " : "Writer: ") + moreData.Writer.replace(/\s*\(.*?\)/g, '');
     }
 
     return {
