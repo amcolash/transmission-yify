@@ -6,7 +6,7 @@ import '../css/Details.css';
 import Version from './Version';
 import Spinner from './Spinner';
 import Genre from '../../Data/Genre';
-import { getMovies, getEpisodes } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes } from '../../Util/Parse';
 
 class Details extends Component {
 
@@ -134,16 +134,6 @@ class Details extends Component {
         }
     }
 
-    convertTime(min) {
-        if (!min) return '';
-        min = Number.parseInt(min.replace(' min', ''));
-
-        const hours = Math.floor(min / 60);
-        const minutes = Math.floor(((min / 60) - hours) * 60);
-        
-        return (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
-    }
-
     imageError() {
         this.setState({ showCover: false });
     }
@@ -161,54 +151,14 @@ class Details extends Component {
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason } = this.state;
+        
+        let versions = getMovies(media, pb ? pb.torrents : [], type);
 
-        let versions = [];
-        let seasons = [];
-        let episodes = [];
+        let seasons = getSeasons(type, maxSeason, moreData);
+        let episodes = getEpisodes(eztv || nyaa, moreData, type);
 
-        if (type === 'shows' || type === 'animes') {
-            if (type === 'shows') {
-                for (let i = 1; i < maxSeason + 1; i++) {
-                    if (moreData && i <= moreData.seasons.length) seasons.push(i);
-                }
-            } else {
-                seasons.push(1);
-            }
 
-            episodes = getEpisodes(eztv || nyaa, moreData, type);
-        }
-
-        if (type === 'movies' && pb) {
-            versions = getMovies(media, pb);
-        }
-
-        var mpaa = media.certification;
-        if (!mpaa || mpaa === "N/A") {
-            if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
-                mpaa = moreData.Rated;
-            } else {
-                mpaa = "NR";
-            }
-        }
-
-        let genres;
-
-        if (tmdbData) {
-            genres = tmdbData.genres.map(g => g.name);
-            genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
-        } else if (moreData) {
-            if (moreData) genres = moreData.genres || moreData.Genres;
-            else genres = [];
-
-            genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
-                JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
-        }
-
-        let writers;
-        if (moreData && moreData.Writer){
-            console.log(moreData.Writer);
-            writers = moreData.Writer.replace(/\s*\(.*?\)/g, '');
-        }
+        const details = getDetails(media, moreData, tmdbData, type, maxSeason);
 
         return (
             <div className="container">
@@ -233,24 +183,15 @@ class Details extends Component {
                     </h3>
                     <h4>
                         <Fragment>
-                            {type === 'movies' ? (
-                                <span>{media.year}{moreData ? ', ' + this.convertTime(moreData.Runtime) : null}</span>
-                            ) : (
-                                <span>{(moreData && moreData.Year) ? moreData.Year : media.year} ({maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')})</span>
-                            )}
-                            <div className="mpaa-rating">{mpaa}</div>
+                            <span>{details.header}</span>
+                            <div className="mpaa-rating">{details.mpaa}</div>
                         </Fragment>
                     </h4>
-                    <p className="plot">{(moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
-                        moreData.overview : (media.synopsis ? media.synopsis : ""))}</p>
-                    {genres ? (
-                        <Fragment>
-                            <span className="capitalize">
-                                {genres}
-                            </span>
-                            <br/>
-                        </Fragment>
-                    ) : null}
+                    <p className="plot">{details.plot}</p>
+                    {details.genres ? ( <Fragment>
+                        <span className="capitalize">{details.genres}</span>
+                        <br/>
+                    </Fragment> ) : null}
                     
                     {type === 'movies' ? moreData !== "ERROR" && moreData !== null ? (
                         <Fragment>
@@ -268,31 +209,17 @@ class Details extends Component {
                                 </Fragment>
                             )) : null}
                             <hr/>
-                            {(moreData.Director && moreData.Director.indexOf("N/A") === -1) ? (
-                                <Fragment>
-                                    <span>{moreData.Director.indexOf(",") !== -1 ? "Directors" : "Director"}: {moreData.Director}</span>
-                                    <br/>
-                                </Fragment>
-                            ) : null}
-                            {writers ? (
-                                <Fragment>
-                                    <span>{(writers.indexOf(",") !== -1 ? "Writers" : "Writer")} {writers}</span>
-                                    <br/>
-                                </Fragment>
-                            ) : null}
+
+                            {details.director ? ( <Fragment><span>{details.director}</span><br/></Fragment> ) : null}
+                            {details.writers ? ( <Fragment><span>{details.writers}</span><br/></Fragment> ) : null}
                             <span>Actors: {moreData.Actors}</span>
                         </Fragment>
                     ) : (
                         <Fragment>
-                            {moreData === "ERROR" || moreData !== null ? (
-                                null
-                            ) : (
+                            {moreData === "ERROR" || moreData !== null ? null : (
                                 <Fragment>
                                     <hr/>
-                                    <span>
-                                        Loading additional data...
-                                        <Spinner visible/>
-                                    </span>
+                                    <span>Loading additional data...<Spinner visible/></span>
                                 </Fragment>
                             )}
                         </Fragment>
@@ -316,30 +243,15 @@ class Details extends Component {
                                     />
                                 ))
                             ) : <h4>No Torrents Found</h4>
-                        ) : (
-                            <span>
-                                Loading torrent data...
-                                <Spinner visible/>
-                            </span>
-                        )
+                        ) : <span>Loading torrent data...<Spinner visible/></span>
                     ) : (
-                        (!eztv && !nyaa) ? (
-                            <Fragment>
-                                Loading torrent data...
-                                <Spinner visible/>
-                            </Fragment>
-                        ) : (
-                            episodes.length > 0 ? (
+                        (!eztv && !nyaa) ? <span>Loading torrent data...<Spinner visible/></span> : (
+                            episodes.length === 0 ? <h4>No Torrents Found</h4> : (
                                 <Fragment>
                                     <h3 className="season">Season
                                         {seasons.length > 1 ? (
-                                            <select
-                                                onChange={(event) => this.updateSeason(event.target.value)}
-                                                value={season}
-                                            >
-                                                {seasons.map(season => (
-                                                    <option key={season} value={season}>{season}</option>
-                                                ))}
+                                            <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
+                                                {seasons.map(season => ( <option key={season} value={season}>{season}</option> ))}
                                             </select>
                                         ) : " 1"}
                                         {(episodes[season]) ? (
@@ -356,32 +268,26 @@ class Details extends Component {
                                             episodes[season].map(episode => (
                                                 episode ? (
                                                 <Fragment key={episode.episode}>
-                                                    {episode.title === "Episode " + episode.episode ? (
-                                                        <h4 className="episode">{episode.title}</h4>
-                                                    ) : (
-                                                        <h4 className="episode">{episode.episode} - {episode.title}</h4>
-                                                    )}
+                                                    <h4 className="episode">{episode.title}</h4>
 
-                                                        {episode.torrents ? episode.torrents.map(version => (
-                                                        <Version
-                                                            key={version.hashString}
-                                                            version={version}
-                                                            started={started}
-                                                            getProgress={getProgress}
-                                                            getLink={getLink}
-                                                            getTorrent={getTorrent}
-                                                            downloadTorrent={downloadTorrent}
-                                                            cancelTorrent={cancelTorrent}
-                                                        />
-                                                        )) : null}
+                                                    {episode.torrents ? episode.torrents.map(version => (
+                                                    <Version
+                                                        key={version.hashString}
+                                                        version={version}
+                                                        started={started}
+                                                        getProgress={getProgress}
+                                                        getLink={getLink}
+                                                        getTorrent={getTorrent}
+                                                        downloadTorrent={downloadTorrent}
+                                                        cancelTorrent={cancelTorrent}
+                                                    />
+                                                    )) : null}
                                                 </Fragment>
                                                 ) : null
                                             ))
                                         ) : null}
                                     </div>
                                 </Fragment>
-                            ) : (
-                                <h4>No Torrents Found</h4>
                             )
                         )
                     )}

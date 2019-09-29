@@ -1,7 +1,10 @@
 import magnet from 'magnet-uri';
 import * as  ptn  from 'parse-torrent-name';
 
-export function getMovies(media, pb) {
+export function getMovies(media, pb, type) {
+    // console.log(media, pb, type)
+    if (type !== 'movies' || !pb || !pb) return [];
+
     // Only show cams if there are not other versions
     let hasNonCam = false;
     pb.forEach(t => {
@@ -54,8 +57,26 @@ export function getMovies(media, pb) {
     });
 }
 
+export function getSeasons(type, maxSeason, moreData) {
+    const seasons = [];
+
+    if (type === 'shows' || type === 'animes') {
+        if (type === 'shows') {
+            for (let i = 1; i < maxSeason + 1; i++) {
+                if (moreData && i <= moreData.seasons.length) seasons.push(i);
+            }
+        } else {
+            seasons.push(1);
+        }
+    }
+
+    return seasons;
+}
+
 export function getEpisodes(torrents, moreData, type) {
     let episodes = [];
+
+    if (type === 'movies') return episodes;
     
     if (torrents && torrents.torrents) {
         torrents.torrents.forEach(torrent => {
@@ -69,7 +90,7 @@ export function getEpisodes(torrents, moreData, type) {
             
             let title = `Episode ${parsed.episode}`;
             if (moreData && moreData.seasons && moreData.seasons[parsed.season - 1] && moreData.seasons[parsed.season - 1].episodes) {
-                title = moreData.seasons[parsed.season - 1].episodes[parsed.episode - 1].name;
+                title = parsed.episode + ' - ' + moreData.seasons[parsed.season - 1].episodes[parsed.episode - 1].name;
             }
 
             episodes[parsed.season] = episodes[parsed.season] || [];
@@ -116,4 +137,64 @@ export function getEpisodes(torrents, moreData, type) {
     }
     
     return episodes;
+}
+
+
+export function convertTime(min) {
+    if (!min) return '';
+    min = Number.parseInt(min.replace(' min', ''));
+
+    const hours = Math.floor(min / 60);
+    const minutes = Math.floor(((min / 60) - hours) * 60);
+    
+    return (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
+}
+
+export function getDetails(media, moreData, tmdbData, type, maxSeason) {
+    let genres;
+    if (tmdbData) {
+        genres = tmdbData.genres.map(g => g.name);
+        genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
+    } else if (moreData) {
+        if (moreData) genres = moreData.genres || moreData.Genres;
+        else genres = [];
+        
+        genres = (genres.length === 1 ? "Genre: " : "Genres: ") +
+        JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
+    }
+
+    let mpaa = media.certification;
+    if (!mpaa || mpaa === "N/A") {
+        if (moreData && moreData.Rated && moreData.Rated !== "N/A") {
+            mpaa = moreData.Rated;
+        } else {
+            mpaa = "NR";
+        }
+    }
+    
+    let header;
+    if (type === 'movies') header = `${media.year}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
+    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year} ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    
+    const plot = (moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
+    moreData.overview : (media.synopsis ? media.synopsis : ""));
+    
+    let director;
+    if (moreData && moreData.Director && moreData.Director.indexOf("N/A") === -1) {
+        director = (moreData.Director.indexOf(",") !== -1 ? "Directors " : "Director ") + moreData.Director;
+    }
+
+    let writers;
+    if (moreData && moreData.Writer){
+        writers = (moreData.Writer.indexOf(",") !== -1 ? "Writers" : "Writer") + moreData.Writer.replace(/\s*\(.*?\)/g, '');
+    }
+
+    return {
+        mpaa,
+        genres,
+        header,
+        plot,
+        director,
+        writers
+    };
 }
