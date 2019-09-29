@@ -238,7 +238,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
         res.set('Cache-Control', 'public, max-age=3600');
         res.send(trackerCache[search]);
     } else {
-        searchPirateBay(search, 1, req.query.all ? '' : '/99/200', 'https://thepiratebay0.org/').then(results => {
+        searchPirateBay(search, 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
             // cache for 1 hour
             res.set('Cache-Control', 'public, max-age=3600');
             res.send(results);

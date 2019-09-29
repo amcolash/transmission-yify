@@ -204,6 +204,12 @@ class Details extends Component {
                 JSON.stringify(genres).replace(/[[\]"]/g, '').replace(/,/g, ', ');
         }
 
+        let writers;
+        if (moreData && moreData.Writer){
+            console.log(moreData.Writer);
+            writers = moreData.Writer.replace(/\s*\(.*?\)/g, '');
+        }
+
         return (
             <div className="container">
                 {showCover ? (
@@ -268,8 +274,12 @@ class Details extends Component {
                                     <br/>
                                 </Fragment>
                             ) : null}
-                            <span>{moreData.Writer && moreData.Writer.indexOf(",") !== -1 ? "Writers" : "Writer"}: {moreData.Writer}</span>
-                            <br/>
+                            {writers ? (
+                                <Fragment>
+                                    <span>{(writers.indexOf(",") !== -1 ? "Writers" : "Writer")} {writers}</span>
+                                    <br/>
+                                </Fragment>
+                            ) : null}
                             <span>Actors: {moreData.Actors}</span>
                         </Fragment>
                     ) : (
