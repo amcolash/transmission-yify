@@ -11,6 +11,7 @@ import '../css/MovieList.css';
 import Cover from './Cover';
 import Spinner from './Spinner';
 import Details from './Details';
+import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
 import Plex from './Plex';
 import Search from './Search';
@@ -369,6 +370,8 @@ class MovieList extends Component {
         const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
 
+        console.log(results)
+
         if (error) {
             return (
                 <div className="message">
@@ -394,19 +397,47 @@ class MovieList extends Component {
                     {status ? <Plex plexServer={status.plex}/> : null}
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
-                    <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
-                        <Details
-                            media={media}
-                            type={type}
-                            server={this.server}
-                            torrents={torrents}
-                            started={started}
-                            updateTorrents={this.updateTorrents}
-                            cancelTorrent={this.cancelTorrent}
-                            downloadTorrent={this.downloadTorrent}
-                            getProgress={this.getProgress}
-                            getTorrent={this.getTorrent}
-                        />
+                    <Modal
+                        open={modal}
+                        onClose={this.onCloseModal}
+                        center={width > 800}
+                        modalId={type === 'animes' ? 'modal' : 'modalFullscreen'}
+                        overlayId='overlay'
+                        // styles={type === 'animes' ? {} : {
+                        //     backgroundImage: 'url(https://via.placeholder.com/1000)'
+                        // }}
+                        styles={{modal: {backgroundImage: `url(https://image.tmdb.org/t/p/w1280/${media.backdrop_path})`}}}
+                    >
+                        {type === 'animes' ? (
+                            <Details
+                                media={media}
+                                type={type}
+                                server={this.server}
+                                torrents={torrents}
+                                started={started}
+                                updateTorrents={this.updateTorrents}
+                                cancelTorrent={this.cancelTorrent}
+                                downloadTorrent={this.downloadTorrent}
+                                getProgress={this.getProgress}
+                                getTorrent={this.getTorrent}
+                            />
+                        ) : (
+                            results ? (
+                                <DetailsBackdrop
+                                    media={media}
+                                    type={type}
+                                    server={this.server}
+                                    torrents={torrents}
+                                    started={started}
+                                    updateTorrents={this.updateTorrents}
+                                    cancelTorrent={this.cancelTorrent}
+                                    downloadTorrent={this.downloadTorrent}
+                                    getProgress={this.getProgress}
+                                    getTorrent={this.getTorrent}
+                                    onCloseModal={this.onCloseModal}
+                                />
+                            ) : null
+                        )}
                     </Modal>
             
                     {status && (status.ip.city === "Seattle") ? (

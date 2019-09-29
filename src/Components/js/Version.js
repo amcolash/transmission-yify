@@ -10,7 +10,7 @@ class Version extends Component {
         const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent } = this.props;
         
         return (
-            <div className={"version" + (version.peers ? "" : " inline padding")} key={version.url}>
+            <div className="version padding" key={version.url}>
                 <div className='qualityPeers'>
                     <b>{version.quality}</b>
                     <span className='peers'>

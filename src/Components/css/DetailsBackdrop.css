@@ -1,0 +1,101 @@
+.container {
+  margin-top: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100vh;
+  background-image: linear-gradient(to top,rgba(0,0,0,0.75),transparent);
+  text-align: left;
+}
+
+.left, .right {
+  /* display: inline-block; */
+  color: #ddd;
+  text-shadow: 1px 1px 3px #000000;
+  margin: 1em;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.left img {
+  max-width: 250px;
+  box-shadow: 0px 0px 15px 4px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 3px;
+}
+
+.left hr {
+  margin: 0.6em 0.7em;
+}
+
+.right {
+  vertical-align: top;
+  max-width: 400px;
+  padding-left: 1.5em;
+}
+
+.versions {
+  display: flex;
+  margin-top: 1em;
+}
+
+.versions .version {
+  margin-right: 1em;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+a {
+  color: #999;
+}
+
+h3 {
+  margin: 0.25em 0;
+}
+
+h4 {
+  margin: 0;
+}
+
+.mpaa-rating {
+  display: inline-block;
+  padding: 0.1em;
+  margin-left: 0.5em;
+  border: 2px solid #666;
+  border-radius: 0;
+  font-family: Times New Roman;
+  font-weight: bold;
+}
+
+.status {
+  stroke-width: 1px;
+  stroke: black;
+  padding-right: 0.15em;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.season select {
+  margin-left: 0.5em;
+}
+
+.episode {
+  padding-top: 1em;
+}
+
+.padding {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+}
+
+@media (max-width: 680px) {
+  .right {
+      max-width: 100%;
+  }
+}
