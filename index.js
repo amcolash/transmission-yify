@@ -244,7 +244,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
             res.send(results);
             trackerCache[search];
         }).catch(err => {
-            res.send([]);
+            res.send({ppage:1,total:0,limit:30,torrents:[]});
         });
     }
 });
@@ -395,35 +395,64 @@ function searchPirateBay(query, page, filter, endpoint) {
             const sizeRegex = new RegExp(/(\d|\.)+\s(KiB|MiB|GiB)/);
             const fullDateRegex = new RegExp(/\d{2}-\d{2}\s*\d{4}/);
             const partialDateRegex = new RegExp(/\d{2}-\d{2}/);
+
+            const results = $('h2').eq(0).text();
+            
+            const range = results.match(/\d+\sto\s\d+/);
+            let lower = 0, upper = 0;
+            if (range && range.length === 1) {
+                lower = range[0].match(/\d+/g)[0];
+                upper = range[0].match(/\d+/g)[1];
+            }
+            const limit = Number.parseInt(upper) - Number.parseInt(lower);
+            
+            const found = Number.parseInt(results.match(/\d+\sfound/));
+            let total = 0;
+            if (found && found.length === 1) total = found.match(/\d+/)[0];
             
             rows.each((i, row) => {
-                const name = $('.detName', row).text().trim();
-                if (!name) return;
-            
-                const link = $('.detLink', row).attr('href');
-                const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
-                const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
-                const seeds = $('[align="right"]', row).eq(0).text();
-                const leeches = $('[align="right"]', row).eq(1).text();
-
-                let date;
-                let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
-                let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
-                if (fullDateMatched) date = fullDateMatched[0];
-                else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
-            
-                torrents.push({
-                    name,
-                    link,
-                    magnetLink,
-                    size: sizeMatched ? sizeMatched[0] : undefined,
-                    date: date,
-                    seeds,
-                    leeches
-                });
+                // Try/Catch on each row so that an error parsing doesn't totally destroy results
+                try {
+                    const name = $('.detName', row).text().trim();
+                    if (!name) return;
+                
+                    const link = $('.detLink', row).attr('href');
+                    const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
+                    const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
+                    const seeds = $('[align="right"]', row).eq(0).text();
+                    const leeches = $('[align="right"]', row).eq(1).text();
+                    const category = $('.vertTh a', row).eq(0).text();
+                    const subCategory = $('.vertTh a', row).eq(1).text();
+                    const authorName = $('.detDesc a', row).text();
+                    const authorUrl = $('.detDesc a', row).attr('href');
+    
+                    let date;
+                    let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
+                    let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
+                    if (fullDateMatched) date = fullDateMatched[0];
+                    else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
+                
+                    torrents.push({
+                        name,
+                        link,
+                        magnetLink,
+                        size: sizeMatched ? sizeMatched[0] : undefined,
+                        date: date,
+                        seeds,
+                        leeches,
+                        category,
+                        subCategory,
+                        author: {
+                            name: authorName,
+                            url: authorUrl
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                }
             });
 
-            resolve(torrents);
+            resolve({page, total, limit, torrents});
         }).catch(err => {
             console.error(err);
             reject();
