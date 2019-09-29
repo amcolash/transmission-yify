@@ -11,11 +11,42 @@ const cheerio = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
+const PlexAPI = require("plex-api");
 
 require('dotenv').config();
 
-const PlexAPI = require("plex-api");
 
+// Init vars
+const IS_DOCKER = fs.existsSync('/.dockerenv');
+const PORT = 9000;
+const DATA = (IS_DOCKER ? '/data' : process.env.DATA_DIR);
+const CACHE_FILE = DATA + '/cache.json';
+const interval = 2000;
+
+let currentTorrents = [];
+let currentFiles = [];
+
+let prevStatus;
+let currentStatus = {
+    buildTime: 'Dev Build',
+    isDocker: IS_DOCKER,
+    plex: process.env.PLEX_SERVER
+};
+
+let cache = {};
+let trackerCache = {};
+let isUpgrading = false;
+
+// Figure out build time
+if (fs.existsSync('./build_time') && IS_DOCKER) {
+    try {
+        currentStatus.buildTime = new Date(fs.readFileSync('./build_time'));
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Init plex client
 let plexClient;
 try {
     plexClient = new PlexAPI({
@@ -30,31 +61,6 @@ try {
 } catch (error) {
     console.error(error);
 }
-
-// Init vars
-const IS_DOCKER = fs.existsSync('/.dockerenv');
-const PORT = 9000;
-const DATA = (IS_DOCKER ? '/data' : process.env.DATA_DIR);
-const CACHE_FILE = DATA + '/cache.json';
-
-let BUILD_TIME = 'Dev Build';
-if (fs.existsSync('./build_time') && IS_DOCKER) {
-    try {
-        BUILD_TIME = new Date(fs.readFileSync('./build_time'));
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-var currentTorrents = [];
-var currentStorage;
-var currentFiles = [];
-
-var cache = {};
-var trackerCache = {};
-var isUpgrading = false;
-
-var pirateBay;
 
 // App Server
 const app = express();
@@ -111,95 +117,19 @@ try {
 
     server.listen(PORT);
     console.log(`Running on port ${PORT}`);
-    if (typeof(BUILD_TIME) !== 'string') console.log(`Docker image build time ${BUILD_TIME}`);
-
-    // Autoprune on start
-    autoPrune();
+    if (typeof(currentStatus.buildTime) !== 'string') console.log(`Docker image build time ${currentStatus.buildTime}`);
 
     // Init socket watchers
     initSocketDataWatchers();
+
+    // Init status watchers
+    initStatusWatchers();
 } catch (err) {
     console.error(err);
 }
 
 // Set up static content
 app.use('/', express.static('build'));
-
-app.get('/ip', function (req, res) {
-    try {
-        if (IS_DOCKER) {
-            let ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
-            handleIP(ip, res);
-        } else {
-            handleIP(null, res);
-        }
-    } catch(err) {
-        console.error(err);
-        res.send('unknown');
-    }
-});
-
-function handleIP(ip, res) {
-    axios.get('https://api.ipdata.co/' + (ip ? ip.trim() : '') + '?api-key=' + process.env.IP_KEY).then(response => {
-        res.send(response.data);
-    }, error => {
-        console.error(error);
-        res.send(ip);
-    });
-}
-
-app.get('/storage', function (req, res) { getStorage(data => res.send(data)); });
-
-function getStorage(cb) {
-    exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
-        if (err) {
-            console.error(err);
-            cb('unknown');
-        } else {
-            try {
-                const stats = fs.statSync(CACHE_FILE);
-                const fileSizeInBytes = stats["size"];
-                const fileSizeInMegabytes = (fileSizeInBytes / Math.pow(1024, 2)).toFixed(1);
-                cb({ used: output.replace('%', '').trim(), cache: `${fileSizeInMegabytes} MB` });
-            } catch (err) {
-                cb({ used: output.replace('%', '').trim() });
-            }
-        }
-    });
-}
-
-function getFiles(cb) {
-    if (!plexClient) cb([]);
-
-    plexClient.query("/library/sections").then(response => {
-        const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
-        const promises = [];
-
-        for (var i = 0; i < sections.length; i++) {
-            promises.push(plexClient.query("/library/sections/" + sections[i].key + "/all"));
-        }
-
-        Promise.all(promises).then(values => {
-            const files = [];
-            for (var i = 0; i < values.length; i++) {
-                const data = values[i].MediaContainer.Metadata;
-                for (var j = 0; j < data.length; j++) {
-                    files.push({title: data[j].title, year: data[j].year});
-                }
-            }
-            cb(files);
-        });
-    }, function (err) {
-        console.error("Could not connect to server", err);
-
-        // If plex goes offline, keep in-memory copy living on
-        if (currentFiles.length > 0) {
-            cb(currentFiles);
-        } else {
-            cb([]);
-        }
-    });
-}
 
 app.get('/omdb/:id', function(req, res) {
     let url ='https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
@@ -283,28 +213,6 @@ app.get('/discover/:type/:page', function (req, res) {
     checkCache(url, res);
 });
 
-function checkTrackerCache(url, res) {
-    if (trackerCache[url]) {
-        if (res) {
-            // cache for 1 hour
-            res.set('Cache-Control', 'public, max-age=3600');
-            res.send(trackerCache[url]);
-        }
-    } else {
-        axios.get(url).then(response => {
-            if (res) {
-                // cache for 1 hour
-                res.set('Cache-Control', 'public, max-age=3600');
-                res.send(response.data);
-            }
-            trackerCache[url] = response.data;
-        }).catch(err => {
-            console.error(err);
-            if (res) res.send([]);
-        });
-    }
-}
-
 app.get('/eztv/:precache?', function(req, res) {
     const url = `https://eztv.io/api/get-torrents?${querystring.stringify(req.query)}`;
     checkTrackerCache(url, req.params.precache ? undefined : res);
@@ -317,88 +225,31 @@ app.get('/nyaa/:precache?', function(req, res) {
     if (req.params.precache) res.sendStatus(200);
 });
 
-function searchPirateBay(query, page, filter, endpoint) {
-    return new Promise((resolve, reject) => {
-        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/${page}${filter}`;
-
-        axios.get(url).then(response => {
-            const $ = cheerio.load(response.data);
-            const torrents = [];
-            
-            const table = $('#searchResult tbody').html();
-            const rows = $('tr', table);
-            
-            const sizeRegex = new RegExp(/(\d|\.)+\s(KiB|MiB|GiB)/);
-            const fullDateRegex = new RegExp(/\d{2}-\d{2}\s*\d{4}/);
-            const partialDateRegex = new RegExp(/\d{2}-\d{2}/);
-            
-            rows.each((i, row) => {
-                const name = $('.detName', row).text().trim();
-                if (!name) return;
-            
-                const link = $('.detLink', row).attr('href');
-                const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
-                const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
-                const seeds = $('[align="right"]', row).eq(0).text();
-                const leeches = $('[align="right"]', row).eq(1).text();
-
-                let date;
-                let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
-                let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
-                if (fullDateMatched) date = fullDateMatched[0];
-                else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
-            
-                torrents.push({
-                    name,
-                    link,
-                    magnetLink,
-                    size: sizeMatched ? sizeMatched[0] : undefined,
-                    date: date,
-                    seeds,
-                    leeches
-                });
-            });
-
-            resolve(torrents);
-        }).catch(err => {
-            console.error(err);
-            reject();
-        });
-    });
-}
-
 app.get('/pirate/:search/:precache?', function(req, res) {
     const search = req.params.search;
-    if (req.params.precache) res.sendStatus(200);
-
-    // Use the scraped PB from proxy for the search endpoint
-    process.env.THEPIRATEBAY_DEFAULT_ENDPOINT = pirateBay;
+    if (req.params.precache) {
+        res.sendStatus(200);
+        return;
+    }
 
     // Add a simple cache here to make things faster on the client
     if (trackerCache[search]) {
-        if (!req.params.precache) {
-            // cache for 1 hour
-            res.set('Cache-Control', 'public, max-age=3600');
-            res.send(trackerCache[search]);
-        }
+        // cache for 1 hour
+        res.set('Cache-Control', 'public, max-age=3600');
+        res.send(trackerCache[search]);
     } else {
         searchPirateBay(search, 1, req.query.all ? '' : '/99/200', 'https://thepiratebay0.org/').then(results => {
-            if (!req.params.precache) {
-                // cache for 1 hour
-                res.set('Cache-Control', 'public, max-age=3600');
-                res.send(results);
-            }
+            // cache for 1 hour
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(results);
             trackerCache[search];
         }).catch(err => {
-            if (!req.params.precache) res.send([]);
+            res.send([]);
         });
     }
 });
 
-app.get('/build', function (req, res) { res.send(BUILD_TIME); });
-app.get('/docker', function (req, res) { res.send(IS_DOCKER); });
-app.get('/plex', function (req, res) { res.send(process.env.PLEX_SERVER); });
-app.get('/pb', function (req, res) { res.send(pirateBay); });
+app.get('/status', function (req, res)  { res.send(currentStatus); });
 app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
@@ -452,6 +303,16 @@ app.post('/upgrade', function (req, res) {
     }
 });
 
+io.on('connection', client => {
+    client.on('subscribe', data => {
+        client.join(data);
+
+        if (data === 'status') client.emit('status', currentStatus);
+        if (data === 'torrents') client.emit('torrents', currentTorrents);
+        if (data === 'files') client.emit('files', currentFiles);
+    })
+});
+
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
@@ -487,6 +348,28 @@ function writeCache() {
     });
 }
 
+function checkTrackerCache(url, res) {
+    if (trackerCache[url]) {
+        if (res) {
+            // cache for 1 hour
+            res.set('Cache-Control', 'public, max-age=3600');
+            res.send(trackerCache[url]);
+        }
+    } else {
+        axios.get(url).then(response => {
+            if (res) {
+                // cache for 1 hour
+                res.set('Cache-Control', 'public, max-age=3600');
+                res.send(response.data);
+            }
+            trackerCache[url] = response.data;
+        }).catch(err => {
+            console.error(err);
+            if (res) res.send([]);
+        });
+    }
+}
+
 // Single handler for all of the transmission wrapper responses
 function handleResponse(res, err, data) {
     if (err) {
@@ -496,6 +379,89 @@ function handleResponse(res, err, data) {
     } else {
         res.send(data);
     }
+}
+
+function searchPirateBay(query, page, filter, endpoint) {
+    return new Promise((resolve, reject) => {
+        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/${page}${filter}`;
+
+        axios.get(url).then(response => {
+            const $ = cheerio.load(response.data);
+            const torrents = [];
+            
+            const table = $('#searchResult tbody').html();
+            const rows = $('tr', table);
+            
+            const sizeRegex = new RegExp(/(\d|\.)+\s(KiB|MiB|GiB)/);
+            const fullDateRegex = new RegExp(/\d{2}-\d{2}\s*\d{4}/);
+            const partialDateRegex = new RegExp(/\d{2}-\d{2}/);
+            
+            rows.each((i, row) => {
+                const name = $('.detName', row).text().trim();
+                if (!name) return;
+            
+                const link = $('.detLink', row).attr('href');
+                const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
+                const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
+                const seeds = $('[align="right"]', row).eq(0).text();
+                const leeches = $('[align="right"]', row).eq(1).text();
+
+                let date;
+                let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
+                let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
+                if (fullDateMatched) date = fullDateMatched[0];
+                else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
+            
+                torrents.push({
+                    name,
+                    link,
+                    magnetLink,
+                    size: sizeMatched ? sizeMatched[0] : undefined,
+                    date: date,
+                    seeds,
+                    leeches
+                });
+            });
+
+            resolve(torrents);
+        }).catch(err => {
+            console.error(err);
+            reject();
+        });
+    });
+}
+
+function getFiles(cb) {
+    if (!plexClient) cb([]);
+
+    plexClient.query("/library/sections").then(response => {
+        const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
+        const promises = [];
+
+        for (var i = 0; i < sections.length; i++) {
+            promises.push(plexClient.query("/library/sections/" + sections[i].key + "/all"));
+        }
+
+        Promise.all(promises).then(values => {
+            const files = [];
+            for (var i = 0; i < values.length; i++) {
+                const data = values[i].MediaContainer.Metadata;
+                for (var j = 0; j < data.length; j++) {
+                    files.push({title: data[j].title, year: data[j].year});
+                }
+            }
+            cb(files);
+        });
+    }, function (err) {
+        console.error("Could not connect to server", err);
+
+        // If plex goes offline, keep in-memory copy living on
+        if (currentFiles.length > 0) {
+            cb(currentFiles);
+        } else {
+            cb([]);
+        }
+    });
 }
 
 function autoPrune() {
@@ -525,20 +491,7 @@ function autoPrune() {
             }
         });
     }
-
-    // Auto prune every minute
-    setTimeout(autoPrune, 1000 * 60);
 }
-
-io.on('connection', client => {
-    client.on('subscribe', data => {
-        client.join(data);
-
-        if (data === 'storage') client.emit('storage', currentStorage);
-        if (data === 'torrents') client.emit('torrents', currentTorrents);
-        if (data === 'files') client.emit('files', currentFiles);
-    })
-});
 
 function setIntervalImmediately(func, interval) {
     func();
@@ -546,14 +499,12 @@ function setIntervalImmediately(func, interval) {
 }
 
 function initSocketDataWatchers() {
-    const interval = 2000;
-
-    setIntervalImmediately(() => getStorage(data => {
-        if (JSON.stringify(currentStorage) !== JSON.stringify(data)) {
-            currentStorage = data;
-            io.sockets.in('storage').emit('storage', currentStorage);
+    setIntervalImmediately(() => {
+        if (JSON.stringify(currentStatus) !== JSON.stringify(prevStatus)) {
+            prevStatus = {...currentStatus};
+            io.sockets.in('status').emit('status', currentStatus);
         }
-    }), interval * 3);
+    }, interval * 3);
 
     // TODO: Give a few failed attempts before killing UI because we cannot connect to transmission
     setIntervalImmediately(() => transmission.get((err, data) => {
@@ -570,16 +521,61 @@ function initSocketDataWatchers() {
             io.sockets.in('files').emit('files', currentFiles);
         }
     }), interval * 30);
+}
 
-    // Grab piratebay proxy list every 30 minutes
+function initStatusWatchers() {
+    // Autoprune every minute
+    setIntervalImmediately(autoPrune, interval * 30);
+
+    // Grab piratebay proxy list every 10 minutes
     setIntervalImmediately(() => axios.get('https://piratebayproxy.info').then(response => {
         const $ = cheerio.load(response.data);
         const links = $('.t1');
         // choose a random link from the top half of the list
         const rnd = Math.floor(Math.random() * links.length / 2);
-        pirateBay = links.eq(rnd).attr('href');
+        currentStatus.pirateBay = links.eq(rnd).attr('href');
     }).catch(err => {
         console.error(err);
-        pirateBay = undefined;
-    }), 1000 * 60 * 30);
+        currentStatus.pirateBay = undefined;
+    }), interval * 300);
+
+    // Update IP address every 5 minutes
+    setIntervalImmediately(() => {
+        try {
+            let ip;
+            if (IS_DOCKER) ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
+    
+            axios.get(`https://api.ipdata.co/${(ip ? ip.trim() : '')}?api-key=${process.env.IP_KEY}`).then(response => {
+                const data = response.data;
+                currentStatus.ip = { city: data.city, country_name: data.country_name };
+            }, error => {
+                console.error(error);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }, interval * 150);
+
+    // Get storage info every minute
+    setIntervalImmediately(() => {
+        exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
+            if (err) {
+                console.error(err);
+                currentStatus.storageUsage = 'unknown';
+            } else {
+                currentStatus.storageUsage = output.replace('%', '').trim();
+            }
+        });
+
+        try {
+            const stats = fs.statSync(CACHE_FILE);
+            const fileSizeInBytes = stats["size"];
+            const fileSizeInMegabytes = (fileSizeInBytes / Math.pow(1024, 2)).toFixed(1);
+            currentStatus.cacheUsage = `${fileSizeInMegabytes} MB`;
+
+            // TODO: plex, build, ip, docker and rename to stats
+        } catch (err) {
+            currentStatus.cacheUsage = 'unknown';
+        }
+    }, interval * 30);
 }

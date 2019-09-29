@@ -8,11 +8,21 @@
 }
 
 .warning {
+    padding: 1em 0 1.5em 0;
+}
+
+.warning .big {
     font-size: 4em;
 }
 
-.warning span {
+.warning div span {
     padding-left: 0.25em;
+}
+
+.warning div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .arrow {
@@ -42,4 +52,8 @@
 #modal {
     max-height: 90vh;
     overflow-y: auto;
+}
+
+.movie-list {
+    padding: 1em 0;
 }

@@ -41,13 +41,11 @@ class MovieList extends Component {
             order: '',
             type: 'movies',
             isSearching: false,
-            storage: null,
+            status: null,
             width: 0,
             height: 0,
             scroll: 0,
-            docker: true,
             files: [],
-            build: null,
         }
 
         // Clean up old faq flag
@@ -66,11 +64,6 @@ class MovieList extends Component {
     componentDidMount() {
         // Get movie list
         this.updateData();
-        this.updateStats();
-        
-        // Get data from server
-        this.updateLocation();
-        this.updateDocker();
 
         // Update window size
         this.updateWindowDimensions();
@@ -83,7 +76,7 @@ class MovieList extends Component {
         var socket = openSocket(this.server);
         socket.on('connect', data => {
             socket.emit('subscribe', 'torrents');
-            socket.emit('subscribe', 'storage');
+            socket.emit('subscribe', 'status');
             socket.emit('subscribe', 'files');
         });
 
@@ -91,12 +84,12 @@ class MovieList extends Component {
             if (data) this.updateTorrents(data);
         });
 
-        socket.on('storage', data => {
-            if (data) this.updateStorage(data);
+        socket.on('status', data => {
+            if (data) this.setState({status: data});
         });
 
         socket.on('files', data => {
-            if (data) this.updateFiles(data);
+            if (data) this.setState({files: data});
         });
     }
     
@@ -112,44 +105,6 @@ class MovieList extends Component {
     updateScroll = () => {
         let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight);
         if (!isNaN(scroll)) this.setState({ scroll: scroll });
-    }
-
-    updateDocker() {
-        axios.get(this.server + '/docker').then(response => {
-            this.setState({ docker: response.data });
-        }, error => {
-            console.error(error);
-        });
-    }
-
-    updateLocation() {
-        axios.get(this.server + '/ip').then(response => {
-            if (response.data.city && response.data.country_name) {
-                this.setState({ location: response.data.city + ', ' + response.data.country_name });
-            } else {
-                this.setState({ location: "ERROR" });
-            }
-        }, error => {
-            console.error(error);
-            this.setState({ location: "ERROR" });
-        });
-
-        // Update every minute (to make sure we are ok without a full refresh of page)
-        // We don't need sockets here at the moment, but adding all stats to a socket
-        // wouldn't be a bad idea at some point...
-        setTimeout(() => this.updateLocation, 60 * 1000);
-    }
-
-    // Update build time stats
-    updateStats() {
-        axios.get(this.server + '/build').then(response => {
-            this.setState({ build: response.data });
-        }, error => {
-            console.error(error);
-        });
-
-        // Update every hour, don't need sockets here
-        setTimeout(() => this.updateStats, 60 * 60 * 1000);
     }
 
     updateTorrents(data) {
@@ -187,18 +142,6 @@ class MovieList extends Component {
                 error: resetError ? null : this.state.error
             });
         }
-    }
-
-    updateStorage(data) {
-        try {
-            this.setState({ storage: data });
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    updateFiles(data) {
-        this.setState({files: data});
     }
 
     updateSearch(search, genre, order, type, page) {
@@ -421,10 +364,7 @@ class MovieList extends Component {
     }
 
     render() {
-        const {
-            error, isLoaded, movies, modal, media, page, torrents, location,
-            started, width, storage, scroll, build, type
-        } = this.state;
+        const { error, isLoaded, movies, modal, media, page, torrents, started, width, status, scroll, type } = this.state;
 
         const pagerVisibility = page !== 1 || movies.length >= 20;
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
@@ -451,7 +391,7 @@ class MovieList extends Component {
         } else {
             return (
                 <Fragment>
-                    <Plex server={this.server}/>
+                    {status ? <Plex plexServer={status.plex}/> : null}
                     {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
 
                     <Modal open={modal} onClose={this.onCloseModal} center={width > 800} modalId='modal'>
@@ -469,11 +409,14 @@ class MovieList extends Component {
                         />
                     </Modal>
             
-                    {location && (location === "ERROR" || location === "Seattle, United States") ? (
-                        <span className="warning red">
-                            <FaExclamationTriangle/>
-                            <span>Server not secure</span>
-                        </span>
+                    {status && (status.ip.city === "Seattle") ? (
+                        <div className="warning red">
+                            <div>
+                                <FaExclamationTriangle className="big"/>
+                                <span className="big">Server not secure</span>
+                            </div>
+                            <span>(Don't worry, your activity is still encrypted and untraceable. This is an admin message for Andrew)</span>
+                        </div>
                     ) : null}
 
                     <TorrentList
@@ -528,7 +471,7 @@ class MovieList extends Component {
                                         files={this.state.type === "movies" ? this.state.files : []} // only show downloaded files for movies
                                     />
                             ))
-                        )) : type !== 'pirate' ? <h1>No Results</h1> : null
+                        )) : type !== 'pirate' ? <h1>No Results</h1> : <h2>Please enter a search term</h2>
                         }
                     </div>
 
@@ -546,18 +489,20 @@ class MovieList extends Component {
                     <FaPowerOff className="pointer marginLeft" onClick={this.upgrade}/>
 
                     <div className="footer">
-                        <hr/>
-
-                        <p>Server Location: {location ? location : "Unknown"}</p>
-                        {(build && build.indexOf('Dev Build') === -1) ? <p><span>Build Time: {new Date(build).toLocaleString()}</span></p> : null}
-                        {storage ? (
+                        {status ? (
                             <Fragment>
+                                <hr/>
+
+                                <p>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p>
+                                {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
+                                    <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
+                                ) : null}
                                 <p>
-                                    <span>Disk Usage: {parseFloat(storage.used).toFixed(1)}%</span>
-                                    <progress value={storage.used} max="100"/>
+                                    <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>
+                                    <progress value={status.storageUsage} max="100"/>
                                 </p>
                                 <p>
-                                    <span>Cache Size: {storage.cache}</span>
+                                    <span>Cache Size: {status.cacheUsage}</span>
                                 </p>
                             </Fragment>
                         ) : null}
