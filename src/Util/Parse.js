@@ -89,7 +89,8 @@ export function getEpisodes(torrents, moreData, type) {
                 ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;
             
             let title = `Episode ${parsed.episode}`;
-            if (moreData && moreData.seasons && moreData.seasons[parsed.season - 1] && moreData.seasons[parsed.season - 1].episodes) {
+            if (moreData && moreData.seasons && moreData.seasons[parsed.season - 1] && moreData.seasons[parsed.season - 1].episodes &&
+                moreData.seasons[parsed.season - 1].episodes[parsed.episode - 1]) {
                 title = parsed.episode + ' - ' + moreData.seasons[parsed.season - 1].episodes[parsed.episode - 1].name;
             }
 

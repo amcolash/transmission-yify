@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FaTrash, FaExclamationCircle, FaArchive } from 'react-icons/fa';
 import * as  ptn  from 'parse-torrent-name';
 
 class Progress extends Component {
     
     render() {
-        const { torrent, cancelTorrent, fullName, getProgress, hideInfo } = this.props;
+        const { torrent, cancelTorrent, fullName, getProgress, hideInfo, hideBar } = this.props;
 
         if (!torrent || !torrent.name) return null;
 
@@ -24,8 +24,10 @@ class Progress extends Component {
         return (
             <div className="progress">
                 {hideInfo ? null :  <span>{name}</span>}
-                <progress value={progress > 1 ? progress : null } max="100" />
-                <span>{progress}% </span>
+                {hideBar ? null : <Fragment>
+                    <progress value={progress > 1 ? progress : null } max="100" />
+                    <span>{progress}% </span>
+                </Fragment>}
                 {!hideInfo && progress < 99 ? (
                     <span className={speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red"}>
                         {speed < 0.15 ? (

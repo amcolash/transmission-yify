@@ -36,12 +36,10 @@
 
 .right {
   background-color: rgba(0,0,0,0.5);
-  padding: 1.5em 1em 1em 1.5em;
+  padding: 1.5em 1em 1em 2em;
   max-width: 400px;
   border-radius: 0.5em 0 0 0;
-  z-index: 1;
-  position: relative;
-  max-height: calc(100vh - 2em);
+  max-height: calc(100vh - 2.5em);
   overflow-y: auto;
 }
 
