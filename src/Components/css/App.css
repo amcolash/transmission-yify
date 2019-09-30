@@ -48,3 +48,30 @@ progress {
 .react-icons {
     vertical-align: middle;
 }
+
+input, select {
+    margin: 0 0.6em;
+    background-color: white;
+    border: none;
+    outline: none;
+    transition: all 0.30s ease;
+    padding: 0.3em;
+    border-color: gray;
+    border-radius: 3px;
+}
+
+input:disabled, select:disabled {
+    background-color: #aaa;
+}
+
+input:not(:disabled):hover, select:not(:disabled):hover {
+    box-shadow: 0px 0px 12px 5px rgba(255,255,255,0.4);
+}
+
+input {
+    height: 1.5em;
+}
+
+select {
+    height: 2.1em;
+}
