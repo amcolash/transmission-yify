@@ -115,41 +115,40 @@ class Cover extends Component {
                             <FaCheck />
                         </div>
                     ) : null}
-                    <div className="quality">
-                        {versions.length > 0 ? (
-                            versions.map(version => (
-                                <Fragment
-                                    key={version.hashString}
-                                >
-                                    <span>{version.quality}</span>
-                                    {version.progress != null ? (
-                                        <button className="red" onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.nativeEvent.stopImmediatePropagation();
-                                            cancelTorrent(version.hashString, true);
-                                        }}><FaTrash/></button>
-                                    ) : (
-                                        <button className="orange download" onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.nativeEvent.stopImmediatePropagation();
-                                            if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
-                                        }}>
-                                            {started.indexOf(version.hashString) !== -1 ? (
-                                                <Spinner visible noMargin button />
-                                            ) : (
-                                                <FaDownload />
-                                            )}
-                                        </button>
-                                    )}
-                                    <br/>
-                                </Fragment>
-                            ))
-                        ) : (
-                            type === 'movies' ? (
-                                pb ? <span className="red medium"><FaExclamationCircle /></span> : <Spinner visible noMargin button />
-                            ) : null
-                        )}
-                    </div>
+                    {type === 'movies' ? (
+                        <div className="quality">
+                            {versions.length > 0 ? (
+                                versions.map(version => (
+                                    <Fragment
+                                        key={version.hashString}
+                                    >
+                                        <span>{version.quality}</span>
+                                        {version.progress != null ? (
+                                            <button className="red" onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.nativeEvent.stopImmediatePropagation();
+                                                cancelTorrent(version.hashString, true);
+                                            }}><FaTrash/></button>
+                                        ) : (
+                                            <button className="orange download" onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.nativeEvent.stopImmediatePropagation();
+                                                if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
+                                            }}>
+                                                {started.indexOf(version.hashString) !== -1 ? (
+                                                    <Spinner visible noMargin button />
+                                                ) : (
+                                                    <FaDownload />
+                                                )}
+                                            </button>
+                                        )}
+                                        <br/>
+                                    </Fragment>
+                                ))
+                            ) : pb ? <span className="red medium"><FaExclamationCircle /></span> : <Spinner visible noMargin button />
+                            }
+                        </div>
+                    ) : null}
                 </div>
                 <span onClick={(e) => click(media)}>{media.title} {media.year ? <span>({media.year})</span> : null}</span>
             </div>
