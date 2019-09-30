@@ -78,11 +78,11 @@ class DetailsBackdrop extends Component {
         const { media, type } = this.props;
 
         if (media && media !== prevProps.media && this.state === prevState) {
-            console.log('fetching data for', media)
             if (type === 'animes') {
                 axios.get(`${this.props.server}/kitsu/${media.id}`).then(response => {
                     const data = response.data.data;
                     this.setState({moreData: {
+                        CoverImage: data.attributes.coverImage.large,
                         Plot: data.attributes.synopsis,
                         Rated: data.attributes.rating,
                         Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
@@ -175,12 +175,22 @@ class DetailsBackdrop extends Component {
                 modalId={'modalFullscreen'}
                 overlayId='overlay'
                 onClose={onCloseModal}
-                styles={{modal: {
-                    backgroundImage: (type === 'animes' ? (media.coverImage ? media.coverImage.large : ''):
-                        `url(https://image.tmdb.org/t/p/w1280/${media.backdrop_path})`)
-                }}}
+                styles={{
+                    modal: {
+                        backgroundImage: (type === 'animes' ? (moreData && moreData !== 'ERROR' ? `url(${moreData.CoverImage})` : ''):
+                            `url(https://image.tmdb.org/t/p/w1280/${media.backdrop_path})`)
+                    },
+                    closeIcon: {
+                        fill: '#bbb',
+                        stroke: '#bbb',
+                    }
+                }}
             >
-                <div className="container" onClick={onCloseModal}>
+                <div className="container" onClick={e => {
+                    // console.log(e)
+                    this.setState({tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true});
+                    onCloseModal();
+                }}>
                     <div className="info">
                         <h3>{media.title}</h3>
                         <h4>
@@ -189,7 +199,7 @@ class DetailsBackdrop extends Component {
                                 <div className="mpaa-rating">{details.mpaa}</div>
                             </Fragment>
                         </h4>
-                        <Ratings moreData={moreData} media={media}/>
+                        <Ratings moreData={moreData}/>
                     </div>
                     {showCover ? (
                         <img
@@ -267,18 +277,20 @@ class DetailsBackdrop extends Component {
                                                     <Fragment key={episode.episode}>
                                                         <h4 className="episode">{episode.title}</h4>
 
-                                                        {episode.torrents ? episode.torrents.map(version => (
-                                                        <Version
-                                                            key={version.hashString}
-                                                            version={version}
-                                                            started={started}
-                                                            getProgress={getProgress}
-                                                            getLink={getLink}
-                                                            getTorrent={getTorrent}
-                                                            downloadTorrent={downloadTorrent}
-                                                            cancelTorrent={cancelTorrent}
-                                                        />
-                                                        )) : null}
+                                                        <div className="versions">
+                                                            {episode.torrents ? episode.torrents.map(version => (
+                                                            <Version
+                                                                key={version.hashString}
+                                                                version={version}
+                                                                started={started}
+                                                                getProgress={getProgress}
+                                                                getLink={getLink}
+                                                                getTorrent={getTorrent}
+                                                                downloadTorrent={downloadTorrent}
+                                                                cancelTorrent={cancelTorrent}
+                                                            />
+                                                            )) : null}
+                                                        </div>
                                                     </Fragment>
                                                     ) : null
                                                 ))

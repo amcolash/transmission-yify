@@ -49,27 +49,6 @@
     margin-left: 1.25em;
 }
 
-#modal {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#modalFullscreen {
-    height: 100vh;
-    width: 100vw;
-    max-width: 100vw;
-    background: unset;
-    background-color: #222;
-    background-position: center;
-    background-size: cover;
-    padding: 0;
-}
-
-#modalFullscreen svg {
-    fill: #bbb;
-    stroke: #bbb;
-}
-
 #overlay {
     overflow-y: hidden;
     padding: 0;
