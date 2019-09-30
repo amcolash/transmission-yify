@@ -38,8 +38,11 @@
   min-width: 7em;
 }
 
-/* @media (max-width: 1050px) {
-  .size, .category {
+@media (max-width: 900px) {
+  .size, .categories {
     display: none;
   }
-} */
+  .pirateRow div {
+    margin: 0 0.25em;
+  }
+}
