@@ -26,7 +26,7 @@
   flex-grow: 1;
 }
 
-.cover {
+#modalFullscreen .cover {
   max-width: 250px;
   box-shadow: 0px 0px 15px 4px rgba(0,0,0,0.5);
   border: 1px solid rgba(255,255,255,0.5);
@@ -82,7 +82,7 @@ h4 {
   display: inline-block;
   padding: 0.1em;
   margin-left: 0.5em;
-  border: 2px solid #aaa;
+  border: 2px solid #ccc;
   border-radius: 0;
   font-family: Times New Roman;
   font-weight: bold;
@@ -113,6 +113,12 @@ h4 {
 
 @media (max-width: 680px) {
   .right {
-      max-width: 100%;
+    max-height: 80vh;
+    max-width: 100%;
+    border-radius: 1.5em 1.5em 0 0;
+  }
+
+  #modalFullscreen .cover {
+    display: none;
   }
 }
