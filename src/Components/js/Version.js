@@ -7,7 +7,7 @@ import '../css/Version.css';
 
 class Version extends Component {
     render() {
-        const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent } = this.props;
+        const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent, hideInfo, hideBar } = this.props;
         
         return (
             <div className="version padding" key={version.url}>
@@ -22,22 +22,26 @@ class Version extends Component {
                         }
                     </span>
                 </div>
-                {getProgress(version.hashString) ? (
-                    <Progress
-                        torrent={getTorrent(version.hashString)}
-                        getLink={getLink}
-                        cancelTorrent={cancelTorrent}
-                        getProgress={getProgress}
-                    />
-                ) : (
-                    <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
-                        {started.indexOf(version.hashString) !== -1 ? (
-                            <Spinner visible noMargin button />
-                        ) : (
-                            <FaDownload/>
-                        )}
-                    </button>
-                )}
+                <div className="leftMargin">
+                    {getProgress(version.hashString) ? (
+                        <Progress
+                            torrent={getTorrent(version.hashString)}
+                            getLink={getLink}
+                            cancelTorrent={cancelTorrent}
+                            getProgress={getProgress}
+                            hideInfo={hideInfo}
+                            hideBar={hideBar}
+                        />
+                    ) : (
+                        <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
+                            {started.indexOf(version.hashString) !== -1 ? (
+                                <Spinner visible noMargin button />
+                            ) : (
+                                <FaDownload/>
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
         );
     }

@@ -187,7 +187,6 @@ class DetailsBackdrop extends Component {
                 }}
             >
                 <div className="container" onClick={e => {
-                    // console.log(e)
                     this.setState({tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true});
                     onCloseModal();
                 }}>
@@ -210,7 +209,7 @@ class DetailsBackdrop extends Component {
                         />
                     ) : null }
                     <div className="spacer"></div>
-                    <div className="right">
+                    <div className="right" onClick={e => e.stopPropagation()}>
                         <div className="plot">{details.plot}</div>
                         {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
                         
@@ -288,6 +287,8 @@ class DetailsBackdrop extends Component {
                                                                 getTorrent={getTorrent}
                                                                 downloadTorrent={downloadTorrent}
                                                                 cancelTorrent={cancelTorrent}
+                                                                hideInfo={true}
+                                                                hideBar={true}
                                                             />
                                                             )) : null}
                                                         </div>

@@ -4,6 +4,10 @@
   padding: 0.25em 0;
 }
 
+.version .leftMargin {
+  margin-left: 0.8em;
+}
+
 .qualityPeers {
   display: flex;
   flex-direction: column;
@@ -23,5 +27,4 @@
 
 .download {
   font-weight: bolder;
-  margin-left: 0.8em;
 }

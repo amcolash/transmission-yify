@@ -37,7 +37,7 @@ class MovieList extends Component {
             search: '',
             genre: '',
             order: '',
-            type: 'movies',
+            type: 'shows',
             isSearching: false,
             status: null,
             width: 0,
