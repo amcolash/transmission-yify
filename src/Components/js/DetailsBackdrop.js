@@ -210,7 +210,7 @@ class DetailsBackdrop extends Component {
                     ) : null }
                     <div className="spacer"></div>
                     <div className="right" onClick={e => e.stopPropagation()}>
-                        <div className="plot">{details.plot}</div>
+                        <div className="plot padding">{details.plot}</div>
                         {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
                         
                         {type === 'movies' ? moreData !== "ERROR" && moreData !== null ? (
