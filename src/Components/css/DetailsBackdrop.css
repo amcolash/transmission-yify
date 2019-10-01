@@ -29,7 +29,6 @@
 #modalFullscreen .coverWrap {
   position: relative;
   margin: 1em;
-  overflow: hidden;
 }
 
 #modalFullscreen .coverWrap img {
