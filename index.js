@@ -108,9 +108,7 @@ try {
 
     // Setup cache
     try {
-        fs.accessSync(CACHE_FILE, (err) => {
-            cache = require(CACHE_FILE);
-        });
+        if (fs.existsSync(CACHE_FILE)) cache = require(CACHE_FILE);
     } catch (err) {
         console.error(err);
         writeCache();
