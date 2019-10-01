@@ -22,11 +22,13 @@ class Cover extends Component {
             duration: 300,
             scale: 1.05,
             distance: '50px',
-            easing: 'ease'
-        }
-
-        if (this.props.type === 'movies') {
-            this.updatePB();
+            easing: 'ease',
+            afterReveal: () => {
+                // Only fetch torrents once in focus
+                if (this.props.type === 'movies') {
+                    this.updatePB();
+                }
+            }
         }
 
         ScrollReveal.reveal(this.refs.mediaCover, config);

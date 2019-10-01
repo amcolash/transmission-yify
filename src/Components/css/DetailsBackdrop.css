@@ -115,10 +115,23 @@ h4 {
   .right {
     max-height: 75vh;
     max-width: 100%;
+    padding: 1.5em 1em 1em 1.5em;
     border-radius: 1em 1em 0 0;
   }
 
   #modalFullscreen .cover {
     display: none;
+  }
+}
+
+@media (max-height: 450px) {
+  .right {
+    max-width: 350px;
+    padding: 1.5em 1em 1em 1.5em;
+  }
+
+  #modalFullscreen .cover {
+    max-height: 45vh;
+    width: auto;
   }
 }
