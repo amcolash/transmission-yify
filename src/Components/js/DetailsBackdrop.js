@@ -9,6 +9,7 @@ import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
 import { getDetails, getMovies, getSeasons, getEpisodes } from '../../Util/Parse';
+import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
 
@@ -18,59 +19,75 @@ class DetailsBackdrop extends Component {
     }
 
     getEztv(imdb, page) {
-        const moreData = this.state.moreData;
-
         const limit = 50;
         const url = `${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`;
         
-        axios.get(url).then(response => {
-            // Make sure that the show was found and we are not just getting
-            // the newest shows on the site. This is a bad api design for them :(
-            const data = response.data;
-            if (data.torrents_count < 2000 && data.torrents) {
+        if (Cache[url]) {
+            this.handleEztv(Cache[url], imdb, page, limit);
+        } else {
+            axios.get(url).then(response => {
+                // Make sure that the show was found and we are not just getting
+                // the newest shows on the site. This is a bad api design for them :(
+                const data = response.data;
+                Cache[url] = data;
+                this.handleEztv(data, imdb, page, limit);
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+    }
 
-                let maxSeason = this.state.maxSeason;
-                let newMax = false;
-                data.torrents.forEach(t => {
-                    const s = parseInt(t.season);
-                    if (s > maxSeason && moreData && s <= moreData.seasons.length) { maxSeason = s; newMax = true; }
-                });
-                
-                let eztv = this.state.eztv || response.data;
-                if (eztv !== response.data) response.data.torrents.forEach(t => eztv.torrents.push(t));
+    handleEztv(data, imdb, page, limit) {
+        if (data.torrents_count < 2000 && data.torrents) {
+            const moreData = this.state.moreData;
 
-                this.setState({ eztv: eztv, season: (page === 1 || newMax) ? maxSeason : this.state.season, maxSeason: maxSeason }, () => {
-                    // If there are more pages, get them
-                    if (page * limit < data.torrents_count) {
-                        this.getEztv(imdb, page + 1);
-                    }
-                });
-            } else {
-                this.setState({ eztv: { torrents: [] }});
-            }
-        }).catch(err => {
-            console.error(err);
-        });
+            let maxSeason = this.state.maxSeason;
+            let newMax = false;
+            data.torrents.forEach(t => {
+                const s = parseInt(t.season);
+                if (s > maxSeason && moreData && s <= moreData.seasons.length) { maxSeason = s; newMax = true; }
+            });
+            
+            let eztv = this.state.eztv || data;
+            if (eztv !== data) data.torrents.forEach(t => eztv.torrents.push(t));
+
+            this.setState({ eztv: eztv, season: (page === 1 || newMax) ? maxSeason : this.state.season, maxSeason: maxSeason }, () => {
+                // If there are more pages, get them
+                if (page * limit < data.torrents_count) {
+                    this.getEztv(imdb, page + 1);
+                }
+            });
+        } else {
+            this.setState({ eztv: { torrents: [] }});
+        }
     }
 
     getNyaa(title, page) {
         const limit = 50;
         const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
-        axios.get(url).then(response => {
-            const data = response.data;
-            
-            let nyaa = this.state.nyaa || response.data;
-            if (nyaa !== response.data) response.data.torrents.forEach(t => nyaa.torrents.push(t));
-
-            this.setState({nyaa: nyaa}, () => {
-                // If there are more pages, get them
-                if (page * limit < data.totalRecordCount) {
-                    this.getNyaa(title, page + 1);
-                }
+        if (Cache[url]) {
+            this.handleNyaa(Cache[url], title, page, limit);
+        } else {
+            axios.get(url).then(response => {
+                const data = response.data;
+                Cache[url] = data;
+                this.handleNyaa(data, title, page, limit);
+            }).catch(err => {
+                console.error(err);
             });
-        }).catch(err => {
-            console.error(err);
+        }
+    }
+
+    handleNyaa(data, title, page, limit) {
+        let nyaa = this.state.nyaa || data;
+        if (nyaa !== data) data.torrents.forEach(t => nyaa.torrents.push(t));
+
+        this.setState({nyaa: nyaa}, () => {
+            // If there are more pages, get them
+            if (page * limit < data.totalRecordCount) {
+                this.getNyaa(title, page + 1);
+            }
         });
     }
 
@@ -96,39 +113,52 @@ class DetailsBackdrop extends Component {
                 });
             } else {
                 axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id).then(response => {
-                    this.setState({ tmdbData: response.data });
+                    const updated = { tmdbData: response.data };
+                    if (type === 'shows') updated.moreData = response.data;
+
+                    this.setState(updated);
         
                     if (type === 'shows') {
-                        this.setState({moreData: response.data}, () => {
-                            const moreData = this.state.moreData;
-                            moreData.seasons.forEach(season => {
-                                axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
-                                    if (moreData.seasons[season.season_number - 1]) {
-                                        moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
-                                        this.setState({moreData: moreData});
-                                    }
-                                }).catch(err => {
-                                    console.error(err);
-                                })
-                            });
+                        const moreData = response.data;
+                        moreData.seasons.forEach(season => {
+                            axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
+                                if (moreData.seasons[season.season_number - 1]) {
+                                    moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
+                                    this.setState({moreData: moreData});
+                                }
+                            }).catch(err => {
+                                console.error(err);
+                            })
                         });
                         
                         const imdb = response.data.external_ids.imdb_id.replace('tt', '');
                         this.getEztv(imdb, 1);
                     } else {
-                        axios.get(this.props.server + '/omdb/' + response.data.imdb_id).then(response => {
-                            this.setState({ moreData: response.data });
-                        }).catch(error => {
-                            console.error(error);
-                            this.setState({ moreData: "ERROR" });
-                        });
+                        const omdbUrl = this.props.server + '/omdb/' + response.data.imdb_id;
+                        
+                        if (Cache[omdbUrl]) {
+                            this.setState({ moreData: Cache[omdbUrl] });
+                        } else {
+                            axios.get(omdbUrl).then(response => {
+                                this.setState({ moreData: response.data });
+                            }).catch(error => {
+                                console.error(error);
+                                this.setState({ moreData: "ERROR" });
+                            });
+                        }
         
                         const cleanedTitle = media.title.replace(/[^\w\s]/gi, ' ');
-                        axios.get(`${this.props.server}/pirate/${cleanedTitle} ${media.year}`).then(response => {
-                            this.setState({pb: response.data});
-                        }).catch(err => {
-                            console.error(err);
-                        });
+                        const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
+
+                        if (Cache[pirateUrl]) {
+                            this.setState({pb: Cache[pirateUrl]});
+                        } else {
+                            axios.get(pirateUrl).then(response => {
+                                this.setState({pb: response.data});
+                            }).catch(err => {
+                                console.error(err);
+                            });
+                        }
                     }
                 }).catch(error => {
                     console.error(error);

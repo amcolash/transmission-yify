@@ -17,8 +17,8 @@ import Beta from './Beta';
 import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
+import Cache from '../../Util/Cache';
 
-const searchCache = [];
 const hashMapping = {};
 
 class MovieList extends Component {
@@ -194,11 +194,11 @@ class MovieList extends Component {
             }
         }
 
-        if (searchCache[ENDPOINT]) {
-            this.handleData(searchCache[ENDPOINT]);
+        if (Cache[ENDPOINT]) {
+            this.handleData(Cache[ENDPOINT]);
         } else {
             axios.get(ENDPOINT).then(response => {
-                searchCache[ENDPOINT] = response.data;
+                Cache[ENDPOINT] = response.data;
                 this.handleData(response.data);
             }).catch(error => {
                 console.error(error);

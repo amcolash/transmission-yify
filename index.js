@@ -128,8 +128,8 @@ try {
     console.error(err);
 }
 
-// Set up static content
-app.use('/', express.static('build'));
+// Set up static content, cache for a little bit
+app.use('/', express.static('build', { maxAge: '4h' }));
 
 app.get('/omdb/:id', function(req, res) {
     let url ='https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;

@@ -2,10 +2,12 @@ import React, { Component, Fragment } from 'react';
 import { FaFilm, FaCheck, FaExclamationCircle, FaDownload, FaTrash } from 'react-icons/fa';
 import levenshtein from 'js-levenshtein';
 import axios from 'axios';
+import ScrollReveal from '../../Util/ScrollReveal';
+
 import '../css/Cover.css';
 import {getMovies} from '../../Util/Parse';
 import Spinner from './Spinner';
-import ScrollReveal from '../../Util/ScrollReveal';
+import Cache from '../../Util/Cache';
 
 const CancelToken = axios.CancelToken;
 
@@ -63,16 +65,22 @@ class Cover extends Component {
 
         this.cancelToken = CancelToken.source();
         const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
-        axios.get(url, { cancelToken: CancelToken.token }).then(response => {
-            this.cancelToken = null;
 
-            // Only update things if we are still actually showing the same cover
-            if (media.title === this.props.media.title) {
-                this.setState({pb: response.data});
-            }
-        }).catch(err => {
-            console.error(err);
-        });
+        if (Cache[url]) {
+            this.setState({pb: Cache[url]});
+        } else {
+            axios.get(url, { cancelToken: CancelToken.token }).then(response => {
+                Cache[url] = response.data;
+                this.cancelToken = null;
+    
+                // Only update things if we are still actually showing the same cover
+                if (media.title === this.props.media.title) {
+                    this.setState({pb: response.data});
+                }
+            }).catch(err => {
+                console.error(err);
+            });
+        }
     }
 
     render() {

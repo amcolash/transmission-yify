@@ -16,6 +16,5 @@
 @media (max-height: 450px) {
   .ratings {
     flex-wrap: wrap;
-    max-width: 40vw;
   }
 }
