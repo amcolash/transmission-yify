@@ -112,6 +112,7 @@ try {
             cache = require(CACHE_FILE);
         });
     } catch (err) {
+        console.error(err);
         writeCache();
     }
 
