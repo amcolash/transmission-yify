@@ -1,5 +1,6 @@
 import magnet from 'magnet-uri';
 import * as  ptn  from 'parse-torrent-name';
+import levenshtein from 'js-levenshtein';
 
 export function getMovies(media, pb, type) {
     // console.log(media, pb, type)
@@ -198,4 +199,19 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
         director,
         writers
     };
+}
+
+export function hasFile(media, files) {
+    for (let i = 0; i < files.length; i++) {
+        if (media && media.title && media.year) {
+            const file = files[i];
+            const lev = levenshtein(file.title.toLowerCase(), media.title.toLowerCase());
+            const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
+
+            if (match > 0.95 && file.year === media.year) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

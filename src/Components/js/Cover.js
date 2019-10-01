@@ -1,11 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { FaFilm, FaCheck, FaExclamationCircle, FaDownload, FaTrash } from 'react-icons/fa';
-import levenshtein from 'js-levenshtein';
 import axios from 'axios';
 import ScrollReveal from '../../Util/ScrollReveal';
 
 import '../css/Cover.css';
-import {getMovies} from '../../Util/Parse';
+import {getMovies, hasFile} from '../../Util/Parse';
 import Spinner from './Spinner';
 import Cache from '../../Util/Cache';
 
@@ -89,20 +88,8 @@ class Cover extends Component {
 
         if (!media.poster_path) media.poster_path = "broken image";
 
-        var hasFile = false;
-        for (let i = 0; i < files.length; i++) {
-            if (media && media.title && media.year) {
-                const file = files[i];
-                const lev = levenshtein(file.title.toLowerCase(), media.title.toLowerCase());
-                const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
+        const fileExists = hasFile(media, files);
     
-                if (match > 0.95 && file.year === media.year) {
-                    hasFile = true;
-                    break;
-                }
-            }
-        }
-
         let versions = [];
         if (pb) {
             versions = getMovies(media, pb.torrents, type);
@@ -120,7 +107,7 @@ class Cover extends Component {
                     <div className="movieIcon">
                         <FaFilm />
                     </div>
-                    {hasFile ? (
+                    {fileExists ? (
                         <div className="fileExists">
                             <FaCheck />
                         </div>
@@ -143,7 +130,7 @@ class Cover extends Component {
                                             <button className="orange download" onClick={(e) => {
                                                 e.stopPropagation();
                                                 e.nativeEvent.stopImmediatePropagation();
-                                                if (!hasFile || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
+                                                if (!fileExists || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
                                             }}>
                                                 {started.indexOf(version.hashString) !== -1 ? (
                                                     <Spinner visible noMargin button />

@@ -405,6 +405,7 @@ class MovieList extends Component {
                         getProgress={this.getProgress}
                         getTorrent={this.getTorrent}
                         onCloseModal={this.onCloseModal}
+                        files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                     />
             
                     {status && (status.ip.city === "Seattle") ? (

@@ -16,22 +16,41 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background-image: linear-gradient(to top,rgba(0,0,0,0.75) 0%, transparent 60%, rgba(0,0,0,0.25) 100%);
+  background-image: linear-gradient(to top,rgba(0,0,0,0.5) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.5) 100%);
   text-align: left;
   color: #ddd;
-  text-shadow: 2px 2px 3px #000000;
+  text-shadow: 2px 2px 3px #000000, -1px 0px 0px #888, 1px 0px 0px #888, 0px -1px 0px #888, 0px 1px 0px #888;
 }
 
 .spacer {
   flex-grow: 1;
 }
 
-#modalFullscreen .cover {
-  max-width: 250px;
-  box-shadow: 0px 0px 15px 4px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.5);
-  border-radius: 3px;
+#modalFullscreen .coverWrap {
+  position: relative;
   margin: 1em;
+  overflow: hidden;
+}
+
+#modalFullscreen .coverWrap img {
+  border-radius: 3px;
+  box-shadow: 0px 0px 15px 4px rgba(0,0,0,0.5);
+  border: 1px solid #888;
+  max-width: 250px;
+}
+
+#modalFullscreen .info .fileExists {
+  border: none;
+  border-radius: 0.2em;
+  position: unset;
+  display: none;
+  margin-left: 0.5em;
+}
+
+#modalFullscreen .coverWrap .fileExists  {
+  border: solid 1px #888;
+  bottom: 5px;
+  border-bottom-left-radius: 3px;
 }
 
 .right {
@@ -80,9 +99,10 @@ h4 {
 
 .mpaa-rating {
   display: inline-block;
-  padding: 0.1em;
+  padding: 0.15em;
   margin-left: 0.5em;
   border: 2px solid #ccc;
+  outline: solid 1px #aaa;
   border-radius: 0;
   font-family: Times New Roman;
   font-weight: bold;
@@ -119,14 +139,20 @@ h4 {
     border-radius: 1em 1em 0 0;
   }
 
-  #modalFullscreen .cover {
+  #modalFullscreen .coverWrap {
     display: none;
+  }
+
+
+  #modalFullscreen .info .fileExists {
+    display: inline-block;
   }
 }
 
 @media (max-height: 450px) {
   .right {
     max-width: 330px;
+    max-height: calc(100vh - 2em);
     padding: 1em;
   }
 
@@ -134,7 +160,7 @@ h4 {
     max-width: 350px;
   }
 
-  #modalFullscreen .cover {
+  #modalFullscreen .coverWrap img {
     max-height: 45vh;
     width: auto;
   }

@@ -11,5 +11,5 @@ TODO
 - [DONE] Move all server data into the storage socket and rename to stats
 - [DONE] Add a prune button to downloads
 - [DONE] Paging results for Pirate Bay
+- [DONE] Redo UI to make it prettier
 - Analytics (views, downloads, ip locations, etc)
-- Redo UI to make it prettier

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaDownload } from 'react-icons/fa';
+import { FaCheck, FaDownload } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 
@@ -8,7 +8,7 @@ import Version from './Version';
 import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
-import { getDetails, getMovies, getSeasons, getEpisodes } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes, hasFile } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
@@ -185,7 +185,7 @@ class DetailsBackdrop extends Component {
     }
 
     render() {
-        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onCloseModal, width } = this.props;
+        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onCloseModal, width, files } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason } = this.state;
         
         if (!media) return null;
@@ -195,8 +195,8 @@ class DetailsBackdrop extends Component {
         let seasons = getSeasons(type, maxSeason, moreData);
         let episodes = getEpisodes(eztv || nyaa, moreData, type);
 
-
         const details = getDetails(media, moreData, tmdbData, type, maxSeason);
+        const fileExists = hasFile(media, files);
 
         return (
             <Modal
@@ -226,17 +226,28 @@ class DetailsBackdrop extends Component {
                             <Fragment>
                                 <span>{details.header}</span>
                                 <div className="mpaa-rating">{details.mpaa}</div>
+                                {fileExists ? (
+                                    <div className="fileExists">
+                                        <FaCheck />
+                                    </div>
+                                ) : null}
                             </Fragment>
                         </h4>
                         <Ratings moreData={moreData}/>
                     </div>
                     {showCover ? (
-                        <img
-                            className="cover"
-                            src={media.poster_path}
-                            alt={media.title}
-                            onError={this.imageError.bind(this)}
-                        />
+                        <div className="coverWrap">
+                            <img
+                                src={media.poster_path}
+                                alt={media.title}
+                                onError={this.imageError.bind(this)}
+                            />
+                            {fileExists ? (
+                                <div className="fileExists">
+                                    <FaCheck />
+                                </div>
+                            ) : null}
+                        </div>
                     ) : null }
                     <div className="spacer"></div>
                     <div className="right" onClick={e => e.stopPropagation()}>
@@ -273,7 +284,9 @@ class DetailsBackdrop extends Component {
                                                 getProgress={getProgress}
                                                 getLink={getLink}
                                                 getTorrent={getTorrent}
-                                                downloadTorrent={downloadTorrent}
+                                                downloadTorrent={version => {
+                                                    if (!fileExists || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
+                                                }}
                                                 cancelTorrent={cancelTorrent}
                                             />
                                         ))}
