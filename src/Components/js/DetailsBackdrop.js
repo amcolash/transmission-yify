@@ -288,6 +288,8 @@ class DetailsBackdrop extends Component {
                                                     if (!fileExists || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
                                                 }}
                                                 cancelTorrent={cancelTorrent}
+                                                hideInfo={true}
+                                                hideBar={true}
                                             />
                                         ))}
                                     </div>
