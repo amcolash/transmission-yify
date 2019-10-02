@@ -93,7 +93,7 @@ class Cover extends Component {
         let versions = [];
         if (pb) {
             versions = getMovies(media, pb.torrents, type);
-            if (versions.length > 2) versions = versions.slice(1);
+            if (versions.length > 2) versions = versions.slice(0, 2);
             versions = versions.map(version => { return {...version, progress: getProgress(version.hashString)}; });
         }
 

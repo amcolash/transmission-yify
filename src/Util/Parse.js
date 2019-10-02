@@ -36,14 +36,14 @@ export function getMovies(media, pb, type) {
                 default: sort = 0; break;
             }
             
-            if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeders)) return;
+            if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeds)) return;
             
             versions[parsed.resolution] = {
                 quality: `${parsed.resolution} ${isCam ? '(CAM)' : ''}`,
                 sort: sort,
-                peers: t.leechers,
-                seeds: t.seeders,
-                ratio: t.leechers > 0 ? (t.seeders / t.leechers).toFixed(3) : 0,
+                peers: t.leeches,
+                seeds: t.seeds,
+                ratio: t.leeches > 0 ? (t.seeds / t.leeches).toFixed(3) : 0,
                 url: t.magnetLink,
                 hashString: magnet.decode(t.magnetLink).infoHash.toLowerCase(),
                 size: t.size,

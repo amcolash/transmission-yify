@@ -419,8 +419,8 @@ function searchPirateBay(query, page, filter, endpoint) {
                     const link = $('.detLink', row).attr('href');
                     const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
                     const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
-                    const seeds = $('[align="right"]', row).eq(0).text();
-                    const leeches = $('[align="right"]', row).eq(1).text();
+                    const seeds = Number.parseInt($('[align="right"]', row).eq(0).text());
+                    const leeches = Number.parseInt($('[align="right"]', row).eq(1).text());
                     const category = $('.vertTh a', row).eq(0).text();
                     const subCategory = $('.vertTh a', row).eq(1).text();
                     const authorName = $('.detDesc a', row).text();

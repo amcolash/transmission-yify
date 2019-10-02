@@ -149,6 +149,7 @@ class MovieList extends Component {
             order: order,
             type: type,
             page: page || 1, // reset page if not provided
+            results: this.state.type === type ? this.state.results : []
         }, () => this.updateData());
     }
     

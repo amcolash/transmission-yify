@@ -10,7 +10,7 @@ import Order from '../../Data/Order';
 class Search extends Component {
 
     clearSearch() {
-        this.props.updateSearch("", "", "", this.props.type, 1);
+        this.props.updateSearch('', '', '', this.props.type, 1);
     }
 
     render() {
@@ -78,7 +78,7 @@ class Search extends Component {
 
                     <div className="searchItem">
                         <span>Type</span>
-                        <select onChange={(event) => updateSearch(search, genre, order, event.target.value)} value={type} >
+                        <select onChange={(event) => updateSearch('', '', '', event.target.value, 1)} value={type} >
                             <option key="movies" value="movies">Movies</option>
                             <option key="shows" value="shows">TV</option>
                             <option key="animes" value="animes">Anime</option>
