@@ -83,10 +83,17 @@ if (fs.existsSync('./.cert/fullchain.pem')) {
     credentials.cert = fs.readFileSync('./.cert/cert.pem');
 }
 
-// Auto clean tracker cache daily at 5am
-new CronJob('00 00 05 * * *', function() {
+// Auto clean torrent cache every 12 hours
+new CronJob('00 00 */12 * * *', function() {
     console.log('scheduled clearing of tracker cache');
     this.trackerCache = {};
+}, null, true, 'America/Los_Angeles');
+
+// Wipe the full cache weekly at 4am on sunday morning
+new CronJob('00 00 4 * * 0', function() {
+    console.log('scheduled clearing of main cache');
+    this.cache = {};
+    this.writeCache();
 }, null, true, 'America/Los_Angeles');
 
 // Make the server
@@ -315,8 +322,8 @@ io.on('connection', client => {
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
-        // cache for 1 week
-        res.set('Cache-Control', 'public, max-age=604800');
+        // cache for 1/2 week
+        res.set('Cache-Control', 'public, max-age=302400');
         res.send(cache[url]);
     } else {
         cacheRequest(url, res, shouldRetry);
@@ -326,8 +333,8 @@ function checkCache(url, res, shouldRetry) {
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
-        // cache for 1 week
-        res.set('Cache-Control', 'public, max-age=604800');
+        // cache for 1/2 week
+        res.set('Cache-Control', 'public, max-age=302400');
         res.send(response.data);
         cache[url] = response.data;
         writeCache();
