@@ -46,6 +46,51 @@
   margin-left: 0.5em;
 }
 
+#modalFullscreen .info .trailer {
+  display: flex;
+  align-items: center;
+  padding-top: 0.4em;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+
+#modalFullscreen .info .trailer div {
+  padding-left: 0.25em;
+}
+
+#modalFullscreen .ytContainer {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: black;
+  z-index: 2;
+}
+
+#modalFullscreen .ytContainer button {
+  position: absolute;
+  font-size: 1.75em;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  background-color: black;
+  color: rgba(255,255,255,0.4);
+  transition: all 0.5s;
+}
+
+#modalFullscreen .ytContainer button:hover {
+  color: rgba(255,255,255,1);
+}
+
+#modalFullscreen #youtube {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 #modalFullscreen .coverWrap .fileExists  {
   border: solid 1px #888;
   bottom: 5px;
