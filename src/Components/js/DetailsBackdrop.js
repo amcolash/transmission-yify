@@ -269,16 +269,18 @@ class DetailsBackdrop extends Component {
                         <div className="spacer"></div>
                         {showCover ? (
                             <div className="coverWrap">
-                                <img
-                                    src={media.poster_path}
-                                    alt={media.title}
-                                    onError={this.imageError.bind(this)}
-                                />
-                                {fileExists ? (
-                                    <div className="fileExists">
-                                        <FaCheck />
-                                    </div>
-                                ) : null}
+                                {/* <div className="coverInner"> */}
+                                    <img
+                                        src={media.poster_path}
+                                        alt={media.title}
+                                        onError={this.imageError.bind(this)}
+                                    />
+                                    {fileExists ? (
+                                        <div className="fileExists">
+                                            <FaCheck />
+                                        </div>
+                                    ) : null}
+                                {/* </div> */}
                             </div>
                         ) : null }
                     </div>
