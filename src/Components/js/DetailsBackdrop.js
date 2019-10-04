@@ -241,44 +241,47 @@ class DetailsBackdrop extends Component {
                                 onEnd={() => this.setState({trailerFullscreen: false})}/>
                         </div>
                     ) : null}
-                    <div className="info">
-                        <h3>{media.title}</h3>
-                        <h4>
-                            <Fragment>
-                                <span>{details.header}</span>
-                                <div className="mpaa-rating">{details.mpaa}</div>
+                    <div className="left">
+                        <div className="info">
+                            <h3>{media.title}</h3>
+                            <h4>
+                                <Fragment>
+                                    <span>{details.header}</span>
+                                    <div className="mpaa-rating">{details.mpaa}</div>
+                                    {fileExists ? (
+                                        <div className="fileExists">
+                                            <FaCheck />
+                                        </div>
+                                    ) : null}
+                                </Fragment>
+                            </h4>
+                            <Ratings moreData={moreData}/>
+                            {details.trailer ? (
+                                <div className="trailer" onClick={e => {
+                                    e.stopPropagation();
+                                    this.setState({trailerFullscreen: !trailerFullscreen});
+                                }}>
+                                    <FaYoutube className="red"/>
+                                    <div>Trailer</div>
+                                </div>
+                            ) : null}
+                        </div>
+                        <div className="spacer"></div>
+                        {showCover ? (
+                            <div className="coverWrap">
+                                <img
+                                    src={media.poster_path}
+                                    alt={media.title}
+                                    onError={this.imageError.bind(this)}
+                                />
                                 {fileExists ? (
                                     <div className="fileExists">
                                         <FaCheck />
                                     </div>
                                 ) : null}
-                            </Fragment>
-                        </h4>
-                        <Ratings moreData={moreData}/>
-                        {details.trailer ? (
-                            <div className="trailer" onClick={e => {
-                                e.stopPropagation();
-                                this.setState({trailerFullscreen: !trailerFullscreen});
-                            }}>
-                                <FaYoutube className="red"/>
-                                <div>Trailer</div>
                             </div>
-                        ) : null}
+                        ) : null }
                     </div>
-                    {showCover ? (
-                        <div className="coverWrap">
-                            <img
-                                src={media.poster_path}
-                                alt={media.title}
-                                onError={this.imageError.bind(this)}
-                            />
-                            {fileExists ? (
-                                <div className="fileExists">
-                                    <FaCheck />
-                                </div>
-                            ) : null}
-                        </div>
-                    ) : null }
                     <div className="spacer"></div>
                     <div className="right" onClick={e => e.stopPropagation()}>
                         <div className="plot padding">{details.plot}</div>
