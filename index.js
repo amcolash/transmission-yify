@@ -135,7 +135,7 @@ try {
 }
 
 // Set up static content, cache for a little bit
-app.use('/', express.static('build', { maxAge: '4h' }));
+app.use('/', express.static('build', IS_DOCKER ? { maxAge: '4h' } : {}));
 
 app.get('/omdb/:id', function(req, res) {
     let url ='https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
@@ -144,7 +144,7 @@ app.get('/omdb/:id', function(req, res) {
 
 app.get('/tmdbid/:type/:id', function(req, res) {
     let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
-        '&append_to_response=external_ids';
+        '&append_to_response=external_ids,videos';
     checkCache(url, res, true);
 });
 
@@ -241,12 +241,12 @@ app.get('/pirate/:search/:precache?', function(req, res) {
     // Add a simple cache here to make things faster on the client
     if (trackerCache[search]) {
         // cache for 1 hour
-        res.set('Cache-Control', 'public, max-age=3600');
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
         res.send(trackerCache[search]);
     } else {
         searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
             // cache for 1 hour
-            res.set('Cache-Control', 'public, max-age=3600');
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
             res.send(results);
             trackerCache[search];
         }).catch(err => {
@@ -323,7 +323,7 @@ io.on('connection', client => {
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
         // cache for 1/2 week
-        res.set('Cache-Control', 'public, max-age=302400');
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=302400');
         res.send(cache[url]);
     } else {
         cacheRequest(url, res, shouldRetry);
@@ -334,7 +334,7 @@ function checkCache(url, res, shouldRetry) {
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
         // cache for 1/2 week
-        res.set('Cache-Control', 'public, max-age=302400');
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=302400');
         res.send(response.data);
         cache[url] = response.data;
         writeCache();
@@ -358,14 +358,14 @@ function checkTrackerCache(url, res) {
     if (trackerCache[url]) {
         if (res) {
             // cache for 1 hour
-            res.set('Cache-Control', 'public, max-age=3600');
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
             res.send(trackerCache[url]);
         }
     } else {
         axios.get(url).then(response => {
             if (res) {
                 // cache for 1 hour
-                res.set('Cache-Control', 'public, max-age=3600');
+                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
                 res.send(response.data);
             }
             trackerCache[url] = response.data;
