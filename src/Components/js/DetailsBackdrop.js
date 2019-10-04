@@ -147,7 +147,7 @@ class DetailsBackdrop extends Component {
                             });
                         }
         
-                        const cleanedTitle = media.title.replace(/[^\w\s]/gi, ' ');
+                        const cleanedTitle = media.title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
                         const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
 
                         if (Cache[pirateUrl]) {

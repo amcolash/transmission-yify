@@ -58,7 +58,7 @@ class Cover extends Component {
 
     updatePB() {
         const media = this.props.media;
-        const cleanedTitle = media.title.replace(/[^\w\s]/gi, ' ');
+        const cleanedTitle = media.title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
         
         this.cancelPB();
 

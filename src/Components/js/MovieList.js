@@ -156,8 +156,8 @@ class MovieList extends Component {
     updateData() {
         const { page, genre, type } = this.state;
 
-        // sanitize the search so that there are no special characters
-        let search = this.state.search.replace(/[^\w\s]/gi, ' ');
+        // sanitize the search so that there are no special characters, replace with spaces for most characters except quotes
+        let search = this.state.search.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
         
         this.setState({isSearching: true});
 
