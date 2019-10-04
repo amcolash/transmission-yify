@@ -13,6 +13,7 @@ services:
       - TR_PEER_LIMIT_PER_TORRENT=200
       - TR_INCOMPLETE_DIR_ENABLED=true
       - TR_DOWNLOAD_DIR=/var/lib/transmission-daemon/completed
+      - TR_RATIO_LIMIT_ENABLED=false
     ports:
       - 9091:9091
     restart: unless-stopped
