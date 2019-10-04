@@ -191,13 +191,27 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
         writers = (moreData.Writer.indexOf(",") !== -1 ? "Writers: " : "Writer: ") + moreData.Writer.replace(/\s*\(.*?\)/g, '');
     }
 
+    let trailer;
+    if (tmdbData && tmdbData.videos) {
+        tmdbData.videos.results.some(video => {
+            // If this is the first trailer, choose it and ignore others
+            if (video.type === 'Trailer' && video.site === 'YouTube') {
+                trailer = video;
+                return true;
+            }
+
+            return false;
+        });
+    }
+
     return {
         mpaa,
         genres,
         header,
         plot,
         director,
-        writers
+        writers,
+        trailer
     };
 }
 

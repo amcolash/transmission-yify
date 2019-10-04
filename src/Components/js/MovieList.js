@@ -416,7 +416,7 @@ class MovieList extends Component {
                         files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                     />
             
-                    {status && (status.ip.city === "Seattle") ? (
+                    {status && status.ip && status.ip.city === "Seattle" ? (
                         <div className="warning red">
                             <div>
                                 <FaExclamationTriangle className="big"/>

@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { FaCheck, FaDownload } from 'react-icons/fa';
+import { FaCheck, FaDownload, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
+import YouTube from 'react-youtube';
 
 import '../css/DetailsBackdrop.css';
 import Version from './Version';
@@ -15,7 +16,22 @@ class DetailsBackdrop extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true };
+        this.state = { tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
+            trailerFullscreen: false };
+    }
+
+    componentWillMount() {
+        document.addEventListener('fullscreenchange', this.changeFullscreen.bind(this));
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('fullscreenchange', this.changeFullscreen);
+    }
+
+    changeFullscreen(event) {
+        if (!document.fullscreenElement) {
+            this.setState({trailerFullscreen: false});
+        }
     }
 
     getEztv(imdb, page) {
@@ -186,7 +202,7 @@ class DetailsBackdrop extends Component {
 
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onCloseModal, width, files } = this.props;
-        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason } = this.state;
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen } = this.state;
         
         if (!media) return null;
 
@@ -197,6 +213,15 @@ class DetailsBackdrop extends Component {
 
         const details = getDetails(media, moreData, tmdbData, type, maxSeason);
         const fileExists = hasFile(media, files);
+
+        const trailerOpts = {
+            playerVars: { // https://developers.google.com/youtube/player_parameters
+                autoplay: 1,
+                fs: 0,
+                modestbranding: 1,
+                iv_load_policy: 3
+            }
+        };
 
         return (
             <Modal
@@ -234,6 +259,23 @@ class DetailsBackdrop extends Component {
                             </Fragment>
                         </h4>
                         <Ratings moreData={moreData}/>
+                        {details.trailer ? (
+                            <div className="trailer" onClick={e => {
+                                e.stopPropagation();
+                                this.setState({trailerFullscreen: !trailerFullscreen});
+                            }}>
+                                <FaYoutube className="red"/>
+                                <span>Trailer</span>
+                                {trailerFullscreen ? (
+                                    <YouTube videoId={details.trailer.key} opts={trailerOpts} id='youtube' onReady={e => {
+                                        const iframe = document.getElementById('youtube');
+                                        if (iframe && iframe.requestFullscreen) {
+                                            iframe.requestFullscreen.bind(iframe)().catch(err => console.error(err));
+                                        }
+                                    }} onEnd={() => this.setState({trailerFullscreen: false})}/>
+                                ) : null}
+                            </div>
+                        ) : null}
                     </div>
                     {showCover ? (
                         <div className="coverWrap">
