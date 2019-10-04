@@ -227,8 +227,15 @@ class MovieList extends Component {
 
         if (data.data) data.results = data.data;
 
+        const now = new Date();
+        
         if (data.results && data.results.map) {
-            data = data.results.map(media => {
+            data = data.results.filter(media => {
+                if (media.release_date && new Date(media.release_date) > now) return false;
+                return true;
+            });
+
+            data = data.map(media => {
                 // used for anime
                 const attributes = media.attributes;
                 if (attributes) {
@@ -236,7 +243,7 @@ class MovieList extends Component {
                     media.year = attributes.startDate;
                     if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
                 }
-                
+
                 // fix weird years (since it seems the year can vary based on region released first)
                 media.year = media.year || media.release_date || media.first_air_date;
 
