@@ -86,14 +86,14 @@ if (fs.existsSync('./.cert/fullchain.pem')) {
 // Auto clean torrent cache every 12 hours
 new CronJob('00 00 */12 * * *', function() {
     console.log('scheduled clearing of tracker cache');
-    this.trackerCache = {};
+    trackerCache = {};
 }, null, true, 'America/Los_Angeles');
 
 // Wipe the full cache weekly at 4am on sunday morning
-new CronJob('00 00 4 * * 0', function() {
+new CronJob('00 03 4 * * 0', function() {
     console.log('scheduled clearing of main cache');
-    this.cache = {};
-    this.writeCache();
+    cache = {};
+    writeCache();
 }, null, true, 'America/Los_Angeles');
 
 // Make the server

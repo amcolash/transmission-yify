@@ -38,6 +38,16 @@ progress {
     filter: grayscale();
 }
 
+::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+    background: #444;
+}
+  
+::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
 .green { color: greenyellow; }
 .red { color: red; }
 .orange { color: #e5a00d; } /* Plex orange */

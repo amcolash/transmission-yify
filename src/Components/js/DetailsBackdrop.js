@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaCheck, FaChevronLeft, FaChevronRight, FaDownload, FaTimes, FaYoutube } from 'react-icons/fa';
+import { FaCheck, FaDownload, FaTimes, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -190,18 +190,6 @@ class DetailsBackdrop extends Component {
         });
     }
 
-    scrollRecommendations(direction, numItems) {
-        const container = document.getElementsByClassName('recommendations');
-        if (container.length === 1) {
-            const item = container[0].getElementsByTagName('div')[0];
-            const current = container[0].scrollLeft;
-            const scrollAmount = (item.offsetWidth * direction * 3) - 1; // remove slight offsets, account for 3x scrolling
-            if (direction === -1 || current + scrollAmount < (numItems / 3) * scrollAmount) {
-                container[0].scrollBy(scrollAmount , 0);
-            }
-        }
-    }
-
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             width, files } = this.props;
@@ -289,7 +277,6 @@ class DetailsBackdrop extends Component {
                         <div className="spacer"></div>
                         {showCover ? (
                             <div className="coverWrap">
-                                {/* <div className="coverInner"> */}
                                     <img
                                         src={media.poster_path}
                                         alt={media.title}
@@ -300,7 +287,6 @@ class DetailsBackdrop extends Component {
                                             <FaCheck />
                                         </div>
                                     ) : null}
-                                {/* </div> */}
                             </div>
                         ) : null }
                     </div>
@@ -406,12 +392,11 @@ class DetailsBackdrop extends Component {
                             <Fragment>
                                 <h4>You Might Also Like...</h4>
                                 <div className="recommendationContainer">
-                                    <FaChevronLeft onClick={() => this.scrollRecommendations(-1, recommendations.length)}/>
                                     <div className="recommendations">
                                         {recommendations.map(r => {
                                             const recommendation = parseMedia(r, 'movies');
 
-                                            return <div key={r.id} onClick={() => {
+                                            return <div key={r.id} className="item" onClick={() => {
                                                 this.setState({tmdbData: null, moreData: null}, () => {
                                                     onOpenModal(recommendation);
                                                 });
@@ -421,7 +406,6 @@ class DetailsBackdrop extends Component {
                                             </div>
                                         })}
                                     </div>
-                                    <FaChevronRight onClick={() => this.scrollRecommendations(1, recommendations.length)}/>
                                 </div>
                             </Fragment>
                         ) : null}

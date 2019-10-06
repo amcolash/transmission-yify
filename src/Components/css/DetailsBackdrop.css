@@ -136,30 +136,25 @@
 .recommendationContainer {
   display: flex;
   align-items: center;
-  margin-left: -1.25em;
-}
-
-.recommendationContainer svg {
-  cursor: pointer;
 }
 
 .recommendations {
-  width: 100%;
   display: flex;
   text-align: center;
-  margin: 0.5em;
-  overflow: hidden;
+  margin-top: 1em;
+  overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
 }
 
-.recommendations div {
+.recommendations .item {
   padding-right: 0.7em;
   padding-bottom: 0.3em;
   cursor: pointer;
   width: 6.5em;
 }
 
-.recommendations div:last-of-type {
+.recommendations .item:last-of-type {
   margin-right: 0;
 }
 
@@ -170,7 +165,7 @@
 }
 
 .recommendations img {
-  width: 100%;
+  width: 6.5em;
   border: 1px solid #777;
   border-radius: 0.2em;
 }
