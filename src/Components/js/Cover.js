@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaFilm, FaCheck, FaExclamationCircle, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaFilm, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 import ScrollReveal from '../../Util/ScrollReveal';
 
@@ -109,7 +109,7 @@ class Cover extends Component {
                     </div>
                     {fileExists ? (
                         <div className="fileExists">
-                            <FaCheck />
+                            <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }} />
                         </div>
                     ) : null}
                     {type === 'movies' ? (

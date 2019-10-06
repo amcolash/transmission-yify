@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaCheck, FaDownload, FaTimes, FaYoutube } from 'react-icons/fa';
+import { FaDownload, FaPlayCircle, FaTimes, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -21,7 +21,7 @@ class DetailsBackdrop extends Component {
 
     getDefaultState() {
         return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
-            trailerFullscreen: false};
+            trailerFullscreen: false, loadingEpisodes: false};
     }
 
     getEztv(imdb, page) {
@@ -61,6 +61,8 @@ class DetailsBackdrop extends Component {
                 // If there are more pages, get them
                 if (page * limit < data.torrents_count) {
                     this.getEztv(imdb, page + 1);
+                } else {
+                    this.setState({loadingEpisodes: false});
                 }
             });
         } else {
@@ -93,6 +95,8 @@ class DetailsBackdrop extends Component {
             // If there are more pages, get them
             if (page * limit < data.totalRecordCount) {
                 this.getNyaa(title, page + 1);
+            } else {
+                this.setState({loadingEpisodes: false});
             }
         });
     }
@@ -104,13 +108,16 @@ class DetailsBackdrop extends Component {
             if (type === 'animes') {
                 axios.get(`${this.props.server}/kitsu/${media.id}`).then(response => {
                     const data = response.data.data;
-                    this.setState({moreData: {
-                        CoverImage: data.attributes.coverImage.large,
-                        Plot: data.attributes.synopsis,
-                        Rated: data.attributes.rating,
-                        Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
-                        EpisodeCount: data.attributes.episodeCount
-                    }});
+                    this.setState({
+                        moreData: {
+                            CoverImage: data.attributes.coverImage.large,
+                            Plot: data.attributes.synopsis,
+                            Rated: data.attributes.rating,
+                            Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
+                            EpisodeCount: data.attributes.episodeCount
+                        },
+                        loadingEpisodes: true
+                    });
 
                     this.getNyaa(media.title, 1);
                 }).catch(err => {
@@ -119,7 +126,7 @@ class DetailsBackdrop extends Component {
                 });
             } else {
                 axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id).then(response => {
-                    const updated = { tmdbData: response.data };
+                    const updated = { tmdbData: response.data, loadingEpisodes: true };
                     if (type === 'shows') updated.moreData = response.data;
 
                     this.setState(updated);
@@ -193,7 +200,7 @@ class DetailsBackdrop extends Component {
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             width, files } = this.props;
-        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen } = this.state;
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen, loadingEpisodes } = this.state;
         
         if (!media) return null;
 
@@ -258,7 +265,7 @@ class DetailsBackdrop extends Component {
                                     <div className="mpaa-rating">{details.mpaa}</div>
                                     {fileExists ? (
                                         <div className="fileExists">
-                                            <FaCheck />
+                                            <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
                                         </div>
                                     ) : null}
                                 </Fragment>
@@ -284,7 +291,7 @@ class DetailsBackdrop extends Component {
                                     />
                                     {fileExists ? (
                                         <div className="fileExists">
-                                            <FaCheck />
+                                            <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
                                         </div>
                                     ) : null}
                             </div>
@@ -337,55 +344,58 @@ class DetailsBackdrop extends Component {
                                 ) : <h4>No Torrents Found</h4>
                             ) : <span>Loading torrent data...<Spinner visible/></span>
                         ) : (
-                            (!eztv && !nyaa) ? <span>Loading torrent data...<Spinner visible/></span> : (
-                                episodes.length === 0 ? <h4>No Torrents Found</h4> : (
-                                    <Fragment>
-                                        <h3 className="season">Season
-                                            {seasons.length > 1 ? (
-                                                <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
-                                                    {seasons.map(season => ( <option key={season} value={season}>{season}</option> ))}
-                                                </select>
-                                            ) : " 1"}
-                                            {(episodes[season]) ? (
-                                                <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
-                                                    <FaDownload/>
-                                                </button>
+                            <Fragment>
+                                {loadingEpisodes ? <span>Loading torrent data...<Spinner visible/></span> : null}
+                                {(!eztv && !nyaa) ? null : (
+                                    episodes.length === 0 ? <h4>No Torrents Found</h4> : (
+                                        <Fragment>
+                                            <h3 className="season">Season
+                                                {seasons.length > 1 ? (
+                                                    <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
+                                                        {seasons.map(season => ( <option key={season} value={season}>{season}</option> ))}
+                                                    </select>
+                                                ) : " 1"}
+                                                {(episodes[season]) ? (
+                                                    <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
+                                                        <FaDownload/>
+                                                    </button>
+                                                ) : null}
+                                            </h3>
+                                            {type === 'shows' && moreData && moreData.seasons && moreData.seasons[season-1] ? (
+                                                <span>{moreData.seasons[season-1].overview}</span>
                                             ) : null}
-                                        </h3>
-                                        {type === 'shows' && moreData && moreData.seasons && moreData.seasons[season-1] ? (
-                                            <span>{moreData.seasons[season-1].overview}</span>
-                                        ) : null}
-                                        <div className="episodeList">
-                                            {(episodes[season] && episodes[season].length > 0) ? (
-                                                episodes[season].map(episode => (
-                                                    episode ? (
-                                                    <Fragment key={episode.episode}>
-                                                        <h4 className="episode">{episode.title}</h4>
+                                            <div className="episodeList">
+                                                {(episodes[season] && episodes[season].length > 0) ? (
+                                                    episodes[season].map(episode => (
+                                                        episode ? (
+                                                        <Fragment key={episode.episode}>
+                                                            <h4 className="episode">{episode.title}</h4>
 
-                                                        <div className="versions">
-                                                            {episode.torrents ? episode.torrents.map(version => (
-                                                            <Version
-                                                                key={version.hashString}
-                                                                version={version}
-                                                                started={started}
-                                                                getProgress={getProgress}
-                                                                getLink={getLink}
-                                                                getTorrent={getTorrent}
-                                                                downloadTorrent={downloadTorrent}
-                                                                cancelTorrent={cancelTorrent}
-                                                                hideInfo={true}
-                                                                hideBar={true}
-                                                            />
-                                                            )) : null}
-                                                        </div>
-                                                    </Fragment>
-                                                    ) : null
-                                                ))
-                                            ) : null}
-                                        </div>
-                                    </Fragment>
-                                )
-                            )
+                                                            <div className="versions">
+                                                                {episode.torrents ? episode.torrents.map(version => (
+                                                                <Version
+                                                                    key={version.hashString}
+                                                                    version={version}
+                                                                    started={started}
+                                                                    getProgress={getProgress}
+                                                                    getLink={getLink}
+                                                                    getTorrent={getTorrent}
+                                                                    downloadTorrent={downloadTorrent}
+                                                                    cancelTorrent={cancelTorrent}
+                                                                    hideInfo={true}
+                                                                    hideBar={true}
+                                                                />
+                                                                )) : null}
+                                                            </div>
+                                                        </Fragment>
+                                                        ) : null
+                                                    ))
+                                                ) : null}
+                                            </div>
+                                        </Fragment>
+                                    )
+                                )}
+                            </Fragment>
                         )}
 
                         {recommendations ? (

@@ -223,7 +223,7 @@ export function hasFile(media, files) {
             const match = (1 - (lev / Math.max(file.title.length, media.title.length)));
 
             if (match > 0.95 && file.year === media.year) {
-                return true;
+                return file;
             }
         }
     }

@@ -477,7 +477,7 @@ class MovieList extends Component {
                             <Fragment>
                                 <hr/>
 
-                                <p>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p>
+                                {status && status.ip ? <p>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
                                 {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
                                     <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
                                 ) : null}

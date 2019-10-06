@@ -39,13 +39,14 @@ progress {
 }
 
 ::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-    background: #444;
+    height: 0.4em;
+    width: 0.4em;
+    background: #333;
 }
   
 ::-webkit-scrollbar-thumb {
     background: #555;
+    border-radius: 0.15em;
 }
 
 .green { color: greenyellow; }
