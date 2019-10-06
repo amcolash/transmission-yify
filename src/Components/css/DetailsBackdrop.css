@@ -129,6 +129,52 @@
   padding: 0.45em 0;
 }
 
+.right h4 {
+  padding-top: 1em;
+}
+
+.recommendationContainer {
+  display: flex;
+  align-items: center;
+  margin-left: -1.25em;
+}
+
+.recommendationContainer svg {
+  cursor: pointer;
+}
+
+.recommendations {
+  width: 100%;
+  display: flex;
+  text-align: center;
+  margin: 0.5em;
+  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+.recommendations div {
+  padding-right: 0.7em;
+  padding-bottom: 0.3em;
+  cursor: pointer;
+  width: 6.5em;
+}
+
+.recommendations div:last-of-type {
+  margin-right: 0;
+}
+
+.recommendations .title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.recommendations img {
+  width: 100%;
+  border: 1px solid #777;
+  border-radius: 0.2em;
+}
+
 .versions {
   display: flex;
 }

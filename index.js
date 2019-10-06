@@ -144,7 +144,7 @@ app.get('/omdb/:id', function(req, res) {
 
 app.get('/tmdbid/:type/:id', function(req, res) {
     let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
-        '&append_to_response=external_ids,videos';
+        '&append_to_response=external_ids,videos,recommendations';
     checkCache(url, res, true);
 });
 

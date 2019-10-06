@@ -18,6 +18,7 @@ import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
 import Cache from '../../Util/Cache';
+import { parseMedia } from '../../Util/Parse';
 
 const hashMapping = {};
 
@@ -236,32 +237,7 @@ class MovieList extends Component {
             });
 
             data = data.map(media => {
-                // used for anime
-                const attributes = media.attributes;
-                if (attributes) {
-                    media.title = attributes.canonicalTitle;
-                    media.year = attributes.startDate;
-                    if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
-                }
-
-                // fix weird years (since it seems the year can vary based on region released first)
-                media.year = media.year || media.release_date || media.first_air_date;
-
-                // only try to do fancy stuff if not a standard year
-                if (media.year && !media.year.toString().match(/^\d{4}$/)) media.year = new Date(media.year).getFullYear();
-
-                media.title = media.title || media.name || '?';
-                media.title = media.title.replace(/&amp;/g, '&');
-                
-                // TMDB does not add an absolute url to returned poster paths
-                if (media.poster_path && media.poster_path.indexOf('http') === -1) {
-                    media.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + media.poster_path;
-                }
-
-                // Fake tv data
-                if (type !== 'movies') media.num_seasons = 1;
-
-                return media;
+                return parseMedia(media, type);
             });
             
             // The search filtering is not great for kitsu :(
@@ -412,6 +388,7 @@ class MovieList extends Component {
                         downloadTorrent={this.downloadTorrent}
                         getProgress={this.getProgress}
                         getTorrent={this.getTorrent}
+                        onOpenModal={this.onOpenModal}
                         onCloseModal={this.onCloseModal}
                         files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                     />

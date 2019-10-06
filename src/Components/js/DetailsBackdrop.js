@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaCheck, FaDownload, FaTimes, FaYoutube } from 'react-icons/fa';
+import { FaCheck, FaChevronLeft, FaChevronRight, FaDownload, FaTimes, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -9,7 +9,7 @@ import Version from './Version';
 import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
-import { getDetails, getMovies, getSeasons, getEpisodes, hasFile } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, parseMedia } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
@@ -190,16 +190,29 @@ class DetailsBackdrop extends Component {
         });
     }
 
+    scrollRecommendations(direction, numItems) {
+        const container = document.getElementsByClassName('recommendations');
+        if (container.length === 1) {
+            const item = container[0].getElementsByTagName('div')[0];
+            const current = container[0].scrollLeft;
+            const scrollAmount = (item.offsetWidth * direction * 3) - 1; // remove slight offsets, account for 3x scrolling
+            if (direction === -1 || current + scrollAmount < (numItems / 3) * scrollAmount) {
+                container[0].scrollBy(scrollAmount , 0);
+            }
+        }
+    }
+
     render() {
-        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onCloseModal, width, files } = this.props;
+        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
+            width, files } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen } = this.state;
         
         if (!media) return null;
 
-        let versions = getMovies(media, pb ? pb.torrents : [], type);
+        const versions = getMovies(media, pb ? pb.torrents : [], type);
 
-        let seasons = getSeasons(type, maxSeason, moreData);
-        let episodes = getEpisodes(eztv || nyaa, moreData, type);
+        const seasons = getSeasons(type, maxSeason, moreData);
+        const episodes = getEpisodes(eztv || nyaa, moreData, type);
 
         const details = getDetails(media, moreData, tmdbData, type, maxSeason);
         const fileExists = hasFile(media, files);
@@ -211,6 +224,13 @@ class DetailsBackdrop extends Component {
                 modestbranding: 1
             }
         };
+
+        let recommendations;
+        if (tmdbData && tmdbData.recommendations && tmdbData.recommendations.results) {
+            const results = tmdbData.recommendations.results;
+            // only show groups of three
+            if (results.length > 3) recommendations = results.slice(0, Math.floor(results.length / 3) * 3);
+        }
 
         return (
             <Modal
@@ -381,6 +401,30 @@ class DetailsBackdrop extends Component {
                                 )
                             )
                         )}
+
+                        {recommendations ? (
+                            <Fragment>
+                                <h4>You Might Also Like...</h4>
+                                <div className="recommendationContainer">
+                                    <FaChevronLeft onClick={() => this.scrollRecommendations(-1, recommendations.length)}/>
+                                    <div className="recommendations">
+                                        {recommendations.map(r => {
+                                            const recommendation = parseMedia(r, 'movies');
+
+                                            return <div key={r.id} onClick={() => {
+                                                this.setState({tmdbData: null, moreData: null}, () => {
+                                                    onOpenModal(recommendation);
+                                                });
+                                            }}>
+                                                <img src={r.poster_path} alt="cover"/>
+                                                <div className="title">{r.original_title}</div>
+                                            </div>
+                                        })}
+                                    </div>
+                                    <FaChevronRight onClick={() => this.scrollRecommendations(1, recommendations.length)}/>
+                                </div>
+                            </Fragment>
+                        ) : null}
                     </div>
                 </div>
             </Modal>

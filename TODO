@@ -12,7 +12,15 @@ TODO
 - [DONE] Add a prune button to downloads
 - [DONE] Paging results for Pirate Bay
 - [DONE] Redo UI to make it prettier
-- Analytics (views, downloads, ip locations, etc)
-- Trailers
+- [DONE] Trailers
+- [DONE] Recommendations (Backdrop, movies + tv)
+- Recommendations (Search)
+- Better loading state for tv + anime torrents
 - Other Videos (bloopers, bts, etc if possible)
-- Recommendations
+- Sidebar menu instead of dropdown for search, allows for settings, feels more like app, etc
+- Subscribe to TV Show (download latest + new episodes as they show up)
+- PWA for better cache control instead of on server?
+- Direct links to plex for available videos
+- Precache on the server side when cache cleared
+- Analytics (views, downloads, ip locations, etc)
+- Move to Mongo?
