@@ -66,7 +66,7 @@ class DetailsBackdrop extends Component {
                 }
             });
         } else {
-            this.setState({ eztv: { torrents: [] }});
+            this.setState({ eztv: {torrents: []}, loadingEpisodes: false });
         }
     }
 
@@ -126,7 +126,7 @@ class DetailsBackdrop extends Component {
                 });
             } else {
                 axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id).then(response => {
-                    const updated = { tmdbData: response.data, loadingEpisodes: true };
+                    const updated = { tmdbData: response.data, loadingEpisodes: type === 'shows' };
                     if (type === 'shows') updated.moreData = response.data;
 
                     this.setState(updated);
@@ -199,7 +199,7 @@ class DetailsBackdrop extends Component {
 
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
-            width, files } = this.props;
+            files, status } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen, loadingEpisodes } = this.state;
         
         if (!media) return null;
@@ -213,24 +213,18 @@ class DetailsBackdrop extends Component {
         const fileExists = hasFile(media, files);
 
         const trailerOpts = {
-            playerVars: { // https://developers.google.com/youtube/player_parameters
+            // https://developers.google.com/youtube/player_parameters
+            playerVars: {
                 autoplay: 1,
-                // fs: 0,
                 modestbranding: 1
             }
         };
 
-        let recommendations;
-        if (tmdbData && tmdbData.recommendations && tmdbData.recommendations.results) {
-            const results = tmdbData.recommendations.results;
-            // only show groups of three
-            if (results.length > 3) recommendations = results.slice(0, Math.floor(results.length / 3) * 3);
-        }
+        let recommendations = tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;
 
         return (
             <Modal
                 open={media !== null}
-                center={width > 800}
                 modalId={'modalFullscreen'}
                 overlayId='overlay'
                 onClose={onCloseModal}
@@ -407,12 +401,12 @@ class DetailsBackdrop extends Component {
                                             const recommendation = parseMedia(r, 'movies');
 
                                             return <div key={r.id} className="item" onClick={() => {
-                                                this.setState({tmdbData: null, moreData: null}, () => {
+                                                this.setState(this.getDefaultState(), () => {
                                                     onOpenModal(recommendation);
                                                 });
                                             }}>
                                                 <img src={r.poster_path} alt="cover"/>
-                                                <div className="title">{r.original_title}</div>
+                                                <div className="title">{r.title}</div>
                                             </div>
                                         })}
                                     </div>

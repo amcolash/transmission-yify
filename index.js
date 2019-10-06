@@ -21,6 +21,7 @@ const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9000;
 const DATA = (IS_DOCKER ? '/data' : process.env.DATA_DIR);
 const CACHE_FILE = DATA + '/cache.json';
+const SUBSCRIPTION_FILE = DATA + '/subscriptions.json';
 const interval = 2000;
 
 let currentTorrents = [];
@@ -30,7 +31,8 @@ let prevStatus;
 let currentStatus = {
     buildTime: 'Dev Build',
     isDocker: IS_DOCKER,
-    plex: process.env.PLEX_SERVER
+    plex: process.env.PLEX_SERVER,
+    subscriptions: {}
 };
 
 let cache = {};
@@ -116,9 +118,19 @@ try {
     // Setup cache
     try {
         if (fs.existsSync(CACHE_FILE)) cache = require(CACHE_FILE);
+        else writeCache();
     } catch (err) {
         console.error(err);
         writeCache();
+    }
+
+    // Setup subscription file
+    try {
+        if (fs.existsSync(SUBSCRIPTION_FILE)) currentStatus.subscriptions = require(SUBSCRIPTION_FILE);
+        else writeSubscriptions();
+    } catch (err) {
+        console.error(err);
+        writeSubscriptions();
     }
 
     server.listen(PORT);
@@ -143,8 +155,9 @@ app.get('/omdb/:id', function(req, res) {
 });
 
 app.get('/tmdbid/:type/:id', function(req, res) {
-    let url = 'https://api.themoviedb.org/3/' + req.params.type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
-        '&append_to_response=external_ids,videos,recommendations';
+    const type = req.params.type;
+    let url = 'https://api.themoviedb.org/3/' + type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
+        '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
     checkCache(url, res, true);
 });
 
@@ -309,6 +322,20 @@ app.post('/upgrade', function (req, res) {
     }
 });
 
+app.post('/subscriptions', function (req, res) {
+    res.sendStatus(200);
+    subscribe(req.query.id);
+});
+
+app.delete('/subscriptions', function(req, res) {
+    res.sendStatus(200);
+
+    if (currentStatus.subscriptions[req.query.id]) {
+        delete currentStatus.subscriptions[req.query.id];
+        writeSubscriptions();
+    }
+});
+
 io.on('connection', client => {
     client.on('subscribe', data => {
         client.join(data);
@@ -354,6 +381,12 @@ function writeCache() {
     });
 }
 
+function writeSubscriptions() {
+    fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(currentStatus.subscriptions), (err) => {
+        if (err) console.error(err);
+    });
+}
+
 function checkTrackerCache(url, res) {
     if (trackerCache[url]) {
         if (res) {
@@ -385,6 +418,12 @@ function handleResponse(res, err, data) {
     } else {
         res.send(data);
     }
+}
+
+function subscribe(id) {
+    console.log('subscribing to ' + id);
+    currentStatus.subscriptions[id] = true;
+    writeSubscriptions();
 }
 
 function searchPirateBay(query, page, filter, endpoint) {

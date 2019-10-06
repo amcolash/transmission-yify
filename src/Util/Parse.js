@@ -173,10 +173,16 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
             mpaa = "NR";
         }
     }
+
+    if (tmdbData && tmdbData.content_ratings) {
+        tmdbData.content_ratings.results.forEach(r => {
+            if (r.iso_3166_1 === 'US') mpaa = r.rating;
+        });
+    }
     
     let header;
     if (type === 'movies') header = `${media.year}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
-    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year} ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year}, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
     
     const plot = (moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
     moreData.overview : (media.synopsis ? media.synopsis : ""));
@@ -245,7 +251,7 @@ export function parseMedia(media, type) {
     // only try to do fancy stuff if not a standard year
     if (media.year && !media.year.toString().match(/^\d{4}$/)) media.year = new Date(media.year).getFullYear();
 
-    media.title = media.title || media.name || '?';
+    media.title = media.title || media.name || media.original_title || '?';
     media.title = media.title.replace(/&amp;/g, '&');
     
     // TMDB does not add an absolute url to returned poster paths

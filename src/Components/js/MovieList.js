@@ -35,10 +35,10 @@ class MovieList extends Component {
             media: null,
             torrents: [],
             started: [],
-            search: '',
+            search: 'lost',
             genre: '',
             order: '',
-            type: 'movies',
+            type: 'shows',
             isSearching: false,
             status: null,
             width: 0,
@@ -346,7 +346,7 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, results, media, page, torrents, started, width, status, scroll, type, search } = this.state;
+        const { error, isLoaded, results, media, page, torrents, started, status, scroll, type, search } = this.state;
 
         const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
@@ -379,7 +379,6 @@ class MovieList extends Component {
                     <DetailsBackdrop
                         media={media}
                         type={type}
-                        width={width}
                         server={this.server}
                         torrents={torrents}
                         started={started}
@@ -391,6 +390,7 @@ class MovieList extends Component {
                         onOpenModal={this.onOpenModal}
                         onCloseModal={this.onCloseModal}
                         files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                        status={status}
                     />
             
                     {status && status.ip && status.ip.city === "Seattle" ? (
