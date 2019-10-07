@@ -144,6 +144,10 @@ class DetailsBackdrop extends Component {
                             })
                         });
                         
+                        if (!response.data.external_ids || !response.data.external_ids.imdb_id) {
+                            this.setState({ eztv: {torrents: []}, loadingEpisodes: false });
+                            return;
+                        }
                         const imdb = response.data.external_ids.imdb_id.replace('tt', '');
                         this.getEztv(imdb, 1);
                     } else {

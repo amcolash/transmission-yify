@@ -64,7 +64,7 @@ export function getSeasons(type, maxSeason, moreData) {
     if (type === 'shows' || type === 'animes') {
         if (type === 'shows') {
             for (let i = 1; i < maxSeason + 1; i++) {
-                if (moreData && i <= moreData.seasons.length) seasons.push(i);
+                if (moreData && moreData.seasons && i <= moreData.seasons.length) seasons.push(i);
             }
         } else {
             seasons.push(1);
