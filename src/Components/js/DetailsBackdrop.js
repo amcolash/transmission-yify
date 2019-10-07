@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaDownload, FaPlayCircle, FaTimes, FaYoutube } from 'react-icons/fa';
+import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -21,7 +21,7 @@ class DetailsBackdrop extends Component {
 
     getDefaultState() {
         return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
-            trailerFullscreen: false, loadingEpisodes: false};
+            trailerFullscreen: false, loadingEpisodes: false, subscribing: false};
     }
 
     getEztv(imdb, page) {
@@ -197,10 +197,33 @@ class DetailsBackdrop extends Component {
         });
     }
 
+    toggleSubscription() {
+        this.setState({subscribing: true});
+
+        const status = this.props.status;
+        const details = getDetails(this.props.media, this.state.moreData, this.state.tmdbData, 'shows');
+
+        // Not too happy about the fake timeouts, but it will do for now...
+        if (status.subscriptions[details.imdb]) {
+            axios.delete(`${this.props.server}/subscriptions?id=${details.imdb}`).catch(err => {
+                console.error(err)
+            }).finally(() => {
+                setTimeout(() => this.setState({subscribing: false}), 2000);
+            });
+        } else {
+            axios.post(`${this.props.server}/subscriptions?id=${details.imdb}`).catch(err => {
+                console.error(err)
+            }).finally(() => {
+                setTimeout(() => this.setState({subscribing: false}), 2000);
+            });
+        }
+    }
+
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
-        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen, loadingEpisodes } = this.state;
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen, loadingEpisodes,
+            subscribing } = this.state;
         
         if (!media) return null;
 
@@ -252,7 +275,13 @@ class DetailsBackdrop extends Component {
                     ) : null}
                     <div className="left">
                         <div className="info">
-                            <h3>{media.title}</h3>
+                            <h3>{media.title}{status && status.subscriptions ? (subscribing ?
+                                <span className="subscription"><Spinner visible/></span> :
+                                <FaRssSquare
+                                    className={`subscription ${status.subscriptions[details.imdb] ? 'orange': 'gray'}`}
+                                    onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
+                                />) : null}
+                            </h3>
                             <h4>
                                 <Fragment>
                                     <span>{details.header}</span>

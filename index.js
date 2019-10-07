@@ -12,6 +12,7 @@ const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
 const PlexAPI = require("plex-api");
+const ptn = require('parse-torrent-name');
 
 require('dotenv').config();
 
@@ -27,7 +28,7 @@ const interval = 2000;
 let currentTorrents = [];
 let currentFiles = [];
 
-let prevStatus;
+let prevStatus = {};
 let currentStatus = {
     buildTime: 'Dev Build',
     isDocker: IS_DOCKER,
@@ -276,7 +277,7 @@ app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.para
 
 app.post('/torrents', function (req, res) {
     if (req.body.tv) {
-        transmission.addUrl(req.body.url, { 'download-dir': '/TV' }, (err, data) => handleResponse(res, err, data));
+        transmission.addUrl(req.body.url, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => handleResponse(res, err, data));
     } else {
         transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data));
     }
@@ -323,16 +324,27 @@ app.post('/upgrade', function (req, res) {
 });
 
 app.post('/subscriptions', function (req, res) {
+    const id = req.query.id;
+
+    if (currentStatus.subscriptions[id]) {
+        res.sendStatus(403);
+        return;
+    }
+
     res.sendStatus(200);
-    subscribe(req.query.id);
+    console.log('subscribing to ' + id);
+    downloadSubscription(id, true);
 });
 
 app.delete('/subscriptions', function(req, res) {
-    res.sendStatus(200);
-
-    if (currentStatus.subscriptions[req.query.id]) {
+    const id = req.query.id;
+    if (currentStatus.subscriptions[id]) {
+        res.sendStatus(200);
+        console.log('unsubscribing from ' + id);
         delete currentStatus.subscriptions[req.query.id];
         writeSubscriptions();
+    } else {
+        res.sendStatus(404);
     }
 });
 
@@ -420,10 +432,79 @@ function handleResponse(res, err, data) {
     }
 }
 
-function subscribe(id) {
-    console.log('subscribing to ' + id);
-    currentStatus.subscriptions[id] = true;
-    writeSubscriptions();
+function downloadSubscription(id, onlyLast) {
+    axios.get(`https://eztv.io/api/get-torrents?imdb_id=${id}`).then(res => {
+        const torrents = res.data.torrents;
+        
+        // Generate a list of all episodes from the query
+        let episodes = [];
+        torrents.forEach(t => {
+            const parsed = ptn(t.filename);
+            const episode = t.episode || parsed.episode;
+            const season = t.season || parsed.season;
+            if (!episode || !season) return;
+
+            t.episode = Number.parseInt(episode);
+            t.season = Number.parseInt(season);
+
+            episodes[season] = episodes[season] || [];
+
+            if (!episodes[season][episode]) episodes[season][episode] = t;
+            else {
+                const existing = episodes[season][episode];
+                const parsedExisting = ptn(existing.filename);
+
+                if (t.seeds > existing.seeds || Number.parseInt(parsed.resolution) > Number.parseInt(parsedExisting.resolution)) {
+                    episodes[season][episode] = t;
+                }
+            }
+        });
+
+        // Get the current subscription status
+        let subscription = currentStatus.subscriptions[id];
+        if (!subscription) subscription = {
+            lastSeason: 0,
+            lastEpisode: 0
+        };
+
+        // Filter out non-relevant episodes as needed
+        const lastSeason = episodes[episodes.length-1];
+        const lastEpisode = lastSeason[lastSeason.length-1];
+        if (onlyLast) {
+            episodes = [lastEpisode];
+        } else {
+            const lastValue = subscription.lastSeason * 99 + subscription.lastEpisode;
+
+            const tmp = [];
+            episodes = episodes.forEach(season => {
+                if (season) {
+                    season.forEach(episode => {
+                        if (episode.season * 99 + episode.episode > lastValue) tmp.push(episode);
+                    });
+                }
+            });
+            episodes = tmp;
+        }
+
+        console.log('need to get ' + episodes.length + ' new files')
+
+        // Download each torrent
+        episodes.forEach(e => {
+            console.log('Downloading new subscribed file: ' + e.filename);
+            transmission.addUrl(e.magnet_url, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
+                if (err) console.error(err);
+            });
+        });
+
+        // Update subscription
+        currentStatus.subscriptions[id] = {
+            lastSeason: lastEpisode.season,
+            lastEpisode: lastEpisode.episode
+        };
+        writeSubscriptions();
+    }).catch(err => {
+        console.error(err);
+    });
 }
 
 function searchPirateBay(query, page, filter, endpoint) {
@@ -584,10 +665,11 @@ function setIntervalImmediately(func, interval) {
 function initSocketDataWatchers() {
     setIntervalImmediately(() => {
         if (JSON.stringify(currentStatus) !== JSON.stringify(prevStatus)) {
-            prevStatus = {...currentStatus};
+            // Do a copy via stringify/parse since we are modifying objects with subscriptions
+            prevStatus = JSON.parse(JSON.stringify(currentStatus));
             io.sockets.in('status').emit('status', currentStatus);
         }
-    }, interval * 3);
+    }, interval);
 
     // TODO: Give a few failed attempts before killing UI because we cannot connect to transmission
     setIntervalImmediately(() => transmission.get((err, data) => {
@@ -661,4 +743,12 @@ function initStatusWatchers() {
             currentStatus.cacheUsage = 'unknown';
         }
     }, interval * 30);
+
+    // Check subscriptions every hour
+    setIntervalImmediately(() => {
+        Object.keys(currentStatus.subscriptions).forEach(key => {
+            console.log(`checking ${key} for new files, current: ${JSON.stringify(currentStatus.subscriptions[key])}`);
+            downloadSubscription(key, false);
+        });
+    }, interval * 30 * 60);
 }

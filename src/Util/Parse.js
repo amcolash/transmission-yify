@@ -210,6 +210,9 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
         });
     }
 
+    let imdb;
+    if (moreData && moreData.external_ids && moreData.external_ids.imdb_id) imdb = moreData.external_ids.imdb_id.replace('tt', '');
+
     return {
         mpaa,
         genres,
@@ -217,7 +220,8 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
         plot,
         director,
         writers,
-        trailer
+        trailer,
+        imdb
     };
 }
 

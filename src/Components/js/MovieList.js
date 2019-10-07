@@ -35,7 +35,7 @@ class MovieList extends Component {
             media: null,
             torrents: [],
             started: [],
-            search: 'lost',
+            search: '',
             genre: '',
             order: '',
             type: 'shows',

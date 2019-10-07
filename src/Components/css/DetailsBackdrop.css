@@ -38,6 +38,18 @@
   font-size: 1.25em;
 }
 
+#modalFullscreen .subscription .spinner {
+  width: 0.5em;
+  height: 0.5em;
+  margin: 0.05em 0 0 0.1em;
+}
+
+#modalFullscreen .subscription {
+  padding-left: 0.2em;
+  vertical-align: text-top;
+  cursor: pointer;
+}
+
 #modalFullscreen .coverWrap {
   max-height: 350px;
   display: flex;
