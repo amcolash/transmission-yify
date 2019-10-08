@@ -9,11 +9,12 @@ import {
 import '../css/MovieList.css';
 import Cover from './Cover';
 import Spinner from './Spinner';
+import Logo from './Logo';
 import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
 import Plex from './Plex';
 import Search from './Search';
-import Beta from './Beta';
+// import Beta from './Beta';
 import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
@@ -29,6 +30,7 @@ class MovieList extends Component {
 
         this.state = {
             error: null,
+            showLogo: true,
             isLoaded: false,
             results: [],
             page: 1,
@@ -58,6 +60,9 @@ class MovieList extends Component {
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
+
+        // After the initial logo, hide it and go back to loading
+        setTimeout(() => this.setState({showLogo: false}), 3550);
     }
     
     componentDidMount() {
@@ -346,7 +351,7 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, results, media, page, torrents, started, status, scroll, type, search } = this.state;
+        const { error, isLoaded, showLogo, results, media, page, torrents, started, status, scroll, type, search } = this.state;
 
         const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
         const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
@@ -362,19 +367,23 @@ class MovieList extends Component {
                     ) : <span>Error: {error.message}</span>}
                 </div>
             );
-        } else if (!isLoaded) {
-            return (
-            <div className="message">
-                <span>Loading...
-                    <Spinner visible/>
-                </span>
-            </div>
-            );
+        } else if (showLogo || !isLoaded) {
+            if (showLogo) {
+                return <Logo/>;
+            } else {
+                return (
+                    <div className="message">
+                        <span>Loading...
+                            <Spinner visible/>
+                        </span>
+                    </div>
+                );
+            }
         } else {
             return (
                 <Fragment>
                     {status ? <Plex plexServer={status.plex}/> : null}
-                    {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null}
+                    {/* {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null} */}
 
                     <DetailsBackdrop
                         media={media}

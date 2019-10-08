@@ -1,0 +1,81 @@
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.logo {
+  width: 55vw;
+  height: 55vh;
+  transform: scale(0);
+  animation: 3.5s scaleLogo forwards;
+}
+
+@keyframes scaleLogo {
+  25% {
+    transform: scale(1.15);
+  }
+  28% {
+    transform: scale(1);
+  }
+  90% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+.logo path {
+  stroke-dasharray: 0;
+  stroke-dashoffset: 0;
+  stroke: transparent;
+  stroke-width: 1px;
+  fill: transparent;
+  animation: 3s logoAnim forwards;
+}
+
+@keyframes logoAnim {
+  20% {
+    stroke: white;
+  }
+  50% {
+    fill: transparent;
+    stroke-width: 3px;
+    stroke: #444;
+  }
+  80% {
+    stroke-width: 0;
+    stroke-dashoffset: 500;
+    stroke-dasharray: 1000;
+  }
+  100% {
+    stroke: transparent;
+    fill: #444;
+  }
+}
+
+.logo circle {
+  fill: transparent;
+  stroke: #999;
+  stroke-width: 0;
+  animation: 3s circleFade forwards;
+}
+
+@keyframes circleFade {
+  20% {
+    stroke-width: 0;
+  }
+  30% {
+    stroke-width: 1px;
+    fill: transparent;
+  }
+  50% {
+    fill: #64dd17;
+  }
+  100% {
+    fill: #64dd17;
+  }
+}
