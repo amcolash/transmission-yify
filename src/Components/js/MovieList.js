@@ -456,6 +456,7 @@ class MovieList extends Component {
                                             getProgress={this.getProgress}
                                             server={this.server}
                                             files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                            status={status}
                                         />
                                     ))}
                                 </div>

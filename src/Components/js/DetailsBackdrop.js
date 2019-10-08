@@ -9,7 +9,7 @@ import Version from './Version';
 import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
-import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, parseMedia } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, hasSubscription, parseMedia } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
@@ -201,11 +201,6 @@ class DetailsBackdrop extends Component {
         });
     }
 
-    findSubscription(id) {
-        const matched = this.props.status.subscriptions.filter(s => s.id === id);
-        return matched.length === 1 ? matched[0] : undefined;
-    }
-
     toggleSubscription() {
         this.setState({subscribing: true});
 
@@ -213,7 +208,7 @@ class DetailsBackdrop extends Component {
         const details = getDetails(media, this.state.moreData, this.state.tmdbData, 'shows');
 
         // Not too happy about the fake timeouts, but it will do for now...
-        if (this.findSubscription(media.id)) {
+        if (hasSubscription(media.id, this.props.status.subscriptions)) {
             axios.delete(`${this.props.server}/subscriptions?id=${media.id}&imdb=tt${details.imdb}`).catch(err => {
                 console.error(err)
             }).finally(() => {
@@ -287,7 +282,7 @@ class DetailsBackdrop extends Component {
                             <h3>{media.title}{type !== 'movies' && status && status.subscriptions ? (subscribing ?
                                 <span className="subscription"><Spinner visible/></span> :
                                 <FaRssSquare
-                                    className={`subscription ${this.findSubscription(media.id) ? 'orange': 'gray'}`}
+                                    className={`subscription ${hasSubscription(media.id, this.props.status.subscriptions) ? 'orange': 'gray'}`}
                                     onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
                                 />) : null}
                             </h3>

@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from 'react';
-import { FaFilm, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash } from 'react-icons/fa';
+import { FaFilm, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash, FaRssSquare } from 'react-icons/fa';
 import axios from 'axios';
 import ScrollReveal from '../../Util/ScrollReveal';
 
 import '../css/Cover.css';
-import {getMovies, hasFile} from '../../Util/Parse';
+import {getMovies, hasFile, hasSubscription} from '../../Util/Parse';
 import Spinner from './Spinner';
 import Cache from '../../Util/Cache';
 
@@ -83,12 +83,13 @@ class Cover extends Component {
     }
 
     render() {
-        const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress } = this.props;
+        const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status } = this.props;
         const pb = this.state.pb;
 
         if (!media.poster_path) media.poster_path = "broken image";
 
         const fileExists = hasFile(media, files);
+        const subscription = status ? hasSubscription(media.id, status.subscriptions) : null;
     
         let versions = [];
         if (pb) {
@@ -108,8 +109,13 @@ class Cover extends Component {
                         <FaFilm />
                     </div>
                     {fileExists ? (
-                        <div className="fileExists">
+                        <div className="fileExists hover">
                             <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }} />
+                        </div>
+                    ) : null}
+                    {subscription ? (
+                        <div className="fileExists">
+                            <FaRssSquare />
                         </div>
                     ) : null}
                     {type === 'movies' ? (

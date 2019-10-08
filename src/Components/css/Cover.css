@@ -73,7 +73,7 @@
     cursor: pointer;
 }
 
-.fileExists:hover {
+.fileExists.hover:hover {
     box-shadow: 0px 0px 15px 15px rgba(229,160,13,0.9);
 }
 

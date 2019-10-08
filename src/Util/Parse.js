@@ -240,6 +240,11 @@ export function hasFile(media, files) {
     return false;
 }
 
+export function hasSubscription(id, subscriptions) {
+    const matched = subscriptions.filter(s => s.id === id);
+    return matched.length === 1 ? matched[0] : undefined;
+}
+
 export function parseMedia(media, type) {
     // used for anime
     const attributes = media.attributes;
