@@ -48,14 +48,18 @@
   padding-left: 0.2em;
   vertical-align: text-top;
   cursor: pointer;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, .75));
 }
 
 #modalFullscreen .coverWrap {
   max-height: 350px;
   display: flex;
-  flex: 3;
+  flex: 4;
   position: relative;
   overflow: hidden;
+  padding: 1em;
+  margin-left: -1em;
+  margin-bottom: -1em;
 }
 
 #modalFullscreen .coverInner {
@@ -70,8 +74,9 @@
 }
 
 #modalFullscreen .coverWrap .fileExists  {
+  bottom: 1em;
+  left: 1em;
   border: solid 1px #888;
-  bottom: -2px;
   border-bottom-left-radius: 3px;
 }
 
