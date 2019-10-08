@@ -201,21 +201,26 @@ class DetailsBackdrop extends Component {
         });
     }
 
+    findSubscription(id) {
+        const matched = this.props.status.subscriptions.filter(s => s.id === id);
+        return matched.length === 1 ? matched[0] : undefined;
+    }
+
     toggleSubscription() {
         this.setState({subscribing: true});
 
-        const status = this.props.status;
-        const details = getDetails(this.props.media, this.state.moreData, this.state.tmdbData, 'shows');
+        const media = this.props.media;
+        const details = getDetails(media, this.state.moreData, this.state.tmdbData, 'shows');
 
         // Not too happy about the fake timeouts, but it will do for now...
-        if (status.subscriptions[details.imdb]) {
-            axios.delete(`${this.props.server}/subscriptions?id=${details.imdb}`).catch(err => {
+        if (this.findSubscription(media.id)) {
+            axios.delete(`${this.props.server}/subscriptions?id=${media.id}&imdb=tt${details.imdb}`).catch(err => {
                 console.error(err)
             }).finally(() => {
                 setTimeout(() => this.setState({subscribing: false}), 2000);
             });
         } else {
-            axios.post(`${this.props.server}/subscriptions?id=${details.imdb}`).catch(err => {
+            axios.post(`${this.props.server}/subscriptions?id=${media.id}&imdb=tt${details.imdb}`).catch(err => {
                 console.error(err)
             }).finally(() => {
                 setTimeout(() => this.setState({subscribing: false}), 2000);
@@ -279,10 +284,10 @@ class DetailsBackdrop extends Component {
                     ) : null}
                     <div className="left">
                         <div className="info">
-                            <h3>{media.title}{status && status.subscriptions ? (subscribing ?
+                            <h3>{media.title}{type !== 'movies' && status && status.subscriptions ? (subscribing ?
                                 <span className="subscription"><Spinner visible/></span> :
                                 <FaRssSquare
-                                    className={`subscription ${status.subscriptions[details.imdb] ? 'orange': 'gray'}`}
+                                    className={`subscription ${this.findSubscription(media.id) ? 'orange': 'gray'}`}
                                     onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
                                 />) : null}
                             </h3>

@@ -33,7 +33,7 @@ let currentStatus = {
     buildTime: 'Dev Build',
     isDocker: IS_DOCKER,
     plex: process.env.PLEX_SERVER,
-    subscriptions: {}
+    subscriptions: []
 };
 
 let cache = {};
@@ -324,24 +324,27 @@ app.post('/upgrade', function (req, res) {
 });
 
 app.post('/subscriptions', function (req, res) {
-    const id = req.query.id;
+    const id = Number.parseInt(req.query.id);
+    const imdb = req.query.imdb;
 
-    if (currentStatus.subscriptions[id]) {
+    const matched = findSubscription(id);
+    if (matched) {
         res.sendStatus(403);
         return;
     }
 
     res.sendStatus(200);
     console.log('subscribing to ' + id);
-    downloadSubscription(id, true);
+    downloadSubscription(id, imdb, true);
 });
 
 app.delete('/subscriptions', function(req, res) {
-    const id = req.query.id;
-    if (currentStatus.subscriptions[id]) {
+    const id = Number.parseInt(req.query.id);
+    const matched = findSubscription(id);
+    if (matched) {
         res.sendStatus(200);
         console.log('unsubscribing from ' + id);
-        delete currentStatus.subscriptions[req.query.id];
+        currentStatus.subscriptions = currentStatus.subscriptions.filter(s => s.id !== id);
         writeSubscriptions();
     } else {
         res.sendStatus(404);
@@ -432,8 +435,13 @@ function handleResponse(res, err, data) {
     }
 }
 
-function downloadSubscription(id, onlyLast) {
-    axios.get(`https://eztv.io/api/get-torrents?imdb_id=${id}`).then(res => {
+function findSubscription(id) {
+    const matched = currentStatus.subscriptions.filter(s => s.id === id);
+    return matched.length === 1 ? matched[0] : undefined;
+}
+
+function downloadSubscription(id, imdb, onlyLast) {
+    axios.get(`https://eztv.io/api/get-torrents?imdb_id=${imdb.replace('tt','')}`).then(res => {
         const torrents = res.data.torrents;
         
         // Generate a list of all episodes from the query
@@ -461,11 +469,19 @@ function downloadSubscription(id, onlyLast) {
         });
 
         // Get the current subscription status
-        let subscription = currentStatus.subscriptions[id];
-        if (!subscription) subscription = {
-            lastSeason: 0,
-            lastEpisode: 0
-        };
+        const matched = findSubscription(id);
+        let subscription;
+        if (matched) {
+            subscription = matched;
+        } else {
+            subscription = {
+                id,
+                imdb,
+                lastSeason: 0,
+                lastEpisode: 0
+            };
+            currentStatus.subscriptions.push(subscription);
+        }
 
         // Filter out non-relevant episodes as needed
         const lastSeason = episodes[episodes.length-1];
@@ -486,7 +502,7 @@ function downloadSubscription(id, onlyLast) {
             episodes = tmp;
         }
 
-        console.log('need to get ' + episodes.length + ' new files')
+        if (episodes.length > 0) console.log('need to get ' + episodes.length + ' new files')
 
         // Download each torrent
         episodes.forEach(e => {
@@ -497,10 +513,8 @@ function downloadSubscription(id, onlyLast) {
         });
 
         // Update subscription
-        currentStatus.subscriptions[id] = {
-            lastSeason: lastEpisode.season,
-            lastEpisode: lastEpisode.episode
-        };
+        subscription.lastSeason = lastEpisode.season;
+        subscription.lastEpisode = lastEpisode.episode;
         writeSubscriptions();
     }).catch(err => {
         console.error(err);
@@ -746,9 +760,9 @@ function initStatusWatchers() {
 
     // Check subscriptions every hour
     setIntervalImmediately(() => {
-        Object.keys(currentStatus.subscriptions).forEach(key => {
-            console.log(`checking ${key} for new files, current: ${JSON.stringify(currentStatus.subscriptions[key])}`);
-            downloadSubscription(key, false);
+        currentStatus.subscriptions.forEach(subscription => {
+            // console.log(`checking for new files, current: ${JSON.stringify(subscription)}`);
+            downloadSubscription(subscription.id, subscription.imdb, false);
         });
     }, interval * 30 * 60);
 }
