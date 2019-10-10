@@ -157,8 +157,8 @@ app.get('/omdb/:id', function(req, res) {
 
 app.get('/tmdbid/:type/:id', function(req, res) {
     const type = req.params.type;
-    let url = 'https://api.themoviedb.org/3/' + type + '/' + req.params.id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
-        '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
+    const id = req.params.id;
+    const url = getTMDBUrl(id, type);
     checkCache(url, res, true);
 });
 
@@ -325,7 +325,6 @@ app.post('/upgrade', function (req, res) {
 
 app.post('/subscriptions', function (req, res) {
     const id = Number.parseInt(req.query.id);
-    const imdb = req.query.imdb;
 
     const matched = findSubscription(id);
     if (matched) {
@@ -335,7 +334,7 @@ app.post('/subscriptions', function (req, res) {
 
     res.sendStatus(200);
     console.log('subscribing to ' + id);
-    downloadSubscription(id, imdb, true);
+    downloadSubscription(id, true);
 });
 
 app.delete('/subscriptions', function(req, res) {
@@ -343,7 +342,7 @@ app.delete('/subscriptions', function(req, res) {
     const matched = findSubscription(id);
     if (matched) {
         res.sendStatus(200);
-        console.log('unsubscribing from ' + id);
+        console.log(`unsubscribing from ${matched.name} (${id})`);
         currentStatus.subscriptions = currentStatus.subscriptions.filter(s => s.id !== id);
         writeSubscriptions();
     } else {
@@ -360,6 +359,11 @@ io.on('connection', client => {
         if (data === 'files') client.emit('files', currentFiles);
     })
 });
+
+function getTMDBUrl(id, type) {
+    return 'https://api.themoviedb.org/3/' + type + '/' + id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
+        '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
+}
 
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
@@ -440,8 +444,48 @@ function findSubscription(id) {
     return matched.length === 1 ? matched[0] : undefined;
 }
 
-function downloadSubscription(id, imdb, onlyLast) {
-    axios.get(`https://eztv.io/api/get-torrents?imdb_id=${imdb.replace('tt','')}`).then(res => {
+async function downloadSubscription(id, onlyLast) {
+    // Get the current subscription status
+    const matched = findSubscription(id);
+    let subscription = matched || {};
+
+    // Always grab new data for the show
+    const url = getTMDBUrl(id, 'tv');
+    let data;
+    if (cache[url]) {
+        data = cache[url];
+    } else {
+        try {
+            const res = await axios.get(url);
+            data = res.data;
+        } catch (err) {
+            console.error(err);
+            return; // bail, things went wrong getting data
+        }
+    }
+
+    // handle things this way so that the data stored is upgraded on the fly, it modifies the existing object this way
+    subscription.id = id;
+    subscription.imdb = data.external_ids.imdb_id;
+    subscription.title = data.name;
+    subscription.year = new Date(data.first_air_date).getFullYear();
+    subscription.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + data.poster_path;
+
+    // Only update these if needed
+    subscription.lastSeason = subscription.lastSeason || 0;
+    subscription.lastEpisode = subscription.lastEpisode || 0;
+
+    // can't subscribe without an imdb id
+    if (!subscription.imdb) return;
+
+    // Add a new entry if it does not exist
+    if (!matched) currentStatus.subscriptions.push(subscription);
+
+    // write to file so we keep retrying if things fail below, also keep modified fields
+    writeSubscriptions();
+
+    // find the newest torrents for the show (last 50)
+    axios.get(`https://eztv.io/api/get-torrents?limit=50&imdb_id=${subscription.imdb.replace('tt','')}`).then(res => {
         const torrents = res.data.torrents;
         
         // Generate a list of all episodes from the query
@@ -468,21 +512,6 @@ function downloadSubscription(id, imdb, onlyLast) {
             }
         });
 
-        // Get the current subscription status
-        const matched = findSubscription(id);
-        let subscription;
-        if (matched) {
-            subscription = matched;
-        } else {
-            subscription = {
-                id,
-                imdb,
-                lastSeason: 0,
-                lastEpisode: 0
-            };
-            currentStatus.subscriptions.push(subscription);
-        }
-
         // Filter out non-relevant episodes as needed
         const lastSeason = episodes[episodes.length-1];
         const lastEpisode = lastSeason[lastSeason.length-1];
@@ -502,7 +531,7 @@ function downloadSubscription(id, imdb, onlyLast) {
             episodes = tmp;
         }
 
-        if (episodes.length > 0) console.log('need to get ' + episodes.length + ' new files')
+        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.name}`)
 
         // Download each torrent
         episodes.forEach(e => {
@@ -761,8 +790,7 @@ function initStatusWatchers() {
     // Check subscriptions every hour
     setIntervalImmediately(() => {
         currentStatus.subscriptions.forEach(subscription => {
-            // console.log(`checking for new files, current: ${JSON.stringify(subscription)}`);
-            downloadSubscription(subscription.id, subscription.imdb, false);
+            downloadSubscription(subscription.id, false);
         });
     }, interval * 30 * 60);
 }
