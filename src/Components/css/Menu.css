@@ -6,7 +6,6 @@
   top: 0;
   left: 0;
   height: calc(100vh - 1em - 0.2em);
-  max-height: calc(100vh - 1em - 0.2em);
   overflow-y: auto;
   z-index: 1;
   transform: none;
