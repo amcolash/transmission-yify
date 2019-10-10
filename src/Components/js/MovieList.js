@@ -2,9 +2,7 @@ import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import openSocket from 'socket.io-client';
 import levenshtein from 'js-levenshtein';
-import {
-    FaExclamationTriangle, FaMagnet, FaPowerOff
-} from 'react-icons/fa';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 import '../css/MovieList.css';
 import Cover from './Cover';
@@ -18,6 +16,7 @@ import Search from './Search';
 import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
+import Menu from './Menu';
 import Cache from '../../Util/Cache';
 import { parseMedia } from '../../Util/Parse';
 
@@ -58,6 +57,8 @@ class MovieList extends Component {
         this.getProgress = this.getProgress.bind(this);
         this.getTorrent = this.getTorrent.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+        this.upgrade = this.upgrade.bind(this);
+        this.addMagnet = this.addMagnet.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
 
@@ -351,10 +352,10 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, showLogo, results, media, page, torrents, started, status, scroll, type, search } = this.state;
+        const { error, isLoaded, showLogo, results, media, page, torrents, started, status, type, search } = this.state;
 
-        const pagerVisibility = page !== 1 || ((type === 'pirate' && results.torrents && results.torrents.length >= 30) || results.length >= 20);
-        const floatingPagerVisibility = (scroll < 0.97 && pagerVisibility);
+        // Make it a tiny bit quicker on local dev
+        const logo = status ? status.isDocker : showLogo;
 
         if (error) {
             return (
@@ -367,8 +368,8 @@ class MovieList extends Component {
                     ) : <span>Error: {error.message}</span>}
                 </div>
             );
-        } else if (showLogo || !isLoaded) {
-            if (showLogo) {
+        } else if (logo || !isLoaded) {
+            if (logo) {
                 return <Logo/>;
             } else {
                 return (
@@ -384,6 +385,13 @@ class MovieList extends Component {
                 <Fragment>
                     {status ? <Plex plexServer={status.plex}/> : null}
                     {/* {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null} */}
+                    <Menu
+                        type={type}
+                        upgrade={this.upgrade}
+                        addMagnet={this.addMagnet}
+                        updateSearch={this.updateSearch}
+                        status={status}
+                    />
 
                     <DetailsBackdrop
                         media={media}
@@ -473,34 +481,7 @@ class MovieList extends Component {
                         )}
                     </div>
 
-                    <Pager changePage={this.changePage} page={page} results={results} type={type}
-                        cls={"floating " + (floatingPagerVisibility ? "" : "hidden")}/>
-
-                    <Pager changePage={this.changePage} page={page} results={results} type={type}
-                        cls={pagerVisibility ? "" : "hidden"}/>
-
-                    <FaMagnet className="pointer" onClick={this.addMagnet}/>
-                    <FaPowerOff className="pointer marginLeft" onClick={this.upgrade}/>
-
-                    <div className="footer">
-                        {status ? (
-                            <Fragment>
-                                <hr/>
-
-                                {status && status.ip ? <p>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
-                                {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
-                                    <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
-                                ) : null}
-                                <p>
-                                    <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>
-                                    <progress value={status.storageUsage} max="100"/>
-                                </p>
-                                <p>
-                                    <span>Cache Size: {status.cacheUsage}</span>
-                                </p>
-                            </Fragment>
-                        ) : null}
-                    </div>
+                    <Pager changePage={this.changePage} page={page} results={results} type={type} cls="floating"/>
                 </Fragment>
             );
         }

@@ -33,18 +33,6 @@
     cursor: pointer;
 }
 
-.footer {
-    font-size: 0.85em;
-}
-
-.footer p {
-    margin: 0.75em;
-}
-
-.footer hr {
-    margin: 1em;
-}
-
 .marginLeft {
     margin-left: 1.25em;
 }

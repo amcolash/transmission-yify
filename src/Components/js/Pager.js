@@ -6,6 +6,9 @@ import '../css/Pager.css';
 class Pager extends Component {
     render() {
         const { changePage, page, results, cls, type } = this.props;
+
+        if (results.length === 0) return null;
+
         const visibleSingle = type === 'pirate' ? (page * results.limit < results.total) : results.length >= 20;
         const visibleMultiple = type === 'pirate' ? ((page + 4) * results.limit < results.total) : results.length >= 20;
 

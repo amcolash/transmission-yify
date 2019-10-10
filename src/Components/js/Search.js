@@ -76,16 +76,6 @@ class Search extends Component {
                         </select>
                     </div>
 
-                    <div className="searchItem">
-                        <span>Type</span>
-                        <select onChange={(event) => updateSearch('', '', '', event.target.value, 1)} value={type} >
-                            <option key="movies" value="movies">Movies</option>
-                            <option key="shows" value="shows">TV</option>
-                            <option key="animes" value="animes">Anime</option>
-                            <option key="pirate" value="pirate">PirateBay</option>
-                        </select>
-                    </div>
-
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
                 </div>
 
