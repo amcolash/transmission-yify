@@ -6,7 +6,7 @@ import '../css/Menu.css';
 class Menu extends Component {
   constructor(props) {
     super(props);
-    this.state = {visible: true};
+    this.state = {visible: false};
 
     this.outsideClick = this.outsideClick.bind(this);
   }

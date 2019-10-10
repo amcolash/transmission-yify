@@ -355,7 +355,7 @@ class MovieList extends Component {
         const { error, isLoaded, showLogo, results, media, page, torrents, started, status, type, search } = this.state;
 
         // Make it a tiny bit quicker on local dev
-        const logo = status ? status.isDocker : showLogo;
+        const logo = status ? (status.isDocker ? showLogo : false) : showLogo;
 
         if (error) {
             return (
