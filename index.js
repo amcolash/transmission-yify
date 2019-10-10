@@ -531,7 +531,7 @@ async function downloadSubscription(id, onlyLast) {
             episodes = tmp;
         }
 
-        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.name}`)
+        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`)
 
         // Download each torrent
         episodes.forEach(e => {
@@ -787,10 +787,12 @@ function initStatusWatchers() {
         }
     }, interval * 30);
 
-    // Check subscriptions every hour
-    setIntervalImmediately(() => {
-        currentStatus.subscriptions.forEach(subscription => {
-            downloadSubscription(subscription.id, false);
-        });
-    }, interval * 30 * 60);
+    // Check subscriptions every hour, wait a moment to set it up so that transmission has time to start
+    setTimeout(() => {
+        setIntervalImmediately(() => {
+            currentStatus.subscriptions.forEach(subscription => {
+                downloadSubscription(subscription.id, false);
+            });
+        }, interval * 30 * 60);
+    }, IS_DOCKER ? interval * 30 : interval * 5);
 }
