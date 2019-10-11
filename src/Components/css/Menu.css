@@ -2,12 +2,13 @@
   display: flex;
   align-items: flex-start;
   text-align: left;
-  position: absolute;
+  position: sticky;
   top: 0;
   left: 0;
+  width: 350px;
   height: calc(100vh - 1em - 0.2em);
   overflow-y: auto;
-  z-index: 1;
+  z-index: 2;
   transform: none;
   transition: all 0.5s;
   will-change: transform;
@@ -16,6 +17,7 @@
   padding: 0.5em;
   border: 0.1em solid #333;
   box-shadow: 0 0 1em black;
+  margin-bottom: -100vh;
 }
 
 .menu.hidden {
@@ -84,13 +86,24 @@
   margin-left: 0.5em;
 }
 
-.status {
+.menu .status {
   padding-top: 0.75em;
   margin-top: 0.5em;
   border-top: 2px solid #444;
 }
 
-.status p {
+.menu .status p {
   font-size: 0.65em;
   margin: 0;
+}
+
+.slider {
+  background: transparent;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100px;
+  height: 100vh;
+  margin-bottom: -100vh;
 }
