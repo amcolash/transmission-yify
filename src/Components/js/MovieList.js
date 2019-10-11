@@ -10,9 +10,7 @@ import Spinner from './Spinner';
 import Logo from './Logo';
 import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
-import Plex from './Plex';
 import Search from './Search';
-// import Beta from './Beta';
 import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
@@ -383,8 +381,6 @@ class MovieList extends Component {
         } else {
             return (
                 <Fragment>
-                    {status ? <Plex plexServer={status.plex}/> : null}
-                    {/* {(this.state.type === "shows" || this.state.type === "animes") ? <Beta/> : null} */}
                     <Menu
                         type={type}
                         upgrade={this.upgrade}
@@ -409,16 +405,6 @@ class MovieList extends Component {
                         files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                         status={status}
                     />
-            
-                    {status && status.ip && status.ip.city === "Seattle" ? (
-                        <div className="warning red">
-                            <div>
-                                <FaExclamationTriangle className="big"/>
-                                <span className="big">Server not secure</span>
-                            </div>
-                            <span>(Don't worry, your activity is still encrypted and untraceable. This is an admin message for Andrew)</span>
-                        </div>
-                    ) : null}
 
                     <TorrentList
                         torrents={torrents}

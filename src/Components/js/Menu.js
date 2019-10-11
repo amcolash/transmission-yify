@@ -1,7 +1,9 @@
 import React, { Component, Fragment } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff } from 'react-icons/fa';
+import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle } from 'react-icons/fa';
 
 import '../css/Menu.css';
+
+const plexIcon = <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path></svg>;
 
 class Menu extends Component {
   constructor(props) {
@@ -56,12 +58,16 @@ class Menu extends Component {
           <div className="toggleWrap">
             <span>Pirate Flix</span>
             <div className="spacer"></div>
-            <FaBars className="toggle" onClick={e => {e.stopPropagation(); this.setState({visible: !this.state.visible}); }}/>
+            <div className="toggle">
+              <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setState({visible: !this.state.visible}); }}/>
+              {status && status.ip && status.ip.city === "Seattle" ? <FaExclamationTriangle className="red warn"/> : null}
+            </div>
           </div>
           <div className={type === 'movies' ? 'selected item' : 'item'} onClick={() => this.selectItem('movies')}><FaFilm/><span>Movies</span></div>
           <div className={type === 'shows' ? 'selected item' : 'item'} onClick={() => this.selectItem('shows')}><FaTv/><span>TV Shows</span></div>
           <div className={type === 'animes' ? 'selected item' : 'item'} onClick={() => this.selectItem('animes')}><FaLaughBeam/><span>Anime</span></div>
           <div className={type === 'pirate' ? 'selected item' : 'item'} onClick={() => this.selectItem('pirate')}><FaSkullCrossbones/><span>Pirate Bay</span></div>
+          {status ? <div className="item" onClick={() => window.open(status.plex, '_blank')}>{plexIcon}<span>Plex</span></div> : null}
           {/* <div className={type === '' ? 'selected' : 'item'}><FaDownload/><span>Downloads</span></div> */}
           {/* <div className={type === '' ? 'selected' : 'item'}><FaRssSquare/><span>Subscriptions</span></div> */}
           <div className="spacer"></div>
@@ -70,7 +76,7 @@ class Menu extends Component {
 
           {status ? (
             <div className="status">
-              {status && status.ip ? <p>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
+              {status && status.ip ? <p className={status.ip.city === "Seattle" ? 'red' : ''}>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
               {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
                 <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
               ) : null}
