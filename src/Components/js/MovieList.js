@@ -2,7 +2,6 @@ import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import openSocket from 'socket.io-client';
 import levenshtein from 'js-levenshtein';
-import { FaExclamationTriangle } from 'react-icons/fa';
 
 import '../css/MovieList.css';
 import Cover from './Cover';
