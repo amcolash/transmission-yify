@@ -37,7 +37,7 @@ class Menu extends Component {
   }
 
   onTouchMove(e) {
-    if (e.targetTouches.length > 0 && Date.now() > this.touch + 200) {
+    if (e.targetTouches.length > 0 && Date.now() > this.touch + 500) {
       this.touch = Date.now();
       this.setState({visible: !this.state.visible});
     }
@@ -60,14 +60,15 @@ class Menu extends Component {
             <div className="spacer"></div>
             <div className="toggle">
               <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setState({visible: !this.state.visible}); }}/>
-              {status && status.ip && status.ip.city === "Seattle" ? <FaExclamationTriangle className="red warn"/> : null}
+              {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn"/> : null}
             </div>
           </div>
           <div className={type === 'movies' ? 'selected item' : 'item'} onClick={() => this.selectItem('movies')}><FaFilm/><span>Movies</span></div>
           <div className={type === 'shows' ? 'selected item' : 'item'} onClick={() => this.selectItem('shows')}><FaTv/><span>TV Shows</span></div>
           <div className={type === 'animes' ? 'selected item' : 'item'} onClick={() => this.selectItem('animes')}><FaLaughBeam/><span>Anime</span></div>
           <div className={type === 'pirate' ? 'selected item' : 'item'} onClick={() => this.selectItem('pirate')}><FaSkullCrossbones/><span>Pirate Bay</span></div>
-          {status ? <div className="item" onClick={() => window.open(status.plex, '_blank')}>{plexIcon}<span>Plex</span></div> : null}
+          <div className="item disabled"></div>
+          {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setState({visible: false}); }}>{plexIcon}<span>Plex</span></div> : null}
           {/* <div className={type === '' ? 'selected' : 'item'}><FaDownload/><span>Downloads</span></div> */}
           {/* <div className={type === '' ? 'selected' : 'item'}><FaRssSquare/><span>Subscriptions</span></div> */}
           <div className="spacer"></div>
@@ -76,7 +77,7 @@ class Menu extends Component {
 
           {status ? (
             <div className="status">
-              {status && status.ip ? <p className={status.ip.city === "Seattle" ? 'red' : ''}>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
+              {status && status.ip ? <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
               {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
                 <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
               ) : null}

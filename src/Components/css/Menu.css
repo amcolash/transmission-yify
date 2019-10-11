@@ -64,12 +64,13 @@
 }
 
 .menu.hidden .toggle {
-  transform: translateX(200%);
+  transform: translateX(175%);
 }
 
 .menu.menu.hidden .toggle .toggleButton {
   padding: 0.35em;
   border-radius: 0.1em;
+  transition: all 0.25s;
 }
 
 .menu.hidden .toggle .toggleButton:hover {
@@ -85,17 +86,22 @@
 
 .menu.hidden .toggle .warn {
   right: 1em;
+  pointer-events: none;
 }
 
 .menu .list .item {
   cursor: pointer;
 }
 
+.menu .list .item.disabled {
+  cursor: auto;
+}
+
 .menu .list .item.selected {
   background: #333;
 }
 
-.menu .list .item:not(.selected):hover {
+.menu .list .item:not(.selected):not(.disabled):hover {
   background: #555;
 }
 
