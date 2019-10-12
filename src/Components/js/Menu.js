@@ -11,21 +11,32 @@ class Menu extends Component {
     this.state = {visible: false};
 
     this.outsideClick = this.outsideClick.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
     this.touch = 0;
   }
 
   componentDidMount() {
     document.addEventListener('click', this.outsideClick, false);
+    document.addEventListener('touchmove', this.onTouchMove, false);
   }
 
   componentWillUnmount() {
     document.removeEventListener('click', this.outsideClick, false);
+    document.addEventListener('touchmove', this.onTouchMove, false);
   }
 
   outsideClick(e) {
     if (this.state.visible) {
       if (this.menu && this.menu.contains(e.target)) return;
       else this.setState({visible: false});
+    }
+  }
+
+  onTouchMove(e) {
+    if (e.targetTouches.length > 0 && Date.now() > this.touch + 500) {
+      console.log(e)
+      this.touch = Date.now();
+      this.setState({visible: !this.state.visible});
     }
   }
 
@@ -36,19 +47,11 @@ class Menu extends Component {
     setTimeout(() => this.props.updateSearch('', '', '', value, 1), 500);
   }
 
-  onTouchMove(e) {
-    if (e.targetTouches.length > 0 && Date.now() > this.touch + 500) {
-      this.touch = Date.now();
-      this.setState({visible: !this.state.visible});
-    }
-  }
-
   render() {
     const visible = this.state.visible;
     const { type, status, torrents } = this.props;
 
-    return <Fragment>
-      <div className="slider" onTouchMove={e => this.onTouchMove(e)}></div>
+    return (
       <div className={`menu ${visible ? '' : 'hidden'}`}
         ref={node => this.menu = node}
         onClick={() => this.setState({visible: false})}
@@ -69,8 +72,7 @@ class Menu extends Component {
           <div className={type === 'pirate' ? 'selected item' : 'item'} onClick={() => this.selectItem('pirate')}><FaSkullCrossbones/><span>Pirate Bay</span></div>
           <div className="item disabled"></div>
           <div className={(type === 'downloads' ? 'selected' : '') + ' item downloads'} onClick={() => this.selectItem('downloads')}>
-            {torrents.length > 0 ? <div className="counter">{torrents.length}</div> : null}
-            <FaDownload/><span>Downloads</span>
+            <FaDownload/><span>Downloads {torrents.length > 0 ? `(${torrents.length})` : ''}</span>
           </div>
           <div className={(type === 'subscriptions' ? 'selected' : '') + ' item'} onClick={() => this.selectItem('subscriptions')}><FaRssSquare/><span>Subscriptions</span></div>
           <div className="item disabled"></div>
@@ -81,13 +83,15 @@ class Menu extends Component {
 
           {status ? (
             <div className="status">
-              {status && status.ip ? <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>Server Location: {`${status.ip.city}, ${status.ip.country_name}`}</p> : null}
+              {status && status.ip ? <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>
+                Server Location: {`${status.ip.city}, ${status.ip.country_code}`}
+              </p> : null}
               {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
                 <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
               ) : null}
               <p>
                 <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>
-                <progress value={status.storageUsage} max="100"/>
+                {/* <progress value={status.storageUsage} max="100"/> */}
               </p>
               <p>
                 <span>Cache Size: {status.cacheUsage}</span>
@@ -96,7 +100,7 @@ class Menu extends Component {
           ) : null}
         </div>
       </div>
-    </Fragment>;
+    );
   }
 }
 

@@ -5,7 +5,8 @@
   position: sticky;
   top: 0;
   left: 0;
-  width: 350px;
+  width: 14em;
+  max-width: calc(100vw - 1em);
   height: calc(100vh - 1em - 0.2em);
   overflow-y: auto;
   z-index: 2;
@@ -115,18 +116,6 @@
   position: relative;
 }
 
-.menu .downloads .counter {
-  position: absolute;
-  padding: 0.2em 0.35em;
-  border-radius: 0.3em;
-  left: 0.15em;
-  top: 0.15em;
-  font-size: 0.7em;
-  font-family: 'Ubuntu', Arial, sans-serif;
-  background: greenyellow;
-  color: navy;
-}
-
 .menu .status {
   padding-top: 0.75em;
   margin-top: 0.5em;
@@ -134,17 +123,7 @@
 }
 
 .menu .status p {
-  font-size: 0.65em;
-  margin: 0;
-}
-
-.slider {
-  background: transparent;
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 100px;
-  height: 100vh;
-  margin-bottom: -100vh;
+  font-size: 0.85em;
+  margin: 0.5em 0;
+  line-height: 1em;
 }

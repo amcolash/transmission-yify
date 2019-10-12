@@ -17,7 +17,7 @@ class TorrentList extends Component {
 
         return (
             <div className="torrentList">
-                {torrents.length === 0 ? <h2>No Active Downloads</h2> : <h2>Downloads ( {sorted.length} )</h2>}
+                {torrents.length === 0 ? <h2>No Active Downloads</h2> : <h2>Downloads ({sorted.length})</h2>}
                 <div>
                     {(sorted.map(torrent => (
                         <Progress

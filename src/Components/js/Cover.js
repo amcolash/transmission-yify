@@ -120,7 +120,7 @@ class Cover extends Component {
                             <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }} />
                         </div>
                     ) : null}
-                    {type !== 'movies' ? (
+                    {type === 'shows' || type === 'subscriptions' ? (
                         <div className={'fileExists' + (subscription ? '' : ' notSubscribed')} onClick={e => {e.stopPropagation(); this.toggleSubscription(); }}>
                             {subscribing ? <Spinner visible noMargin button/> : <FaRssSquare/>}
                         </div>

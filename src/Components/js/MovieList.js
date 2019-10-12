@@ -456,7 +456,7 @@ class MovieList extends Component {
                         />
                     ) : type === 'subscriptions' ? (
                         <div className="movie-list">
-                            {results.length === 0 ? <h2>No Subscriptions</h2> : <h2>Subscriptions ( {results.length} )</h2>}
+                            {results.length === 0 ? <h2>No Subscriptions</h2> : <h2>Subscriptions ({results.length})</h2>}
                             <div>
                                 {results.map(media => (
                                     <Cover

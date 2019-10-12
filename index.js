@@ -755,7 +755,8 @@ function initStatusWatchers() {
     
             axios.get(`https://api.ipdata.co/${(ip ? ip.trim() : '')}?api-key=${process.env.IP_KEY}`).then(response => {
                 const data = response.data;
-                currentStatus.ip = { city: data.city, country_name: data.country_name };
+                currentStatus.ip = { city: data.city, country: data.country_name, country_code: data.country_code, region: data.region,
+                    region_code: data.region_code };
             }, error => {
                 console.error(error);
             });
