@@ -110,7 +110,7 @@ class DetailsBackdrop extends Component {
                     const data = response.data.data;
                     this.setState({
                         moreData: {
-                            CoverImage: data.attributes.coverImage.large,
+                            CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
                             Plot: data.attributes.synopsis,
                             Rated: data.attributes.rating,
                             Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
