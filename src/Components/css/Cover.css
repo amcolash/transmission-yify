@@ -6,7 +6,7 @@
     margin: 0.6em;
 }
 
-.movie:hover {
+.movie:not(.disabled):hover {
     cursor: pointer;
 }
 
@@ -31,7 +31,7 @@
     transform: scale(1);
 }
 
-.cover:hover {
+.movie:not(.disabled) .cover:hover {
     box-shadow: 0px 0px 12px 5px rgba(255,255,255,0.25);
     transform: scale(1.025);
 }
@@ -77,6 +77,11 @@
 
 .fileExists.hover:hover {
     box-shadow: 0px 0px 15px 15px rgba(229,160,13,0.9);
+}
+
+.notSubscribed {
+    background-color: #555;
+    color: #999;
 }
 
 .quality button {

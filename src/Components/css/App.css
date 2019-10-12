@@ -1,5 +1,8 @@
-/* Ubuntu Font */
+/* Poppins Font */
 @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+/* Ubuntu Font */
+@import url('https://fonts.googleapis.com/css?family=Ubuntu&display=swap');
 
 body {
     margin: 0;

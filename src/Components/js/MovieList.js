@@ -15,7 +15,7 @@ import Order from '../../Data/Order';
 import Pirate from './Pirate';
 import Menu from './Menu';
 import Cache from '../../Util/Cache';
-import { parseMedia } from '../../Util/Parse';
+import { parseMedia, hasSubscription } from '../../Util/Parse';
 
 const hashMapping = {};
 
@@ -27,7 +27,8 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                type: 'downloads'
+                type: 'subscriptions',
+                // search: 'saturday night live'
             };
         }
 
@@ -64,6 +65,7 @@ class MovieList extends Component {
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.upgrade = this.upgrade.bind(this);
         this.addMagnet = this.addMagnet.bind(this);
+        this.toggleSubscription = this.toggleSubscription.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
 
@@ -95,7 +97,13 @@ class MovieList extends Component {
         });
 
         socket.on('status', data => {
-            if (data) this.setState({status: data});
+            if (data) {
+                if (this.state.type === 'subscriptions') {
+                    this.setState({status: data, results: data.subscriptions});
+                } else {
+                    this.setState({status: data});
+                }
+            }
         });
 
         socket.on('files', data => {
@@ -198,10 +206,11 @@ class MovieList extends Component {
             }
             // use all so that we do not filter here
             ENDPOINT = `${this.server}/pirate/${search}?all=true&page=${page}`;
-        } else if (type === 'downloads') {
+        } else if (type === 'subscriptions' || type === 'downloads') {
             this.setState({
                 isLoaded: true,
-                isSearching: false
+                isSearching: false,
+                results: this.state.status ? this.state.status.subscriptions : []
             });
             return;
         } else {
@@ -345,6 +354,22 @@ class MovieList extends Component {
         return (torrent !== null) ? (torrent.percentDone * 100).toFixed(0) : null;
     }
 
+    toggleSubscription(media, finallyCb) {
+        if (hasSubscription(media.id, this.state.status.subscriptions)) {
+            axios.delete(`${this.server}/subscriptions?id=${media.id}`).catch(err => {
+                console.error(err)
+            }).finally(() => {
+                if (finallyCb) finallyCb();
+            });
+        } else {
+            axios.post(`${this.server}/subscriptions?id=${media.id}`).catch(err => {
+                console.error(err)
+            }).finally(() => {
+                if (finallyCb) finallyCb();
+            });
+        }
+    }
+
     onOpenModal = (media) => {
         this.setState({ media: media });
     };
@@ -366,7 +391,7 @@ class MovieList extends Component {
         const { error, isLoaded, showLogo, results, media, page, torrents, started, status, type, search } = this.state;
 
         // Make it a tiny bit quicker on local dev
-        const logo = status ? (status.isDocker ? showLogo : false) : showLogo;
+        const logo = process.env.NODE_ENV === 'development' ? false : showLogo;
 
         if (error) {
             return (
@@ -418,6 +443,7 @@ class MovieList extends Component {
                         onCloseModal={this.onCloseModal}
                         files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                         status={status}
+                        toggleSubscription={this.toggleSubscription}
                     />
 
                     {type === 'downloads' ? (
@@ -428,6 +454,22 @@ class MovieList extends Component {
                             getProgress={this.getProgress}
                             ref={instance => { this.torrentList = instance; }}
                         />
+                    ) : type === 'subscriptions' ? (
+                        <div className="movie-list">
+                            {results.length === 0 ? <h2>No Subscriptions</h2> : <h2>Subscriptions ( {results.length} )</h2>}
+                            <div>
+                                {results.map(media => (
+                                    <Cover
+                                        key={media.id}
+                                        media={media}
+                                        type={type}
+                                        server={this.server}
+                                        status={status}
+                                        toggleSubscription={this.toggleSubscription}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     ) : (
                         <Fragment>
                             <Search
@@ -476,6 +518,7 @@ class MovieList extends Component {
                                                     server={this.server}
                                                     files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
                                                     status={status}
+                                                    toggleSubscription={this.toggleSubscription}
                                                 />
                                             ))}
                                         </div>

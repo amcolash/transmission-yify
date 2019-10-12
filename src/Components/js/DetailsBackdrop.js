@@ -204,21 +204,7 @@ class DetailsBackdrop extends Component {
     toggleSubscription() {
         this.setState({subscribing: true});
         const media = this.props.media;
-
-        // Not too happy about the fake timeouts, but it will do for now...
-        if (hasSubscription(media.id, this.props.status.subscriptions)) {
-            axios.delete(`${this.props.server}/subscriptions?id=${media.id}`).catch(err => {
-                console.error(err)
-            }).finally(() => {
-                setTimeout(() => this.setState({subscribing: false}), 2000);
-            });
-        } else {
-            axios.post(`${this.props.server}/subscriptions?id=${media.id}`).catch(err => {
-                console.error(err)
-            }).finally(() => {
-                setTimeout(() => this.setState({subscribing: false}), 2000);
-            });
-        }
+        this.props.toggleSubscription(media, () => setTimeout(() => this.setState({subscribing: false}), 2000));
     }
 
     render() {

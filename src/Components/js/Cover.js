@@ -15,7 +15,7 @@ class Cover extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { pb: null };
+        this.state = { pb: null, subscribing: false };
     }
 
     componentDidMount() {
@@ -82,13 +82,20 @@ class Cover extends Component {
         }
     }
 
+    toggleSubscription() {
+        if (this.props.toggleSubscription) {
+            this.props.toggleSubscription(this.props.media, () => setTimeout(() => this.setState({subscribing: false}), 2000));
+            this.setState({subscribing: true});
+        }
+    }
+
     render() {
         const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status } = this.props;
-        const pb = this.state.pb;
+        const { pb, subscribing } = this.state;
 
         if (!media.poster_path) media.poster_path = "broken image";
 
-        const fileExists = hasFile(media, files);
+        const fileExists = hasFile(media, files || []);
         const subscription = status ? hasSubscription(media.id, status.subscriptions) : null;
     
         let versions = [];
@@ -99,10 +106,10 @@ class Cover extends Component {
         }
 
         return (
-            <div className="movie" ref='mediaCover'>
+            <div className={"movie" + (type === 'subscriptions' ? ' disabled' : '')} ref='mediaCover'>
                 <div
                     className="cover"
-                    onClick={(e) => click(media)}
+                    onClick={(e) => { if (click) click(media); }}
                 >
                     <img className="movieCover" src={media.poster_path} alt="" />
                     <div className="movieIcon">
@@ -113,9 +120,9 @@ class Cover extends Component {
                             <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }} />
                         </div>
                     ) : null}
-                    {subscription ? (
-                        <div className="fileExists">
-                            <FaRssSquare />
+                    {type !== 'movies' ? (
+                        <div className={'fileExists' + (subscription ? '' : ' notSubscribed')} onClick={e => {e.stopPropagation(); this.toggleSubscription(); }}>
+                            {subscribing ? <Spinner visible noMargin button/> : <FaRssSquare/>}
                         </div>
                     ) : null}
                     {type === 'movies' ? (

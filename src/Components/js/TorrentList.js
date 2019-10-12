@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import Progress from './Progress';
 import '../css/TorrentList.css';
@@ -17,22 +17,18 @@ class TorrentList extends Component {
 
         return (
             <div className="torrentList">
-                {torrents.length === 0 ? <h3>No Active Downloads</h3> : (
-                    <Fragment>
-                        <h3>Downloads ( {sorted.length} )</h3>
-                        <div>
-                            {(sorted.map(torrent => (
-                                <Progress
-                                    key={torrent.hashString}
-                                    torrent={torrent}
-                                    cancelTorrent={cancelTorrent}
-                                    getProgress={getProgress}
-                                    fullName={false}
-                                />
-                            )))}
-                        </div>
-                    </Fragment>
-                )}
+                {torrents.length === 0 ? <h2>No Active Downloads</h2> : <h2>Downloads ( {sorted.length} )</h2>}
+                <div>
+                    {(sorted.map(torrent => (
+                        <Progress
+                            key={torrent.hashString}
+                            torrent={torrent}
+                            cancelTorrent={cancelTorrent}
+                            getProgress={getProgress}
+                            fullName={false}
+                        />
+                    )))}
+                </div>
             </div>
         );
     }

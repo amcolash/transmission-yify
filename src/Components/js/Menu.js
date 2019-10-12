@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
+import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare } from 'react-icons/fa';
 
 import '../css/Menu.css';
 
@@ -72,8 +72,9 @@ class Menu extends Component {
             {torrents.length > 0 ? <div className="counter">{torrents.length}</div> : null}
             <FaDownload/><span>Downloads</span>
           </div>
+          <div className={(type === 'subscriptions' ? 'selected' : '') + ' item'} onClick={() => this.selectItem('subscriptions')}><FaRssSquare/><span>Subscriptions</span></div>
+          <div className="item disabled"></div>
           {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setState({visible: false}); }}>{plexIcon}<span>Plex</span></div> : null}
-          {/* <div className={type === '' ? 'selected' : 'item'}><FaRssSquare/><span>Subscriptions</span></div> */}
           <div className="spacer"></div>
           <div className="item" onClick={this.props.addMagnet}><FaMagnet/><span>Add Magnet</span></div>
           <div className="item" onClick={this.props.upgrade}><FaPowerOff/><span>Upgrade</span></div>

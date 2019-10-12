@@ -17,9 +17,10 @@ TODO
 - [DONE] Better loading state for tv + anime torrents
 - [DONE] Direct links to plex for available videos
 - [DONE] Subscribe to TV Show (download latest + new episodes as they show up)
-- Fancy little logo anim on load
-- Subscription icon, like file exists on cover?
-- Sidebar menu instead of dropdown for search, allows for settings, feels more like app, etc
+- [DONE] Fancy little logo anim on load
+- [DONE] Subscription icon, like file exists on cover?
+- [DONE] Sidebar menu instead of dropdown for search, allows for settings, feels more like app, etc
+- Infinite scrolling
 - Write my own EZTV parser (cache show list from https://eztv.io/showlist/, then grab and parse page based off of matching names)
 - Other Videos (bloopers, bts, etc if possible)
 - Precache on the server side when cache cleared

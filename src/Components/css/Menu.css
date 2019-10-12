@@ -117,12 +117,14 @@
 
 .menu .downloads .counter {
   position: absolute;
-  padding: 0 0.35em;
+  padding: 0.2em 0.35em;
   border-radius: 0.3em;
-  left: 0.5em;
-  top: 0.5em;
-  background: #888;
-  font-size: 0.65em;
+  left: 0.15em;
+  top: 0.15em;
+  font-size: 0.7em;
+  font-family: 'Ubuntu', Arial, sans-serif;
+  background: greenyellow;
+  color: navy;
 }
 
 .menu .status {
