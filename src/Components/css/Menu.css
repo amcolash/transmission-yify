@@ -8,6 +8,7 @@
   width: 14em;
   max-width: calc(100vw - 1em);
   height: calc(100vh - 1em - 0.2em);
+  overflow-x: hidden;
   overflow-y: auto;
   z-index: 2;
   transform: none;
@@ -24,6 +25,7 @@
 .menu.hidden {
   transform: translateX(-100%);
   box-shadow: none;
+  overflow-x: unset;
   overflow-y: unset;
 }
 

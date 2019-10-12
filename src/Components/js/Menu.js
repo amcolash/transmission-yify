@@ -1,7 +1,8 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare } from 'react-icons/fa';
 
 import '../css/Menu.css';
+import {swipedetect} from '../../Util/Swipe';
 
 const plexIcon = <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path></svg>;
 
@@ -11,32 +12,35 @@ class Menu extends Component {
     this.state = {visible: false};
 
     this.outsideClick = this.outsideClick.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
     this.touch = 0;
   }
 
   componentDidMount() {
     document.addEventListener('click', this.outsideClick, false);
-    document.addEventListener('touchmove', this.onTouchMove, false);
+
+    swipedetect(document, (swipedir) => {
+      if (swipedir === 'left') this.setVisible(false);
+      else if (swipedir === 'right') this.setVisible(true);
+    });
   }
 
   componentWillUnmount() {
     document.removeEventListener('click', this.outsideClick, false);
-    document.addEventListener('touchmove', this.onTouchMove, false);
+    
+    //  i'm a bad person and am not cleaning up event listeners, doesn't really matter since this is never re-created
   }
 
   outsideClick(e) {
     if (this.state.visible) {
       if (this.menu && this.menu.contains(e.target)) return;
-      else this.setState({visible: false});
+      else this.setVisible(false);
     }
   }
 
-  onTouchMove(e) {
-    if (e.targetTouches.length > 0 && Date.now() > this.touch + 500) {
-      console.log(e)
+  setVisible(visible) {
+    if (Date.now() > this.touch + 300) {
       this.touch = Date.now();
-      this.setState({visible: !this.state.visible});
+      this.setState({visible: visible});
     }
   }
 
@@ -54,8 +58,7 @@ class Menu extends Component {
     return (
       <div className={`menu ${visible ? '' : 'hidden'}`}
         ref={node => this.menu = node}
-        onClick={() => this.setState({visible: false})}
-        onTouchMove={e => this.onTouchMove(e)}
+        onClick={() => this.setVisible(false)}
       >
         <div className="list">
           <div className="toggleWrap">
