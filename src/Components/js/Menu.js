@@ -45,6 +45,10 @@ class Menu extends Component {
   }
 
   selectItem(value) {
+    // scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // hide the menu
     this.setState({visible: false});
 
     // delay setting the search so the menu closes smoothly

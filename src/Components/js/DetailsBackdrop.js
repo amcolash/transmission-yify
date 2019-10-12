@@ -366,7 +366,7 @@ class DetailsBackdrop extends Component {
                                                         {seasons.map(season => ( <option key={season} value={season}>{season}</option> ))}
                                                     </select>
                                                 ) : " 1"}
-                                                {(episodes[season]) ? (
+                                                {(episodes[season] && episodes[season].length > 0) ? (
                                                     <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
                                                         <FaDownload/>
                                                     </button>

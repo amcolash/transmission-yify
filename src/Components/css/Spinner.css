@@ -12,21 +12,26 @@
     transition: opacity 0.5s ease-in;
 }
 
-.button {
+.spinner.button {
     width: 0.65em;
     height: 0.65em;
 }
 
-.margin {
+.spinner.margin {
     margin-left: 0.5em;
 }
 
-.visible {
+.spinner.visible {
     opacity: 1;
 }
 
-.invisible {
+.spinner.invisible {
     opacity: 0;
+}
+
+.spinner.big {
+    font-size: 2em;
+    margin-bottom: 1em;
 }
 
 @keyframes spin {

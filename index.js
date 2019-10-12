@@ -95,8 +95,7 @@ new CronJob('00 00 */12 * * *', function() {
 // Wipe the full cache weekly at 4am on sunday/wednesday morning
 new CronJob('00 00 4 * * 0,3', function() {
     console.log('scheduled clearing of main cache');
-    cache = {};
-    writeCache();
+    clearCache();
 }, null, true, 'America/Los_Angeles');
 
 // Make the server
@@ -350,6 +349,17 @@ app.delete('/subscriptions', function(req, res) {
     }
 });
 
+app.delete('/cache', function (req, res) {
+    const KEY = process.env.UPGRADE_KEY;
+    if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
+    if (req.query.key !== KEY) throw new Error('Invalid key');
+
+    clearCache();
+    trackerCache = {};
+
+    res.sendStatus(200);
+});
+
 io.on('connection', client => {
     client.on('subscribe', data => {
         client.join(data);
@@ -363,6 +373,11 @@ io.on('connection', client => {
 function getTMDBUrl(id, type) {
     return 'https://api.themoviedb.org/3/' + type + '/' + id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
         '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
+}
+
+function clearCache() {
+    cache = {};
+    writeCache();
 }
 
 // Check if the cache has data, else grab it

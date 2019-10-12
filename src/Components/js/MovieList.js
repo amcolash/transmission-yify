@@ -10,7 +10,7 @@ import Logo from './Logo';
 import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
 import Search from './Search';
-import Pager from './Pager';
+// import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
 import Menu from './Menu';
@@ -27,7 +27,7 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                type: 'subscriptions',
+                type: 'movies',
                 // search: 'saturday night live'
             };
         }
@@ -49,7 +49,7 @@ class MovieList extends Component {
             status: null,
             width: 0,
             height: 0,
-            scroll: 0,
+            lastPage: false,
             files: [],
             ...devOverrides
         }
@@ -112,7 +112,7 @@ class MovieList extends Component {
     }
     
     componentWillUnmount() {
-        window.removeEventListener('scroll', this.updateWindowDimensions);
+        window.removeEventListener('scroll', this.updateScroll);
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
 
@@ -122,7 +122,11 @@ class MovieList extends Component {
 
     updateScroll = () => {
         let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight);
-        if (!isNaN(scroll)) this.setState({ scroll: scroll });
+        if (!isNaN(scroll)) {
+            if (scroll > 0.90 && !this.state.isSearching && !this.state.lastPage) {
+                this.changePage(1);
+            }
+        }
     }
 
     updateTorrents(data) {
@@ -163,13 +167,17 @@ class MovieList extends Component {
     }
 
     updateSearch(search, genre, order, type, page) {
+        let page1 = (page || 1) === 1;
+        if (page1) window.scrollTo({ top: 0, behavior: 'smooth' });
+
         this.setState({
             search: search,
             genre: genre,
             order: order,
             type: type,
             page: page || 1, // reset page if not provided
-            results: this.state.type === type ? this.state.results : []
+            results: this.state.type === type ? this.state.results : [],
+            lastPage: !page1 // reset last page if we are on page 1
         }, () => this.updateData());
     }
     
@@ -240,7 +248,7 @@ class MovieList extends Component {
     }
 
     handleData(data) {
-        const { search, type } = this.state;
+        const { search, type, page } = this.state;
         
         if (type === 'pirate') {
             this.setState({
@@ -251,6 +259,8 @@ class MovieList extends Component {
 
             return;
         }
+
+        let lastPage = data.page !== undefined && data.total_pages !== undefined && data.page === data.total_pages;
 
         if (data.data) data.results = data.data;
 
@@ -274,16 +284,20 @@ class MovieList extends Component {
                     return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
                 });
             }
+
+            if (page > 1) data = this.state.results.concat(data);
     
             this.setState({
                 results: data,
                 isLoaded: true,
-                isSearching: false
+                isSearching: false,
+                lastPage
             });
         } else {
             this.setState({
                 isLoaded: true,
-                isSearching: false
+                isSearching: false,
+                lastPage
             });
         }
     }
@@ -388,7 +402,7 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, showLogo, results, media, page, torrents, started, status, type, search } = this.state;
+        const { error, isLoaded, showLogo, results, media, torrents, started, status, type, search, isSearching } = this.state;
 
         // Make it a tiny bit quicker on local dev
         const logo = process.env.NODE_ENV === 'development' ? false : showLogo;
@@ -526,7 +540,7 @@ class MovieList extends Component {
                                 )}
                             </div>
         
-                            <Pager changePage={this.changePage} page={page} results={results} type={type} cls="floating"/>
+                            {isSearching ? <Spinner visible big/> : null}
                         </Fragment>
                     )}
                 </Fragment>
