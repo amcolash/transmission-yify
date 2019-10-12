@@ -396,7 +396,7 @@ function checkCache(url, res, shouldRetry) {
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
         // cache for 1 day
-        if (IS_DOCKER) cares.set('Cache-Control', 'public, max-age=86400');
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
         res.send(response.data);
         cache[url] = response.data;
         writeCache();
