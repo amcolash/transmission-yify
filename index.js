@@ -341,7 +341,7 @@ app.delete('/subscriptions', function(req, res) {
     const matched = findSubscription(id);
     if (matched) {
         res.sendStatus(200);
-        console.log(`unsubscribing from ${matched.name} (${id})`);
+        console.log(`unsubscribing from ${matched.title} (${id})`);
         currentStatus.subscriptions = currentStatus.subscriptions.filter(s => s.id !== id);
         writeSubscriptions();
     } else {
