@@ -27,8 +27,8 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                type: 'pirate',
-                search: 'saturday night live'
+                type: 'animes',
+                search: 'attack'
             };
         }
 
@@ -252,7 +252,7 @@ class MovieList extends Component {
 
     handleData(data) {
         const { search, type, page, results } = this.state;
-        
+
         if (type === 'pirate') {
             if (page > 1 && results && results.torrents) data.torrents = results.torrents.concat(data.torrents);
             let lastPage = page >= Math.ceil(results.total / results.limit);
@@ -284,12 +284,13 @@ class MovieList extends Component {
             });
             
             // The search filtering is not great for kitsu :(
-                if (type === 'animes' && search.length > 0) {
-                    data = data.filter(media => {
+            if (type === 'animes' && search.length > 0) {
+                data = data.filter(media => {
                     const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
                     const match = (1 - (lev / Math.max(search.length, media.title.length)));
                     return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
                 });
+                if (data.length === 0) lastPage = true;
             }
 
             if (page > 1) data = results.concat(data);

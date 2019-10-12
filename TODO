@@ -20,7 +20,7 @@ TODO
 - [DONE] Fancy little logo anim on load
 - [DONE] Subscription icon, like file exists on cover?
 - [DONE] Sidebar menu instead of dropdown for search, allows for settings, feels more like app, etc
-- Infinite scrolling
+- [DONE] Infinite scrolling
 - Write my own EZTV parser (cache show list from https://eztv.io/showlist/, then grab and parse page based off of matching names)
 - Other Videos (bloopers, bts, etc if possible)
 - Precache on the server side when cache cleared
