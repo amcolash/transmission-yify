@@ -2,7 +2,7 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    padding: 1.5em 0;
+    padding: 1.5em 3em;
     background-color: #444;
     border-bottom: 4px solid #333;
 }
@@ -13,14 +13,19 @@
 
 .searchItem  {
     margin-bottom: 0.35em;
+    display: inline-block;
 }
 
 .searchItem span {
     margin-left: 0.75em;
 }
 
-@media (min-width: 510px) {
+@media (max-width: 570px) {
     .search .form, .searchItem {
-        display: inline-block;
+        display: block;
+    }
+
+    .search {
+        padding: 1.5em 0 0 0;
     }
 }

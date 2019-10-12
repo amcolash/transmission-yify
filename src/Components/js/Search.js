@@ -77,9 +77,8 @@ class Search extends Component {
                     </div>
 
                     <button className="red" style={{display: clearVisible ? "inline" : "none"}} onClick={() => this.clearSearch()}><FaTimes /></button>
+                    <Spinner visible={isSearching} />
                 </div>
-
-                <Spinner visible={isSearching} />
             </div >
         );
     }
