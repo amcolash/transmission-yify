@@ -64,7 +64,7 @@
 }
 
 .menu.hidden .toggle {
-  transform: translateX(175%);
+  transform: translateX(200%);
 }
 
 .menu.menu.hidden .toggle .toggleButton {
@@ -81,11 +81,13 @@
   position: relative;
   top: -0.65em;
   right: 0.5em;
+  margin-right: -0.75em;
   font-size: 0.75em;
 }
 
 .menu.hidden .toggle .warn {
   right: 1em;
+  margin-right: -1em;
   pointer-events: none;
 }
 
