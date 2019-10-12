@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { FaFilm, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash, FaRssSquare } from 'react-icons/fa';
 import axios from 'axios';
-import ScrollReveal from '../../Util/ScrollReveal';
+import ScrollAnimation from 'react-animate-on-scroll';
+import "animate.css/animate.min.css";
 
 import '../css/Cover.css';
 import {getMovies, hasFile, hasSubscription} from '../../Util/Parse';
@@ -18,27 +19,7 @@ class Cover extends Component {
         this.state = { pb: null, subscribing: false };
     }
 
-    componentDidMount() {
-        const config = {
-            duration: 300,
-            scale: 1.05,
-            distance: '50px',
-            easing: 'ease',
-            afterReveal: () => {
-                // Only fetch torrents once in focus
-                if (this.props.type === 'movies') {
-                    this.updatePB();
-                }
-            }
-        }
-
-        ScrollReveal.reveal(this.refs.mediaCover, config);
-    }
-
     componentWillUnmount() {
-        // Need to do this to fix some random bugs when unmount/mount happens
-        ScrollReveal.sync();
-
         this.cancelPB();
     }
 
@@ -106,7 +87,11 @@ class Cover extends Component {
         }
 
         return (
-            <div className={"movie" + (type === 'subscriptions' ? ' disabled' : '')} ref='mediaCover'>
+            <ScrollAnimation animateIn='fadeIn'
+                animateOnce={true}
+                className={"movie" + (type === 'subscriptions' ? ' disabled' : '')}
+                afterAnimatedIn={() => { if (this.props.type === 'movies') this.updatePB(); }}
+            >        
                 <div
                     className="cover"
                     onClick={(e) => { if (click) click(media); }}
@@ -161,7 +146,7 @@ class Cover extends Component {
                     ) : null}
                 </div>
                 <span onClick={(e) => click(media)}>{media.title} {media.year ? <span>({media.year})</span> : null}</span>
-            </div>
+            </ScrollAnimation>
         );
     }
 }
