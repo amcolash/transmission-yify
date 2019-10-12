@@ -92,8 +92,8 @@ new CronJob('00 00 */12 * * *', function() {
     trackerCache = {};
 }, null, true, 'America/Los_Angeles');
 
-// Wipe the full cache weekly at 4am on sunday morning
-new CronJob('00 00 4 * * 0', function() {
+// Wipe the full cache weekly at 4am on sunday/wednesday morning
+new CronJob('00 00 4 * * 0,3', function() {
     console.log('scheduled clearing of main cache');
     cache = {};
     writeCache();
@@ -368,8 +368,8 @@ function getTMDBUrl(id, type) {
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
-        // cache for 1/2 week
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=302400');
+        // cache for 1 day
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
         res.send(cache[url]);
     } else {
         cacheRequest(url, res, shouldRetry);
@@ -379,8 +379,8 @@ function checkCache(url, res, shouldRetry) {
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
-        // cache for 1/2 week
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=302400');
+        // cache for 1 day
+        if (IS_DOCKER) cares.set('Cache-Control', 'public, max-age=86400');
         res.send(response.data);
         cache[url] = response.data;
         writeCache();

@@ -74,6 +74,7 @@
   padding: 0.35em;
   border-radius: 0.1em;
   transition: all 0.25s;
+  background: #555;
 }
 
 .menu.hidden .toggle .toggleButton:hover {
