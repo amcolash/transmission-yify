@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare } from 'react-icons/fa';
+import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare, FaRecycle } from 'react-icons/fa';
 
 import '../css/Menu.css';
 import {swipedetect} from '../../Util/Swipe';
@@ -86,7 +86,8 @@ class Menu extends Component {
           {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setState({visible: false}); }}>{plexIcon}<span>Plex</span></div> : null}
           <div className="spacer"></div>
           <div className="item" onClick={this.props.addMagnet}><FaMagnet/><span>Add Magnet</span></div>
-          <div className="item" onClick={this.props.upgrade}><FaPowerOff/><span>Upgrade</span></div>
+          <div className="item" onClick={this.props.clearCache}><FaRecycle/><span>Clear Cache</span></div>
+          <div className="item" onClick={this.props.upgrade}><FaPowerOff/><span>Upgrade Server</span></div>
 
           {status ? (
             <div className="status">

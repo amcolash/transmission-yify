@@ -27,8 +27,8 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                type: 'movies',
-                // search: 'saturday night live'
+                type: 'pirate',
+                search: 'saturday night live'
             };
         }
 
@@ -66,6 +66,7 @@ class MovieList extends Component {
         this.upgrade = this.upgrade.bind(this);
         this.addMagnet = this.addMagnet.bind(this);
         this.toggleSubscription = this.toggleSubscription.bind(this);
+        this.clearCache = this.clearCache.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
 
@@ -184,6 +185,8 @@ class MovieList extends Component {
     updateData() {
         const { page, genre, type } = this.state;
 
+        if (page === 1) window.scrollTo({ top: 0, behavior: 'smooth' });
+
         // sanitize the search so that there are no special characters, replace with spaces for most characters except quotes
         let search = this.state.search.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
         
@@ -248,13 +251,17 @@ class MovieList extends Component {
     }
 
     handleData(data) {
-        const { search, type, page } = this.state;
+        const { search, type, page, results } = this.state;
         
         if (type === 'pirate') {
+            if (page > 1 && results && results.torrents) data.torrents = results.torrents.concat(data.torrents);
+            let lastPage = page >= Math.ceil(results.total / results.limit);
+
             this.setState({
                 results: data,
                 isLoaded: true,
-                isSearching: false
+                isSearching: false,
+                lastPage
             });
 
             return;
@@ -285,7 +292,7 @@ class MovieList extends Component {
                 });
             }
 
-            if (page > 1) data = this.state.results.concat(data);
+            if (page > 1) data = results.concat(data);
     
             this.setState({
                 results: data,
@@ -353,7 +360,18 @@ class MovieList extends Component {
             alert('Starting upgrade');
         }).catch(err => {
             console.error(err);
-            alert('Something went wrong...')
+            alert('Something went wrong...');
+        });
+    }
+
+    clearCache = () => {
+        var password = window.prompt("Password?", "");
+        axios.delete(this.server + '/cache?key=' + password).then(response => {
+            console.log(response.data);
+            alert('Clearing Cache');
+        }).catch(err => {
+            console.error(err);
+            alert('Something went wrong...');
         });
     }
 
@@ -440,6 +458,7 @@ class MovieList extends Component {
                         type={type}
                         upgrade={this.upgrade}
                         addMagnet={this.addMagnet}
+                        clearCache={this.clearCache}
                         updateSearch={this.updateSearch}
                         status={status}
                         torrents={torrents}

@@ -354,6 +354,7 @@ app.delete('/cache', function (req, res) {
     if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
     if (req.query.key !== KEY) throw new Error('Invalid key');
 
+    console.log('clearing cache via endpoint')
     clearCache();
     trackerCache = {};
 
@@ -565,7 +566,9 @@ async function downloadSubscription(id, onlyLast) {
     });
 }
 
-function searchPirateBay(query, page, filter, endpoint) {
+function searchPirateBay(query, p, filter, endpoint) {
+    const page = Number.parseInt(p);
+
     return new Promise((resolve, reject) => {
         const url = `${endpoint.replace(/\/$/, '')}/search/${query}/${page}${filter}`;
 
