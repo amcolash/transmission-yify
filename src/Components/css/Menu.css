@@ -67,7 +67,7 @@
 }
 
 .menu.hidden .toggle {
-  transform: translateX(200%);
+  transform: translateX(225%);
 }
 
 .menu.menu.hidden .toggle .toggleButton {
