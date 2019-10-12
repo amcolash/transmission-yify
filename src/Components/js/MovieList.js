@@ -24,6 +24,13 @@ class MovieList extends Component {
     constructor(props) {
         super(props);
 
+        let devOverrides = {};
+        if (process.env.NODE_ENV === 'development') {
+            devOverrides = {
+                type: 'downloads'
+            };
+        }
+
         this.state = {
             error: null,
             showLogo: true,
@@ -43,6 +50,7 @@ class MovieList extends Component {
             height: 0,
             scroll: 0,
             files: [],
+            ...devOverrides
         }
 
         // Clean up old faq flag
@@ -190,6 +198,12 @@ class MovieList extends Component {
             }
             // use all so that we do not filter here
             ENDPOINT = `${this.server}/pirate/${search}?all=true&page=${page}`;
+        } else if (type === 'downloads') {
+            this.setState({
+                isLoaded: true,
+                isSearching: false
+            });
+            return;
         } else {
             if (search.length > 0) {
                 ENDPOINT = `${this.server}/search/${type}/${page}?query=${search}`;
@@ -386,6 +400,7 @@ class MovieList extends Component {
                         addMagnet={this.addMagnet}
                         updateSearch={this.updateSearch}
                         status={status}
+                        torrents={torrents}
                     />
 
                     <DetailsBackdrop
@@ -405,68 +420,72 @@ class MovieList extends Component {
                         status={status}
                     />
 
-                    <TorrentList
-                        torrents={torrents}
-                        cancelTorrent={this.cancelTorrent}
-                        getLink={this.getLink}
-                        getProgress={this.getProgress}
-                        ref={instance => { this.torrentList = instance; }}
-                    />
-
-                    <Search
-                        updateSearch={this.updateSearch}
-                        isSearching={this.state.isSearching}
-                        search={this.state.search}
-                        genre={this.state.genre}
-                        quality={this.state.quality}
-                        order={this.state.order}
-                        type={this.state.type}
-                        page={this.state.page}
-                    />
-
-                    <div className="movie-list">
-                        {type === 'pirate' ? (
-                            results && results.torrents && results.torrents.length > 0 ? (
-                                <div className="pirateList">
-                                    {results.torrents.map(media => (
-                                        <Pirate
-                                            key={media.link}
-                                            media={media}
-                                            started={started}
-                                            downloadTorrent={this.downloadTorrent}
-                                            cancelTorrent={this.cancelTorrent}
-                                            getLink={this.getLink}
-                                            getProgress={this.getProgress}
-                                            getTorrent={this.getTorrent}
-                                        />
-                                    ))}
-                                </div>
-                            ) : search.length === 0 ? <h2>Please enter a search term</h2> : <h1>No Results</h1>
-                        ) : (
-                            results.length === 0 ? <h1>No Results</h1> : (
-                                <div>
-                                    {results.map(media => (
-                                        <Cover
-                                            key={media.id}
-                                            media={media}
-                                            type={type}
-                                            click={this.onOpenModal}
-                                            downloadTorrent={this.downloadTorrent}
-                                            cancelTorrent={this.cancelTorrent}
-                                            torrents={this.torrents}
-                                            started={started}
-                                            getProgress={this.getProgress}
-                                            server={this.server}
-                                            files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
-                                            status={status}
-                                        />
-                                    ))}
-                                </div>
-                            )
-                        )}
-                    </div>
-
-                    <Pager changePage={this.changePage} page={page} results={results} type={type} cls="floating"/>
+                    {type === 'downloads' ? (
+                        <TorrentList
+                            torrents={torrents}
+                            cancelTorrent={this.cancelTorrent}
+                            getLink={this.getLink}
+                            getProgress={this.getProgress}
+                            ref={instance => { this.torrentList = instance; }}
+                        />
+                    ) : (
+                        <Fragment>
+                            <Search
+                                updateSearch={this.updateSearch}
+                                isSearching={this.state.isSearching}
+                                search={this.state.search}
+                                genre={this.state.genre}
+                                quality={this.state.quality}
+                                order={this.state.order}
+                                type={this.state.type}
+                                page={this.state.page}
+                            />
+        
+                            <div className="movie-list">
+                                {type === 'pirate' ? (
+                                    results && results.torrents && results.torrents.length > 0 ? (
+                                        <div className="pirateList">
+                                            {results.torrents.map(media => (
+                                                <Pirate
+                                                    key={media.link}
+                                                    media={media}
+                                                    started={started}
+                                                    downloadTorrent={this.downloadTorrent}
+                                                    cancelTorrent={this.cancelTorrent}
+                                                    getLink={this.getLink}
+                                                    getProgress={this.getProgress}
+                                                    getTorrent={this.getTorrent}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : search.length === 0 ? <h2>Please enter a search term</h2> : <h1>No Results</h1>
+                                ) : (
+                                    results.length === 0 ? <h1>No Results</h1> : (
+                                        <div>
+                                            {results.map(media => (
+                                                <Cover
+                                                    key={media.id}
+                                                    media={media}
+                                                    type={type}
+                                                    click={this.onOpenModal}
+                                                    downloadTorrent={this.downloadTorrent}
+                                                    cancelTorrent={this.cancelTorrent}
+                                                    torrents={this.torrents}
+                                                    started={started}
+                                                    getProgress={this.getProgress}
+                                                    server={this.server}
+                                                    files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                                    status={status}
+                                                />
+                                            ))}
+                                        </div>
+                                    )
+                                )}
+                            </div>
+        
+                            <Pager changePage={this.changePage} page={page} results={results} type={type} cls="floating"/>
+                        </Fragment>
+                    )}
                 </Fragment>
             );
         }

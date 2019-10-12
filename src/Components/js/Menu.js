@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
 
 import '../css/Menu.css';
 
@@ -45,7 +45,7 @@ class Menu extends Component {
 
   render() {
     const visible = this.state.visible;
-    const { type, status } = this.props;
+    const { type, status, torrents } = this.props;
 
     return <Fragment>
       <div className="slider" onTouchMove={e => this.onTouchMove(e)}></div>
@@ -68,8 +68,11 @@ class Menu extends Component {
           <div className={type === 'animes' ? 'selected item' : 'item'} onClick={() => this.selectItem('animes')}><FaLaughBeam/><span>Anime</span></div>
           <div className={type === 'pirate' ? 'selected item' : 'item'} onClick={() => this.selectItem('pirate')}><FaSkullCrossbones/><span>Pirate Bay</span></div>
           <div className="item disabled"></div>
+          <div className={(type === 'downloads' ? 'selected' : '') + ' item downloads'} onClick={() => this.selectItem('downloads')}>
+            {torrents.length > 0 ? <div className="counter">{torrents.length}</div> : null}
+            <FaDownload/><span>Downloads</span>
+          </div>
           {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setState({visible: false}); }}>{plexIcon}<span>Plex</span></div> : null}
-          {/* <div className={type === '' ? 'selected' : 'item'}><FaDownload/><span>Downloads</span></div> */}
           {/* <div className={type === '' ? 'selected' : 'item'}><FaRssSquare/><span>Subscriptions</span></div> */}
           <div className="spacer"></div>
           <div className="item" onClick={this.props.addMagnet}><FaMagnet/><span>Add Magnet</span></div>

@@ -384,7 +384,7 @@ function cacheRequest(url, res, shouldRetry) {
         res.send(response.data);
         cache[url] = response.data;
         writeCache();
-    }, error => {
+    }).catch(error => {
         if (shouldRetry) {
             setTimeout(() => cacheRequest(url, res, false), 10000);
         } else {
