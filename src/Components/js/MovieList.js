@@ -308,7 +308,10 @@ class MovieList extends Component {
         });
     }
 
-    downloadTorrent = (version) => {
+    downloadTorrent = (version, asktv) => {
+        let tv = version.tv;
+        if (asktv) tv = window.confirm("Is this a tv show?");
+
         this.setState({
             started: [ ...this.state.started, version.hashString ]
         });
@@ -319,7 +322,7 @@ class MovieList extends Component {
         let url = version.url;
         if (url.indexOf('nyaa.se') !== -1) url = url.replace('nyaa.se', 'nyaa.si').replace('?page=download', 'download/').replace('&tid=', '') + '.torrent';
 
-        axios.post(this.server + '/torrents', { url: url, tv: version.tv }).catch(error => {
+        axios.post(this.server + '/torrents', { url, tv }).catch(error => {
             console.error(error);
 
             // Reset started state if download failed

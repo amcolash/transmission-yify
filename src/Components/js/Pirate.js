@@ -50,7 +50,7 @@ class Pirate extends Component {
               hideInfo
             />
           ) : (
-            <button className="orange download" onClick={() => downloadTorrent(version)}>
+            <button className="orange download" onClick={() => downloadTorrent(version, true)}>
               {started.indexOf(hashString) !== -1 ? (
                 <Spinner visible noMargin button />
               ) : (

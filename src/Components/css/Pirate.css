@@ -20,7 +20,7 @@
   text-overflow: ellipsis;
 }
 
-.pirateRow div {
+.pirateRow div:not(.spinner) {
   margin: 0 0.5em;
 }
 
