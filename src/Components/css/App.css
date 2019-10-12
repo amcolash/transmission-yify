@@ -11,6 +11,11 @@ body {
     user-select: none;
 }
 
+/* Disable scrolling when menu open */
+body.noscroll {
+    overflow: hidden;
+}
+
 button {
     background-color: #777;
     border: none;

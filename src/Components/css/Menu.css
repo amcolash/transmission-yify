@@ -51,8 +51,12 @@
 }
 
 .menu .toggleWrap {
+  position: sticky;
+  top: 0.15em;
+  border-radius: 0;
   border-bottom: 2px solid #444;
   margin-bottom: 0.5em;
+  background: #666;
 }
 
 .menu .toggle {

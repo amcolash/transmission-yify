@@ -41,6 +41,7 @@ class Menu extends Component {
     if (Date.now() > this.touch + 300) {
       this.touch = Date.now();
       this.setState({visible: visible});
+      document.body.classList.toggle('noscroll', visible);
     }
   }
 
