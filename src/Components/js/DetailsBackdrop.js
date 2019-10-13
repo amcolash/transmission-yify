@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube } from 'react-icons/fa';
+import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -21,7 +21,7 @@ class DetailsBackdrop extends Component {
 
     getDefaultState() {
         return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
-            loadingEpisodes: false, subscribing: false, youtubeId: null};
+            loadingEpisodes: false, subscribing: false, youtubeId: null, otherVideos: false};
     }
 
     getEztv() {
@@ -203,7 +203,7 @@ class DetailsBackdrop extends Component {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, youtubeId, loadingEpisodes,
-            subscribing } = this.state;
+            subscribing, otherVideos } = this.state;
         
         if (!media) return null;
 
@@ -253,6 +253,30 @@ class DetailsBackdrop extends Component {
                                 onEnd={() => this.setState({youtubeId: null})}/>
                         </div>
                     ) : null}
+                    {tmdbData && tmdbData.videos ?
+                        <div className={"otherVideos" + (!otherVideos ? " hidden" : "")} onClick={e => e.stopPropagation()}>
+                            <div className="toggle">
+                                <span onClick={e => { e.stopPropagation(); this.setState({otherVideos: !this.state.otherVideos})}}>
+                                    <FaYoutube className="red"/> YouTube Videos {otherVideos ? <FaChevronDown/> : <FaChevronUp/>}
+                                </span>
+                            </div>
+                            <div className="videoContainer">
+                                {tmdbData.videos.results.map(v => {
+                                    if (v.site === 'YouTube') {
+                                        return (
+                                            <div className="video">
+                                                <img src={`https://img.youtube.com/vi/${v.key}/0.jpg`} alt="video thumbnail"
+                                                    onClick={() => this.setState({youtubeId: v.key})}/>
+                                                <div className="title">{v.name}</div>
+                                            </div>
+                                        )
+                                    } else {
+                                        return null;
+                                    }
+                                })}
+                            </div>
+                        </div>
+                    : null}
                     <div className="left">
                         <div className="info">
                             <h3>{media.title}{type !== 'movies' && status && status.subscriptions ? (subscribing ?

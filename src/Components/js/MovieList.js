@@ -18,6 +18,7 @@ import Cache from '../../Util/Cache';
 import { parseMedia, hasSubscription } from '../../Util/Parse';
 
 const hashMapping = {};
+const showMedia = false;
 
 class MovieList extends Component {
 
@@ -295,6 +296,11 @@ class MovieList extends Component {
 
             if (page > 1) data = results.concat(data);
     
+            // Show media after loaded
+            if (process.env.NODE_ENV === 'development' && showMedia) {
+                setTimeout(() => this.setState({media: data[0]}), 500);
+            }
+
             this.setState({
                 results: data,
                 isLoaded: true,

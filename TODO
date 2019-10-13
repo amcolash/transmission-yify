@@ -22,10 +22,10 @@ TODO
 - [DONE] Sidebar menu instead of dropdown for search, allows for settings, feels more like app, etc
 - [DONE] Infinite scrolling
 - [DONE] Write my own EZTV parser (cache show list from https://eztv.io/showlist/, then grab and parse page based off of matching names)
+- [DONE] Other Videos (bloopers, bts, etc if possible)
 - Keyboard navigation (arrow keys, backspace / back button)
 - Add hashes to backdrop for simple history
 - Look into android tv app / webapp
-- Other Videos (bloopers, bts, etc if possible)
 - Precache on the server side when cache cleared
 - Analytics (views, downloads, ip locations, etc)
 - Move to Mongo?
