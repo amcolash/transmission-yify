@@ -222,7 +222,7 @@ class MovieList extends Component {
             this.setState({
                 isLoaded: true,
                 isSearching: false,
-                results: this.state.status ? this.state.status.subscriptions : []
+                results: this.state.status ? this.state.status.subscriptions.sort((a, b) => a.title.localeCompare(b.title)) : []
             });
             return;
         } else {
