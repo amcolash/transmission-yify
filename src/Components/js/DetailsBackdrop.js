@@ -21,7 +21,7 @@ class DetailsBackdrop extends Component {
 
     getDefaultState() {
         return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
-            trailerFullscreen: false, loadingEpisodes: false, subscribing: false};
+            loadingEpisodes: false, subscribing: false, youtubeId: null};
     }
 
     getEztv() {
@@ -202,7 +202,7 @@ class DetailsBackdrop extends Component {
     render() {
         const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
-        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, trailerFullscreen, loadingEpisodes,
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, youtubeId, loadingEpisodes,
             subscribing } = this.state;
         
         if (!media) return null;
@@ -246,11 +246,11 @@ class DetailsBackdrop extends Component {
                     this.setState(this.getDefaultState());
                     onCloseModal();
                 }}>
-                    {details.trailer && trailerFullscreen ? (
+                    {youtubeId ? (
                         <div className="ytContainer" onClick={e => e.stopPropagation()}>
-                            <button onClick={e => { e.stopPropagation(); this.setState({trailerFullscreen: false}) }}><FaTimes/></button>
-                            <YouTube videoId={details.trailer.key} opts={trailerOpts} id='youtube'
-                                onEnd={() => this.setState({trailerFullscreen: false})}/>
+                            <button onClick={e => { e.stopPropagation(); this.setState({youtubeId: null}) }}><FaTimes/></button>
+                            <YouTube videoId={youtubeId} opts={trailerOpts} id='youtube'
+                                onEnd={() => this.setState({youtubeId: null})}/>
                         </div>
                     ) : null}
                     <div className="left">
@@ -277,7 +277,7 @@ class DetailsBackdrop extends Component {
                             {details.trailer ? (
                                 <div className="trailer" onClick={e => {
                                     e.stopPropagation();
-                                    this.setState({trailerFullscreen: !trailerFullscreen});
+                                    this.setState({youtubeId: details.trailer.key});
                                 }}>
                                     <FaYoutube className="red"/>
                                     <div>Trailer</div>
