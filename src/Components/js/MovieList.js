@@ -101,7 +101,7 @@ class MovieList extends Component {
         socket.on('status', data => {
             if (data) {
                 if (this.state.type === 'subscriptions') {
-                    this.setState({status: data, results: data.subscriptions});
+                    this.setState({status: data, results: data.subscriptions.sort((a, b) => a.title.localeCompare(b.title))});
                 } else {
                     this.setState({status: data});
                 }

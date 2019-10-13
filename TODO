@@ -23,8 +23,8 @@ TODO
 - [DONE] Infinite scrolling
 - [DONE] Write my own EZTV parser (cache show list from https://eztv.io/showlist/, then grab and parse page based off of matching names)
 - [DONE] Other Videos (bloopers, bts, etc if possible)
-- Keyboard navigation (arrow keys, backspace / back button)
-- Add hashes to backdrop for simple history
+- Keyboard navigation (arrow keys, backspace / back button) - yikes the grid is tough...
+- Add hashes to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
 - Look into android tv app / webapp
 - Precache on the server side when cache cleared
 - Analytics (views, downloads, ip locations, etc)
