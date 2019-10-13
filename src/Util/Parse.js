@@ -109,7 +109,8 @@ export function getEpisodes(torrents, moreData, type) {
             const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
             if (!existing || seeds > existing.seeds) {
                 const url = torrent.magnet_url || torrent.torrent_url || torrent.magnet;
-                const hash = magnet.decode(url).infoHash.toLowerCase();
+                let hash = magnet.decode(url).infoHash;
+                if (hash) hash = hash.toLowerCase();
                 
                 let sort = 0;
                 switch (parsed.resolution) {
