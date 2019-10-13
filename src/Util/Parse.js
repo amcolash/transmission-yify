@@ -84,7 +84,7 @@ export function getEpisodes(torrents, moreData, type) {
             const parsed = ptn(torrent.filename || torrent.name);
             parsed.resolution = parsed.resolution || '480p';
             if (type === 'animes') parsed.season = 1; // keep anime in 1 season
-            
+
             // Bail if we weren't able to parse season/episode
             if ((type === 'shows' && parsed.season === 0) || parsed.episode === 0 || (moreData && parsed.episode > moreData.EpisodeCount) ||
                 ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;

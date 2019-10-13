@@ -52,7 +52,7 @@ class DetailsBackdrop extends Component {
             let newMax = false;
             data.torrents.forEach(t => {
                 const s = parseInt(t.season);
-                if (s > maxSeason && moreData && s <= moreData.seasons.length) { maxSeason = s; newMax = true; }
+                if (s > maxSeason && moreData && moreData.seasons && s <= moreData.seasons.length) { maxSeason = s; newMax = true; }
             });
             
             let eztv = this.state.eztv || data;
@@ -129,16 +129,18 @@ class DetailsBackdrop extends Component {
         
                     if (type === 'shows') {
                         const moreData = response.data;
-                        moreData.seasons.forEach(season => {
-                            axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
-                                if (moreData.seasons[season.season_number - 1]) {
-                                    moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
-                                    this.setState({moreData: moreData});
-                                }
-                            }).catch(err => {
-                                console.error(err);
-                            })
-                        });
+                        if (moreData.seasons) {
+                            moreData.seasons.forEach(season => {
+                                axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
+                                    if (moreData.seasons[season.season_number - 1]) {
+                                        moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
+                                        this.setState({moreData: moreData});
+                                    }
+                                }).catch(err => {
+                                    console.error(err);
+                                })
+                            });
+                        }
                         this.getEztv();
                     } else {
                         const omdbUrl = this.props.server + '/omdb/' + response.data.imdb_id;

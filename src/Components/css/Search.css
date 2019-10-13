@@ -11,18 +11,19 @@
     margin-top: 0.35em;
 }
 
-.searchItem  {
-    margin-bottom: 0.35em;
+.search .form, .searchItem  {
     display: inline-block;
+    margin-top: 0.15em;
 }
 
-.searchItem span {
+.search .form, .searchItem span {
     margin-left: 0.75em;
 }
 
 @media (max-width: 570px) {
     .search .form, .searchItem {
         display: block;
+        margin-bottom: 0.35em;
     }
 
     .search {

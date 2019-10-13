@@ -194,7 +194,7 @@ app.get('/search/:type/:page', function (req, res) {
     }
     if (!url) res.send([]);
 
-    checkTrackerCache(url, res);
+    checkCache(url, res);
 });
 
 app.get('/discover/:type/:page', function (req, res) {
@@ -401,6 +401,17 @@ function clearCache() {
     writeCache();
 }
 
+function filterTV(url, data) {
+    if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
+        (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
+        data.results = data.results.filter(show => {
+            return searchEZTVShow(show.original_name) !== undefined;
+        });
+    }
+
+    return data;
+}
+
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
     if (cache[url]) {
@@ -415,10 +426,12 @@ function checkCache(url, res, shouldRetry) {
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
     axios.get(url, { timeout: 10000 }).then(response => {
+        const data = filterTV(url, response.data);
+
         // cache for 1 day
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
-        res.send(response.data);
-        cache[url] = response.data;
+        res.send(data);
+        cache[url] = data;
         writeCache();
     }).catch(error => {
         if (shouldRetry) {
@@ -685,7 +698,7 @@ function getEZTVShows() {
 }
 
 function searchEZTVShow(search) {
-    let matched = '';
+    let matched;
     eztvShows.forEach(s => {
         const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
         const match = (1 - (lev / Math.max(s.title.length, search.length)));
