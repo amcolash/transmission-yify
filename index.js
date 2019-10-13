@@ -13,6 +13,7 @@ const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
 const PlexAPI = require("plex-api");
 const ptn = require('parse-torrent-name');
+const levenshtein = require('js-levenshtein');
 
 require('dotenv').config();
 
@@ -38,6 +39,7 @@ let currentStatus = {
 
 let cache = {};
 let trackerCache = {};
+let eztvShows = [];
 let isUpgrading = false;
 
 // Figure out build time
@@ -232,12 +234,6 @@ app.get('/discover/:type/:page', function (req, res) {
     checkCache(url, res);
 });
 
-app.get('/eztv/:precache?', function(req, res) {
-    const url = `https://eztv.io/api/get-torrents?${querystring.stringify(req.query)}`;
-    checkTrackerCache(url, req.params.precache ? undefined : res);
-    if (req.params.precache) res.sendStatus(200);
-});
-
 app.get('/nyaa/:precache?', function(req, res) {
     const url = `https://nyaa.pantsu.cat/api/search?${querystring.stringify(req.query)}`;
     checkTrackerCache(url, req.params.precache ? undefined : res);
@@ -253,17 +249,17 @@ app.get('/pirate/:search/:precache?', function(req, res) {
 
     // Add a simple cache here to make things faster on the client
     if (trackerCache[search]) {
-        // cache for 1 hour
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
+        // cache for 6 hours
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(trackerCache[search]);
     } else {
         searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
-            // cache for 1 hour
-            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
+            // cache for 6 hours
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
             res.send(results);
             trackerCache[search];
         }).catch(err => {
-            res.send({ppage:1,total:0,limit:30,torrents:[]});
+            res.send({page:1,total:0,limit:30,torrents:[]});
         });
     }
 });
@@ -361,6 +357,30 @@ app.delete('/cache', function (req, res) {
     res.sendStatus(200);
 });
 
+app.get('/eztv/:search', function(req, res) {
+    const search = req.params.search;
+    const match = searchEZTVShow(search);
+    
+    if (match) {
+        const url = match.url;
+
+        // Add a simple cache here to make things faster on the client
+        if (trackerCache[url]) {
+            // cache for 6 hours
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+            res.send(trackerCache[url]);
+        } else {
+            getEZTVDetails(url).then(torrents => {
+                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+                res.send(torrents);
+                trackerCache[url] = torrents;
+            });
+        }
+    } else {
+        res.send({page:1,total:0,limit:30,torrents:[]});
+    }
+});
+
 io.on('connection', client => {
     client.on('subscribe', data => {
         client.join(data);
@@ -425,15 +445,15 @@ function writeSubscriptions() {
 function checkTrackerCache(url, res) {
     if (trackerCache[url]) {
         if (res) {
-            // cache for 1 hour
-            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
+            // cache for 6 hours
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
             res.send(trackerCache[url]);
         }
     } else {
         axios.get(url).then(response => {
             if (res) {
-                // cache for 1 hour
-                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=3600');
+                // cache for 6 hours
+                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
                 res.send(response.data);
             }
             trackerCache[url] = response.data;
@@ -491,18 +511,16 @@ async function downloadSubscription(id, onlyLast) {
     subscription.lastSeason = subscription.lastSeason || 0;
     subscription.lastEpisode = subscription.lastEpisode || 0;
 
-    // can't subscribe without an imdb id
-    if (!subscription.imdb) return;
-
     // Add a new entry if it does not exist
     if (!matched) currentStatus.subscriptions.push(subscription);
 
     // write to file so we keep retrying if things fail below, also keep modified fields
     writeSubscriptions();
 
-    // find the newest torrents for the show (last 50)
-    axios.get(`https://eztv.io/api/get-torrents?limit=50&imdb_id=${subscription.imdb.replace('tt','')}`).then(res => {
-        const torrents = res.data.torrents;
+    // find torrents for the show
+    const matchedShow = searchEZTVShow(subscription.title);
+    getEZTVDetails(matchedShow.url).then(data => {
+        const torrents = data.torrents;
         
         // Generate a list of all episodes from the query
         let episodes = [];
@@ -552,7 +570,7 @@ async function downloadSubscription(id, onlyLast) {
         // Download each torrent
         episodes.forEach(e => {
             console.log('Downloading new subscribed file: ' + e.filename);
-            transmission.addUrl(e.magnet_url, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
+            transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
                 if (err) console.error(err);
             });
         });
@@ -586,13 +604,6 @@ function searchPirateBay(query, p, filter, endpoint) {
             const results = $('h2').eq(0).text();
             
             const limit = 30;
-            // const range = results.match(/\d+\sto\s\d+/);
-            // let lower = 0, upper = 0;
-            // if (range && range.length > 0) {
-            //     lower = range[0].match(/\d+/g)[0];
-            //     upper = range[0].match(/\d+/g)[1];
-            // }
-            // const limit = Number.parseInt(upper) - Number.parseInt(lower);
             
             const found = results.match(/\d+\sfound/);
             let total = 0;
@@ -644,6 +655,88 @@ function searchPirateBay(query, p, filter, endpoint) {
         }).catch(err => {
             console.error(err);
             reject();
+        });
+    });
+}
+
+function getEZTVShows() {
+    axios.get('https://eztv.io/showlist/').then(response => {
+        const $ = cheerio.load(response.data);
+        
+        const table = $('.forum_header_border').eq(1);
+        const items = $('tr[name="hover"] td:first-child', table);
+
+        const shows = [];
+
+        items.each((index, el) => {
+            const row = $('a', el);
+            let title = row.text();
+            if (title.endsWith(', The')) title = `The ${title.replace(', The', '')}`;
+            shows.push({
+                title,
+                url: 'https://eztv.io' + row.attr('href')
+            });
+        });
+
+        eztvShows = shows;
+    }).catch(err => {
+        console.error(err);
+    });
+}
+
+function searchEZTVShow(search) {
+    let matched = '';
+    eztvShows.forEach(s => {
+        const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
+        const match = (1 - (lev / Math.max(s.title.length, search.length)));
+        if (match > 0.95) {
+            matched = s;
+        }
+    });
+
+    return matched;
+}
+
+function getEZTVDetails(url) {
+    return new Promise((resolve, reject) => {
+        axios.get(url).then(response => {
+            const torrents = [];
+
+            const $ = cheerio.load(response.data);
+            const table = $('.forum_header_noborder');
+            const items = $('tr[name="hover"]', table);
+            items.each((index, el) => {
+                const columns = $('td', el);
+                const filename = $('a', columns.eq(1)).text();
+                const link = $('a', columns.eq(1)).attr('href');
+                const magnet = $('a', columns.eq(2)).attr('href');
+                const size = columns.eq(3).text();
+                const date = columns.eq(4).text();
+                const seeds = Number.parseInt(columns.eq(5).text()) || 0;
+
+                const parsed = ptn(filename);
+                const episode = parsed.episode ? Number.parseInt(parsed.episode) : undefined;
+                const season = parsed.season ? Number.parseInt(parsed.season) : undefined;
+                if (!episode || !season) return;
+
+                const torrent = {
+                    filename,
+                    link,
+                    magnet,
+                    size,
+                    date,
+                    seeds,
+                    episode,
+                    season
+                };
+
+                torrents.push(torrent);
+            });
+
+            resolve({page: 1, total: torrents.length, limit: torrents.length, torrents});
+        }).catch(err => {
+            console.error(err);
+            resolve({page: 1, total: 0, limit: 30, torrents: []});
         });
     });
 }
@@ -814,4 +907,7 @@ function initStatusWatchers() {
             });
         }, interval * 30 * 60);
     }, IS_DOCKER ? interval * 30 : interval * 5);
+
+    // Refresh list of eztv shows every day
+    setIntervalImmediately(() => getEZTVShows(), 1000 * 60 * 60 * 24);
 }

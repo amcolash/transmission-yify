@@ -24,27 +24,28 @@ class DetailsBackdrop extends Component {
             trailerFullscreen: false, loadingEpisodes: false, subscribing: false};
     }
 
-    getEztv(imdb, page) {
-        const limit = 50;
-        const url = `${this.props.server}/eztv/?limit=${limit}&page=${page}&imdb_id=${imdb}`;
+    getEztv() {
+        const url = `${this.props.server}/eztv/${this.props.media.title}`;
         
         if (Cache[url]) {
-            this.handleEztv(Cache[url], imdb, page, limit);
+            this.handleEztv(Cache[url]);
         } else {
             axios.get(url).then(response => {
                 // Make sure that the show was found and we are not just getting
                 // the newest shows on the site. This is a bad api design for them :(
                 const data = response.data;
                 Cache[url] = data;
-                this.handleEztv(data, imdb, page, limit);
+
+                this.handleEztv(data);
             }).catch(err => {
                 console.error(err);
+                this.setState({loadingEpisodes: false});
             });
         }
     }
 
-    handleEztv(data, imdb, page, limit) {
-        if (data.torrents_count < 2000 && data.torrents) {
+    handleEztv(data) {
+        if (data.torrents) {
             const moreData = this.state.moreData;
 
             let maxSeason = this.state.maxSeason;
@@ -55,18 +56,12 @@ class DetailsBackdrop extends Component {
             });
             
             let eztv = this.state.eztv || data;
-            if (eztv !== data) data.torrents.forEach(t => eztv.torrents.push(t));
 
-            this.setState({ eztv: eztv, season: (page === 1 || newMax) ? maxSeason : this.state.season, maxSeason: maxSeason }, () => {
-                // If there are more pages, get them
-                if (page * limit < data.torrents_count) {
-                    this.getEztv(imdb, page + 1);
-                } else {
-                    this.setState({loadingEpisodes: false});
-                }
+            this.setState({ eztv: eztv, season: newMax ? maxSeason : this.state.season, maxSeason: maxSeason }, () => {
+                this.setState({loadingEpisodes: false});
             });
         } else {
-            this.setState({ eztv: {torrents: []}, loadingEpisodes: false });
+            this.setState({loadingEpisodes: false});
         }
     }
 
@@ -83,6 +78,7 @@ class DetailsBackdrop extends Component {
                 this.handleNyaa(data, title, page, limit);
             }).catch(err => {
                 console.error(err);
+                this.setState({loadingEpisodes: false});
             });
         }
     }
@@ -143,13 +139,7 @@ class DetailsBackdrop extends Component {
                                 console.error(err);
                             })
                         });
-                        
-                        if (!response.data.external_ids || !response.data.external_ids.imdb_id) {
-                            this.setState({ eztv: {torrents: []}, loadingEpisodes: false });
-                            return;
-                        }
-                        const imdb = response.data.external_ids.imdb_id.replace('tt', '');
-                        this.getEztv(imdb, 1);
+                        this.getEztv();
                     } else {
                         const omdbUrl = this.props.server + '/omdb/' + response.data.imdb_id;
                         
