@@ -16,8 +16,8 @@ export function swipedetect(el, callback) {
   startY,
   distX,
   distY,
-  threshold = 150, //required min distance traveled to be considered swipe
-  restraint = 75, // maximum distance allowed at the same time in perpendicular direction
+  threshold = 75, //required min distance traveled to be considered swipe
+  restraint = 50, // maximum distance allowed at the same time in perpendicular direction
   allowedTime = 300, // maximum time allowed to travel that distance
   elapsedTime,
   startTime,

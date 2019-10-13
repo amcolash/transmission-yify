@@ -50,7 +50,7 @@ class Menu extends Component {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // hide the menu
-    this.setState({visible: false});
+    this.setVisible(false);
 
     // delay setting the search so the menu closes smoothly
     setTimeout(() => this.props.updateSearch('', '', '', value, 1), 500);
@@ -70,7 +70,7 @@ class Menu extends Component {
             <span>Pirate Flix</span>
             <div className="spacer"></div>
             <div className="toggle">
-              <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setState({visible: !this.state.visible}); }}/>
+              <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setVisible(!this.state.visible); }}/>
               {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn"/> : null}
             </div>
           </div>
@@ -84,7 +84,7 @@ class Menu extends Component {
           </div>
           <div className={(type === 'subscriptions' ? 'selected' : '') + ' item'} onClick={() => this.selectItem('subscriptions')}><FaRssSquare/><span>Subscriptions</span></div>
           <div className="item disabled"></div>
-          {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setState({visible: false}); }}>{plexIcon}<span>Plex</span></div> : null}
+          {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setVisible(false); }}>{plexIcon}<span>Plex</span></div> : null}
           <div className="spacer"></div>
           <div className="item" onClick={this.props.addMagnet}><FaMagnet/><span>Add Magnet</span></div>
           <div className="item" onClick={this.props.clearCache}><FaRecycle/><span>Clear Cache</span></div>
