@@ -430,7 +430,10 @@ class MovieList extends Component {
     }
 
     render() {
-        const { error, isLoaded, showLogo, results, media, torrents, started, status, type, search, isSearching } = this.state;
+        const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching } = this.state;
+
+        // Filter out completed torrents from all views
+        const torrents = this.state.torrents.filter(t => t.percentDone < 1);
 
         // Make it a tiny bit quicker on local dev
         const logo = process.env.NODE_ENV === 'development' ? false : showLogo;

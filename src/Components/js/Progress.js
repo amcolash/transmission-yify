@@ -25,7 +25,7 @@ class Progress extends Component {
             <div className="progress">
                 {hideInfo ? null :  <span>{name}</span>}
                 {hideBar ? null : <Fragment>
-                    <progress value={progress > 1 ? progress : null } max="100" />
+                    <progress value={progress > 0 ? progress : null } max="100" />
                     <span>{progress}% </span>
                 </Fragment>}
                 {!hideInfo && progress < 99 ? (
