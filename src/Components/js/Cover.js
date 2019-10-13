@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaFilm, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash, FaRssSquare } from 'react-icons/fa';
+import { FaFilm, FaTv, FaLaughBeam, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash, FaRssSquare } from 'react-icons/fa';
 import axios from 'axios';
 import ScrollAnimation from 'react-animate-on-scroll';
 import "animate.css/animate.min.css";
@@ -70,6 +70,14 @@ class Cover extends Component {
         }
     }
 
+    getIcon() {
+        switch(this.props.type) {
+            case 'shows': return <FaTv/>;
+            case 'animes': return <FaLaughBeam/>;
+            default: return <FaFilm/>;
+        }
+    }
+
     render() {
         const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status } = this.props;
         const { pb, subscribing } = this.state;
@@ -99,7 +107,7 @@ class Cover extends Component {
                 >
                     <img className="movieCover" src={media.poster_path} alt="" />
                     <div className="movieIcon">
-                        <FaFilm />
+                        {this.getIcon()}
                     </div>
                     {fileExists ? (
                         <div className="fileExists hover">
