@@ -50,7 +50,15 @@ class Search extends Component {
                 <div className="form">
 
                     <div className="searchItem">
-                        {icon}
+                        <div className="iconHover">
+                            <span className="mainIcon">{icon}</span>
+                            <div className="icons">
+                                <FaFilm className={type === 'movies' ? 'active' : ''} onClick={() => updateSearch('', '', '', 'movies', 1)}/>
+                                <FaTv className={type === 'shows' ? 'active' : ''} onClick={() => updateSearch('', '', '', 'shows', 1)}/>
+                                <FaLaughBeam className={type === 'animes' ? 'active' : ''} onClick={() => updateSearch('', '', '', 'animes', 1)}/>
+                                <FaSkullCrossbones className={type === 'pirate' ? 'active' : ''} onClick={() => updateSearch('', '', '', 'pirate', 1)}/>
+                            </div>
+                        </div>
                         <span>Search</span>
                         <DebounceInput
                             value={search}
