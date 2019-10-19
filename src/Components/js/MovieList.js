@@ -10,7 +10,6 @@ import Logo from './Logo';
 import DetailsBackdrop from './DetailsBackdrop';
 import TorrentList from './TorrentList';
 import Search from './Search';
-// import Pager from './Pager';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
 import Menu from './Menu';
