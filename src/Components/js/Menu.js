@@ -85,8 +85,8 @@ class Menu extends Component {
           <div className={(type === 'subscriptions' ? 'selected' : '') + ' item'} onClick={() => this.selectItem('subscriptions')}><FaRssSquare/><span>Subscriptions</span></div>
           <div className="item disabled"></div>
           {status ? <div className="item" onClick={() => { window.open(status.plex, '_blank'); this.setVisible(false); }}>{plexIcon}<span>Plex</span></div> : null}
+          <div className="item" onClick={e => { e.stopPropagation(); this.props.addMagnet(); }}><FaMagnet/><span>Add Magnet</span></div>
           <div className="spacer"></div>
-          <div className="item" onClick={this.props.addMagnet}><FaMagnet/><span>Add Magnet</span></div>
           <div className="item" onClick={this.props.clearCache}><FaRecycle/><span>Clear Cache</span></div>
           <div className="item" onClick={this.props.upgrade}><FaPowerOff/><span>Upgrade Server</span></div>
 

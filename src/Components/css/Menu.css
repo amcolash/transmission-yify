@@ -61,23 +61,26 @@
 
 .menu .toggle {
   cursor: pointer;
-  transform: translateX(0.5em);
+  transform: translateX(0.75em);
   transition: all 0.25s;
   will-change: transform;
-}
-
-.menu .toggle .toggleButton {
-  padding: 0.35em 0;
 }
 
 .menu.hidden .toggle {
   transform: translateX(225%);
 }
 
-.menu.menu.hidden .toggle .toggleButton {
+.menu .toggle .toggleButton {
   padding: 0.35em;
   border-radius: 0.1em;
   transition: all 0.25s;
+}
+
+.menu.menu.hidden .toggle .toggleButton {
+  background: #555;
+}
+
+.menu .toggle .toggleButton:hover {
   background: #555;
 }
 
@@ -88,14 +91,9 @@
 .menu .toggle .warn {
   position: relative;
   top: -0.65em;
-  right: 0.5em;
-  margin-right: -0.75em;
-  font-size: 0.75em;
-}
-
-.menu.hidden .toggle .warn {
   right: 1em;
   margin-right: -1em;
+  font-size: 0.75em;
   pointer-events: none;
 }
 
