@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { DebounceInput } from 'react-debounce-input';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaTv, FaLaughBeam, FaSkullCrossbones, FaFilm } from 'react-icons/fa';
 import '../css/Search.css';
 import Spinner from './Spinner';
 
@@ -28,10 +28,29 @@ class Search extends Component {
             return a.label.localeCompare(b.label);
         });
 
+        let icon;
+        switch(type) {
+            case 'shows':
+                icon = <FaTv/>;
+                break;
+            case 'animes': 
+                icon = <FaLaughBeam/>;
+                break;
+            case 'pirate':
+                icon = <FaSkullCrossbones/>;
+                break;
+            default:
+            case 'movies':
+                icon = <FaFilm/>;
+                break;
+        }
+
         return (
             <div className="search">
                 <div className="form">
+
                     <div className="searchItem">
+                        {icon}
                         <span>Search</span>
                         <DebounceInput
                             value={search}
