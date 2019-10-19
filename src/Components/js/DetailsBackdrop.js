@@ -221,13 +221,13 @@ class DetailsBackdrop extends Component {
     }
 
     render() {
-        const { media, downloadTorrent, cancelTorrent, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
+        const { downloadTorrent, cancelTorrent, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, horribleSubs, season, maxSeason, youtubeId, loadingEpisodes,
             subscribing, otherVideos } = this.state;
-        
-        if (!media) return null;
 
+        const media = this.props.media || {};
+        
         const versions = getMovies(media, pb ? pb.torrents : [], type);
 
         const seasons = getSeasons(type, maxSeason, moreData);
@@ -248,7 +248,7 @@ class DetailsBackdrop extends Component {
 
         return (
             <Modal
-                open={media !== null}
+                open={this.props.media !== null}
                 modalId={'modalFullscreen'}
                 overlayId='overlay'
                 onClose={onCloseModal}
@@ -285,7 +285,7 @@ class DetailsBackdrop extends Component {
                                 {tmdbData.videos.results.map(v => {
                                     if (v.site === 'YouTube') {
                                         return (
-                                            <div className="video">
+                                            <div className="video" key={v.key}>
                                                 <img src={`https://img.youtube.com/vi/${v.key}/0.jpg`} alt="video thumbnail"
                                                     onClick={() => this.setState({youtubeId: v.key})}/>
                                                 <div className="title">{v.name}</div>
@@ -300,24 +300,29 @@ class DetailsBackdrop extends Component {
                     : null}
                     <div className="left">
                         <div className="info">
-                            <h3>{media.title}{type !== 'movies' && status && status.subscriptions ? (subscribing ?
-                                <span className="subscription"><Spinner visible/></span> :
-                                <FaRssSquare
-                                    className={`subscription ${hasSubscription(media.id, this.props.status.subscriptions) ? 'orange': 'gray'}`}
-                                    onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
-                                />) : null}
+                            <h3>
+                                {media.title || ''}
+                                {type !== 'movies' && status && status.subscriptions ? (subscribing ?
+                                    <span className="subscription"><Spinner visible/></span> :
+                                    <FaRssSquare
+                                        className={`subscription ${hasSubscription(media.id, this.props.status.subscriptions) ? 'orange': 'gray'}`}
+                                        onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
+                                    />)
+                                : null}
                             </h3>
-                            <h4>
-                                <Fragment>
-                                    <span>{details.header}</span>
-                                    <div className="mpaa-rating">{details.mpaa}</div>
-                                    {fileExists ? (
-                                        <div className="fileExists">
-                                            <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
-                                        </div>
-                                    ) : null}
-                                </Fragment>
-                            </h4>
+                            {details ? (
+                                <h4>
+                                    <Fragment>
+                                        <span>{details.header || ''}</span>
+                                        <div className="mpaa-rating">{details.mpaa}</div>
+                                        {fileExists ? (
+                                            <div className="fileExists">
+                                                <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
+                                            </div>
+                                        ) : null}
+                                    </Fragment>
+                                </h4>
+                            ) : null}
                             <Ratings moreData={moreData}/>
                             {details.trailer ? (
                                 <div className="trailer" onClick={e => {

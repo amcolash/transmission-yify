@@ -153,7 +153,8 @@ export function convertTime(min) {
     return (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
 }
 
-export function getDetails(media, moreData, tmdbData, type, maxSeason) {
+export function getDetails(m, moreData, tmdbData, type, maxSeason) {
+    let media = m || {};
     let genres;
     if (tmdbData && tmdbData.genres) {
         genres = tmdbData.genres.map(g => g.name);
@@ -182,8 +183,8 @@ export function getDetails(media, moreData, tmdbData, type, maxSeason) {
     }
     
     let header;
-    if (type === 'movies') header = `${media.year}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
-    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year}, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    if (type === 'movies') header = `${media.year || ''}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
+    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year || ''}, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
     
     const plot = (moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
     moreData.overview : (media.synopsis ? media.synopsis : ""));
