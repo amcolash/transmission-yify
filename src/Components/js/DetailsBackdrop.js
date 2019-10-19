@@ -200,7 +200,7 @@ class DetailsBackdrop extends Component {
     }
 
     render() {
-        const { media, downloadTorrent, cancelTorrent, getLink, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
+        const { media, downloadTorrent, cancelTorrent, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, youtubeId, loadingEpisodes,
             subscribing, otherVideos } = this.state;
@@ -357,7 +357,6 @@ class DetailsBackdrop extends Component {
                                                 version={version}
                                                 started={started}
                                                 getProgress={getProgress}
-                                                getLink={getLink}
                                                 getTorrent={getTorrent}
                                                 downloadTorrent={version => {
                                                     if (!fileExists || window.confirm("This file already exists in plex. Are you sure you want to download it again?")) downloadTorrent(version);
@@ -405,7 +404,6 @@ class DetailsBackdrop extends Component {
                                                                     version={version}
                                                                     started={started}
                                                                     getProgress={getProgress}
-                                                                    getLink={getLink}
                                                                     getTorrent={getTorrent}
                                                                     downloadTorrent={downloadTorrent}
                                                                     cancelTorrent={cancelTorrent}

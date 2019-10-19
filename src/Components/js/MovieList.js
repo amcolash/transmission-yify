@@ -495,7 +495,6 @@ class MovieList extends Component {
                         <TorrentList
                             torrents={torrents}
                             cancelTorrent={this.cancelTorrent}
-                            getLink={this.getLink}
                             getProgress={this.getProgress}
                             ref={instance => { this.torrentList = instance; }}
                         />
@@ -539,7 +538,6 @@ class MovieList extends Component {
                                                     started={started}
                                                     downloadTorrent={this.downloadTorrent}
                                                     cancelTorrent={this.cancelTorrent}
-                                                    getLink={this.getLink}
                                                     getProgress={this.getProgress}
                                                     getTorrent={this.getTorrent}
                                                 />

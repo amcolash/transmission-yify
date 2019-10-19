@@ -7,7 +7,7 @@ import '../css/Version.css';
 
 class Version extends Component {
     render() {
-        const { version, started, getProgress, getLink, getTorrent, downloadTorrent, cancelTorrent, hideInfo, hideBar } = this.props;
+        const { version, started, getProgress, getTorrent, downloadTorrent, cancelTorrent, hideInfo, hideBar } = this.props;
         
         return (
             <div className="version padding" key={version.url}>
@@ -26,7 +26,6 @@ class Version extends Component {
                     {getProgress(version.hashString) ? (
                         <Progress
                             torrent={getTorrent(version.hashString)}
-                            getLink={getLink}
                             cancelTorrent={cancelTorrent}
                             getProgress={getProgress}
                             hideInfo={hideInfo}

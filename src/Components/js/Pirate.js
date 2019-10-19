@@ -10,7 +10,7 @@ import '../css/Pirate.css';
 
 class Pirate extends Component {
     render() {
-      const { media, cancelTorrent, downloadTorrent, getLink, getProgress, getTorrent, started } = this.props;
+      const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started } = this.props;
 
       if (!media.magnetLink) return null;
 
@@ -52,7 +52,6 @@ class Pirate extends Component {
             {getProgress(hashString) ? (
               <Progress
                 torrent={getTorrent(hashString)}
-                getLink={getLink}
                 cancelTorrent={cancelTorrent}
                 getProgress={getProgress}
                 hideInfo
