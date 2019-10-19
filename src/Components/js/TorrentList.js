@@ -25,7 +25,7 @@ class TorrentList extends Component {
                             torrent={torrent}
                             cancelTorrent={cancelTorrent}
                             getProgress={getProgress}
-                            fullName={false}
+                            fullName={true}
                         />
                     )))}
                 </div>

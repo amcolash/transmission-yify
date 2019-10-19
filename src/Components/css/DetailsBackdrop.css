@@ -240,6 +240,11 @@ h4 {
   padding-top: 1em;
 }
 
+.episode svg {
+  vertical-align: top;
+  color: lime;
+}
+
 .padding {
   padding-left: 0.3em;
   padding-right: 0.3em;

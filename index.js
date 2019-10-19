@@ -40,6 +40,7 @@ let currentStatus = {
 let cache = {};
 let trackerCache = {};
 let eztvShows = [];
+let horribleSubsShows = [];
 let isUpgrading = false;
 
 // Figure out build time
@@ -240,30 +241,6 @@ app.get('/nyaa/:precache?', function(req, res) {
     if (req.params.precache) res.sendStatus(200);
 });
 
-app.get('/pirate/:search/:precache?', function(req, res) {
-    const search = req.params.search;
-    if (req.params.precache) {
-        res.sendStatus(200);
-        return;
-    }
-
-    // Add a simple cache here to make things faster on the client
-    if (trackerCache[search]) {
-        // cache for 6 hours
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-        res.send(trackerCache[search]);
-    } else {
-        searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
-            // cache for 6 hours
-            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-            res.send(results);
-            trackerCache[search];
-        }).catch(err => {
-            res.send({page:1,total:0,limit:30,torrents:[]});
-        });
-    }
-});
-
 app.get('/status', function (req, res)  { res.send(currentStatus); });
 app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
@@ -357,9 +334,33 @@ app.delete('/cache', function (req, res) {
     res.sendStatus(200);
 });
 
+app.get('/pirate/:search/:precache?', function(req, res) {
+    const search = req.params.search;
+    if (req.params.precache) {
+        res.sendStatus(200);
+        return;
+    }
+
+    // Add a simple cache here to make things faster on the client
+    if (trackerCache[search]) {
+        // cache for 6 hours
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+        res.send(trackerCache[search]);
+    } else {
+        searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
+            // cache for 6 hours
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+            res.send(results);
+            trackerCache[search];
+        }).catch(err => {
+            res.send({page:1,total:0,limit:30,torrents:[]});
+        });
+    }
+});
+
 app.get('/eztv/:search', function(req, res) {
     const search = req.params.search;
-    const match = searchEZTVShow(search);
+    const match = searchShow(search, eztvShows);
     
     if (match) {
         const url = match.url;
@@ -371,6 +372,30 @@ app.get('/eztv/:search', function(req, res) {
             res.send(trackerCache[url]);
         } else {
             getEZTVDetails(url).then(torrents => {
+                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+                res.send(torrents);
+                trackerCache[url] = torrents;
+            });
+        }
+    } else {
+        res.send({page:1,total:0,limit:30,torrents:[]});
+    }
+});
+
+app.get('/horriblesubs/:search', function(req, res) {
+    const search = req.params.search;
+    const match = searchShow(search, horribleSubsShows);
+    
+    if (match) {
+        const url = match.url;
+
+        // Add a simple cache here to make things faster on the client
+        if (trackerCache[url]) {
+            // cache for 6 hours
+            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+            res.send(trackerCache[url]);
+        } else {
+            getHorribleSubsDetails(url).then(torrents => {
                 if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
                 res.send(torrents);
                 trackerCache[url] = torrents;
@@ -405,7 +430,7 @@ function filterTV(url, data) {
     if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
         (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
         data.results = data.results.filter(show => {
-            return searchEZTVShow(show.original_name) !== undefined;
+            return searchShow(show.original_name, eztvShows) !== undefined;
         });
     }
 
@@ -531,7 +556,7 @@ async function downloadSubscription(id, onlyLast) {
     writeSubscriptions();
 
     // find torrents for the show
-    const matchedShow = searchEZTVShow(subscription.title);
+    const matchedShow = searchShow(subscription.title, eztvShows);
     getEZTVDetails(matchedShow.url).then(data => {
         const torrents = data.torrents;
         
@@ -672,6 +697,19 @@ function searchPirateBay(query, p, filter, endpoint) {
     });
 }
 
+function searchShow(search, source) {
+    let matched;
+    source.forEach(s => {
+        const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
+        const match = (1 - (lev / Math.max(s.title.length, search.length)));
+        if (match > 0.95) {
+            matched = s;
+        }
+    });
+
+    return matched;
+}
+
 function getEZTVShows() {
     axios.get('https://eztv.io/showlist/').then(response => {
         const $ = cheerio.load(response.data);
@@ -697,17 +735,28 @@ function getEZTVShows() {
     });
 }
 
-function searchEZTVShow(search) {
-    let matched;
-    eztvShows.forEach(s => {
-        const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
-        const match = (1 - (lev / Math.max(s.title.length, search.length)));
-        if (match > 0.95) {
-            matched = s;
-        }
-    });
+function getHorribleSubsShows() {
+    axios.get('https://horriblesubs.info/shows/').then(response => {
+        const $ = cheerio.load(response.data);
+        
+        const wrapper = $('.shows-wrapper').eq(0);
+        const items = $('.ind-show', wrapper);
 
-    return matched;
+        const shows = [];
+
+        items.each((index, el) => {
+            const row = $('a', el);
+            let title = row.text();
+            shows.push({
+                title,
+                url: 'https://horriblesubs.info/shows' + row.attr('href')
+            });
+        });
+
+        horribleSubsShows = shows;
+    }).catch(err => {
+        console.error(err);
+    });
 }
 
 function getEZTVDetails(url) {
@@ -747,6 +796,52 @@ function getEZTVDetails(url) {
             });
 
             resolve({page: 1, total: torrents.length, limit: torrents.length, torrents});
+        }).catch(err => {
+            console.error(err);
+            resolve({page: 1, total: 0, limit: 30, torrents: []});
+        });
+    });
+}
+
+function getHorribleSubsDetails(url) {
+    return new Promise((resolve, reject) => {
+        axios.get(url).then(response => {
+            const match = response.data.match(/var hs_showid = \d+;/g);
+            if (match.length  === 1) {
+                const showId = Number.parseInt(match[0].match(/\d+/g)[0]);
+                axios.get('https://horriblesubs.info/api.php?method=getshows&type=batch&showid=' + showId).then(response => {
+                    const torrents = [];
+
+                    if (response.data !== 'The are no batches for this show yet') {
+                        const $ = cheerio.load(response.data);
+                        const label = $('.rls-label').text();
+                        const date = $('.rls-date').text();
+                        const episodes = $('strong').text().replace('-', ' - ');
+                        
+                        const links = $('.rls-link');
+                        links.each((index, el) => {
+                            const quality = $('.rls-link-label', el).text().trim().replace(/:/g, '');
+                            const magnet = $('.hs-magnet-link a', el).attr('href');
+
+                            torrents.push({
+                                filename: label,
+                                quality,
+                                magnet,
+                                date,
+                                link: url,
+                                episodes
+                            });
+                        });
+                    }
+
+                    resolve({page: 1, total: torrents.length, limit: torrents.length, torrents});
+                }).catch(err => {
+                    console.error(err);
+                    resolve({page: 1, total: 0, limit: 30, torrents: []});    
+                });
+            } else {
+                resolve({page: 1, total: 0, limit: 30, torrents: []});
+            }
         }).catch(err => {
             console.error(err);
             resolve({page: 1, total: 0, limit: 30, torrents: []});
@@ -921,6 +1016,7 @@ function initStatusWatchers() {
         }, interval * 30 * 60);
     }, IS_DOCKER ? interval * 30 : interval * 5);
 
-    // Refresh list of eztv shows every day
+    // Refresh list of eztv / horriblesubs shows every day
     setIntervalImmediately(() => getEZTVShows(), 1000 * 60 * 60 * 24);
+    setIntervalImmediately(() => getHorribleSubsShows(), 1000 * 60 * 60 * 24);
 }

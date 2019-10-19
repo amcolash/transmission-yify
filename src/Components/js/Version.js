@@ -10,17 +10,19 @@ class Version extends Component {
         const { version, started, getProgress, getTorrent, downloadTorrent, cancelTorrent, hideInfo, hideBar } = this.props;
         
         return (
-            <div className="version padding" key={version.url}>
+            <div className="version padding" key={version.hashString}>
                 <div className='qualityPeers'>
                     <b>{version.quality}</b>
-                    <span className='peers'>
-                        {
-                            version.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
-                            version.seeds < 20 ? <FaBatteryQuarter className='red'/> :
-                            version.seeds < 50 ? <FaBatteryHalf className='orange'/> :
-                                                <FaBatteryFull className='green'/>
-                        }
-                    </span>
+                    {version.seeds !== undefined ? (
+                        <span className='peers'>
+                            {
+                                version.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
+                                version.seeds < 20 ? <FaBatteryQuarter className='red'/> :
+                                version.seeds < 50 ? <FaBatteryHalf className='orange'/> :
+                                                    <FaBatteryFull className='green'/>
+                            }
+                        </span>
+                    ) : null}
                 </div>
                 <div className="leftMargin">
                     {getProgress(version.hashString) ? (
@@ -32,7 +34,7 @@ class Version extends Component {
                             hideBar={hideBar}
                         />
                     ) : (
-                        <button className="orange download" onClick={() => downloadTorrent(version)} url={version.url}>
+                        <button className="orange download" onClick={() => downloadTorrent(version)} /*url={version.url}*/>
                             {started.indexOf(version.hashString) !== -1 ? (
                                 <Spinner visible noMargin button />
                             ) : (

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube, FaChevronDown, FaChevronUp, FaStar } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import axios from 'axios';
 import YouTube from 'react-youtube';
@@ -9,7 +9,7 @@ import Version from './Version';
 import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
-import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, hasSubscription, parseMedia } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, hasSubscription, parseMedia, parseHorribleSubs } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
@@ -20,8 +20,8 @@ class DetailsBackdrop extends Component {
     }
 
     getDefaultState() {
-        return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true,
-            loadingEpisodes: false, subscribing: false, youtubeId: null, otherVideos: false};
+        return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, horribleSubs: null, season: 1, maxSeason: 1,
+            showCover: true, loadingEpisodes: false, subscribing: false, youtubeId: null, otherVideos: false};
     }
 
     getEztv() {
@@ -31,8 +31,6 @@ class DetailsBackdrop extends Component {
             this.handleEztv(Cache[url]);
         } else {
             axios.get(url).then(response => {
-                // Make sure that the show was found and we are not just getting
-                // the newest shows on the site. This is a bad api design for them :(
                 const data = response.data;
                 Cache[url] = data;
 
@@ -97,6 +95,28 @@ class DetailsBackdrop extends Component {
         });
     }
 
+    getHorribleSubs() {
+        const url = `${this.props.server}/horribleSubs/${this.props.media.title}`;
+        
+        if (Cache[url]) {
+            this.handleHorribleSubs(Cache[url]);
+        } else {
+            axios.get(url).then(response => {
+                const data = response.data;
+                Cache[url] = data;
+
+                this.handleHorribleSubs(data);
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+    }
+
+    handleHorribleSubs(data) {
+        const parsed = parseHorribleSubs(data);
+        this.setState({horribleSubs: parsed});
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { media, type } = this.props;
 
@@ -116,6 +136,7 @@ class DetailsBackdrop extends Component {
                     });
 
                     this.getNyaa(media.title, 1);
+                    this.getHorribleSubs();
                 }).catch(err => {
                     console.error(err);
                     this.setState({ moreData: "ERROR" });
@@ -202,7 +223,7 @@ class DetailsBackdrop extends Component {
     render() {
         const { media, downloadTorrent, cancelTorrent, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
             files, status } = this.props;
-        const { tmdbData, moreData, showCover, eztv, nyaa, pb, season, maxSeason, youtubeId, loadingEpisodes,
+        const { tmdbData, moreData, showCover, eztv, nyaa, pb, horribleSubs, season, maxSeason, youtubeId, loadingEpisodes,
             subscribing, otherVideos } = this.state;
         
         if (!media) return null;
@@ -387,6 +408,27 @@ class DetailsBackdrop extends Component {
                                                     </button>
                                                 ) : null}
                                             </h3>
+                                            {horribleSubs && horribleSubs.torrents.length > 0 ? (
+                                                <div>
+                                                    <h4 className="episode"><FaStar/> Horrible Subs Bundle (ep {horribleSubs.torrents[0].episodes}) <FaStar/></h4>
+                                                    <div className="versions">
+                                                        {horribleSubs.torrents.map(t => (
+                                                            <Version
+                                                                key={t.filename + t.quality}
+                                                                version={t}
+                                                                started={started}
+                                                                getProgress={getProgress}
+                                                                getTorrent={getTorrent}
+                                                                downloadTorrent={downloadTorrent}
+                                                                cancelTorrent={cancelTorrent}
+                                                                hideInfo={true}
+                                                                hideBar={true}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <hr/>
+                                                </div>
+                                            ) : null}
                                             {type === 'shows' && moreData && moreData.seasons && moreData.seasons[season-1] ? (
                                                 <span>{moreData.seasons[season-1].overview}</span>
                                             ) : null}

@@ -274,3 +274,17 @@ export function parseMedia(media, type) {
 
     return media;
 }
+
+export function parseHorribleSubs(data) {
+    const parsedTorrents = data.torrents.map(t => {
+        return {
+            ...t,
+            hashString: magnet.decode(t.magnet).infoHash.toLowerCase()
+        }
+    });
+
+    return {
+        ...data,
+        torrent: parsedTorrents
+    };
+}
