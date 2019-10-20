@@ -413,11 +413,11 @@ class DetailsBackdrop extends Component {
                                                     </button>
                                                 ) : null}
                                             </h3>
-                                            {horribleSubs && horribleSubs.torrents.length > 0 ? (
+                                            {horribleSubs && horribleSubs.batches.length > 0 ? (
                                                 <div>
-                                                    <h4 className="episode"><FaStar/> Horrible Subs Bundle (ep {horribleSubs.torrents[0].episodes}) <FaStar/></h4>
+                                                    <h4 className="episode"><FaStar/> Horrible Subs Bundle (ep {horribleSubs.batches[0].episodes}) <FaStar/></h4>
                                                     <div className="versions">
-                                                        {horribleSubs.torrents.map(t => (
+                                                        {horribleSubs.batches.map(t => (
                                                             <Version
                                                                 key={t.filename + t.quality}
                                                                 version={t}

@@ -803,6 +803,31 @@ function getEZTVDetails(url) {
     });
 }
 
+function parseHorribleSubsVersion(data, url) {
+    const $ = cheerio.load(data);
+    const label = $('.rls-label').text();
+    const date = $('.rls-date').text();
+    const episodes = $('strong').text().replace('-', ' - ');
+    
+    const links = $('.rls-link');
+    const versions = [];
+    links.each((index, el) => {
+        const quality = $('.rls-link-label', el).text().trim().replace(/:/g, '');
+        const magnet = $('.hs-magnet-link a', el).attr('href');
+
+        versions.push({
+            filename: label,
+            quality,
+            magnet,
+            date,
+            link: url,
+            episodes
+        });
+    });
+
+    return versions;
+}
+
 function getHorribleSubsDetails(url) {
     return new Promise((resolve, reject) => {
         axios.get(url).then(response => {
@@ -810,41 +835,25 @@ function getHorribleSubsDetails(url) {
             if (match.length  === 1) {
                 const showId = Number.parseInt(match[0].match(/\d+/g)[0]);
                 axios.get('https://horriblesubs.info/api.php?method=getshows&type=batch&showid=' + showId).then(response => {
-                    const torrents = [];
+                    let batches = [];
+                    let torrents = [];
 
                     if (response.data !== 'The are no batches for this show yet') {
-                        const $ = cheerio.load(response.data);
-                        const label = $('.rls-label').text();
-                        const date = $('.rls-date').text();
-                        const episodes = $('strong').text().replace('-', ' - ');
-                        
-                        const links = $('.rls-link');
-                        links.each((index, el) => {
-                            const quality = $('.rls-link-label', el).text().trim().replace(/:/g, '');
-                            const magnet = $('.hs-magnet-link a', el).attr('href');
-
-                            torrents.push({
-                                filename: label,
-                                quality,
-                                magnet,
-                                date,
-                                link: url,
-                                episodes
-                            });
-                        });
+                        batches = parseHorribleSubsVersion(response.data, url);
                     }
 
-                    resolve({page: 1, total: torrents.length, limit: torrents.length, torrents});
+                    const total = torrents.length + batches.length;
+                    resolve({page: 1, total, limit: total, torrents, batches});
                 }).catch(err => {
                     console.error(err);
-                    resolve({page: 1, total: 0, limit: 30, torrents: []});    
+                    resolve({page: 1, total: 0, limit: 30, torrents: [], batches: []});    
                 });
             } else {
-                resolve({page: 1, total: 0, limit: 30, torrents: []});
+                resolve({page: 1, total: 0, limit: 30, torrents: [], batches: []});
             }
         }).catch(err => {
             console.error(err);
-            resolve({page: 1, total: 0, limit: 30, torrents: []});
+            resolve({page: 1, total: 0, limit: 30, torrents: [], batches: []});
         });
     });
 }

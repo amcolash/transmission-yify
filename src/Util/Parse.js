@@ -277,7 +277,7 @@ export function parseMedia(media, type) {
 }
 
 export function parseHorribleSubs(data) {
-    const parsedTorrents = data.torrents.map(t => {
+    const parsedTorrents = data.batches.map(t => {
         return {
             ...t,
             hashString: magnet.decode(t.magnet).infoHash.toLowerCase()
@@ -286,6 +286,6 @@ export function parseHorribleSubs(data) {
 
     return {
         ...data,
-        torrent: parsedTorrents
+        batches: parsedTorrents
     };
 }
