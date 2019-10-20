@@ -293,7 +293,14 @@ class MovieList extends Component {
                 if (data.length === 0) lastPage = true;
             }
 
-            if (page > 1) data = results.concat(data);
+            // Concat and filter dupes if infiniscrolling
+            if (page > 1) {
+                let filtered = [];
+                results.concat(data).forEach(d => {
+                    if (!filtered.find(f => f.title === d.title)) filtered.push(d);
+                });
+                data = filtered;
+            }
     
             // Show media after loaded
             if (process.env.NODE_ENV === 'development' && showMedia) {
