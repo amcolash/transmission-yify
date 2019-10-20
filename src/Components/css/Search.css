@@ -23,6 +23,7 @@
 .searchItem .iconHover {
     position: relative;
     display: inline-block;
+    margin-left: 1em;
 }
 
 .searchItem .iconHover:hover .icons {
@@ -32,13 +33,14 @@
 
 .searchItem .iconHover .mainIcon {
     padding: 0.5em;
+    margin-left: 0;
 }
 
 .searchItem .iconHover .icons {
     display: flex;
     position: absolute;
     top: 1.5em;
-    left: -2.5em;
+    left: -3.25em;
     background: #333;
     padding: 0.25em;
     border-radius: 0.5em;
@@ -51,6 +53,7 @@
     padding: 0.25em;
     margin: 0.25em;
     border-radius: 0.25em;
+    transition: all 0.5s;
 }
 
 .searchItem .iconHover .icons svg.active {
