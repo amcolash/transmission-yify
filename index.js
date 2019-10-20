@@ -12,8 +12,9 @@ const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
 const PlexAPI = require("plex-api");
-const ptn = require('parse-torrent-name');
 const levenshtein = require('js-levenshtein');
+
+const ptn = require('./src/Util/TorrentName');
 
 require('dotenv').config();
 

@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { FaTrash, FaExclamationCircle } from 'react-icons/fa';
-import * as  ptn  from 'parse-torrent-name';
+import * as ptn from '../../Util/TorrentName';
 
 import '../css/Progress.css'; 
 

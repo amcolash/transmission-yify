@@ -27,7 +27,7 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                // type: 'downloads',
+                // type: 'animes',
                 // search: 'castlevania'
             };
         }

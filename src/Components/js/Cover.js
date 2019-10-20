@@ -122,7 +122,7 @@ class Cover extends Component {
                     {type === 'movies' ? (
                         <div className="quality">
                             {versions.length > 0 ? (
-                                versions.map(version => (
+                                versions.reverse().map(version => (
                                     <Fragment
                                         key={version.hashString}
                                     >

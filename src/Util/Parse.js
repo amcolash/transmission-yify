@@ -1,5 +1,5 @@
 import magnet from 'magnet-uri';
-import * as  ptn  from 'parse-torrent-name';
+import * as ptn from '../Util/TorrentName';
 import levenshtein from 'js-levenshtein';
 
 export function getMovies(media, pb, type) {
@@ -21,26 +21,18 @@ export function getMovies(media, pb, type) {
         
         let shouldAdd = true;
         let isCam = parsed.quality.toLowerCase().indexOf('cam') !== -1;
-        if (parsed.resolution === '2160p' || (hasNonCam && isCam)) {
+
+        // Not going to show 2160p or 4k since they are UUUUGE
+        const parsedResolution = Number.parseInt(parsed.resolution);
+        if (parsedResolution < 480 || parsedResolution > 1080 || (hasNonCam && isCam)) {
             shouldAdd = false;
         }
         
         if (shouldAdd) {
-            let sort = 0;
-            
-            // Not going to show 2160p since they are UUUUGE
-            switch (parsed.resolution) {
-                case "1080p": sort = 3; break;
-                case "720p": sort = 2; break;
-                case "480p": sort = 1; break;
-                default: sort = 0; break;
-            }
-            
-            if (sort === 0 || (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeds)) return;
+            if (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeds) return;
             
             versions[parsed.resolution] = {
                 quality: `${parsed.resolution} ${isCam ? '(CAM)' : ''}`,
-                sort: sort,
                 peers: t.leeches,
                 seeds: t.seeds,
                 ratio: t.leeches > 0 ? (t.seeds / t.leeches).toFixed(3) : 0,
@@ -53,9 +45,7 @@ export function getMovies(media, pb, type) {
     });
     
     // Sort the versions
-    return Object.values(versions).sort(function(a, b) {
-        return b.sort - a.sort;
-    });
+    return Object.values(versions).sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality));
 }
 
 export function getSeasons(type, maxSeason, moreData) {
@@ -112,20 +102,11 @@ export function getEpisodes(torrents, moreData, type) {
                 let hash = magnet.decode(url).infoHash;
                 if (hash) hash = hash.toLowerCase();
                 
-                let sort = 0;
-                switch (parsed.resolution) {
-                    case "1080p": sort = 3; break;
-                    case "720p": sort = 2; break;
-                    case "480p": sort = 1; break;
-                    default: sort = 0; break;
-                }
-                
                 episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
                     seeds: seeds,
                     peers: peers,
                     url: url,
                     hashString: hash,
-                    sort: sort,
                     quality: parsed.resolution,
                     tv: true
                 };
@@ -134,7 +115,7 @@ export function getEpisodes(torrents, moreData, type) {
         
         episodes.forEach(season => {
             season.forEach(episode => {
-                episode.torrents = Object.values(episode.torrents).sort((a, b) => b.sort - a.sort);
+                episode.torrents = Object.values(episode.torrents).sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality));
             });
         });
     }
@@ -183,8 +164,12 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
     }
     
     let header;
-    if (type === 'movies') header = `${media.year || ''}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
-    else header = `${(moreData && moreData.Year) ? moreData.Year : media.year || ''}, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    if (type === 'movies') {
+        header = `${media.year || ''}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
+    } else {
+        header = `${(moreData && moreData.Year) ? moreData.Year : media.year || ''}`;
+        if (type === 'shows') header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    }
     
     const plot = (moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
     moreData.overview : (media.synopsis ? media.synopsis : ""));

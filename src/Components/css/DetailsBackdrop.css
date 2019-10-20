@@ -201,6 +201,7 @@
 
 .versions {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .versions .version {

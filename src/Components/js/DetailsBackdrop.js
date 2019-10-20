@@ -82,6 +82,9 @@ class DetailsBackdrop extends Component {
     }
 
     handleNyaa(data, title, page, limit) {
+        // Try to handle case where we were loading different data and now are trying to update incorrectly
+        if (title !== this.props.media.title) return;
+
         let nyaa = this.state.nyaa || data;
         if (nyaa !== data) data.torrents.forEach(t => nyaa.torrents.push(t));
 

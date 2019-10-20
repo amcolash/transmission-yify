@@ -12,7 +12,7 @@
     "express-http-proxy": "^1.5.1",
     "express-http-to-https": "^1.1.4",
     "js-levenshtein": "^1.1.6",
-    "parse-torrent-name": "^0.5.4",
+    "parse-torrent-title": "^1.2.0",
     "plex-api": "^5.2.5",
     "socket.io": "^2.2.0",
     "transmission": "^0.4.9"
