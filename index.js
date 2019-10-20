@@ -402,7 +402,7 @@ app.get('/horriblesubs/:search', function(req, res) {
             });
         }
     } else {
-        res.send({page:1,total:0,limit:30,torrents:[]});
+        res.send({page:1,total:0,limit:30,torrents:[], batches: []});
     }
 });
 
