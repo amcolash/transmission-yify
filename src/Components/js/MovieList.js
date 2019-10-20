@@ -122,7 +122,8 @@ class MovieList extends Component {
     }
 
     updateScroll = () => {
-        let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight);
+        let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight + 0.0001);
+        if (document.documentElement.scrollHeight === document.documentElement.clientHeight) scroll = 1;
         if (!isNaN(scroll)) {
             if (scroll > 0.90 && !this.state.isSearching && !this.state.lastPage) {
                 this.changePage(1);
@@ -291,6 +292,9 @@ class MovieList extends Component {
                     return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
                 });
                 if (data.length === 0) lastPage = true;
+            } else if (type === 'movies' || type === 'shows') {
+                // Filter by popularity and vote count to remove obscure results
+                data = data.filter(d => (d.popularity > 1 && d.vote_count > 3));
             }
 
             // Concat and filter dupes if infiniscrolling
@@ -302,8 +306,11 @@ class MovieList extends Component {
                 data = filtered;
             }
     
-            // Show media after loaded
-            if (process.env.NODE_ENV === 'development' && showMedia) {
+            // Safety check if we need to load more data since things were filtered and does not fill client height
+            setTimeout(() => this.updateScroll(), 1000);
+
+            // Show media after loaded, only on first load
+            if (process.env.NODE_ENV === 'development' && showMedia && !this.state.isLoaded) {
                 setTimeout(() => this.setState({media: data[0]}), 500);
             }
 
