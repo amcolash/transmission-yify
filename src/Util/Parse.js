@@ -262,8 +262,16 @@ export function parseMedia(media, type) {
     // only try to do fancy stuff if not a standard year
     if (media.year && !media.year.toString().match(/^\d{4}$/)) media.year = new Date(media.year).getFullYear();
 
+    // figure out title, filter out some characters
     media.title = media.title || media.name || media.original_title || '?';
     media.title = media.title.replace(/&amp;/g, '&');
+
+    // remove year from title if needed. fix year if needed
+    const titleYear = media.title.match(/\((19|20)[0-9]{2}\)/);
+    if (titleYear) {
+        media.title.replace(/\((19|20)[0-9]{2}\)/, '');
+        if (!media.year) media.year = new Date(titleYear).getFullYear();
+    }
     
     // TMDB does not add an absolute url to returned poster paths
     if (media.poster_path && media.poster_path.indexOf('http') === -1) {
