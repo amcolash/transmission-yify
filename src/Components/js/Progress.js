@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { FaTrash, FaExclamationCircle, FaArchive } from 'react-icons/fa';
+import { FaTrash, FaExclamationCircle } from 'react-icons/fa';
 import * as  ptn  from 'parse-torrent-name';
+
+import '../css/Progress.css'; 
 
 class Progress extends Component {
     
@@ -22,24 +24,22 @@ class Progress extends Component {
         const peers = torrent.peersSendingToUs;
 
         return (
-            <div className="progress">
-                {hideInfo ? null :  <span>{name}</span>}
+            <div className={!hideInfo ? 'progressFull': 'progress'}>
+                {hideInfo ? null : <Fragment><div className="filename">{name}</div><div className="spacer"></div></Fragment>}
+                {!hideInfo && progress < 99 ? (
+                    <div className={"status " + (speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red")}>
+                        {speed < 0.15 ? (
+                            <FaExclamationCircle/>
+                        ) : null}
+                        {speed} MB/s, peers: {peers}
+                    </div>
+                ) : null}
                 {hideBar ? null : <Fragment>
                     <progress value={progress > 0 ? progress : null } max="100" />
-                    <span>{progress}% </span>
+                    <div className="percent">{progress}% </div>
                 </Fragment>}
-                {!hideInfo && progress < 99 ? (
-                    <span className={speed > 0.25 ? "green" : speed > 0.125 ? "orange" : "red"}>
-                        {speed < 0.15 ? (
-                            <FaExclamationCircle
-                                style={{ paddingRight: "0.25em" }}
-                            />
-                        ) : null}
-                        [{speed} MB/s], peers: {peers}
-                    </span>
-                ) : null}
                 <button className="red" onClick={() => cancelTorrent(torrent.hashString, true)}><FaTrash/></button>
-                {progress >= 100 ? <button className="green" onClick={() => cancelTorrent(torrent.hashString, false)}><FaArchive/></button> : null}
+                {/* {progress >= 100 ? <button className="green" onClick={() => cancelTorrent(torrent.hashString, false)}><FaArchive/></button> : null} */}
             </div>
         );
     }

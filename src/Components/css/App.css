@@ -46,6 +46,8 @@ button:hover, .pointer {
 progress {
     margin: 0 0.5em;
     filter: grayscale();
+    width: 10em;
+    min-width: 10em;
 }
 
 ::-webkit-scrollbar {
@@ -98,4 +100,8 @@ input {
 
 select {
     height: 2.1em;
+}
+
+.spacer {
+    flex: 1;
 }

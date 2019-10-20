@@ -1,0 +1,36 @@
+.progressFull {
+  padding: 0.3em 0.5em;
+  margin: 0.75em 0;
+  background-color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90vw;
+  max-width: 1100px;
+  border-radius: 0.2em;
+}
+
+.progressFull .filename {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 0.25em;
+}
+
+.progressFull .status {
+  white-space: nowrap;
+}
+
+.progressFull .percent {
+  width: 3em;
+  min-width: 3em;
+}
+
+.progressFull .status svg {
+  padding-right: 0.5em;
+  vertical-align: top;
+}
+
+.progressFull div {
+  margin: 0 0.5em;
+}

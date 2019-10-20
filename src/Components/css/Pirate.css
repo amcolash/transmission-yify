@@ -12,6 +12,7 @@
   align-items: center;
   width: 90vw;
   max-width: 1100px;
+  border-radius: 0.2em;
 }
 
 .pirateRow .title {

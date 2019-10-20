@@ -27,8 +27,8 @@ class MovieList extends Component {
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
-                type: 'animes',
-                search: 'castlevania'
+                // type: 'downloads',
+                // search: 'castlevania'
             };
         }
 
@@ -449,6 +449,7 @@ class MovieList extends Component {
                 <div className="message">
                     {(error.message !== "Cannot access transmission") ? (
                         <Fragment>
+                            <span>Whoops something went wrong!</span>
                             <br/>
                             <button onClick={() => document.location.reload()}>Reload Page</button>
                         </Fragment>
