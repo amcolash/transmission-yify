@@ -21,26 +21,30 @@
   text-overflow: ellipsis;
 }
 
-.pirateRow div:not(.spinner) {
+.pirateRow div:not(.spinner):not(.spacer) {
   margin: 0 0.5em;
 }
 
 .pirateRow .progress {
   display: flex;
   align-items: center;
-  margin: 0;
+  margin: 0 !important;
+}
+
+.pirateRow .size, .pirateRow .categories {
+  white-space: nowrap;
 }
 
 .pirateRow .spacer {
   flex-grow: 1;
 }
 
-.categories {
-  min-width: 7em;
+.pirateRow .categories {
+  min-width: 8em;
 }
 
 @media (max-width: 900px) {
-  .size, .categories {
+  .pirateRow .size, .pirateRow .categories {
     display: none;
   }
   .pirateRow div {
