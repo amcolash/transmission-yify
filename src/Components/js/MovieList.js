@@ -284,13 +284,18 @@ class MovieList extends Component {
                 return parseMedia(media, type);
             });
             
-            // The search filtering is not great for kitsu :(
-            if (type === 'animes' && search.length > 0) {
-                data = data.filter(media => {
-                    const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
-                    const match = (1 - (lev / Math.max(search.length, media.title.length)));
-                    return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
-                });
+            if (type === 'animes') {
+                // Filter out non-tv anime
+                data = data.filter(media => media.attributes.subtype === 'TV');
+                
+                // The search filtering is not great for kitsu :(
+                if (search.length > 0) {
+                    data = data.filter(media => {
+                        const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
+                        const match = (1 - (lev / Math.max(search.length, media.title.length)));
+                        return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
+                    });
+                }
                 if (data.length === 0) lastPage = true;
             } else if (type === 'movies' || type === 'shows') {
                 // Filter by popularity and vote count to remove obscure results
@@ -543,7 +548,7 @@ class MovieList extends Component {
                             />
         
                             <div className="movie-list">
-                                {isSearching ? null : (
+                                {isSearching && this.state.page === 1 ? null : (
                                     type === 'pirate' ? (
                                         results && results.torrents && results.torrents.length > 0 ? (
                                             <div className="pirateList">
