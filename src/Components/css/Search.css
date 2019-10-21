@@ -23,7 +23,8 @@
 .searchItem .iconHover {
     position: relative;
     display: inline-block;
-    margin-left: 1em;
+    margin-left: 1.1em;
+    margin-right: -0.5em;
 }
 
 .searchItem .iconHover:hover .icons {
@@ -34,6 +35,10 @@
 .searchItem .iconHover .mainIcon {
     padding: 0.5em;
     margin-left: 0;
+}
+
+.searchItem .iconHover .mainIcon svg {
+    vertical-align: top;
 }
 
 .searchItem .iconHover .icons {

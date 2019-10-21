@@ -96,10 +96,12 @@ input:not(:disabled):hover, select:not(:disabled):hover {
 }
 
 input {
+    width: 11.25em;
     height: 1.5em;
 }
 
 select {
+    width: 8em;
     height: 2.1em;
 }
 

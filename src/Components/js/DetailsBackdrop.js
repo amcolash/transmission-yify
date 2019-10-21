@@ -67,9 +67,6 @@ class DetailsBackdrop extends Component {
         const limit = 50;
         const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
-        // Not sure about this one... Seems reasonable
-        if (this.state.horribleSubs) return;
-
         if (Cache[url]) {
             this.handleNyaa(Cache[url], title, page, limit);
         } else {
@@ -123,7 +120,7 @@ class DetailsBackdrop extends Component {
         let nyaa = this.state.nyaa || parsed;
         if (nyaa !== parsed) nyaa.torrents.push(...parsed.torrents);
 
-        this.setState({horribleSubs: parsed.batches, nyaa, loadingEpisodes: false});
+        this.setState({horribleSubs: parsed.batches, nyaa});
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -137,7 +134,7 @@ class DetailsBackdrop extends Component {
                         moreData: {
                             CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
                             Plot: data.attributes.synopsis,
-                            Rated: data.attributes.rating,
+                            Rated: data.attributes.ageRating,
                             Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
                             EpisodeCount: data.attributes.episodeCount
                         },

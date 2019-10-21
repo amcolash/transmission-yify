@@ -703,9 +703,7 @@ function searchShow(search, source) {
     source.forEach(s => {
         const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
         const match = (1 - (lev / Math.max(s.title.length, search.length)));
-        if (match > 0.95) {
-            matched = s;
-        }
+        if (match > 0.9) matched = s;
     });
 
     return matched;

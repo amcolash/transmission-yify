@@ -260,10 +260,10 @@ export function parseMedia(media, type) {
     media.title = media.title.replace(/&amp;/g, '&');
 
     // remove year from title if needed. fix year if needed
-    const titleYear = media.title.match(/\((19|20)[0-9]{2}\)/);
-    if (titleYear) {
-        media.title.replace(/\((19|20)[0-9]{2}\)/, '');
-        if (!media.year) media.year = new Date(titleYear).getFullYear();
+    const titleYear = media.title.match(/\((19|20)\d{2}\)/);
+    if (titleYear && titleYear.length > 0) {
+        media.title = media.title.replace(/\((19|20)\d{2}\)/, '');
+        if (!media.year) media.year = new Date(Number.parseInt(titleYear[0].replace(/\(|\)/g, ''))).getFullYear();
     }
     
     // TMDB does not add an absolute url to returned poster paths

@@ -28,7 +28,7 @@ class MovieList extends Component {
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
                 // type: 'animes',
-                // search: 'Noragami'
+                // search: 'One punch man'
             };
         }
 
