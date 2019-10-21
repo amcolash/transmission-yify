@@ -67,6 +67,9 @@ class DetailsBackdrop extends Component {
         const limit = 50;
         const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
+        // Not sure about this one... Seems reasonable
+        if (this.state.horribleSubs) return;
+
         if (Cache[url]) {
             this.handleNyaa(Cache[url], title, page, limit);
         } else {
@@ -83,10 +86,10 @@ class DetailsBackdrop extends Component {
 
     handleNyaa(data, title, page, limit) {
         // Try to handle case where we were loading different data and now are trying to update incorrectly
-        if (title !== this.props.media.title) return;
+        if (!this.props.media || title !== this.props.media.title) return;
 
         let nyaa = this.state.nyaa || data;
-        if (nyaa !== data) data.torrents.forEach(t => nyaa.torrents.push(t));
+        if (nyaa !== data) nyaa.torrents.push(...data.torrents);
 
         this.setState({nyaa: nyaa}, () => {
             // If there are more pages, get them
@@ -117,7 +120,10 @@ class DetailsBackdrop extends Component {
 
     handleHorribleSubs(data) {
         const parsed = parseHorribleSubs(data);
-        this.setState({horribleSubs: parsed});
+        let nyaa = this.state.nyaa || parsed;
+        if (nyaa !== parsed) nyaa.torrents.push(...parsed.torrents);
+
+        this.setState({horribleSubs: parsed.batches, nyaa, loadingEpisodes: false});
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -277,11 +283,11 @@ class DetailsBackdrop extends Component {
                                 onEnd={() => this.setState({youtubeId: null})}/>
                         </div>
                     ) : null}
-                    {tmdbData && tmdbData.videos ?
+                    {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ?
                         <div className={"otherVideos" + (!otherVideos ? " hidden" : "")} onClick={e => e.stopPropagation()}>
                             <div className="toggle">
                                 <span onClick={e => { e.stopPropagation(); this.setState({otherVideos: !this.state.otherVideos})}}>
-                                    <FaYoutube className="red"/> YouTube Videos {otherVideos ? <FaChevronDown/> : <FaChevronUp/>}
+                                    <FaYoutube className="red"/> YouTube Extras {otherVideos ? <FaChevronDown/> : <FaChevronUp/>}
                                 </span>
                             </div>
                             <div className="videoContainer">
@@ -416,11 +422,15 @@ class DetailsBackdrop extends Component {
                                                     </button>
                                                 ) : null}
                                             </h3>
-                                            {horribleSubs && horribleSubs.batches.length > 0 ? (
+                                            {horribleSubs && horribleSubs.length > 0 ? (
                                                 <div>
-                                                    <h4 className="episode"><FaStar/> Horrible Subs Bundle (ep {horribleSubs.batches[0].episodes}) <FaStar/></h4>
+                                                    <h4 className="episode">
+                                                        <FaStar className="purple"/>
+                                                        Horrible Subs Bundle (ep {horribleSubs[0].episode})
+                                                        <FaStar className="purple"/>
+                                                    </h4>
                                                     <div className="versions">
-                                                        {horribleSubs.batches.map(t => (
+                                                        {horribleSubs.sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality)).map(t => (
                                                             <Version
                                                                 key={t.filename + t.quality}
                                                                 version={t}

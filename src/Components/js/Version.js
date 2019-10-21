@@ -13,9 +13,10 @@ class Version extends Component {
             <div className="version padding" key={version.hashString}>
                 <div className='qualityPeers'>
                     <b>{version.quality}</b>
-                    {version.seeds !== undefined ? (
+                    {version.seeds !== undefined || version.hs ? (
                         <span className='peers'>
                             {
+                                version.hs ? <FaBatteryQuarter className='purple'/> :
                                 version.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
                                 version.seeds < 20 ? <FaBatteryQuarter className='red'/> :
                                 version.seeds < 50 ? <FaBatteryHalf className='orange'/> :

@@ -73,6 +73,13 @@ export function getEpisodes(torrents, moreData, type) {
         torrents.torrents.forEach(torrent => {
             const parsed = ptn(torrent.filename || torrent.name);
             parsed.resolution = parsed.resolution || '480p';
+
+            // Add data for horrible subs from the scraped data
+            if (torrent.hs) {
+                parsed.episode = Number.parseInt(torrent.episode);
+                parsed.resolution = torrent.quality;
+            }
+
             if (type === 'animes') parsed.season = 1; // keep anime in 1 season
 
             // Bail if we weren't able to parse season/episode
@@ -97,7 +104,7 @@ export function getEpisodes(torrents, moreData, type) {
             const peers = torrent.peers || torrent.leechers;
             
             const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
-            if (!existing || seeds > existing.seeds) {
+            if (!existing || seeds > existing.seeds || !existing.hs || torrent.hs) {
                 const url = torrent.magnet_url || torrent.torrent_url || torrent.magnet;
                 let hash = magnet.decode(url).infoHash;
                 if (hash) hash = hash.toLowerCase();
@@ -108,11 +115,12 @@ export function getEpisodes(torrents, moreData, type) {
                     url: url,
                     hashString: hash,
                     quality: parsed.resolution,
-                    tv: true
+                    tv: true,
+                    hs: torrent.hs
                 };
             }
         });
-        
+
         episodes.forEach(season => {
             season.forEach(episode => {
                 episode.torrents = Object.values(episode.torrents).sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality));
@@ -270,15 +278,12 @@ export function parseMedia(media, type) {
 }
 
 export function parseHorribleSubs(data) {
-    const parsedTorrents = data.batches.map(t => {
-        return {
-            ...t,
-            hashString: magnet.decode(t.magnet).infoHash.toLowerCase()
-        }
-    });
+    const parsedBatches = data.batches.map(t => { return {...t, hashString: magnet.decode(t.magnet).infoHash.toLowerCase()}});
+    const parsedTorrents = data.torrents.map(t => { return {...t, hashString: magnet.decode(t.magnet).infoHash.toLowerCase(), hs: true}});
 
     return {
         ...data,
-        batches: parsedTorrents
+        batches: parsedBatches,
+        torrents: parsedTorrents
     };
 }

@@ -28,7 +28,7 @@ class MovieList extends Component {
         if (process.env.NODE_ENV === 'development') {
             devOverrides = {
                 // type: 'animes',
-                // search: 'castlevania'
+                // search: 'Noragami'
             };
         }
 
@@ -309,8 +309,8 @@ class MovieList extends Component {
             // Safety check if we need to load more data since things were filtered and does not fill client height
             setTimeout(() => this.updateScroll(), 1000);
 
-            // Show media after loaded, only on first load
-            if (process.env.NODE_ENV === 'development' && showMedia && !this.state.isLoaded) {
+            // Show media after loaded
+            if (process.env.NODE_ENV === 'development' && showMedia) {
                 setTimeout(() => this.setState({media: data[0]}), 500);
             }
 

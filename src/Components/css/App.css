@@ -21,7 +21,7 @@ body.noscroll {
 
 button {
     background-color: #777;
-    border: none;
+    border: 1px solid rgba(0,0,0,0.2);
     color: white;
     padding: 0.3em 0.4em;
     font-size: 1em;   
@@ -65,6 +65,7 @@ progress {
 .red { color: red; }
 .orange { color: #e5a00d; } /* Plex orange */
 .gray { color: gray; }
+.purple { color: magenta; }
 
 .bold { font-weight: bold };
 

@@ -33,7 +33,7 @@
     "scrollreveal": "^4.0.5"
   },
   "scripts": {
-    "start": "concurrently -k \"npm run server\" \"npm run client\" \"transmission-gtk\"",
+    "start": "concurrently -k 'npm run server' 'npm run client' 'transmission-gtk'",
     "client": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
