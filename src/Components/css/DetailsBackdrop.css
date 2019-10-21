@@ -150,7 +150,7 @@
   padding: 1.5em 1em 1em 2em;
   max-width: 400px;
   border-radius: 0.5em 0 0 0;
-  max-height: calc(100vh - 2.5em);
+  max-height: calc(100vh - 6.5em);
   overflow-y: auto;
 }
 
@@ -385,7 +385,7 @@ h4 {
 @media (max-height: 450px) {
   .right {
     max-width: 330px;
-    max-height: calc(100vh - 2em);
+    max-height: calc(100vh - 6em);
     padding: 1em;
   }
 
