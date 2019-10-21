@@ -357,7 +357,7 @@ class DetailsBackdrop extends Component {
                         ) : null }
                     </div>
                     <div className="spacer"></div>
-                    <div className="right" onClick={e => e.stopPropagation()}>
+                    <div className={"right" + ((tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0) ? " videos" : "")} onClick={e => e.stopPropagation()}>
                         <div className="plot padding">{details.plot}</div>
                         {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
                         

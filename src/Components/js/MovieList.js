@@ -125,7 +125,7 @@ class MovieList extends Component {
         let scroll = (document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight + 0.0001);
         if (document.documentElement.scrollHeight === document.documentElement.clientHeight) scroll = 1;
         if (!isNaN(scroll)) {
-            if (scroll > 0.90 && !this.state.isSearching && !this.state.lastPage) {
+            if (scroll > 0.90 && !this.state.isSearching && !this.state.lastPage && !this.state.media) {
                 this.changePage(1);
             }
         }
@@ -543,43 +543,45 @@ class MovieList extends Component {
                             />
         
                             <div className="movie-list">
-                                {type === 'pirate' ? (
-                                    results && results.torrents && results.torrents.length > 0 ? (
-                                        <div className="pirateList">
-                                            {results.torrents.map(media => (
-                                                <Pirate
-                                                    key={media.link}
-                                                    media={media}
-                                                    started={started}
-                                                    downloadTorrent={this.downloadTorrent}
-                                                    cancelTorrent={this.cancelTorrent}
-                                                    getProgress={this.getProgress}
-                                                    getTorrent={this.getTorrent}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : search.length === 0 ? <h2>Please enter a search term</h2> : <h1>No Results</h1>
-                                ) : (
-                                    results.length === 0 ? <h1>No Results</h1> : (
-                                        <div>
-                                            {results.map(media => (
-                                                <Cover
-                                                    key={media.id}
-                                                    media={media}
-                                                    type={type}
-                                                    click={this.onOpenModal}
-                                                    downloadTorrent={this.downloadTorrent}
-                                                    cancelTorrent={this.cancelTorrent}
-                                                    torrents={this.torrents}
-                                                    started={started}
-                                                    getProgress={this.getProgress}
-                                                    server={this.server}
-                                                    files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
-                                                    status={status}
-                                                    toggleSubscription={this.toggleSubscription}
-                                                />
-                                            ))}
-                                        </div>
+                                {isSearching ? null : (
+                                    type === 'pirate' ? (
+                                        results && results.torrents && results.torrents.length > 0 ? (
+                                            <div className="pirateList">
+                                                {results.torrents.map(media => (
+                                                    <Pirate
+                                                        key={media.link}
+                                                        media={media}
+                                                        started={started}
+                                                        downloadTorrent={this.downloadTorrent}
+                                                        cancelTorrent={this.cancelTorrent}
+                                                        getProgress={this.getProgress}
+                                                        getTorrent={this.getTorrent}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : search.length === 0 ? <h2>Please enter a search term</h2> : <h1>No Results</h1>
+                                    ) : (
+                                        results.length === 0 ? <h1>No Results</h1> : (
+                                            <div>
+                                                {results.map(media => (
+                                                    <Cover
+                                                        key={media.id}
+                                                        media={media}
+                                                        type={type}
+                                                        click={this.onOpenModal}
+                                                        downloadTorrent={this.downloadTorrent}
+                                                        cancelTorrent={this.cancelTorrent}
+                                                        torrents={this.torrents}
+                                                        started={started}
+                                                        getProgress={this.getProgress}
+                                                        server={this.server}
+                                                        files={type === "movies" ? this.state.files : []} // only show downloaded files for movies
+                                                        status={status}
+                                                        toggleSubscription={this.toggleSubscription}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )
                                     )
                                 )}
                             </div>

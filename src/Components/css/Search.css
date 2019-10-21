@@ -46,6 +46,7 @@
     position: absolute;
     top: 1.5em;
     left: -3.25em;
+    z-index: 2;
     background: #333;
     padding: 0.25em;
     border-radius: 0.5em;

@@ -344,11 +344,15 @@ h4 {
   }
 
   .right {
-    max-height: 75vh;
+    max-height: 77vh;
     max-width: calc(100% - 2em);
     padding: 1em;
     border-radius: 1em 1em 0 0;
-    margin-bottom: 3em;
+  }
+
+  .right.videos {
+    max-height: 75vh;
+    padding-bottom: 3.5em;
   }
 
   #modalFullscreen .coverWrap {
@@ -359,13 +363,22 @@ h4 {
     display: inline-block;
   }
 
+  .otherVideos {
+    background: rgba(0,0,0,0.75);
+    box-shadow: 0 0 30px 30px rgba(0,0,0,0.75);
+  }
+
   .otherVideos.hidden {
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.75);
     transform: translateY(calc(100% - 3em));
   }
 
   .otherVideos.hidden .toggle {
     margin: 1em 0 0.5em 0;
+  }
+
+  .otherVideos.hidden .toggle span {
+    background: unset;
   }
 }
 
