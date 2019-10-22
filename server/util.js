@@ -78,48 +78,6 @@ function getEpisodes(subscription, torrents, onlyLast) {
   return { episodes, lastEpisode };
 }
 
-// TODO: Change callback into a promise
-function getFiles(plexClient, cb) {
-  if (!plexClient) cb([]);
-  
-  plexClient.query('/').then(status => {
-    const machineId = status.MediaContainer.machineIdentifier;
-    
-    plexClient.query("/library/sections").then(response => {
-      const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
-      const promises = [];
-      
-      for (var i = 0; i < sections.length; i++) {
-        promises.push(plexClient.query("/library/sections/" + sections[i].key + "/all"));
-      }
-      
-      Promise.all(promises).then(values => {
-        const files = [];
-        for (var i = 0; i < values.length; i++) {
-          const data = values[i].MediaContainer.Metadata;
-          for (var j = 0; j < data.length; j++) {
-            const url = `http://${process.env.PLEX_HOSTNAME}:32400/web/index.html#!/server/${machineId}/details?key=${data[j].key}`;
-            files.push({title: data[j].title, year: data[j].year, url: url});
-          }
-        }
-        cb(files);
-      });
-    }).catch(err => {
-      console.error("Could not connect to server", err);
-      
-      // If plex goes offline, keep in-memory copy living on
-      if (currentFiles.length > 0) {
-        cb(currentFiles);
-      } else {
-        cb([]);
-      }
-    });
-  }).catch(err => {
-    console.error(err);
-    cb([]);
-  });
-}
-
 function searchShow(search, source) {
   let matched;
   source.forEach(s => {
@@ -131,4 +89,4 @@ function searchShow(search, source) {
   return matched;
 }
 
-module.exports = { autoPrune, getEpisodes, getFiles, searchShow };
+module.exports = { autoPrune, getEpisodes, searchShow };

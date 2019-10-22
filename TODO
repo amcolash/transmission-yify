@@ -23,10 +23,13 @@ TODO
 - [DONE] Infinite scrolling
 - [DONE] Write my own EZTV parser (cache show list from https://eztv.io/showlist/, then grab and parse page based off of matching names)
 - [DONE] Other Videos (bloopers, bts, etc if possible)
-- [DONE for batches, still need individual episodes] Parse HorribeSubs in addition to nyaa
-- Prettier downloads view
+- [DONE] Parse HorribeSubs in addition to nyaa
+- [DONE] Prettier downloads view
+- [DONE] Start to pull apart portions of the server code into separate files
+- Move subscriptions to a separate file
+- Investigate performance on server and move parsing to worker (threads?)
 - Keyboard navigation (arrow keys, backspace / back button) - yikes the grid is tough...
-- Add hashes to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
+- Add hash urls to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
 - Look into android tv app / webapp
 - Precache on the server side when cache cleared
 - Analytics (views, downloads, ip locations, etc)

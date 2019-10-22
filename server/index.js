@@ -11,13 +11,13 @@ const cheerio = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
-const PlexAPI = require("plex-api");
 
 const { searchPirateBay } = require('./pirate');
 const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
 const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
 
-const { autoPrune, getEpisodes, getFiles, searchShow } = require('./util');
+const { getPlexFiles } = require('./plex');
+const { autoPrune, getEpisodes, searchShow } = require('./util');
 
 require('dotenv').config();
 
@@ -52,22 +52,6 @@ if (fs.existsSync('./build_time') && IS_DOCKER) {
     } catch (err) {
         console.error(err);
     }
-}
-
-// Init plex client
-let plexClient;
-try {
-    plexClient = new PlexAPI({
-        hostname: process.env.PLEX_HOSTNAME, // could be different than plex link
-        username: process.env.PLEX_USERNAME,
-        password: process.env.PLEX_PASSWORD,
-        options: {
-            identifier: "transmission-yify",
-            deviceName: "Transmission-Yify"
-        }
-    });
-} catch (error) {
-    console.error(error);
 }
 
 // App Server
@@ -606,7 +590,7 @@ function initSocketDataWatchers() {
         }
     }), interval);
 
-    setIntervalImmediately(() => getFiles(plexClient, data => {
+    setIntervalImmediately(() => getPlexFiles().then(data => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
             currentFiles = data;
             io.sockets.in('files').emit('files', currentFiles);
