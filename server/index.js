@@ -12,9 +12,12 @@ const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
 const PlexAPI = require("plex-api");
-const levenshtein = require('js-levenshtein');
 
-const ptn = require('./src/Util/TorrentName');
+const { searchPirateBay } = require('./pirate');
+const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
+const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
+
+const { autoPrune, getEpisodes, getFiles, searchShow } = require('./util');
 
 require('dotenv').config();
 
@@ -40,8 +43,6 @@ let currentStatus = {
 
 let cache = {};
 let trackerCache = {};
-let eztvShows = [];
-let horribleSubsShows = [];
 let isUpgrading = false;
 
 // Figure out build time
@@ -354,6 +355,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
             res.send(results);
             trackerCache[search];
         }).catch(err => {
+            console.error(err);
             res.send({page:1,total:0,limit:30,torrents:[]});
         });
     }
@@ -361,8 +363,8 @@ app.get('/pirate/:search/:precache?', function(req, res) {
 
 app.get('/eztv/:search', function(req, res) {
     const search = req.params.search;
-    const match = searchShow(search, eztvShows);
-    
+    const match = searchShow(search, getEZTVShows());
+
     if (match) {
         const url = match.url;
 
@@ -385,7 +387,7 @@ app.get('/eztv/:search', function(req, res) {
 
 app.get('/horriblesubs/:search', function(req, res) {
     const search = req.params.search;
-    const match = searchShow(search, horribleSubsShows);
+    const match = searchShow(search, getHorribleSubsShows());
     
     if (match) {
         const url = match.url;
@@ -431,7 +433,7 @@ function filterTV(url, data) {
     if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
         (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
         data.results = data.results.filter(show => {
-            return searchShow(show.original_name, eztvShows) !== undefined;
+            return searchShow(show.original_name, getEZTVShows()) !== undefined;
         });
     }
 
@@ -557,54 +559,12 @@ async function downloadSubscription(id, onlyLast) {
     writeSubscriptions();
 
     // find torrents for the show
-    const matchedShow = searchShow(subscription.title, eztvShows);
+    const matchedShow = searchShow(subscription.title, getEZTVShows());
     getEZTVDetails(matchedShow.url).then(data => {
-        const torrents = data.torrents;
-        
         // Generate a list of all episodes from the query
-        let episodes = [];
-        torrents.forEach(t => {
-            const parsed = ptn(t.filename);
-            const episode = t.episode || parsed.episode;
-            const season = t.season || parsed.season;
-            if (!episode || !season) return;
+        const { episodes, lastEpisode } = getEpisodes(subscription, data.torrents, onlyLast);
 
-            t.episode = Number.parseInt(episode);
-            t.season = Number.parseInt(season);
-
-            episodes[season] = episodes[season] || [];
-
-            if (!episodes[season][episode]) episodes[season][episode] = t;
-            else {
-                const existing = episodes[season][episode];
-                const parsedExisting = ptn(existing.filename);
-
-                if (t.seeds > existing.seeds || Number.parseInt(parsed.resolution) > Number.parseInt(parsedExisting.resolution)) {
-                    episodes[season][episode] = t;
-                }
-            }
-        });
-
-        // Filter out non-relevant episodes as needed
-        const lastSeason = episodes[episodes.length-1];
-        const lastEpisode = lastSeason[lastSeason.length-1];
-        if (onlyLast) {
-            episodes = [lastEpisode];
-        } else {
-            const lastValue = subscription.lastSeason * 99 + subscription.lastEpisode;
-
-            const tmp = [];
-            episodes = episodes.forEach(season => {
-                if (season) {
-                    season.forEach(episode => {
-                        if (episode.season * 99 + episode.episode > lastValue) tmp.push(episode);
-                    });
-                }
-            });
-            episodes = tmp;
-        }
-
-        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`)
+        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`);
 
         // Download each torrent
         episodes.forEach(e => {
@@ -621,353 +581,6 @@ async function downloadSubscription(id, onlyLast) {
     }).catch(err => {
         console.error(err);
     });
-}
-
-function searchPirateBay(query, p, filter, endpoint) {
-    const page = Number.parseInt(p);
-
-    return new Promise((resolve, reject) => {
-        const url = `${endpoint.replace(/\/$/, '')}/search/${query}/${page}${filter}`;
-
-        axios.get(url).then(response => {
-            const $ = cheerio.load(response.data);
-            const torrents = [];
-            
-            const table = $('#searchResult tbody').html();
-            const rows = $('tr', table);
-            
-            const sizeRegex = new RegExp(/(\d|\.)+\s(KiB|MiB|GiB)/);
-            const fullDateRegex = new RegExp(/\d{2}-\d{2}\s*\d{4}/);
-            const partialDateRegex = new RegExp(/\d{2}-\d{2}/);
-
-            const results = $('h2').eq(0).text();
-            
-            const limit = 30;
-            
-            const found = results.match(/\d+\sfound/);
-            let total = 0;
-            if (found && found.length > 0) total = Number.parseInt(found[0].match(/\d+/)[0]);
-            
-            rows.each((i, row) => {
-                // Try/Catch on each row so that an error parsing doesn't totally destroy results
-                try {
-                    const name = $('.detName', row).text().trim();
-                    if (!name) return;
-                
-                    const link = $('.detLink', row).attr('href');
-                    const magnetLink = $('[title="Download this torrent using magnet"]', row).attr('href');
-                    const sizeMatched = $('.detDesc', row).text().trim().match(sizeRegex);
-                    const seeds = Number.parseInt($('[align="right"]', row).eq(0).text());
-                    const leeches = Number.parseInt($('[align="right"]', row).eq(1).text());
-                    const category = $('.vertTh a', row).eq(0).text();
-                    const subCategory = $('.vertTh a', row).eq(1).text();
-                    const authorName = $('.detDesc a', row).text();
-                    const authorUrl = $('.detDesc a', row).attr('href');
-    
-                    let date;
-                    let fullDateMatched = $('.detDesc', row).text().trim().match(fullDateRegex); // TODO: Fix whitespace
-                    let partialDateMatched = $('.detDesc', row).text().trim().match(partialDateRegex);
-                    if (fullDateMatched) date = fullDateMatched[0];
-                    else if (partialDateMatched) date = partialDateMatched += ' ' + new Date().getFullYear();
-                
-                    torrents.push({
-                        name,
-                        link,
-                        magnetLink,
-                        size: sizeMatched ? sizeMatched[0] : undefined,
-                        date: date,
-                        seeds,
-                        leeches,
-                        category,
-                        subCategory,
-                        author: {
-                            name: authorName,
-                            url: authorUrl
-                        }
-                    });
-                } catch (err) {
-                    console.error(err);
-                }
-            });
-
-            resolve({page, total, limit, torrents});
-        }).catch(err => {
-            console.error(err);
-            reject();
-        });
-    });
-}
-
-function searchShow(search, source) {
-    let matched;
-    source.forEach(s => {
-        const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
-        const match = (1 - (lev / Math.max(s.title.length, search.length)));
-        if (match > 0.9) matched = s;
-    });
-
-    return matched;
-}
-
-function getEZTVShows() {
-    axios.get('https://eztv.io/showlist/').then(response => {
-        const $ = cheerio.load(response.data);
-        
-        const table = $('.forum_header_border').eq(1);
-        const items = $('tr[name="hover"] td:first-child', table);
-
-        const shows = [];
-
-        items.each((index, el) => {
-            const row = $('a', el);
-            let title = row.text();
-            if (title.endsWith(', The')) title = `The ${title.replace(', The', '')}`;
-            shows.push({
-                title,
-                url: 'https://eztv.io' + row.attr('href')
-            });
-        });
-
-        eztvShows = shows;
-    }).catch(err => {
-        console.error(err);
-    });
-}
-
-function getHorribleSubsShows() {
-    axios.get('https://horriblesubs.info/shows/').then(response => {
-        const $ = cheerio.load(response.data);
-        
-        const wrapper = $('.shows-wrapper').eq(0);
-        const items = $('.ind-show', wrapper);
-
-        const shows = [];
-
-        items.each((index, el) => {
-            const row = $('a', el);
-            let title = row.text();
-            shows.push({
-                title,
-                url: 'https://horriblesubs.info/shows' + row.attr('href')
-            });
-        });
-
-        horribleSubsShows = shows;
-    }).catch(err => {
-        console.error(err);
-    });
-}
-
-function getEZTVDetails(url) {
-    return new Promise((resolve, reject) => {
-        axios.get(url).then(response => {
-            const torrents = [];
-
-            const $ = cheerio.load(response.data);
-            const table = $('.forum_header_noborder');
-            const items = $('tr[name="hover"]', table);
-            items.each((index, el) => {
-                const columns = $('td', el);
-                const filename = $('a', columns.eq(1)).text();
-                const link = $('a', columns.eq(1)).attr('href');
-                const magnet = $('a', columns.eq(2)).attr('href');
-                const size = columns.eq(3).text();
-                const date = columns.eq(4).text();
-                const seeds = Number.parseInt(columns.eq(5).text()) || 0;
-
-                const parsed = ptn(filename);
-                const episode = parsed.episode ? Number.parseInt(parsed.episode) : undefined;
-                const season = parsed.season ? Number.parseInt(parsed.season) : undefined;
-                if (!episode || !season) return;
-
-                const torrent = {
-                    filename,
-                    link,
-                    magnet,
-                    size,
-                    date,
-                    seeds,
-                    episode,
-                    season
-                };
-
-                torrents.push(torrent);
-            });
-
-            resolve({page: 1, total: torrents.length, limit: torrents.length, torrents});
-        }).catch(err => {
-            console.error(err);
-            resolve({page: 1, total: 0, limit: 30, torrents: []});
-        });
-    });
-}
-
-function parseHorribleSubsVersion(data, url) {
-    const $ = cheerio.load(data);
-    const containers = $('.rls-info-container');
-
-    const torrents = [];
-
-    containers.each((index, container) => {
-        const label = $('.rls-label', container).text();
-        const date = $('.rls-date', container).text();
-        const episode = $('strong', container).text().replace('-', ' - ');
-        
-        const links = $('.rls-link', container);
-        const versions = [];
-        links.each((index, el) => {
-            const quality = $('.rls-link-label', el).text().trim().replace(/:/g, '');
-            const magnet = $('.hs-magnet-link a', el).attr('href');
-    
-            versions.push({
-                filename: label,
-                quality,
-                magnet,
-                date,
-                link: url,
-                episode
-            });
-        });
-    
-        torrents.push(versions);
-    });
-
-    return torrents;
-}
-
-function queueHorribleSubs(showId, page, torrents, outerResolve) {
-    let promise;
-    if (!outerResolve) {
-        promise = new Promise((resolve, reject) => {
-            outerResolve = resolve;
-        });
-    }
-
-    let url = 'https://horriblesubs.info/api.php?method=getshows&type=show&showid=' + showId;
-    if (page > 1) url += ('&nextid=' + (page - 1));
-
-    axios.get(url).then(response => {
-        if (response.data !== 'DONE') {
-            const parsed = parseHorribleSubsVersion(response.data, url);
-            parsed.forEach(t => torrents.push(...t));
-            queueHorribleSubs(showId, page + 1, torrents, outerResolve);
-        } else {
-            outerResolve();
-        }
-    }).catch(err => {
-        console.error(err);
-    });
-
-    return promise;
-}
-
-function getHorribleSubsDetails(url) {
-    return new Promise((resolve, reject) => {
-        axios.get(url).then(response => {
-            const match = response.data.match(/var hs_showid = \d+;/g);
-            if (match.length  === 1) {
-                const showId = Number.parseInt(match[0].match(/\d+/g)[0]);
-
-                const promises = [];
-                const batches = [];
-                const torrents = [];
-
-                // Get batches
-                promises.push(axios.get('https://horriblesubs.info/api.php?method=getshows&type=batch&showid=' + showId).then(response => {
-                    if (response.data !== 'The are no batches for this show yet') {
-                        const parsed = parseHorribleSubsVersion(response.data, url);
-                        if (parsed.length === 1) batches.push(...parsed[0]);
-                    }
-                }).catch(err => {
-                    console.error(err);
-                }));
-
-                // Start queueing up individual episodes
-                promises.push(queueHorribleSubs(showId, 1, torrents));
-
-                // I guess this works but it feels like it could be very brittle, need to check on this longer term...
-                axios.all(promises).then(() => {
-                    const total = torrents.length + batches.length;
-                    resolve({page: 1, total, limit: total, torrents, batches});
-                });
-            } else {
-                resolve({page: 1, total: 0, limit: 30, torrents: [], batches: []});
-            }
-        }).catch(err => {
-            console.error(err);
-            resolve({page: 1, total: 0, limit: 30, torrents: [], batches: []});
-        });
-    });
-}
-
-function getFiles(cb) {
-    if (!plexClient) cb([]);
-
-    plexClient.query('/').then(status => {
-        const machineId = status.MediaContainer.machineIdentifier;
-
-        plexClient.query("/library/sections").then(response => {
-            const sections = response.MediaContainer.Directory.filter(section => { return section.type === "movie" });
-            const promises = [];
-    
-            for (var i = 0; i < sections.length; i++) {
-                promises.push(plexClient.query("/library/sections/" + sections[i].key + "/all"));
-            }
-    
-            Promise.all(promises).then(values => {
-                const files = [];
-                for (var i = 0; i < values.length; i++) {
-                    const data = values[i].MediaContainer.Metadata;
-                    for (var j = 0; j < data.length; j++) {
-                        const url = `http://${process.env.PLEX_HOSTNAME}:32400/web/index.html#!/server/${machineId}/details?key=${data[j].key}`;
-                        files.push({title: data[j].title, year: data[j].year, url: url});
-                    }
-                }
-                cb(files);
-            });
-        }).catch(err => {
-            console.error("Could not connect to server", err);
-    
-            // If plex goes offline, keep in-memory copy living on
-            if (currentFiles.length > 0) {
-                cb(currentFiles);
-            } else {
-                cb([]);
-            }
-        });
-    }).catch(err => {
-        console.error(err);
-        cb([]);
-    });
-}
-
-function autoPrune() {
-    // Max wait time after complete is 3 days
-    const maxWait = 60 * 60 * 24 * 3;
-
-    if (currentTorrents && currentTorrents.torrents) {
-        currentTorrents.torrents.forEach(torrent => {
-            let uploadComplete = torrent.uploadRatio > 3.0;
-            let expired = (Date.now() / 1000) > (torrent.doneDate + maxWait);
-
-            if (torrent.percentDone === 1.0 && (uploadComplete || (expired && torrent.doneDate > 0))) {
-                // Soft remove (keep data but stop uploading)
-                console.log('removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : ''));
-
-                transmission.remove(torrent.hashString, false, (err) => {
-                    if (err) console.error(err);
-                });
-            }
-
-            // Auto resume paused torrents (not sure why things are getting paused)
-            if (!torrent.isFinished && torrent.status === transmission.status.STOPPED) {
-                console.log(`trying to restart paused torrent: ${torrent.name}`);
-                transmission.start(torrent.hashString, (err, arg) => {
-                    if (err) console.error(err);
-                });
-            }
-        });
-    }
 }
 
 function setIntervalImmediately(func, interval) {
@@ -993,7 +606,7 @@ function initSocketDataWatchers() {
         }
     }), interval);
 
-    setIntervalImmediately(() => getFiles(data => {
+    setIntervalImmediately(() => getFiles(plexClient, data => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
             currentFiles = data;
             io.sockets.in('files').emit('files', currentFiles);
@@ -1003,7 +616,7 @@ function initSocketDataWatchers() {
 
 function initStatusWatchers() {
     // Autoprune every minute
-    setIntervalImmediately(autoPrune, interval * 30);
+    setIntervalImmediately(() => autoPrune(currentTorrents, transmission), interval * 30);
 
     // Grab piratebay proxy list every 10 minutes
     setIntervalImmediately(() => axios.get('https://piratebayproxy.info').then(response => {
@@ -1017,24 +630,6 @@ function initStatusWatchers() {
         currentStatus.pirateBay = undefined;
     }), interval * 300);
 
-    // Update IP address every 5 minutes
-    setIntervalImmediately(() => {
-        try {
-            let ip;
-            if (IS_DOCKER) ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
-    
-            axios.get(`https://api.ipdata.co/${(ip ? ip.trim() : '')}?api-key=${process.env.IP_KEY}`).then(response => {
-                const data = response.data;
-                currentStatus.ip = { city: data.city, country: data.country_name, country_code: data.country_code, region: data.region,
-                    region_code: data.region_code };
-            }, error => {
-                console.error(error);
-            });
-        } catch (err) {
-            console.error(err);
-        }
-    }, interval * 150);
-
     // Get storage info every minute
     setIntervalImmediately(() => {
         exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
@@ -1046,20 +641,38 @@ function initStatusWatchers() {
             }
         });
 
-        try {
-            const stats = fs.statSync(CACHE_FILE);
-            const fileSizeInBytes = stats["size"];
-            const fileSizeInMegabytes = (fileSizeInBytes / Math.pow(1024, 2)).toFixed(1);
-            currentStatus.cacheUsage = `${fileSizeInMegabytes} MB`;
-
-            // TODO: plex, build, ip, docker and rename to stats
-        } catch (err) {
-            currentStatus.cacheUsage = 'unknown';
-        }
+        fs.stat(CACHE_FILE, (err, stats) => {
+            if (err) {
+                currentStatus.cacheUsage = 'unknown';
+            } else {
+                const fileSizeInBytes = stats["size"];
+                const fileSizeInMegabytes = (fileSizeInBytes / Math.pow(1024, 2)).toFixed(1);
+                currentStatus.cacheUsage = `${fileSizeInMegabytes} MB`;
+            }
+        });
     }, interval * 30);
 
-    // Check subscriptions every hour, wait a moment to set it up so that transmission has time to start
+    // Wait a moment to set it up so that transmission has time to start
     setTimeout(() => {
+        // Update IP address every 5 minutes
+        setIntervalImmediately(() => {
+            try {
+                let ip;
+                if (IS_DOCKER && fs.existsSync(DATA + '/ip.txt')) ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
+        
+                axios.get(`https://api.ipdata.co/${(ip ? ip.trim() : '')}?api-key=${process.env.IP_KEY}`).then(response => {
+                    const data = response.data;
+                    currentStatus.ip = { city: data.city, country: data.country_name, country_code: data.country_code, region: data.region,
+                        region_code: data.region_code };
+                }, error => {
+                    console.error(error);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }, interval * 150);
+
+        // Check subscriptions every hour
         setIntervalImmediately(() => {
             currentStatus.subscriptions.forEach(subscription => {
                 downloadSubscription(subscription.id, false);
@@ -1068,6 +681,7 @@ function initStatusWatchers() {
     }, IS_DOCKER ? interval * 30 : interval * 5);
 
     // Refresh list of eztv / horriblesubs shows every day
-    setIntervalImmediately(() => getEZTVShows(), 1000 * 60 * 60 * 24);
-    setIntervalImmediately(() => getHorribleSubsShows(), 1000 * 60 * 60 * 24);
+    const day = 1000 * 60 * 60 * 24;
+    setIntervalImmediately(() => updateEZTVShows(), day);
+    setIntervalImmediately(() => updateHorribleSubsShows(), day);
 }

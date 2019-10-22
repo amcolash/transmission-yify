@@ -38,8 +38,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "docker": "node index.js",
-    "server": "nodemon index.js"
+    "docker": "node server/index.js",
+    "server": "nodemon server/index.js"
   },
   "browserslist": [
     ">0.2%",
