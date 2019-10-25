@@ -337,7 +337,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
             // cache for 6 hours
             if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
             res.send(results);
-            trackerCache[search];
+            trackerCache[search] = results;
         }).catch(err => {
             console.error(err);
             res.send({page:1,total:0,limit:30,torrents:[]});
