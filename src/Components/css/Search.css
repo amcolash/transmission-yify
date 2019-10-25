@@ -39,6 +39,7 @@
 
 .searchItem .iconHover .mainIcon svg {
     vertical-align: top;
+    padding-top: 0.1em;
 }
 
 .searchItem .iconHover .icons {
