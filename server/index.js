@@ -11,8 +11,9 @@ const cheerio = require('cheerio');
 const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
 const CronJob = require('cron').CronJob;
+const workerpool = require('workerpool');
 
-const { searchPirateBay } = require('./pirate');
+const piratePool = workerpool.pool(__dirname + '/pirate.js', {maxWorkers: 6});
 const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
 const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
 
@@ -333,7 +334,8 @@ app.get('/pirate/:search/:precache?', function(req, res) {
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(trackerCache[search]);
     } else {
-        searchPirateBay(search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay).then(results => {
+        piratePool.exec('searchPirateBay', [search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay])
+        .then(results => {
             // cache for 6 hours
             if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
             res.send(results);

@@ -15,7 +15,8 @@
     "parse-torrent-title": "^1.2.0",
     "plex-api": "^5.2.5",
     "socket.io": "^2.2.0",
-    "transmission": "^0.4.9"
+    "transmission": "^0.4.9",
+    "workerpool": "^5.0.1"
   },
   "devDependencies": {
     "animate.css": "^3.7.2",

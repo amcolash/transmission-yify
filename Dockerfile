@@ -1,5 +1,5 @@
-# Use node
-FROM mhart/alpine-node:10
+# Use node, version 12 so that we get worker threads
+FROM mhart/alpine-node:12
 
 # Install openssh client
 RUN apk add --no-cache openssh

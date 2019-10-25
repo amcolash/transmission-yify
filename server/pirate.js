@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const workerpool = require('workerpool');
 
 searchPirateBay = function(query, p, filter, endpoint) {
   const page = Number.parseInt(p);
@@ -77,4 +78,6 @@ searchPirateBay = function(query, p, filter, endpoint) {
   });
 }
 
-module.exports = { searchPirateBay };
+workerpool.worker({
+  searchPirateBay: searchPirateBay
+});
