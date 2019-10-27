@@ -14,12 +14,11 @@ const CronJob = require('cron').CronJob;
 const workerpool = require('workerpool');
 
 const piratePool = workerpool.pool(__dirname + '/pirate.js', {maxWorkers: 6});
-const { filterMovieResults } = require('./pirate');
 const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
 const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
 
 const { getPlexFiles } = require('./plex');
-const { autoPrune, getEpisodes, searchShow } = require('./util');
+const { autoPrune, filterMovieResults, getEpisodes, searchShow } = require('./util');
 
 require('dotenv').config();
 
