@@ -5,6 +5,7 @@ const parser = new Parser();
 // Add my parsers first
 parser.addHandler('complete', /COMPLETE/i, {type: 'boolean'});
 parser.addHandler('resolution', /1920x1080/i, {value: '1080p'});
+parser.addHandler('source', /\bTS\b/, {value: 'telesync'});
 parser.addHandler('season', /\[s([0-9]{1,3})\]/i, {type: 'integer'});
 parser.addHandler('episode', /\[e([0-9]{1,3})\]/i, {type: 'integer'});
 parser.addHandler('episode2', /-\s*([0-9]{1,3})/i, {type: 'integer'});

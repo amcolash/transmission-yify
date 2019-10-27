@@ -184,7 +184,7 @@ class DetailsBackdrop extends Component {
                         }
         
                         const cleanedTitle = media.title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
-                        const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
+                        const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
 
                         if (Cache[pirateUrl]) {
                             this.setState({pb: Cache[pirateUrl]});

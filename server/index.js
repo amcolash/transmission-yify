@@ -14,6 +14,7 @@ const CronJob = require('cron').CronJob;
 const workerpool = require('workerpool');
 
 const piratePool = workerpool.pool(__dirname + '/pirate.js', {maxWorkers: 6});
+const { filterMovieResults } = require('./pirate');
 const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
 const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
 
@@ -39,7 +40,8 @@ let currentStatus = {
     buildTime: 'Dev Build',
     isDocker: IS_DOCKER,
     plex: process.env.PLEX_SERVER,
-    subscriptions: []
+    subscriptions: [],
+    pirateBay: 'https://thepiratebay10.org/'
 };
 
 let cache = {};
@@ -323,23 +325,28 @@ app.delete('/cache', function (req, res) {
 
 app.get('/pirate/:search/:precache?', function(req, res) {
     const search = req.params.search;
+    const filter = req.query.all ? '/99/0' : '/99/200';
+    const cacheName = search + (req.query.page ? `-page${req.query.page}` : '') + (req.query.movie ? '-movie' : '') + filter;
     if (req.params.precache) {
         res.sendStatus(200);
         return;
     }
 
     // Add a simple cache here to make things faster on the client
-    if (trackerCache[search]) {
+    if (trackerCache[cacheName]) {
         // cache for 6 hours
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-        res.send(trackerCache[search]);
+        res.send(trackerCache[cacheName]);
     } else {
-        piratePool.exec('searchPirateBay', [search, req.query.page || 1, req.query.all ? '/99/0' : '/99/200', currentStatus.pirateBay])
+        piratePool.exec('searchPirateBay', [search, req.query.page || 1, filter, currentStatus.pirateBay])
         .then(results => {
+            // Filter if we asked specifically for movies
+            if (req.query.movie) results = filterMovieResults(results);
+            
             // cache for 6 hours
             if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
             res.send(results);
-            trackerCache[search] = results;
+            trackerCache[cacheName] = results;
         }).catch(err => {
             console.error(err);
             res.send({page:1,total:0,limit:30,torrents:[]});
@@ -613,7 +620,6 @@ function initStatusWatchers() {
         currentStatus.pirateBay = links.eq(rnd).attr('href');
     }).catch(err => {
         console.error(err);
-        currentStatus.pirateBay = undefined;
     }), interval * 300);
 
     // Get storage info every minute

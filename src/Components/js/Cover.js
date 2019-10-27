@@ -49,7 +49,7 @@ class Cover extends Component {
         this.cancelPB();
 
         this.cancelToken = CancelToken.source();
-        const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}`;
+        const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
 
         if (Cache[url]) {
             this.setState({pb: Cache[url]});

@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const workerpool = require('workerpool');
+const ptn = require('../src/Util/TorrentName');
 
 searchPirateBay = function(query, p, filter, endpoint) {
   const page = Number.parseInt(p);
@@ -78,6 +79,44 @@ searchPirateBay = function(query, p, filter, endpoint) {
   });
 }
 
+filterMovieResults = function(results) {
+  const torrents = results.torrents;
+
+  // Only show cams if there are not other versions
+  let hasNonCam = false;
+  torrents.forEach(t => {
+      const parsed = ptn(t.name);
+      if (parsed.quality && parsed.resolution) hasNonCam |= parsed.quality.toLowerCase().indexOf('cam') === -1 &&
+        parsed.quality.toLowerCase().indexOf('telesync') === -1;
+  });
+
+  
+  const versions = [];
+  
+  torrents.forEach(t => {
+      const parsed = ptn(t.name);
+      if (!parsed.quality || !parsed.resolution) return;
+      
+      const isCam = parsed.quality.toLowerCase().indexOf('cam') !== -1 || parsed.quality.toLowerCase().indexOf('telesync') !== -1;
+
+      // Not going to show 2160p or 4k since they are UUUUGE
+      const parsedResolution = Number.parseInt(parsed.resolution);
+      const shouldAdd = !(parsedResolution < 480 || parsedResolution > 1080 || (hasNonCam && isCam));
+      
+      if (shouldAdd) {
+        if (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeds) return;
+        
+        versions[parsed.resolution] = t;
+      }
+  });
+  
+  const filtered = Object.values(versions);
+
+  return {page: results.page, total: filtered.length, limit: filtered.length, torrents: filtered};
+}
+
 workerpool.worker({
   searchPirateBay: searchPirateBay
 });
+
+module.exports = { searchPirateBay, filterMovieResults };

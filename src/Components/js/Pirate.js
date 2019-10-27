@@ -44,7 +44,7 @@ class Pirate extends Component {
             }
           </div>
           
-          <div className="title">{media.name}</div>
+          <div className="title" title={media.name}>{media.name}</div>
           <div className="spacer"></div>
           <div className="size">{size + ' ' + units}</div>
 
