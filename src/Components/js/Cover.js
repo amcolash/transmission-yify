@@ -103,7 +103,7 @@ class Cover extends Component {
             <ScrollAnimation animateIn='fadeIn'
                 animateOnce={true}
                 offset={100}
-                className={"movie" + (type === 'subscriptions' ? ' disabled' : '')}
+                className="movie"
                 afterAnimatedIn={() => { if (this.props.type === 'movies') this.updatePB(); }}
             >        
                 <div

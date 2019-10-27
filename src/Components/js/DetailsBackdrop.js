@@ -148,13 +148,13 @@ class DetailsBackdrop extends Component {
                     this.setState({ moreData: "ERROR" });
                 });
             } else {
-                axios.get(this.props.server + '/tmdbid/' + (type === 'shows' ? 'tv/' : 'movie/') + media.id).then(response => {
+                axios.get(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id).then(response => {
                     const updated = { tmdbData: response.data, loadingEpisodes: type === 'shows' };
                     if (type === 'shows') updated.moreData = response.data;
 
                     this.setState(updated);
         
-                    if (type === 'shows') {
+                    if (type === 'shows' || type === 'subscriptions') {
                         const moreData = response.data;
                         if (moreData.seasons) {
                             moreData.seasons.forEach(season => {
@@ -233,6 +233,9 @@ class DetailsBackdrop extends Component {
             subscribing, otherVideos } = this.state;
 
         const media = this.props.media || {};
+
+        let backdrop = media.backdrop_path;
+        if (tmdbData) backdrop = tmdbData.backdrop_path;
         
         const versions = getMovies(media, pb ? pb.torrents : [], type);
 
@@ -261,7 +264,7 @@ class DetailsBackdrop extends Component {
                 styles={{
                     modal: {
                         backgroundImage: (type === 'animes' ? (moreData && moreData !== 'ERROR' ? `url(${moreData.CoverImage})` : ''):
-                            `url(https://image.tmdb.org/t/p/w1280/${media.backdrop_path})`)
+                            `url(https://image.tmdb.org/t/p/w1280/${backdrop})`)
                     },
                     closeIcon: {
                         fill: '#bbb',

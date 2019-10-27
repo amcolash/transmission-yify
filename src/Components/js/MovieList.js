@@ -530,6 +530,7 @@ class MovieList extends Component {
                                         server={this.server}
                                         status={status}
                                         toggleSubscription={this.toggleSubscription}
+                                        click={this.onOpenModal}
                                     />
                                 ))}
                             </div>
