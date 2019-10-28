@@ -85,12 +85,13 @@ export function getEpisodes(torrents, moreData, type) {
                 const peers = torrent.peers || torrent.leechers;
                 
                 const existing = episodes[parsed.season][parsed.episode].torrents[parsed.resolution];
-                if (!existing || seeds > existing.seeds || !existing.hs || torrent.hs) {
+                if (!existing || seeds > existing.seeds || (type === 'animes' ? !existing.hs || torrent.hs : false)) {
                     const url = torrent.magnet_url || torrent.torrent_url || torrent.magnet;
                     let hash = magnet.decode(url).infoHash;
                     if (hash) hash = hash.toLowerCase();
                     
                     episodes[parsed.season][parsed.episode].torrents[parsed.resolution] = {
+                        filename: torrent.filename,
                         seeds: seeds,
                         peers: peers,
                         url: url,
@@ -217,7 +218,7 @@ export function getEpisodes(torrents, moreData, type) {
     }
     
     export function hasSubscription(id, subscriptions) {
-        const matched = subscriptions.filter(s => s.id === id);
+        const matched = subscriptions.filter(s => Number.parseInt(s.id) === Number.parseInt(id));
         return matched.length === 1 ? matched[0] : undefined;
     }
 

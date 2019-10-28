@@ -335,7 +335,7 @@ class DetailsBackdrop extends Component {
                                 {type !== 'movies' && status && status.subscriptions ? (subscribing ?
                                     <span className="subscription"><Spinner visible/></span> :
                                     <FaRssSquare
-                                        className={`subscription ${hasSubscription(media.id, this.props.status.subscriptions) ? 'orange': 'gray'}`}
+                                        className={`subscription ${hasSubscription(media.id, status.subscriptions) ? 'orange': 'gray'}`}
                                         onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
                                     />)
                                 : null}

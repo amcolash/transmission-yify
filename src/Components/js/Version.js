@@ -35,7 +35,7 @@ class Version extends Component {
                             hideBar={hideBar}
                         />
                     ) : (
-                        <button className="orange download" onClick={() => downloadTorrent(version)} /*url={version.url}*/>
+                        <button className="orange download" onClick={() => downloadTorrent(version)} title={version.filename} /*url={version.url}*/>
                             {started.indexOf(version.hashString) !== -1 ? (
                                 <Spinner visible noMargin button />
                             ) : (
