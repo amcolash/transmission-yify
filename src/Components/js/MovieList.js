@@ -86,7 +86,6 @@ class MovieList extends Component {
         window.addEventListener('resize', this.updateWindowDimensions);
 
         // Update window scroll
-        this.updateScroll();
         window.addEventListener('scroll', this.updateScroll);
 
         // Update on hash change
@@ -343,7 +342,7 @@ class MovieList extends Component {
                 isSearching: false,
                 lastPage
             }, () => {
-                // Safety check if we need to load more data since things were filtered and does not fill client height
+                // Safety check if we need to load more data since things were filtered and may not fill client height
                 setTimeout(() => this.updateScroll(), 1000);
 
                 // Show media after loaded

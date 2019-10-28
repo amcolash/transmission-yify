@@ -30,10 +30,11 @@ class Cover extends Component {
         }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        // Try to optimize when covers are re-rendered
-        return nextProps.media !== this.props.media || nextProps.status !== this.props.status || this.state !== nextState;
-    }
+    // Too many edge cases for now... Look into another time, maybe?
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     // Try to optimize when covers are re-rendered
+    //     return nextProps.media !== this.props.media || nextProps.status !== this.props.status || this.state !== nextState;
+    // }
 
     cancelPB() {
         if (this.cancelToken) {

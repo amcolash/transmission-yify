@@ -34,3 +34,20 @@
 .progressFull div {
   margin: 0 0.5em;
 }
+
+@media (max-width: 900px) {
+  .progressFull div {
+    margin: 0 0.15em;
+  }
+}
+
+@media (max-width: 680px) {
+  .progressFull progress {
+    display: none;
+  }
+
+  .progressFull .status {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
