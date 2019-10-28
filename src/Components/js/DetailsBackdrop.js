@@ -297,37 +297,6 @@ class DetailsBackdrop extends Component {
                     this.setState(this.getDefaultState());
                     onCloseModal();
                 }}>
-                    {youtubeId ? (
-                        <div className="ytContainer" onClick={e => e.stopPropagation()}>
-                            <button onClick={e => { e.stopPropagation(); this.setState({youtubeId: null}) }}><FaTimes/></button>
-                            <YouTube videoId={youtubeId} opts={trailerOpts} id='youtube'
-                                onEnd={() => this.setState({youtubeId: null})}/>
-                        </div>
-                    ) : null}
-                    {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ?
-                        <div className={"otherVideos" + (!otherVideos ? " hidden" : "")} onClick={e => e.stopPropagation()}>
-                            <div className="toggle">
-                                <span onClick={e => { e.stopPropagation(); this.setState({otherVideos: !this.state.otherVideos})}}>
-                                    <FaYoutube className="red"/> YouTube Extras {otherVideos ? <FaChevronDown/> : <FaChevronUp/>}
-                                </span>
-                            </div>
-                            <div className="videoContainer">
-                                {tmdbData.videos.results.map(v => {
-                                    if (v.site === 'YouTube') {
-                                        return (
-                                            <div className="video" key={v.key}>
-                                                <img src={`https://img.youtube.com/vi/${v.key}/0.jpg`} alt="video thumbnail"
-                                                    onClick={() => this.setState({youtubeId: v.key})}/>
-                                                <div className="title">{v.name}</div>
-                                            </div>
-                                        )
-                                    } else {
-                                        return null;
-                                    }
-                                })}
-                            </div>
-                        </div>
-                    : null}
                     <div className="left">
                         <div className="info">
                             <h3>
@@ -337,6 +306,8 @@ class DetailsBackdrop extends Component {
                                     <FaRssSquare
                                         className={`subscription ${hasSubscription(media.id, status.subscriptions) ? 'orange': 'gray'}`}
                                         onClick={e => { e.stopPropagation(); this.toggleSubscription(); }}
+                                        onKeyDown={e => { if (e.key === 'Enter') this.toggleSubscription(); }}
+                                        tabIndex="0"
                                     />)
                                 : null}
                             </h3>
@@ -347,7 +318,11 @@ class DetailsBackdrop extends Component {
                                         <div className="mpaa-rating">{details.mpaa}</div>
                                         {fileExists ? (
                                             <div className="fileExists">
-                                                <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
+                                                <FaPlayCircle
+                                                    onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}
+                                                    onKeyPress={e => { if (e.key === 'Enter') window.open(fileExists.url, '_blank').focus(); }}
+                                                    tabIndex="0"
+                                                />
                                             </div>
                                         ) : null}
                                     </Fragment>
@@ -355,10 +330,11 @@ class DetailsBackdrop extends Component {
                             ) : null}
                             <Ratings moreData={moreData}/>
                             {details.trailer ? (
-                                <div className="trailer" onClick={e => {
-                                    e.stopPropagation();
-                                    this.setState({youtubeId: details.trailer.key});
-                                }}>
+                                <div className="trailer"
+                                    onClick={e => { e.stopPropagation(); this.setState({youtubeId: details.trailer.key}); }}
+                                    onKeyDown={e => { if (e.key === 'Enter') this.setState({youtubeId: details.trailer.key}); }}
+                                    tabIndex="0"
+                                >
                                     <FaYoutube className="red"/>
                                     <div>Trailer</div>
                                 </div>
@@ -374,14 +350,18 @@ class DetailsBackdrop extends Component {
                                     />
                                     {fileExists ? (
                                         <div className="fileExists">
-                                            <FaPlayCircle onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}/>
+                                            <FaPlayCircle
+                                                onClick={e => { e.stopPropagation(); window.open(fileExists.url, '_blank').focus(); }}
+                                                onKeyPress={e => { if (e.key === 'Enter') window.open(fileExists.url, '_blank').focus(); }}
+                                                tabIndex="0"
+                                            />
                                         </div>
                                     ) : null}
                             </div>
                         ) : null }
                     </div>
                     <div className="spacer"></div>
-                    <div className={"right" + ((tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0) ? " videos" : "")} onClick={e => e.stopPropagation()}>
+                    <div className={"right" + ((tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0) ? " videos" : "")} onClick={e => e.stopPropagation()} tabIndex="-1">
                         <div className="plot padding">{details.plot}</div>
                         {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
                         
@@ -508,15 +488,14 @@ class DetailsBackdrop extends Component {
                             <Fragment>
                                 <h4>You Might Also Like...</h4>
                                 <div className="recommendationContainer">
-                                    <div className="recommendations">
+                                    <div className="recommendations" tabIndex="-1">
                                         {recommendations.map(r => {
                                             const recommendation = parseMedia(r, 'movies');
 
-                                            return <div key={r.id} className="item" onClick={() => {
-                                                this.setState(this.getDefaultState(), () => {
-                                                    onOpenModal(recommendation);
-                                                });
-                                            }}>
+                                            return <div key={r.id} className="item" tabIndex="0" 
+                                                onClick={() => { this.setState(this.getDefaultState(), () => { onOpenModal(recommendation); }); }}
+                                                onKeyDown={e => { if (e.key === 'Enter') this.setState(this.getDefaultState(), () => { onOpenModal(recommendation); }); }}
+                                            >
                                                 <img src={r.poster_path} alt="cover"/>
                                                 <div className="title">{r.title}</div>
                                             </div>
@@ -526,6 +505,41 @@ class DetailsBackdrop extends Component {
                             </Fragment>
                         ) : null}
                     </div>
+                    {youtubeId ? (
+                        <div className="ytContainer" onClick={e => e.stopPropagation()}>
+                            <button onClick={e => { e.stopPropagation(); this.setState({youtubeId: null}) }}><FaTimes/></button>
+                            <YouTube videoId={youtubeId} opts={trailerOpts} id='youtube'
+                                onEnd={() => this.setState({youtubeId: null})}/>
+                        </div>
+                    ) : null}
+                    {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ?
+                        <div className={"otherVideos" + (!otherVideos ? " hidden" : "")} onClick={e => e.stopPropagation()}>
+                            <div className="toggle">
+                                <span onClick={e => { e.stopPropagation(); this.setState({otherVideos: !this.state.otherVideos})}}
+                                onKeyDown={e => { if (e.key === 'Enter') this.setState({otherVideos: !this.state.otherVideos}) }}
+                                tabIndex="0">
+                                    <FaYoutube className="red"/> YouTube Extras {otherVideos ? <FaChevronDown/> : <FaChevronUp/>}
+                                </span>
+                            </div>
+                            <div className="videoContainer" tabIndex="-1">
+                                {tmdbData.videos.results.map(v => {
+                                    if (v.site === 'YouTube') {
+                                        return (
+                                            <div className="video" key={v.key}>
+                                                <img src={`https://img.youtube.com/vi/${v.key}/0.jpg`} alt="video thumbnail"
+                                                    onClick={() => this.setState({youtubeId: v.key})}
+                                                    onKeyDown={e => { if (e.key === 'Enter') this.setState({youtubeId: v.key}) }}
+                                                    tabIndex={this.state.otherVideos ? "0" : "-1"}/>
+                                                <div className="title">{v.name}</div>
+                                            </div>
+                                        )
+                                    } else {
+                                        return null;
+                                    }
+                                })}
+                            </div>
+                        </div>
+                    : null}
                 </div>
             </Modal>
         );

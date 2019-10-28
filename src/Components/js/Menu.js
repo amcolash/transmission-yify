@@ -5,7 +5,6 @@ import '../css/Menu.css';
 import {swipedetect} from '../../Util/Swipe';
 
 const plexIcon = <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path></svg>;
-const tabIndex = 1;
 
 class Menu extends Component {
   constructor(props) {
@@ -49,7 +48,10 @@ class Menu extends Component {
   }
 
   onFocus(e) {
-    if (this.state.visible && e.target.tabIndex !== tabIndex) this.setVisible(false);
+    // This is a bit nasty and depends on the dom structure to stay the same... We'll see about this
+    if (this.state.visible && !e.target.parentElement.classList.contains('menu') &&
+      !e.target.parentElement.parentElement.classList.contains('menu') &&
+      !e.target.parentElement.parentElement.parentElement.classList.contains('menu')) this.setVisible(false);
   }
 
   selectItem(value) {
@@ -69,7 +71,7 @@ class Menu extends Component {
       className={'item ' + (this.props.type === value ? 'selected' : '')}
       onClick={e => callback(e)}
       onKeyDown={e => { if (e.key === 'Enter') callback(e); }}
-      tabIndex={this.state.visible ? tabIndex : '-1'}
+      tabIndex={this.state.visible ? '0' : '-1'}
     >
       {icon}
       <span>{text}</span>
@@ -90,7 +92,7 @@ class Menu extends Component {
           <div className="toggleWrap">
             <span>Pirate Flix</span>
             <div className="spacer"></div>
-            <div className="toggle" tabIndex={tabIndex} onKeyPress={e => { if (e.key === 'Enter') this.setVisible(!this.state.visible) }}>
+            <div className="toggle" tabIndex="0" onKeyPress={e => { if (e.key === 'Enter') this.setVisible(!this.state.visible) }}>
               <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setVisible(!this.state.visible); }}/>
               {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn"/> : null}
             </div>

@@ -36,10 +36,12 @@ class MovieList extends Component {
         if (window.location.search.length > 0) type = window.location.search.substring(1);
         if (window.location.hash.length > 0) media = {id: window.location.hash.substring(1)};
 
+        let isLoaded = type !== 'movies' && type !== 'shows' && type !== 'animes';
+
         this.state = {
             error: null,
             showLogo: true,
-            isLoaded: false,
+            isLoaded,
             results: [],
             page: 1,
             media: media || null,
