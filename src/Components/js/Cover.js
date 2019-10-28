@@ -109,6 +109,7 @@ class Cover extends Component {
                 <div
                     className="cover"
                     onClick={(e) => { if (click) click(media); }}
+                    tabIndex="3"
                 >
                     <img className="movieCover" src={media.poster_path} alt="" />
                     <div className="movieIcon">
