@@ -32,19 +32,23 @@ class MovieList extends Component {
             };
         }
 
+        let type, media;
+        if (window.location.search.length > 0) type = window.location.search.substring(1);
+        if (window.location.hash.length > 0) media = {id: window.location.hash.substring(1)};
+
         this.state = {
             error: null,
             showLogo: true,
             isLoaded: false,
             results: [],
             page: 1,
-            media: null,
+            media: media || null,
             torrents: [],
             started: [],
             search: '',
             genre: '',
             order: '',
-            type: 'movies',
+            type: type || 'movies',
             isSearching: false,
             status: null,
             width: 0,
@@ -52,12 +56,7 @@ class MovieList extends Component {
             lastPage: false,
             files: [],
             ...devOverrides
-        }
-
-        // Clean up old faq flag
-        window.localStorage.removeItem('popcornfaq');
-        window.localStorage.removeItem('popcornfaq1');
-        window.localStorage.removeItem('popcornfaq2');
+        };
 
         this.updateSearch = this.updateSearch.bind(this);
         this.getProgress = this.getProgress.bind(this);
@@ -67,6 +66,8 @@ class MovieList extends Component {
         this.addMagnet = this.addMagnet.bind(this);
         this.toggleSubscription = this.toggleSubscription.bind(this);
         this.clearCache = this.clearCache.bind(this);
+        this.updateHash = this.updateHash.bind(this);
+        this.updateHistory = this.updateHistory.bind(this);
 
         this.server = "https://" + window.location.hostname + ":9000";
 
@@ -85,6 +86,10 @@ class MovieList extends Component {
         // Update window scroll
         this.updateScroll();
         window.addEventListener('scroll', this.updateScroll);
+
+        // Update on hash change
+        window.addEventListener('hashchange', this.updateHash);
+        window.addEventListener('popstate', this.updateHistory);
 
         var socket = openSocket(this.server);
         socket.on('connect', data => {
@@ -115,10 +120,23 @@ class MovieList extends Component {
     componentWillUnmount() {
         window.removeEventListener('scroll', this.updateScroll);
         window.removeEventListener('resize', this.updateWindowDimensions);
+        window.removeEventListener('hashchange', this.updateHash);
+        window.removeEventListener('popstate', this.updateHistory);
     }
 
     updateWindowDimensions() {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    updateHash() {
+        this.setState({media: window.location.hash.length > 1 ? {id: window.location.hash.substring(1)} : null});
+    }
+
+    updateHistory() {
+        let type = window.location.search.substring(1) || 'movies';
+        if (type !== this.state.type) {
+            this.updateSearch('', '', '', type, 1);
+        }
     }
 
     updateScroll = () => {
@@ -171,6 +189,12 @@ class MovieList extends Component {
     updateSearch(search, genre, order, type, page) {
         let page1 = (page || 1) === 1;
         if (page1) window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        let newurl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${type}`;
+        if (window.location.href !== newurl) {
+            if (this.state.media) newurl += `#${this.state.media.id}`;
+            window.history.pushState({path:newurl},'',newurl);
+        }
 
         this.setState({
             search: search,
@@ -431,10 +455,12 @@ class MovieList extends Component {
     }
 
     onOpenModal = (media) => {
+        window.location.hash = media.id;
         this.setState({ media: media });
     };
 
     onCloseModal = () => {
+        window.location.hash = '';
         this.setState({ media: null });
     };
 
@@ -468,32 +494,29 @@ class MovieList extends Component {
                     ) : <span>Error: {error.message}</span>}
                 </div>
             );
-        } else if (logo || !isLoaded) {
-            if (logo) {
-                return <Logo/>;
-            } else {
-                return (
-                    <div className="message">
-                        <span>Loading...
-                            <Spinner visible/>
-                        </span>
-                    </div>
-                );
-            }
         } else {
             return (
                 <Fragment>
-                    <Menu
-                        type={type}
-                        upgrade={this.upgrade}
-                        addMagnet={this.addMagnet}
-                        clearCache={this.clearCache}
-                        updateSearch={this.updateSearch}
-                        status={status}
-                        torrents={torrents}
-                    />
+                    {logo ? <Logo/> : !isLoaded ? (
+                        <div className="message">
+                            <span>Loading...
+                                <Spinner visible/>
+                            </span>
+                        </div>
+                    ) : (
+                        <Menu
+                            type={type}
+                            upgrade={this.upgrade}
+                            addMagnet={this.addMagnet}
+                            clearCache={this.clearCache}
+                            updateSearch={this.updateSearch}
+                            status={status}
+                            torrents={torrents}
+                        />
+                    )}
 
                     <DetailsBackdrop
+                        loading={logo || !isLoaded}
                         media={media}
                         type={type}
                         server={this.server}
@@ -535,7 +558,7 @@ class MovieList extends Component {
                                 ))}
                             </div>
                         </div>
-                    ) : (
+                    ) : !logo && isLoaded ? (
                         <Fragment>
                             <Search
                                 updateSearch={this.updateSearch}
@@ -594,7 +617,7 @@ class MovieList extends Component {
         
                             {isSearching ? <Spinner visible big/> : null}
                         </Fragment>
-                    )}
+                    ) : null}
                 </Fragment>
             );
         }

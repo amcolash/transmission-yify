@@ -9,23 +9,24 @@ import Version from './Version';
 import Spinner from './Spinner';
 import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
-import { getDetails, getMovies, getSeasons, getEpisodes, hasFile, hasSubscription, parseMedia, parseHorribleSubs } from '../../Util/Parse';
+import { getDetails, getMovies, getSeasons, getEpisodes, getYear, hasFile, hasSubscription, parseMedia,
+    parseHorribleSubs } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
 
 class DetailsBackdrop extends Component {
 
     constructor(props) {
         super(props);
-        this.state = this.getDefaultState();
+        this.state = {...this.getDefaultState(), onLoad: props.media ? true : false};
     }
 
     getDefaultState() {
         return {tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, horribleSubs: null, season: 1, maxSeason: 1,
-            showCover: true, loadingEpisodes: false, subscribing: false, youtubeId: null, otherVideos: false};
+            showCover: true, loadingEpisodes: false, subscribing: false, youtubeId: null, otherVideos: false, onLoad: false};
     }
 
-    getEztv() {
-        const url = `${this.props.server}/eztv/${this.props.media.title}`;
+    getEztv(media) {
+        const url = `${this.props.server}/eztv/${media.title}`;
         
         if (Cache[url]) {
             this.handleEztv(Cache[url]);
@@ -126,17 +127,27 @@ class DetailsBackdrop extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { media, type } = this.props;
 
-        if (media && media !== prevProps.media && this.state === prevState) {
+        if (!media && this.state === prevState) {
+            this.setState(this.getDefaultState());
+            return;
+        }
+
+        if (media && (this.state.onLoad || (media.id !== (prevProps.media ? prevProps.media.id : '') && this.state === prevState))) {
             if (type === 'animes') {
                 axios.get(`${this.props.server}/kitsu/${media.id}`).then(response => {
                     const data = response.data.data;
+                    console.log(data);
+                    media.title = media.title || data.attributes.canonicalTitle;
+                    media.year = media.year || getYear(data);
+                    
                     this.setState({
                         moreData: {
                             CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
                             Plot: data.attributes.synopsis,
                             Rated: data.attributes.ageRating,
                             Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
-                            EpisodeCount: data.attributes.episodeCount
+                            EpisodeCount: data.attributes.episodeCount,
+                            PosterPath: data.attributes.posterImage.small
                         },
                         loadingEpisodes: true
                     });
@@ -149,13 +160,16 @@ class DetailsBackdrop extends Component {
                 });
             } else {
                 axios.get(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id).then(response => {
-                    const updated = { tmdbData: response.data, loadingEpisodes: type === 'shows' };
-                    if (type === 'shows') updated.moreData = response.data;
+                    const data = response.data;
+                    const updated = { tmdbData: data, loadingEpisodes: type === 'shows', showCover: true };
+                    media.title = media.title || data.title || data.original_name;
+                    media.year = media.year || getYear(data);
+                    if (type === 'shows') updated.moreData = data;
 
                     this.setState(updated);
         
                     if (type === 'shows' || type === 'subscriptions') {
-                        const moreData = response.data;
+                        const moreData = data;
                         if (moreData.seasons) {
                             moreData.seasons.forEach(season => {
                                 axios.get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`).then(response => {
@@ -168,9 +182,9 @@ class DetailsBackdrop extends Component {
                                 })
                             });
                         }
-                        this.getEztv();
+                        this.getEztv(media);
                     } else {
-                        const omdbUrl = this.props.server + '/omdb/' + response.data.imdb_id;
+                        const omdbUrl = this.props.server + '/omdb/' + data.imdb_id;
                         
                         if (Cache[omdbUrl]) {
                             this.setState({ moreData: Cache[omdbUrl] });
@@ -201,8 +215,10 @@ class DetailsBackdrop extends Component {
                     this.setState({ moreData: "ERROR" });
                 });
             }
+            if (this.state.onLoad) this.setState({onLoad: false});
         // } else if (this.state !== prevState) {
         //     this.setState({tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true});
+        // }
         }
     }
 
@@ -228,14 +244,19 @@ class DetailsBackdrop extends Component {
 
     render() {
         const { downloadTorrent, cancelTorrent, getTorrent, getProgress, started, type, onOpenModal, onCloseModal,
-            files, status } = this.props;
+            files, status, loading } = this.props;
         const { tmdbData, moreData, showCover, eztv, nyaa, pb, horribleSubs, season, maxSeason, youtubeId, loadingEpisodes,
             subscribing, otherVideos } = this.state;
 
-        const media = this.props.media || {};
+        let media = this.props.media || {};
 
         let backdrop = media.backdrop_path;
-        if (tmdbData) backdrop = tmdbData.backdrop_path;
+        let posterPath = media.poster_path;
+        if (tmdbData) {
+            backdrop = tmdbData.backdrop_path;
+            posterPath = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + tmdbData.poster_path;
+        }
+        if (moreData && moreData.PosterPath) posterPath = moreData.PosterPath;
         
         const versions = getMovies(media, pb ? pb.torrents : [], type);
 
@@ -257,14 +278,14 @@ class DetailsBackdrop extends Component {
 
         return (
             <Modal
-                open={this.props.media !== null}
+                open={this.props.media !== null && !loading}
                 modalId={'modalFullscreen'}
                 overlayId='overlay'
                 onClose={onCloseModal}
                 styles={{
                     modal: {
                         backgroundImage: (type === 'animes' ? (moreData && moreData !== 'ERROR' ? `url(${moreData.CoverImage})` : ''):
-                            `url(https://image.tmdb.org/t/p/w1280/${backdrop})`)
+                            backdrop ? `url(https://image.tmdb.org/t/p/w1280/${backdrop})` : 'unset')
                     },
                     closeIcon: {
                         fill: '#bbb',
@@ -344,10 +365,10 @@ class DetailsBackdrop extends Component {
                             ) : null}
                         </div>
                         <div className="spacer"></div>
-                        {showCover ? (
+                        {showCover && posterPath ? (
                             <div className="coverWrap">
                                     <img
-                                        src={media.poster_path}
+                                        src={posterPath}
                                         alt={media.title}
                                         onError={this.imageError.bind(this)}
                                     />

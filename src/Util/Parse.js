@@ -220,21 +220,30 @@ export function getEpisodes(torrents, moreData, type) {
         const matched = subscriptions.filter(s => s.id === id);
         return matched.length === 1 ? matched[0] : undefined;
     }
+
+    export function getYear(media) {
+        // fix weird years (since it seems the year can vary based on region released first)
+        let year = media.year || media.release_date || media.first_air_date;
+
+        // Handle anime dates
+        if (media.attributes) year = media.attributes.startDate;
+        
+        // only try to do fancy stuff if not a standard year
+        if (year && !year.toString().match(/^\d{4}$/)) year = new Date(year).getFullYear();
+
+        return year;
+    }
     
     export function parseMedia(media, type) {
         // used for anime
         const attributes = media.attributes;
         if (attributes) {
             media.title = attributes.canonicalTitle;
-            media.year = attributes.startDate;
             if (attributes.posterImage) media.poster_path = attributes.posterImage.small;
         }
         
-        // fix weird years (since it seems the year can vary based on region released first)
-        media.year = media.year || media.release_date || media.first_air_date;
-        
-        // only try to do fancy stuff if not a standard year
-        if (media.year && !media.year.toString().match(/^\d{4}$/)) media.year = new Date(media.year).getFullYear();
+        // parse year
+        media.year = getYear(media);
         
         // figure out title, filter out some characters
         media.title = media.title || media.name || media.original_title || '?';

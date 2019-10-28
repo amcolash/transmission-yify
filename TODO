@@ -26,10 +26,10 @@ TODO
 - [DONE] Parse HorribeSubs in addition to nyaa
 - [DONE] Prettier downloads view
 - [DONE] Start to pull apart portions of the server code into separate files
+- [DONE] Investigate performance on server and move parsing to worker (threads?)
+- [DONE - Experimental] Add hash urls to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
 - Move subscriptions to a separate file
-- Investigate performance on server and move parsing to worker (threads?)
 - Keyboard navigation (arrow keys, backspace / back button) - yikes the grid is tough...
-- Add hash urls to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
 - Look into android tv app / webapp
 - Precache on the server side when cache cleared
 - Analytics (views, downloads, ip locations, etc)
