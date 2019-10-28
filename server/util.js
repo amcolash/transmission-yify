@@ -66,54 +66,6 @@ function filterMovieResults(results) {
   return {page: results.page, total: filtered.length, limit: filtered.length, torrents: filtered};
 }
 
-// TODO: Move to a subscription util file later...
-function getEpisodes(subscription, torrents, onlyLast) {
-  let episodes = [];
-
-  torrents.forEach(t => {
-    const parsed = ptn(t.filename);
-    const episode = t.episode || parsed.episode;
-    const season = t.season || parsed.season;
-    if (!episode || !season) return;
-    
-    t.episode = Number.parseInt(episode);
-    t.season = Number.parseInt(season);
-    
-    episodes[season] = episodes[season] || [];
-    
-    if (!episodes[season][episode]) episodes[season][episode] = t;
-    else {
-      const existing = episodes[season][episode];
-      const parsedExisting = ptn(existing.filename);
-      
-      if (t.seeds > existing.seeds || Number.parseInt(parsed.resolution) > Number.parseInt(parsedExisting.resolution)) {
-        episodes[season][episode] = t;
-      }
-    }
-  });
-  
-  // Filter out non-relevant episodes as needed
-  const lastSeason = episodes[episodes.length-1];
-  const lastEpisode = lastSeason[lastSeason.length-1];
-  if (onlyLast) {
-    episodes = [lastEpisode];
-  } else {
-    const lastValue = subscription.lastSeason * 99 + subscription.lastEpisode;
-    
-    const tmp = [];
-    episodes = episodes.forEach(season => {
-      if (season) {
-        season.forEach(episode => {
-          if (episode.season * 99 + episode.episode > lastValue) tmp.push(episode);
-        });
-      }
-    });
-    episodes = tmp;
-  }
-
-  return { episodes, lastEpisode };
-}
-
 function searchShow(search, source) {
   let matched;
   source.forEach(s => {
@@ -125,4 +77,14 @@ function searchShow(search, source) {
   return matched;
 }
 
-module.exports = { autoPrune, filterMovieResults, getEpisodes, searchShow };
+function getTMDBUrl(id, type) {
+  return 'https://api.themoviedb.org/3/' + type + '/' + id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
+      '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
+}
+
+function setIntervalImmediately(func, interval) {
+  func();
+  return setInterval(func, interval);
+}
+
+module.exports = { autoPrune, filterMovieResults, searchShow, getTMDBUrl, setIntervalImmediately };

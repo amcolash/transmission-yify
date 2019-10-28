@@ -8,9 +8,7 @@ const proxy = require('express-http-proxy');
 const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
 const cheerio = require('cheerio');
-const transmissionWrapper = require('transmission');
 const querystring = require('querystring');
-const CronJob = require('cron').CronJob;
 const workerpool = require('workerpool');
 
 const piratePool = workerpool.pool(__dirname + '/pirate.js', {maxWorkers: 6});
@@ -18,18 +16,16 @@ const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
 const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } = require('./horriblesubs');
 
 const { getPlexFiles } = require('./plex');
-const { autoPrune, filterMovieResults, getEpisodes, searchShow } = require('./util');
+const { setupSubscriptions, findSubscription, downloadSubscription, writeSubscriptions } = require('./subscriptions');
+const { trackerCache, setupCache, clearCache, checkCache, checkTrackerCache } = require('./cache');
+const { autoPrune, filterMovieResults, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
 
 require('dotenv').config();
 
 
-// Init vars
-const IS_DOCKER = fs.existsSync('/.dockerenv');
-const PORT = 9000;
-const DATA = (IS_DOCKER ? '/data' : process.env.DATA_DIR);
-const CACHE_FILE = DATA + '/cache.json';
-const SUBSCRIPTION_FILE = DATA + '/subscriptions.json';
-const interval = 2000;
+// Init global vars
+const { IS_DOCKER, PORT, DATA, CACHE_FILE, interval, transmission } = require('./global');
+
 
 let currentTorrents = [];
 let currentFiles = [];
@@ -43,8 +39,6 @@ let currentStatus = {
     pirateBay: 'https://thepiratebay10.org/'
 };
 
-let cache = {};
-let trackerCache = {};
 let isUpgrading = false;
 
 // Figure out build time
@@ -77,25 +71,9 @@ if (fs.existsSync('./.cert/fullchain.pem')) {
     credentials.cert = fs.readFileSync('./.cert/cert.pem');
 }
 
-// Auto clean torrent cache every 12 hours
-new CronJob('00 00 */12 * * *', function() {
-    console.log('scheduled clearing of tracker cache');
-    trackerCache = {};
-}, null, true, 'America/Los_Angeles');
-
-// Wipe the full cache weekly at 4am on sunday/wednesday morning
-new CronJob('00 00 4 * * 0,3', function() {
-    console.log('scheduled clearing of main cache');
-    clearCache();
-}, null, true, 'America/Los_Angeles');
-
 // Make the server
 const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);
-
-// Transmission wrapper, conditional host based on if running from a docker container
-const transmission = new transmissionWrapper({ host: IS_DOCKER ? 'transmission' : '127.0.0.1',
-    username: process.env.TRUSER, password: process.env.TRPASSWD });
 
 // Get this party started!
 try {
@@ -106,23 +84,8 @@ try {
         });
     }
 
-    // Setup cache
-    try {
-        if (fs.existsSync(CACHE_FILE)) cache = require(CACHE_FILE);
-        else writeCache();
-    } catch (err) {
-        console.error(err);
-        writeCache();
-    }
-
-    // Setup subscription file
-    try {
-        if (fs.existsSync(SUBSCRIPTION_FILE)) currentStatus.subscriptions = require(SUBSCRIPTION_FILE);
-        else writeSubscriptions();
-    } catch (err) {
-        console.error(err);
-        writeSubscriptions();
-    }
+    setupCache();
+    setupSubscriptions(currentStatus);
 
     server.listen(PORT);
     console.log(`Running on port ${PORT}`);
@@ -286,7 +249,7 @@ app.post('/upgrade', function (req, res) {
 app.post('/subscriptions', function (req, res) {
     const id = Number.parseInt(req.query.id);
 
-    const matched = findSubscription(id);
+    const matched = findSubscription(id, currentStatus.subscriptions);
     if (matched) {
         res.sendStatus(403);
         return;
@@ -294,17 +257,17 @@ app.post('/subscriptions', function (req, res) {
 
     res.sendStatus(200);
     console.log('subscribing to ' + id);
-    downloadSubscription(id, true);
+    downloadSubscription(id, currentStatus.subscriptions, true);
 });
 
 app.delete('/subscriptions', function(req, res) {
     const id = Number.parseInt(req.query.id);
-    const matched = findSubscription(id);
+    const matched = findSubscription(id, currentStatus.subscriptions);
     if (matched) {
         res.sendStatus(200);
         console.log(`unsubscribing from ${matched.title} (${id})`);
         currentStatus.subscriptions = currentStatus.subscriptions.filter(s => s.id !== id);
-        writeSubscriptions();
+        writeSubscriptions(currentStatus.subscriptions);
     } else {
         res.sendStatus(404);
     }
@@ -411,92 +374,6 @@ io.on('connection', client => {
     })
 });
 
-function getTMDBUrl(id, type) {
-    return 'https://api.themoviedb.org/3/' + type + '/' + id + '?api_key=' + process.env.THE_MOVIE_DB_KEY + 
-        '&append_to_response=external_ids,videos,recommendations' + (type === 'tv' ? ',content_ratings' : '');
-}
-
-function clearCache() {
-    cache = {};
-    writeCache();
-}
-
-function filterTV(url, data) {
-    if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
-        (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
-        data.results = data.results.filter(show => {
-            return searchShow(show.original_name, getEZTVShows()) !== undefined;
-        });
-    }
-
-    return data;
-}
-
-// Check if the cache has data, else grab it
-function checkCache(url, res, shouldRetry) {
-    if (cache[url]) {
-        // cache for 1 day
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
-        res.send(cache[url]);
-    } else {
-        cacheRequest(url, res, shouldRetry);
-    }
-}
-
-// Stick things into a cache
-function cacheRequest(url, res, shouldRetry) {
-    axios.get(url, { timeout: 10000 }).then(response => {
-        const data = filterTV(url, response.data);
-
-        // cache for 1 day
-        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
-        res.send(data);
-        cache[url] = data;
-        writeCache();
-    }).catch(error => {
-        if (shouldRetry) {
-            setTimeout(() => cacheRequest(url, res, false), 10000);
-        } else {
-            console.error(error);
-            res.send(error);
-        }
-    });
-}
-
-function writeCache() {
-    fs.writeFile(CACHE_FILE, JSON.stringify(cache), (err) => {
-        if (err) console.error(err);
-    });
-}
-
-function writeSubscriptions() {
-    fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(currentStatus.subscriptions), (err) => {
-        if (err) console.error(err);
-    });
-}
-
-function checkTrackerCache(url, res) {
-    if (trackerCache[url]) {
-        if (res) {
-            // cache for 6 hours
-            if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-            res.send(trackerCache[url]);
-        }
-    } else {
-        axios.get(url).then(response => {
-            if (res) {
-                // cache for 6 hours
-                if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-                res.send(response.data);
-            }
-            trackerCache[url] = response.data;
-        }).catch(err => {
-            console.error(err);
-            if (res) res.send([]);
-        });
-    }
-}
-
 // Single handler for all of the transmission wrapper responses
 function handleResponse(res, err, data) {
     if (err) {
@@ -506,78 +383,6 @@ function handleResponse(res, err, data) {
     } else {
         res.send(data);
     }
-}
-
-function findSubscription(id) {
-    const matched = currentStatus.subscriptions.filter(s => s.id === id);
-    return matched.length === 1 ? matched[0] : undefined;
-}
-
-async function downloadSubscription(id, onlyLast) {
-    // Get the current subscription status
-    const matched = findSubscription(id);
-    let subscription = matched || {};
-
-    // Always grab new data for the show
-    const url = getTMDBUrl(id, 'tv');
-    let data;
-    if (cache[url]) {
-        data = cache[url];
-    } else {
-        try {
-            const res = await axios.get(url);
-            data = res.data;
-        } catch (err) {
-            console.error(err);
-            return; // bail, things went wrong getting data
-        }
-    }
-
-    // handle things this way so that the data stored is upgraded on the fly, it modifies the existing object this way
-    subscription.id = id;
-    subscription.imdb = data.external_ids.imdb_id;
-    subscription.title = data.name;
-    subscription.year = new Date(data.first_air_date).getFullYear();
-    subscription.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + data.poster_path;
-
-    // Only update these if needed
-    subscription.lastSeason = subscription.lastSeason || 0;
-    subscription.lastEpisode = subscription.lastEpisode || 0;
-
-    // Add a new entry if it does not exist
-    if (!matched) currentStatus.subscriptions.push(subscription);
-
-    // write to file so we keep retrying if things fail below, also keep modified fields
-    writeSubscriptions();
-
-    // find torrents for the show
-    const matchedShow = searchShow(subscription.title, getEZTVShows());
-    getEZTVDetails(matchedShow.url).then(data => {
-        // Generate a list of all episodes from the query
-        const { episodes, lastEpisode } = getEpisodes(subscription, data.torrents, onlyLast);
-
-        if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`);
-
-        // Download each torrent
-        episodes.forEach(e => {
-            console.log('Downloading new subscribed file: ' + e.filename);
-            transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
-                if (err) console.error(err);
-            });
-        });
-
-        // Update subscription
-        subscription.lastSeason = lastEpisode.season;
-        subscription.lastEpisode = lastEpisode.episode;
-        writeSubscriptions();
-    }).catch(err => {
-        console.error(err);
-    });
-}
-
-function setIntervalImmediately(func, interval) {
-    func();
-    return setInterval(func, interval);
 }
 
 function initSocketDataWatchers() {
@@ -666,7 +471,7 @@ function initStatusWatchers() {
         // Check subscriptions every hour
         setIntervalImmediately(() => {
             currentStatus.subscriptions.forEach(subscription => {
-                downloadSubscription(subscription.id, false);
+                downloadSubscription(subscription.id, currentStatus.subscriptions, false);
             });
         }, interval * 30 * 60);
     }, IS_DOCKER ? interval * 30 : interval * 5);
