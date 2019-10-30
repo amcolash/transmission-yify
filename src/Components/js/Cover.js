@@ -111,7 +111,7 @@ class Cover extends Component {
                     className="cover"
                     onClick={e => { if (click) click(media); }}
                     onKeyDown={e => { if (e.key === 'Enter' && click) click(media); }}
-                    tabIndex="3"
+                    tabIndex="0"
                 >
                     <img className="movieCover" src={media.poster_path} alt="" />
                     <div className="movieIcon">

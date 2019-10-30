@@ -32,7 +32,11 @@ button {
 
 :focus {
     outline: 0.2em solid rgb(70,170,230);
-    transition: all 0.15s;
+    transition: outline 0.15s;
+}
+
+[tabindex^="-"]:focus {
+    outline: none;
 }
 
 input:focus, select:focus {
