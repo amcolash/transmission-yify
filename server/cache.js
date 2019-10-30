@@ -3,6 +3,8 @@ const axios = require('axios');
 const CronJob = require('cron').CronJob;
 
 const { CACHE_FILE, IS_DOCKER } = require('./global');
+const { searchShow } = require('./util');
+const { getEZTVShows } = require('./eztv');
 
 let cache = {};
 let trackerCache = {};
@@ -37,71 +39,71 @@ function clearCache() {
 
 function writeCache() {
   fs.writeFile(CACHE_FILE, JSON.stringify(cache), (err) => {
-      if (err) console.error(err);
+    if (err) console.error(err);
   });
 }
 
 function filterTV(url, data) {
   if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
-      (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
-      data.results = data.results.filter(show => {
-          return searchShow(show.original_name, getEZTVShows()) !== undefined;
-      });
+  (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
+    data.results = data.results.filter(show => {
+      return searchShow(show.original_name, getEZTVShows()) !== undefined;
+    });
   }
-
+  
   return data;
 }
 
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
   axios.get(url, { timeout: 10000 }).then(response => {
-      const data = filterTV(url, response.data);
-
-      // cache for 1 day
-      if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
-      res.send(data);
-      cache[url] = data;
-      writeCache();
+    const data = filterTV(url, response.data);
+    
+    // cache for 1 day
+    if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
+    res.send(data);
+    cache[url] = data;
+    writeCache();
   }).catch(error => {
-      if (shouldRetry) {
-          setTimeout(() => cacheRequest(url, res, false), 10000);
-      } else {
-          console.error(error);
-          res.send(error);
-      }
+    if (shouldRetry) {
+      setTimeout(() => cacheRequest(url, res, false), 10000);
+    } else {
+      console.error(error);
+      res.send(error);
+    }
   });
 }
 
 // Check if the cache has data, else grab it
 function checkCache(url, res, shouldRetry) {
   if (cache[url]) {
-      // cache for 1 day
-      if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
-      res.send(cache[url]);
+    // cache for 1 day
+    if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
+    res.send(cache[url]);
   } else {
-      cacheRequest(url, res, shouldRetry);
+    cacheRequest(url, res, shouldRetry);
   }
 }
 
 function checkTrackerCache(url, res) {
   if (trackerCache[url]) {
-      if (res) {
-          // cache for 6 hours
-          if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-          res.send(trackerCache[url]);
-      }
+    if (res) {
+      // cache for 6 hours
+      if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+      res.send(trackerCache[url]);
+    }
   } else {
-      axios.get(url).then(response => {
-          if (res) {
-              // cache for 6 hours
-              if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
-              res.send(response.data);
-          }
-          trackerCache[url] = response.data;
-      }).catch(err => {
-          console.error(err);
-          if (res) res.send([]);
-      });
+    axios.get(url).then(response => {
+      if (res) {
+        // cache for 6 hours
+        if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
+        res.send(response.data);
+      }
+      trackerCache[url] = response.data;
+    }).catch(err => {
+      console.error(err);
+      if (res) res.send([]);
+    });
   }
 }
 
