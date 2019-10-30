@@ -488,7 +488,7 @@ class DetailsBackdrop extends Component {
                             </Fragment>
                         )}
 
-                        {recommendations ? (
+                        {recommendations && recommendations.length > 0 ? (
                             <Fragment>
                                 <h4>You Might Also Like...</h4>
                                 <div className="recommendationContainer">
