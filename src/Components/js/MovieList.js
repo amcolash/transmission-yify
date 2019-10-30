@@ -130,7 +130,16 @@ class MovieList extends Component {
     }
 
     updateHash() {
-        this.setState({media: window.location.hash.length > 1 ? {id: window.location.hash.substring(1)} : null});
+        const id = Number.parseInt((window.location.hash || '').substring(1));
+
+        if (this.state.media && this.state.media.id === id) return;
+
+        // Only update if the id has changed
+        if (id.length > 0) {
+            this.setState({media: {id}});
+        } else {
+            this.setState({media: null});
+        }
     }
 
     updateHistory() {

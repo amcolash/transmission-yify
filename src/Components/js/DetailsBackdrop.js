@@ -292,6 +292,10 @@ class DetailsBackdrop extends Component {
                         stroke: '#bbb',
                     }
                 }}
+                closeIconId='closeButton'
+                focusTrapOptions={{
+                    initialFocus: '#modalFullscreen #closeButton'
+                }}
             >
                 <div className="container" onClick={e => {
                     this.setState(this.getDefaultState());
@@ -300,7 +304,7 @@ class DetailsBackdrop extends Component {
                     <div className="left">
                         <div className="info">
                             <h3>
-                                {media.title || ''}
+                                {media.title || media.original_name || ''}
                                 {type !== 'movies' && status && status.subscriptions ? (subscribing ?
                                     <span className="subscription"><Spinner visible/></span> :
                                     <FaRssSquare

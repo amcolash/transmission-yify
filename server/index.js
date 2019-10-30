@@ -278,9 +278,8 @@ app.delete('/cache', function (req, res) {
     if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
     if (req.query.key !== KEY) throw new Error('Invalid key');
 
-    console.log('clearing cache via endpoint')
+    console.log('clearing cache via endpoint');
     clearCache();
-    trackerCache = {};
 
     res.sendStatus(200);
 });

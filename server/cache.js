@@ -34,6 +34,7 @@ function setupCache() {
 
 function clearCache() {
   cache = {};
+  trackerCache = {};
   writeCache();
 }
 
@@ -44,11 +45,17 @@ function writeCache() {
 }
 
 function filterTV(url, data) {
-  if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1 &&
-  (url.indexOf('search') !== -1 || url.indexOf('discover') !== -1)) {
+  if (url.indexOf('https://api.themoviedb.org') !== -1 && url.indexOf('tv') !== -1) {
+    if (data.results) {
     data.results = data.results.filter(show => {
       return searchShow(show.original_name, getEZTVShows()) !== undefined;
     });
+  }
+    if (data.recommendations && data.recommendations.results) {
+      data.recommendations.results = data.recommendations.results.filter(show => {
+        return searchShow(show.original_name, getEZTVShows()) !== undefined;
+      });
+    }
   }
   
   return data;
