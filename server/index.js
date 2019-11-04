@@ -17,7 +17,8 @@ const { updateHorribleSubsShows, getHorribleSubsDetails, getHorribleSubsShows } 
 
 const { getPlexFiles } = require('./plex');
 const { setupSubscriptions, findSubscription, downloadSubscription, writeSubscriptions } = require('./subscriptions');
-const { trackerCache, setupCache, clearCache, checkCache, checkTrackerCache } = require('./cache');
+const { getTrackerCache, setupCache, clearCache, checkCache, checkTrackerCache } = require('./cache');
+const { setupAnalytics, analyticsMiddleware, getAnalytics } = require('./analytics');
 const { autoPrune, filterMovieResults, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
 
 require('dotenv').config();
@@ -59,6 +60,9 @@ app.use(redirectToHTTPS());
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
 
+// record requests through analytics handler
+app.use(analyticsMiddleware);
+
 // HTTPS setup
 const credentials = {};
 credentials.key = fs.readFileSync('./.cert/privkey.pem');
@@ -86,6 +90,7 @@ try {
 
     setupCache();
     setupSubscriptions(currentStatus);
+    setupAnalytics();
 
     server.listen(PORT);
     console.log(`Running on port ${PORT}`);
@@ -193,7 +198,6 @@ app.get('/nyaa/:precache?', function(req, res) {
 });
 
 app.get('/status', function (req, res)  { res.send(currentStatus); });
-app.get('/session', function (req, res) { transmission.session((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents', function (req, res) { transmission.get((err, data) => handleResponse(res, err, data)); });
 app.get('/torrents/:hash', function (req, res) { transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data)); });
 app.delete('/torrents/:hash', function (req, res) { transmission.remove(req.params.hash, req.query.deleteFiles == 'true', (err, data) => handleResponse(res, err, data)); });
@@ -288,6 +292,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
     const search = req.params.search;
     const filter = req.query.all ? '/99/0' : '/99/200';
     const cacheName = search + (req.query.page ? `-page${req.query.page}` : '') + (req.query.movie ? '-movie' : '') + filter;
+    const trackerCache = getTrackerCache();
     if (req.params.precache) {
         res.sendStatus(200);
         return;
@@ -318,6 +323,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
 app.get('/eztv/:search', function(req, res) {
     const search = req.params.search;
     const match = searchShow(search, getEZTVShows());
+    const trackerCache = getTrackerCache();
 
     if (match) {
         const url = match.url;
@@ -342,6 +348,7 @@ app.get('/eztv/:search', function(req, res) {
 app.get('/horriblesubs/:search', function(req, res) {
     const search = req.params.search;
     const match = searchShow(search, getHorribleSubsShows());
+    const trackerCache = getTrackerCache();
     
     if (match) {
         const url = match.url;
@@ -362,6 +369,15 @@ app.get('/horriblesubs/:search', function(req, res) {
         res.send({page:1,total:0,limit:30,torrents:[], batches: []});
     }
 });
+
+// TODO: Password protect
+app.get('/analytics', function(req, res) {
+    const KEY = process.env.UPGRADE_KEY;
+    if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
+    if (req.query.key !== KEY) throw new Error('Invalid key');
+    
+    res.send(getAnalytics());
+})
 
 io.on('connection', client => {
     client.on('subscribe', data => {

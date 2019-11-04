@@ -21,6 +21,11 @@ new CronJob('00 00 4 * * 0,3', function() {
   clearCache();
 }, null, true, 'America/Los_Angeles');
 
+// Write updates to the cache every 5 minutes for perf reasons
+new CronJob('0 */5 * * * *', function() {
+  writeCache();
+}, null, true, 'America/Los_Angeles');
+
 
 function setupCache() {
   try {
@@ -70,7 +75,6 @@ function cacheRequest(url, res, shouldRetry) {
     if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=86400');
     res.send(data);
     cache[url] = data;
-    writeCache();
   }).catch(error => {
     if (shouldRetry) {
       setTimeout(() => cacheRequest(url, res, false), 10000);
@@ -114,4 +118,12 @@ function checkTrackerCache(url, res) {
   }
 }
 
-module.exports = { cache, trackerCache, setupCache, clearCache, checkCache, checkTrackerCache };
+function getCache() {
+  return cache;
+}
+
+function getTrackerCache() {
+  return trackerCache;
+}
+
+module.exports = { getCache, getTrackerCache, setupCache, clearCache, checkCache, checkTrackerCache };

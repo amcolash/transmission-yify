@@ -30,7 +30,9 @@ TODO
 - [DONE - Experimental] Add hash urls to backdrop for simple history - this gets nasty because of assumptions being made at the moment about details
 - [DONE] Move subscriptions to a separate file
 - [DONE] Keyboard navigation (arrow keys, backspace / back button) - yikes the grid is tough...
+- [DONE] Basic Analytics (views, downloads, ip locations, etc)
+- Analytics dashboard if it seems like these are useful
+- Persist Upgrade / Cache Key in localstorage
 - Look into android tv app / webapp
 - Precache on the server side when cache cleared
-- Analytics (views, downloads, ip locations, etc)
 - Move to Mongo?

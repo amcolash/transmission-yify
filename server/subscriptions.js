@@ -3,7 +3,7 @@ const axios = require('axios');
 const ptn = require('../src/Util/TorrentName');
 
 const { SUBSCRIPTION_FILE, IS_DOCKER, transmission } = require('./global');
-const { cache } = require('./cache');
+const { getCache } = require('./cache');
 const { getEZTVShows, getEZTVDetails } = require('./eztv');
 const { getTMDBUrl, searchShow } = require('./util');
 
@@ -31,12 +31,13 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
   // Always grab new data for the show
   const url = getTMDBUrl(id, 'tv');
   let data;
-  if (cache[url]) {
-      data = cache[url];
+  if (getCache()[url]) {
+      data = getCache()[url];
   } else {
       try {
           const res = await axios.get(url);
           data = res.data;
+          getCache()[url] = data;
       } catch (err) {
           console.error(err);
           return; // bail, things went wrong getting data
