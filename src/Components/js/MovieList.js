@@ -422,6 +422,7 @@ class MovieList extends Component {
             console.log(response.data);
             alert('Starting upgrade');
         }).catch(err => {
+            localStorage.removeItem('key');
             console.error(err);
             alert('Something went wrong...');
         });
@@ -435,6 +436,7 @@ class MovieList extends Component {
             console.log(response.data);
             alert('Clearing Cache');
         }).catch(err => {
+            localStorage.removeItem('key');
             console.error(err);
             alert('Something went wrong...');
         });

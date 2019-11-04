@@ -12,10 +12,12 @@ class Analytics extends Component {
   }
 
   componentDidMount() {
-    // TODO
-    axios.get(this.props.server + '/analytics?key=').then(response => {
+    const key = localStorage.getItem('key') || window.prompt("Password?", "");
+    axios.get(this.props.server + '/analytics?key=' + key).then(response => {
+      localStorage.setItem('key', key);
       this.setState({analytics: response.data, type: Object.keys(response.data)[0]});
     }).catch(err => {
+      localStorage.removeItem('key');
       console.error(err);
     });
   }
