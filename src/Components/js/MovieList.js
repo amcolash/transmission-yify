@@ -413,8 +413,10 @@ class MovieList extends Component {
     }
 
     upgrade = () => {
-        var password = window.prompt("Password?", "");
-        axios.post(this.server + '/upgrade?upgradeKey=' + password).then(response => {
+        const key = localStorage.getItem('key') || window.prompt("Password?", "");
+        if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to upgrade the server?')) return;
+        axios.post(this.server + '/upgrade?upgradeKey=' + key).then(response => {
+            localStorage.setItem('key', key);
             console.log(response.data);
             alert('Starting upgrade');
         }).catch(err => {
@@ -424,8 +426,10 @@ class MovieList extends Component {
     }
 
     clearCache = () => {
-        var password = window.prompt("Password?", "");
-        axios.delete(this.server + '/cache?key=' + password).then(response => {
+        const key = localStorage.getItem('key') || window.prompt("Password?", "");
+        if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to clear the cache?')) return;
+        axios.delete(this.server + '/cache?key=' + key).then(response => {
+            localStorage.setItem('key', key);
             console.log(response.data);
             alert('Clearing Cache');
         }).catch(err => {
