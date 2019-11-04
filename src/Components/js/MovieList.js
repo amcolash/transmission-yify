@@ -131,11 +131,12 @@ class MovieList extends Component {
     }
 
     updateHash() {
-        const id = Number.parseInt((window.location.hash || '').substring(1));
+        const id = (window.location.hash || '').substring(1);
 
-        if (this.state.media && this.state.media.id === id) return;
+        // Double equals so that string and number can coexist and if they match in any form don't double things
+        if (this.state.media && this.state.media.id == id) return; // eslint-disable-line eqeqeq
 
-        // Only update if the id has changed
+        // Only update if the id is defined
         if (id.length > 0) {
             this.setState({media: {id}});
         } else {
@@ -414,8 +415,10 @@ class MovieList extends Component {
     }
 
     upgrade = () => {
-        var password = window.prompt("Password?", "");
-        axios.post(this.server + '/upgrade?upgradeKey=' + password).then(response => {
+        const key = localStorage.getItem('key') || window.prompt("Password?", "");
+        if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to upgrade the server?')) return;
+        axios.post(this.server + '/upgrade?upgradeKey=' + key).then(response => {
+            localStorage.setItem('key', key);
             console.log(response.data);
             alert('Starting upgrade');
         }).catch(err => {
@@ -425,8 +428,10 @@ class MovieList extends Component {
     }
 
     clearCache = () => {
-        var password = window.prompt("Password?", "");
-        axios.delete(this.server + '/cache?key=' + password).then(response => {
+        const key = localStorage.getItem('key') || window.prompt("Password?", "");
+        if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to clear the cache?')) return;
+        axios.delete(this.server + '/cache?key=' + key).then(response => {
+            localStorage.setItem('key', key);
             console.log(response.data);
             alert('Clearing Cache');
         }).catch(err => {

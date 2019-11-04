@@ -36,19 +36,18 @@ function analyticsMiddleware(req, res, next) {
   next();
 
   try {
-    const ip = req.ip || req.ips || req.connection.remoteAddress;
+    // Need to remove ipv6 for local addresses for some reason to get the geoip library to work properly
+    const ip = (req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress).replace('::ffff:', '');;
     const geo = geoip.lookup(ip);
-    const url = req.originalUrl;
-    const params = req.params;
-    const location = ip === '::1' ? 'localhost' : geo ? `${geo.city}, ${geo.region}, ${geo.country}` : 'Unknown'
-
+    const location = geo ? `${geo.city} ${geo.region}, ${geo.country}` : ip === '::1' ? 'localhost' : 'Unknown';
+    
+    const query = req.query;
+    const url = req.path;
     const data = {
       location,
-      method: req.method
+      method: req.method,
+      query: Object.values(query).length > 0 ? query : undefined
     };
-
-    // Only add params if passed
-    if (Object.values(params).length > 0) data.params = params;
 
     let type = analyticsType.EXPRESS_BASE;
     if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1) type = analyticsType.MOVIES;
@@ -57,8 +56,6 @@ function analyticsMiddleware(req, res, next) {
     if (url.indexOf('subscriptions') !== -1) type = analyticsType.SUBSCRIPTION;
     if (url.indexOf('torrents') !== -1) type = analyticsType.TRANSMISSION;
     if (url.indexOf('analytics') !== -1 || url.indexOf('upgrade') !== -1 || url.indexOf('cache') !== -1) type = analyticsType.ADMIN;
-
-    // console.log(data, type, url)
 
     recordEvent(data, type, url);
   } catch (e) {
