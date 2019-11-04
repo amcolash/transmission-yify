@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare, FaRecycle } from 'react-icons/fa';
+import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare,
+  FaRecycle, FaChartBar } from 'react-icons/fa';
 
 import '../css/Menu.css';
 import {swipedetect} from '../../Util/Swipe';
@@ -108,6 +109,7 @@ class Menu extends Component {
           {status ? this.generateItem(plexIcon, 'Plex', () => { window.open(status.plex, '_blank'); this.setVisible(false); }) : null}
           {this.generateItem(<FaMagnet/>, 'Add Magnet', e => { e.stopPropagation(); this.props.addMagnet(); })}
           <div className="spacer"></div>
+          {this.generateItem(<FaChartBar/>, 'Analytics', 'analytics')}
           {this.generateItem(<FaRecycle/>, 'Clear Cache', this.props.clearCache)}
           {this.generateItem(<FaPowerOff/>, 'Upgrade Server', this.props.upgrade)}
 

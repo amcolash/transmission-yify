@@ -13,6 +13,7 @@ import Search from './Search';
 import Order from '../../Data/Order';
 import Pirate from './Pirate';
 import Menu from './Menu';
+import Analytics from './Analytics';
 import Cache from '../../Util/Cache';
 import { parseMedia, hasSubscription } from '../../Util/Parse';
 
@@ -252,7 +253,7 @@ class MovieList extends Component {
             }
             // use all so that we do not filter here
             ENDPOINT = `${this.server}/pirate/${search}?all=true&page=${page}`;
-        } else if (type === 'subscriptions' || type === 'downloads') {
+        } else if (type === 'subscriptions' || type === 'downloads' || type === 'analytics') {
             this.setState({
                 isLoaded: true,
                 isSearching: false,
@@ -568,6 +569,8 @@ class MovieList extends Component {
                                 ))}
                             </div>
                         </div>
+                    ) : type === 'analytics' ? (
+                        <Analytics server={this.server}/>
                     ) : !logo && isLoaded ? (
                         <Fragment>
                             <Search
