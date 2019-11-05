@@ -23,7 +23,7 @@ class Analytics extends Component {
     const key = localStorage.getItem('key') || window.prompt("Password?", "");
     axios.get(this.props.server + '/analytics?key=' + key).then(response => {
       localStorage.setItem('key', key);
-      this.setState({analytics: response.data});
+      this.setState({analytics: response.data}, () => this.updateOptions());
     }).catch(err => {
       //TODO: localStorage.removeItem('key');
       console.error(err);
@@ -108,17 +108,12 @@ class Analytics extends Component {
     const aggregated = this.aggregateData(flat);
     const series = this.generateSeries(aggregated);
 
-    console.log(series)
-
     return series;
   }
 
-  render() {
+  updateOptions() {
     const { analytics, type } = this.state;
-
-    const types = analytics ? Object.keys(analytics).sort() : [];
-    const series = this.parseAnalytics(analytics, type);
-
+    const series = this.parseAnalytics(analytics, this.state.type);
     const options = {
       chart: {
         type: 'column'
@@ -137,6 +132,13 @@ class Analytics extends Component {
       },
       series
     };
+
+    this.setState({highchartsOptions: options});
+  }
+
+  render() {
+    const { analytics, type, highchartsOptions } = this.state;
+    const types = analytics ? Object.keys(analytics).sort() : [];
     
     return (
       <div className="analyticsList">
@@ -145,7 +147,7 @@ class Analytics extends Component {
           {types.length > 0 ? (
             <div className="searchItem">
                 <span>Type</span>
-                <select onChange={(event) => this.setState({type: event.target.value})} value={type} >
+                <select onChange={(event) => this.setState({type: event.target.value}, () => this.updateOptions())} value={type} >
                   <option key="all" value="all">All</option>
                   {types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                 </select>
@@ -155,7 +157,7 @@ class Analytics extends Component {
         <br/>
         <HighchartsReact
           highcharts={Highcharts}
-          options={options}
+          options={highchartsOptions}
         />
         <br/>
         {/* {analytics && type ? JSON.stringify(analytics[type]) : null} */}
