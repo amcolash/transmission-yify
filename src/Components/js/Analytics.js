@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { FaSync } from 'react-icons/fa';
 import axios from 'axios';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -11,21 +12,20 @@ const colors = ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80"
 class Analytics extends Component {
   constructor(props) {
     super(props);
-    this.state = { analytics: {}, type: 'all' };
+    this.state = { analytics: {}, type: 'all', filter: 7 };
   }
 
   componentDidMount() {
     this.updateData();
   }
 
-  // TODO: Refresh Button
   updateData() {
     const key = localStorage.getItem('key') || window.prompt("Password?", "");
     axios.get(this.props.server + '/analytics?key=' + key).then(response => {
       localStorage.setItem('key', key);
       this.setState({analytics: response.data}, () => this.updateOptions());
     }).catch(err => {
-      //TODO: localStorage.removeItem('key');
+      localStorage.removeItem('key');
       console.error(err);
     });
   }
@@ -54,6 +54,10 @@ class Analytics extends Component {
 
   // Structure data similarly to the final data, but aggregate based on base url and add up method calls
   aggregateData(data) {
+    const filter = this.state.filter;
+    const filterDate = new Date();
+    if (this.filter !== 'none') filterDate.setDate(filterDate.getDate() - filter);
+
     const aggregated = {};
     data.forEach(entry => {
       const simpleurl = this.getSimpleUrl(entry.url);
@@ -63,6 +67,8 @@ class Analytics extends Component {
       let date = new Date(entry.timestamp);
       date.setHours(0,0,0,0);
       date = date.getTime();
+
+      if (date < filterDate.getTime()) return;
 
       if (aggregated[key][date]) aggregated[key][date]++;
       else aggregated[key][date] = 1; 
@@ -76,10 +82,13 @@ class Analytics extends Component {
     const series = [];
     Object.keys(data).forEach((url, index) => {
       const baseUrl = url.substring(0, url.indexOf(':'));
-      const seriesData = [];
+      let seriesData = [];
       Object.keys(data[url]).forEach(day => {
         seriesData.push([Number.parseInt(day), data[url][day]]);
       });
+
+      // Sort the data to make highcharts happy
+      seriesData = seriesData.sort((a, b) => a[0] - b[0]);
 
       series.push({
         name: url,
@@ -119,13 +128,13 @@ class Analytics extends Component {
         type: 'column'
       },
       title: {
-        text: type
+        text: type.charAt(0).toUpperCase() + type.slice(1)
       },
       xAxis: {
         labels: {
           format: '{value:%b %d, %Y}'
         },
-        type: 'datetime',
+        type: 'datetime'
       },
       yAxis: {
         minTickInterval: 1
@@ -137,13 +146,21 @@ class Analytics extends Component {
   }
 
   render() {
-    const { analytics, type, highchartsOptions } = this.state;
+    const { analytics, filter, type, highchartsOptions } = this.state;
     const types = analytics ? Object.keys(analytics).sort() : [];
+    const dateFilter = [1, 7, 30, 90];
     
     return (
       <div className="analyticsList">
         <h2>Analytics</h2>
         <div>
+          <div className="searchItem">
+            <span>Date Filter</span>
+            <select onChange={(event) => this.setState({filter: event.target.value}, () => this.updateOptions())} value={filter} >
+              <option key="none" value="none">All Data</option>
+              {dateFilter.map(t => <option key={t} value={t}>{t} Days</option>)}
+            </select>
+          </div>
           {types.length > 0 ? (
             <div className="searchItem">
                 <span>Type</span>
@@ -153,11 +170,12 @@ class Analytics extends Component {
                 </select>
             </div>
           ) : null}
+          <button onClick={() => this.updateData()}><FaSync/></button>
         </div>
         <br/>
         <HighchartsReact
           highcharts={Highcharts}
-          options={highchartsOptions}
+          options={highchartsOptions || {}}
         />
         <br/>
         {/* {analytics && type ? JSON.stringify(analytics[type]) : null} */}

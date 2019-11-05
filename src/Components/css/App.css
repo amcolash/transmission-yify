@@ -20,14 +20,28 @@ body.noscroll {
 }
 
 button {
-    background-color: #777;
-    border: 1px solid rgba(0,0,0,0.2);
+    background-color: #666;
+    border: 1px solid #111;
     color: white;
     padding: 0.3em 0.4em;
     font-size: 1em;   
     margin: 0.5em 0.3em;
     line-height: 1em;
     border-radius: 0.2em;
+    transition: all 0.3s;
+}
+
+input:focus, select:focus {
+    outline: 0.3em solid rgb(70,170,230);
+}
+
+button:hover {
+    background-color: #777;
+    border-color: rgba(0,0,0,0.2);
+}
+
+button:hover, .pointer {
+    cursor: pointer;
 }
 
 :focus {
@@ -37,14 +51,6 @@ button {
 
 [tabindex^="-"]:focus {
     outline: none;
-}
-
-input:focus, select:focus {
-    outline: 0.3em solid rgb(70,170,230);
-}
-
-button:hover, .pointer {
-    cursor: pointer;
 }
 
 progress {
