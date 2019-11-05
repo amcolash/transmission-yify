@@ -11,6 +11,7 @@ const analyticsType = {
   MOVIES: 'movies',
   SHOWS: 'shows',
   ANIMES: 'animes',
+  PIRATE: 'pirate',
   TRANSMISSION: 'transmission',
   SUBSCRIPTION: 'subscription',
   ADMIN: 'admin'
@@ -50,9 +51,10 @@ function analyticsMiddleware(req, res, next) {
     };
 
     let type = analyticsType.EXPRESS_BASE;
-    if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1) type = analyticsType.MOVIES;
+    if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1 || query.movie) type = analyticsType.MOVIES;
     if (url.indexOf('show') !== -1 || url.indexOf('tv') !== -1 || url.indexOf('tmdb/seasons') !== -1 || url.indexOf('eztv') !== -1) type = analyticsType.SHOWS;
-    if (url.indexOf('kitsu') !== -1 || url.indexOf('nyaa') !== -1 || url.indexOf('horriblesubs') !== -1) type = analyticsType.ANIMES;
+    if (url.indexOf('kitsu') !== -1 || url.indexOf('nyaa') !== -1 || url.indexOf('horribleSubs') !== -1) type = analyticsType.ANIMES;
+    if (url.indexOf('pirate') !== -1 && !query.movie) type = analyticsType.PIRATE;
     if (url.indexOf('subscriptions') !== -1) type = analyticsType.SUBSCRIPTION;
     if (url.indexOf('torrents') !== -1) type = analyticsType.TRANSMISSION;
     if (url.indexOf('analytics') !== -1 || url.indexOf('upgrade') !== -1 || url.indexOf('cache') !== -1) type = analyticsType.ADMIN;
