@@ -72,7 +72,7 @@ class MovieList extends Component {
         this.updateHash = this.updateHash.bind(this);
         this.updateHistory = this.updateHistory.bind(this);
 
-        this.server = "https://" + window.location.hostname + ":9000";
+        this.server = "https://" + window.location.hostname + (window.location.port.length > 0 ? `:${window.location.port}` : '');
 
         // After the initial logo, hide it and go back to loading
         setTimeout(() => this.setState({showLogo: false}), 3550);
