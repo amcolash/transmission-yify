@@ -19,7 +19,7 @@ const { getPlexFiles } = require('./plex');
 const { setupSubscriptions, findSubscription, downloadSubscription, writeSubscriptions } = require('./subscriptions');
 const { getTrackerCache, setupCache, clearCache, checkCache, checkTrackerCache } = require('./cache');
 const { setupAnalytics, analyticsMiddleware, getAnalytics } = require('./analytics');
-const { autoPrune, filterMovieResults, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
+const { autoPrune, filterMovieResults, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
 
 require('dotenv').config();
 
@@ -107,6 +107,10 @@ try {
 
 // Set up static content, cache for a little bit
 app.use('/', express.static('build', IS_DOCKER ? { maxAge: '4h' } : {}));
+
+app.get('/test', function(req, res) {
+    res.send(JSONStringify(req));
+});
 
 app.get('/omdb/:id', function(req, res) {
     let url ='https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;

@@ -34,7 +34,7 @@ services:
     links:
       - transmission:transmission
     ports:
-      - 9000:9000
+      - 9090:9090
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA_DIR}:/data

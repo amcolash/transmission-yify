@@ -66,6 +66,25 @@ function filterMovieResults(results) {
   return {page: results.page, total: filtered.length, limit: filtered.length, torrents: filtered};
 }
 
+function JSONStringify(object) {
+  var cache = [];        
+  var str = JSON.stringify(object,
+      // custom replacer fxn - gets around "TypeError: Converting circular structure to JSON" 
+      function(key, value) {
+          if (typeof value === 'object' && value !== null) {
+              if (cache.indexOf(value) !== -1) {
+                  // Circular reference found, discard key
+                  return;
+              }
+              // Store value in our collection
+              cache.push(value);
+          }
+          return value;
+      }, 4);
+  cache = null; // enable garbage collection
+  return str;
+}
+
 function searchShow(search, source) {
   let matched;
   source.forEach(s => {
@@ -87,4 +106,4 @@ function setIntervalImmediately(func, interval) {
   return setInterval(func, interval);
 }
 
-module.exports = { autoPrune, filterMovieResults, searchShow, getTMDBUrl, setIntervalImmediately };
+module.exports = { autoPrune, filterMovieResults, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately };
