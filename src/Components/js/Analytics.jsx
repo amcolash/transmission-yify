@@ -176,7 +176,10 @@ class Analytics extends Component {
         type: 'datetime'
       },
       yAxis: {
-        minTickInterval: 1
+        minTickInterval: 1,
+        title: {
+          text: 'Requests'
+        }
       },
       series
     };
@@ -191,9 +194,8 @@ class Analytics extends Component {
         chart: {
           map: 'countries/us/us-all'
         },
-        colorAxis: {
-          min: 0,
-          visible: false
+        legend: {
+          enabled: false
         },
         series: [
           {
@@ -207,10 +209,14 @@ class Analytics extends Component {
             name: 'Region Data',
             data: chartData,
             type: 'mapbubble',
-            showInLegend: false,
-            minSize: 4,
-            maxSize: '12%',
+            minSize: 15,
+            maxSize: '10%',
             zIndex: 1,
+            dataLabels: {
+              enabled: true,
+              format: '{point.name}: {point.z}',
+              y: 15
+            },
           }
         ]
       }

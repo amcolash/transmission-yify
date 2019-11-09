@@ -25,7 +25,7 @@ new CronJob('0 */5 * * * *', function() {
 function setupAnalytics() {
   try {
     // Only load in previous analytics if in docker, otherwise wipe when server restarts
-    if (fs.existsSync(ANALYTICS_FILE) && IS_DOCKER) analytics = require(ANALYTICS_FILE);
+    if (fs.existsSync(ANALYTICS_FILE)) analytics = require(ANALYTICS_FILE);
   } catch (err) {
     console.error(err);
   }
@@ -59,6 +59,9 @@ function analyticsMiddleware(req, res, next) {
       query: Object.values(query).length > 0 ? query : undefined
     };
 
+    // If we are heading through the remote proxy, exit and do not record
+    if (url.indexOf('/remote') !== -1) return;
+    
     let type = analyticsType.EXPRESS_BASE;
     if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1 || query.movie) type = analyticsType.MOVIES;
     if (url.indexOf('show') !== -1 || url.indexOf('tv') !== -1 || url.indexOf('tmdb/seasons') !== -1 || url.indexOf('eztv') !== -1) type = analyticsType.SHOWS;
