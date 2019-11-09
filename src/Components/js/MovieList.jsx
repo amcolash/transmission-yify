@@ -25,8 +25,10 @@ class MovieList extends Component {
     constructor(props) {
         super(props);
 
+        let port;
         let devOverrides = {};
         if (process.env.NODE_ENV === 'development') {
+            port = 9000;
             devOverrides = {
                 // type: 'animes',
                 // search: 'One punch man'
@@ -72,7 +74,9 @@ class MovieList extends Component {
         this.updateHash = this.updateHash.bind(this);
         this.updateHistory = this.updateHistory.bind(this);
 
-        this.server = "https://" + window.location.hostname + (window.location.port.length > 0 ? `:${window.location.port}` : '');
+        this.server = "https://" + window.location.hostname;
+        if (port) this.server += `:${port}`;
+        else this.server += (window.location.port.length > 0 ? `:${window.location.port}` : '');
 
         // After the initial logo, hide it and go back to loading
         setTimeout(() => this.setState({showLogo: false}), 3550);
