@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FaSync } from 'react-icons/fa';
 import axios from 'axios';
-import Highcharts from 'highcharts';
+import Highcharts from '../../Util/Highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import geohash from 'ngeohash';
 
 import '../css/Analytics.css';
 
@@ -12,7 +13,7 @@ const colors = ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80"
 class Analytics extends Component {
   constructor(props) {
     super(props);
-    this.state = { analytics: {}, type: 'all', filter: 7 };
+    this.state = { analytics: {}, type: 'all', filter: 7, chartOptions: {}, mapOptions: {} };
   }
 
   componentDidMount() {
@@ -42,9 +43,19 @@ class Analytics extends Component {
 
   // Take the nested analytics data and flatten it into a row-level like 1d array
   flattenType(data, type) {
+    const filter = this.state.filter;
+    const filterDate = new Date();
+    if (this.filter !== 'none') filterDate.setDate(filterDate.getDate() - filter);
+
     const flat = [];
     Object.keys(data).forEach(url => {
       data[url].forEach(entry => {
+        let date = new Date(entry.timestamp);
+        date.setHours(0,0,0,0);
+        date = date.getTime();
+  
+        if (date < filterDate.getTime()) return;
+  
         const e = {url: type || url, ...entry};
         flat.push(e);
       });
@@ -54,10 +65,6 @@ class Analytics extends Component {
 
   // Structure data similarly to the final data, but aggregate based on base url and add up method calls
   aggregateData(data) {
-    const filter = this.state.filter;
-    const filterDate = new Date();
-    if (this.filter !== 'none') filterDate.setDate(filterDate.getDate() - filter);
-
     const aggregated = {};
     data.forEach(entry => {
       const simpleurl = this.getSimpleUrl(entry.url);
@@ -67,8 +74,6 @@ class Analytics extends Component {
       let date = new Date(entry.timestamp);
       date.setHours(0,0,0,0);
       date = date.getTime();
-
-      if (date < filterDate.getTime()) return;
 
       if (aggregated[key][date]) aggregated[key][date]++;
       else aggregated[key][date] = 1; 
@@ -120,10 +125,44 @@ class Analytics extends Component {
     return series;
   }
 
+  getChartData(analytics) {
+    let flat = [];
+    Object.keys(analytics).forEach(t => {
+      flat = flat.concat(this.flattenType(analytics[t], t));
+    });
+
+    // Get a mapping of location data to regions that are geohashed
+    const locationData = {};
+    const cities = {};
+    flat.forEach(i => {
+      if (i.location.state && i.location.country === 'US') {
+        const key = geohash.encode(i.location.lat, i.location.lng, 6);
+        locationData[key] = locationData[key] || 0;
+        locationData[key] ++;
+        cities[key] = i.location.city;
+      }
+    });
+
+    // Convert data to a format usable by highmaps
+    const chartData = [];
+    Object.keys(locationData).forEach(key => {
+      const loc = geohash.decode(key);
+      chartData.push({
+        name: cities[key],
+        lat: loc.latitude,
+        lon: loc.longitude,
+        z: locationData[key]
+      });
+    });
+
+    return chartData;
+  }
+
   updateOptions() {
     const { analytics, type } = this.state;
     const series = this.parseAnalytics(analytics, this.state.type);
-    const options = {
+
+    const chartOptions = {
       chart: {
         type: 'column'
       },
@@ -142,21 +181,56 @@ class Analytics extends Component {
       series
     };
 
-    this.setState({highchartsOptions: options});
+    const chartData = this.getChartData(analytics);
+    let mapOptions = {};
+    if (chartData.length > 0) {
+      mapOptions = {
+        title: {
+          text: 'Geographic User Distribution'
+        },
+        chart: {
+          map: 'countries/us/us-all'
+        },
+        colorAxis: {
+          min: 0,
+          visible: false
+        },
+        series: [
+          {
+            name: 'States',
+            color: '#E0E0E0',
+            enableMouseTracking: false,
+            showInLegend: false,
+            zIndex: 1,
+          },
+          {
+            name: 'Region Data',
+            data: chartData,
+            type: 'mapbubble',
+            showInLegend: false,
+            minSize: 4,
+            maxSize: '12%',
+            zIndex: 1,
+          }
+        ]
+      }
+    }
+
+    this.setState({chartOptions, mapOptions});
   }
 
   render() {
-    const { analytics, filter, type, highchartsOptions } = this.state;
+    const { analytics, filter, type, chartOptions, mapOptions } = this.state;
     const types = analytics ? Object.keys(analytics).sort() : [];
     const dateFilter = [1, 7, 30, 90];
-    
+
     return (
       <div className="analyticsList">
         <h2>Analytics</h2>
         <div>
           <div className="searchItem">
             <span>Date Filter</span>
-            <select onChange={(event) => this.setState({filter: event.target.value}, () => this.updateOptions())} value={filter} >
+            <select onChange={(event) => this.setState({filter: Number.parseInt(event.target.value)}, () => this.updateOptions())} value={filter} >
               <option key="none" value="none">All Data</option>
               {dateFilter.map(t => <option key={t} value={t}>{t} Days</option>)}
             </select>
@@ -175,9 +249,18 @@ class Analytics extends Component {
         <br/>
         <HighchartsReact
           highcharts={Highcharts}
-          options={highchartsOptions || {}}
+          options={chartOptions}
         />
-        <br/>
+        {mapOptions.series ? (
+          <Fragment>
+            <br/>
+            <HighchartsReact
+              highcharts={Highcharts}
+              constructorType={'mapChart'}
+              options={mapOptions}
+            />
+          </Fragment>
+        ) : null}
         {/* {analytics && type ? JSON.stringify(analytics[type]) : null} */}
       </div>
     );

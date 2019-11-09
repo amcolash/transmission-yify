@@ -40,8 +40,17 @@ function analyticsMiddleware(req, res, next) {
     // Need to remove ipv6 for local addresses for some reason to get the geoip library to work properly
     const ip = (req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress).replace('::ffff:', '');;
     const geo = geoip.lookup(ip);
-    const location = geo ? `${geo.city} ${geo.region}, ${geo.country}` : ip === '::1' ? 'localhost' : 'Unknown';
-    
+    let location = ip === '::1' ? 'localhost' : 'Unknown';
+    if (geo) {
+      location = {
+        city: geo.city,
+        state: geo.region,
+        country: geo.country,
+        lat: geo.ll[0],
+        lng: geo.ll[1],
+      };
+    }
+
     const query = req.query;
     const url = req.path;
     const data = {
