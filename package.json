@@ -17,6 +17,7 @@
     "plex-api": "^5.2.5",
     "socket.io": "^2.3.0",
     "transmission": "^0.4.9",
+    "uuid-by-string": "^3.0.2",
     "workerpool": "^5.0.1"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const geoip = require('geoip-lite');
 const CronJob = require('cron').CronJob;
+const getUuid = require('uuid-by-string');
 
 const { ANALYTICS_FILE, IS_DOCKER } = require('./global');
 
@@ -38,7 +39,8 @@ function analyticsMiddleware(req, res, next) {
 
   try {
     // Need to remove ipv6 for local addresses for some reason to get the geoip library to work properly
-    const ip = (req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress).replace('::ffff:', '');;
+    const ip = (req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress).replace('::ffff:', '');
+    const clientId = getUuid(ip);
     const geo = geoip.lookup(ip);
     let location = ip === '::1' ? 'localhost' : 'Unknown';
     if (geo) {
@@ -54,6 +56,7 @@ function analyticsMiddleware(req, res, next) {
     const query = req.query;
     const url = req.path;
     const data = {
+      clientId,
       location,
       method: req.method,
       query: Object.values(query).length > 0 ? query : undefined
