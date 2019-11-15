@@ -34,7 +34,7 @@ TODO
 - [DONE] Analytics dashboard if it seems like these are useful
 - [DONE] Persist Upgrade / Cache Key in localstorage
 - [DONE] Fix opening show from subscription view
-- Show latest season / episode in subscription view
+- [DONE - may want to make it prettier] Show latest season / episode in subscription view
 - Use client IDs to count unique users for analytics view
 - Look into android tv app / webapp
 - Precache on the server side when cache cleared
