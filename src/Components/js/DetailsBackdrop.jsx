@@ -161,10 +161,10 @@ class DetailsBackdrop extends Component {
             } else {
                 axios.get(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id).then(response => {
                     const data = response.data;
-                    const updated = { tmdbData: data, loadingEpisodes: type === 'shows', showCover: true };
+                    const updated = { tmdbData: data, loadingEpisodes: type === 'shows' || type === 'subscriptions', showCover: true };
                     media.title = media.title || data.title || data.original_name;
                     media.year = media.year || getYear(data);
-                    if (type === 'shows') updated.moreData = data;
+                    if (type === 'shows' || type === 'subscriptions') updated.moreData = data;
 
                     this.setState(updated);
         
@@ -452,7 +452,8 @@ class DetailsBackdrop extends Component {
                                                     <hr/>
                                                 </div>
                                             ) : null}
-                                            {type === 'shows' && moreData && moreData.seasons && moreData.seasons[season-1] ? (
+                                            {(type === 'shows' || type === 'subscriptions') && moreData && moreData.seasons &&
+                                                moreData.seasons[season-1] ? (
                                                 <span>{moreData.seasons[season-1].overview}</span>
                                             ) : null}
                                             <div className="episodeList">

@@ -32,8 +32,8 @@ export function getMovies(media, pb, type) {
 export function getSeasons(type, maxSeason, moreData) {
     const seasons = [];
     
-    if (type === 'shows' || type === 'animes') {
-        if (type === 'shows') {
+    if (type === 'shows' || type === 'animes' || type === 'subscriptions') {
+        if (type === 'shows' || type === 'subscriptions') {
             for (let i = 1; i < maxSeason + 1; i++) {
                 if (moreData && moreData.seasons && i <= moreData.seasons.length) seasons.push(i);
             }
@@ -64,8 +64,9 @@ export function getEpisodes(torrents, moreData, type) {
             if (type === 'animes') parsed.season = 1; // keep anime in 1 season
             
             // Bail if we weren't able to parse season/episode
-            if ((type === 'shows' && parsed.season === 0) || parsed.episode === 0 || (moreData && parsed.episode > moreData.EpisodeCount) ||
-            ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;
+            if (((type === 'shows' || type === 'subscriptions') && parsed.season === 0) || parsed.episode === 0 ||
+                (moreData && parsed.episode > moreData.EpisodeCount) ||
+                ((moreData && moreData.seasons) ? parsed.season > moreData.seasons.length : false)) return;
             
             let title = `Episode ${parsed.episode}`;
             if (moreData && moreData.seasons && moreData.seasons[parsed.season - 1] && moreData.seasons[parsed.season - 1].episodes &&
@@ -159,7 +160,7 @@ export function getEpisodes(torrents, moreData, type) {
             header = `${media.year || ''}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
         } else {
             header = `${(moreData && moreData.Year) ? moreData.Year : media.year || ''}`;
-            if (type === 'shows') header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+            if (type === 'shows'  || type === 'subscriptions') header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
         }
         
         const plot = (moreData && moreData.Plot) ? moreData.Plot : ((moreData && moreData.overview) ?
