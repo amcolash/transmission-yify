@@ -63,7 +63,7 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
 
   // find torrents for the show
   const matchedShow = searchShow(subscription.title, getEZTVShows());
-  if (!matchedShow.url) return;
+  if (!matchedShow || !matchedShow.url) return;
 
   getEZTVDetails(matchedShow.url).then(data => {
       // Generate a list of all episodes from the query

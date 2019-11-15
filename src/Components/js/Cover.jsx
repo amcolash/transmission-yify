@@ -8,6 +8,7 @@ import '../css/Cover.css';
 import {getMovies, hasFile, hasSubscription} from '../../Util/Parse';
 import Spinner from './Spinner';
 import Cache from '../../Util/Cache';
+import { shouldUpdate } from '../../Util/Util';
 
 const CancelToken = axios.CancelToken;
 
@@ -30,11 +31,9 @@ class Cover extends Component {
         }
     }
 
-    // Too many edge cases for now... Look into another time, maybe?
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     // Try to optimize when covers are re-rendered
-    //     return nextProps.media !== this.props.media || nextProps.status !== this.props.status || this.state !== nextState;
-    // }
+    shouldComponentUpdate(nextProps, nextState) {
+        return shouldUpdate(this.props, this.state, nextProps, nextState, false);
+    }
 
     cancelPB() {
         if (this.cancelToken) {
@@ -92,7 +91,7 @@ class Cover extends Component {
 
         const fileExists = hasFile(media, files || []);
         const subscription = status ? hasSubscription(media.id, status.subscriptions) : null;
-    
+
         let versions = [];
         if (pb) {
             versions = getMovies(media, pb.torrents, type);
@@ -163,6 +162,10 @@ class Cover extends Component {
                     ) : null}
                 </div>
                 <span onClick={(e) => click(media)}>{media.title} {media.year ? <span>({media.year})</span> : null}</span>
+                <br/>
+                {subscription ? (
+                    <span>Latest: S{subscription.lastSeason}E{subscription.lastEpisode}</span>
+                ) : null}
             </ScrollAnimation>
         );
     }

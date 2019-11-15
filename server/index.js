@@ -415,6 +415,13 @@ function initSocketDataWatchers() {
 
     // TODO: Give a few failed attempts before killing UI because we cannot connect to transmission
     setIntervalImmediately(() => transmission.get((err, data) => {
+        if (data) {
+            // remove peer data as it is pretty bulky and not used
+            Object.keys(data).forEach(k => {
+                data[k].peers = undefined;
+            });
+        }
+
         if ((data && JSON.stringify(currentTorrents) !== JSON.stringify(data)) ||
             (err && JSON.stringify(currentTorrents) !== JSON.stringify(err))) {
             currentTorrents = data || err;

@@ -6,8 +6,12 @@ import Spinner from './Spinner';
 
 import Genre from '../../Data/Genre';
 import Order from '../../Data/Order';
+import { shouldUpdate } from '../../Util/Util';
 
 class Search extends Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return shouldUpdate(this.props, this.state, nextProps, nextState, false);
+    }
 
     clearSearch() {
         this.props.updateSearch('', '', '', this.props.type, 1);

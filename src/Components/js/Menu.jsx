@@ -3,7 +3,8 @@ import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPower
   FaRecycle, FaChartBar } from 'react-icons/fa';
 
 import '../css/Menu.css';
-import {swipedetect} from '../../Util/Swipe';
+import { swipedetect } from '../../Util/Swipe';
+import { shouldUpdate } from '../../Util/Util';
 
 const plexIcon = <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path></svg>;
 
@@ -31,6 +32,10 @@ class Menu extends Component {
   componentWillUnmount() {
     document.removeEventListener('click', this.outsideClick, false);
     document.removeEventListener('focusin', this.onFocus, false);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shouldUpdate(this.props, this.state, nextProps, nextState, false);
   }
 
   outsideClick(e) {

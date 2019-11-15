@@ -16,6 +16,7 @@ import Menu from './Menu';
 import Analytics from './Analytics';
 import Cache from '../../Util/Cache';
 import { parseMedia, hasSubscription } from '../../Util/Parse';
+import { shouldUpdate } from '../../Util/Util';
 
 const hashMapping = {};
 const showMedia = false;
@@ -33,6 +34,9 @@ class MovieList extends Component {
                 // type: 'animes',
                 // search: 'One punch man'
             };
+        } else {
+            // After the initial logo, hide it and go back to loading
+            setTimeout(() => this.setState({showLogo: false}), 3550);
         }
 
         let type, media;
@@ -77,9 +81,6 @@ class MovieList extends Component {
         this.server = "https://" + window.location.hostname;
         if (port) this.server += `:${port}`;
         else this.server += (window.location.port.length > 0 ? `:${window.location.port}` : '');
-
-        // After the initial logo, hide it and go back to loading
-        setTimeout(() => this.setState({showLogo: false}), 3550);
     }
     
     componentDidMount() {
@@ -128,6 +129,10 @@ class MovieList extends Component {
         window.removeEventListener('resize', this.updateWindowDimensions);
         window.removeEventListener('hashchange', this.updateHash);
         window.removeEventListener('popstate', this.updateHistory);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return shouldUpdate(this.props, this.state, nextProps, nextState, true);
     }
 
     updateWindowDimensions() {

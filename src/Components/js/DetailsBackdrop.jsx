@@ -12,6 +12,7 @@ import Genre from '../../Data/Genre';
 import { getDetails, getMovies, getSeasons, getEpisodes, getYear, hasFile, hasSubscription, parseMedia,
     parseHorribleSubs } from '../../Util/Parse';
 import Cache from '../../Util/Cache';
+import { shouldUpdate } from '../../Util/Util';
 
 class DetailsBackdrop extends Component {
 
@@ -222,6 +223,10 @@ class DetailsBackdrop extends Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return shouldUpdate(this.props, this.state, nextProps, nextState, false);
+    }
+
     imageError() {
         this.setState({ showCover: false });
     }
@@ -305,7 +310,7 @@ class DetailsBackdrop extends Component {
                         <div className="info">
                             <h3>
                                 {media.title || media.original_name || ''}
-                                {type !== 'movies' && status && status.subscriptions ? (subscribing ?
+                                {(type === 'shows' || type === 'subscriptions') && status && status.subscriptions ? (subscribing ?
                                     <span className="subscription"><Spinner visible/></span> :
                                     <FaRssSquare
                                         className={`subscription ${hasSubscription(media.id, status.subscriptions) ? 'orange': 'gray'}`}
