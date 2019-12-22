@@ -172,6 +172,7 @@ class MovieList extends Component {
 
     updateTorrents(data) {
         if (data.errno === "ECONNREFUSED") {
+            console.error(data)
             this.setState({ error: { message: "Cannot access transmission" }});
         } else {
             var torrents = data.torrents || [];
