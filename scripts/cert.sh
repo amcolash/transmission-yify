@@ -14,3 +14,5 @@ mkcert localhost
 
 mv localhost.pem .cert/cert.pem
 mv localhost-key.pem .cert/privkey.pem
+
+echo "All done! Make sure to turn on chrome://flags/#allow-insecure-localhost as well if things aren't working properly"
