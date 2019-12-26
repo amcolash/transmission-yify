@@ -56,7 +56,7 @@ class Analytics extends Component {
   
         if (date < filterDate.getTime()) return;
   
-        const e = {url: type || url, ...entry};
+        const e = {url: type || url, simpleUrl: this.getSimpleUrl(url), ...entry};
         flat.push(e);
       });
     });
@@ -100,24 +100,59 @@ class Analytics extends Component {
         data: seriesData,
         stack: baseUrl,
         stacking: 'column',
-        color: colors[index % colors.length]
+        color: colors[index % colors.length],
+        events: {
+          hide: e => this.onToggleType(e),
+          show: e => this.onToggleType(e)
+        }
       });
     });
 
     return series;
   }
 
-  parseAnalytics(analytics, type) {
-    if (Object.keys(analytics).length === 0) return [];
+  onToggleType(e) {
+    const { analytics, type } = this.state;
+    const mapOptions = this.getMapOptions(analytics, type, e.target.chart);
 
+    this.setState({mapOptions});
+  }
+
+  flattenTypeAnalytics(analytics, type, newChart) {
     let flat = [];
     if (analytics[type]) {
       flat = this.flattenType(analytics[type]);
+
+      if (newChart) {
+        let tmp = [];
+        flat.forEach(i => {
+          newChart.series.forEach(s => {
+            if (s.name.indexOf(i.simpleUrl) !== -1 && s.visible) tmp.push(i);
+          });
+        });
+        flat = tmp;
+      }
     } else {
       Object.keys(analytics).forEach(t => {
-        flat = flat.concat(this.flattenType(analytics[t], t));
+        let matched = true;
+        
+        if (newChart) {
+          newChart.series.forEach(s => {
+            if (s.name.indexOf(t) !== -1) matched = s.visible;
+          });
+        }
+
+        if (matched) flat = flat.concat(this.flattenType(analytics[t], t));
       });
     }
+
+    return flat;
+  }
+
+  parseAnalytics(analytics, type) {
+    if (Object.keys(analytics).length === 0) return [];
+
+    const flat = this.flattenTypeAnalytics(analytics, type);
 
     const aggregated = this.aggregateData(flat);
     const series = this.generateSeries(aggregated);
@@ -125,18 +160,15 @@ class Analytics extends Component {
     return series;
   }
 
-  getChartData(analytics) {
-    let flat = [];
-    Object.keys(analytics).forEach(t => {
-      flat = flat.concat(this.flattenType(analytics[t], t));
-    });
+  getMapData(analytics, type, newChart) {
+    const flat = this.flattenTypeAnalytics(analytics, type, newChart);
 
     // Get a mapping of location data to regions that are geohashed
     const locationData = {};
     const cities = {};
     flat.forEach(i => {
       if (i.location.state && i.location.country === 'US') {
-        const key = geohash.encode(i.location.lat, i.location.lng, 6);
+        const key = geohash.encode(i.location.lat, i.location.lng, 3);
         locationData[key] = locationData[key] || 0;
         locationData[key] ++;
         cities[key] = i.location.city;
@@ -158,11 +190,8 @@ class Analytics extends Component {
     return chartData;
   }
 
-  updateOptions() {
-    const { analytics, type } = this.state;
-    const series = this.parseAnalytics(analytics, this.state.type);
-
-    const chartOptions = {
+  getChartOptions(series, type) {
+    return {
       chart: {
         type: 'column'
       },
@@ -183,8 +212,10 @@ class Analytics extends Component {
       },
       series
     };
+  }
 
-    const chartData = this.getChartData(analytics);
+  getMapOptions(analytics, type, newChart) {
+    const chartData = this.getMapData(analytics, type, newChart);
     let mapOptions = {};
     if (chartData.length > 0) {
       mapOptions = {
@@ -210,7 +241,7 @@ class Analytics extends Component {
             data: chartData,
             type: 'mapbubble',
             minSize: 15,
-            maxSize: '10%',
+            maxSize: '8%',
             zIndex: 1,
             dataLabels: {
               enabled: true,
@@ -221,6 +252,16 @@ class Analytics extends Component {
         ]
       }
     }
+
+    return mapOptions;
+  }
+
+  updateOptions() {
+    const { analytics, type } = this.state;
+    const series = this.parseAnalytics(analytics, this.state.type);
+
+    const chartOptions = this.getChartOptions(series, type);
+    const mapOptions = this.getMapOptions(analytics, type);
 
     this.setState({chartOptions, mapOptions});
   }

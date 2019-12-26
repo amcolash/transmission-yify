@@ -3,7 +3,7 @@ const geoip = require('geoip-lite');
 const CronJob = require('cron').CronJob;
 const getUuid = require('uuid-by-string');
 
-const { ANALYTICS_FILE, IS_DOCKER } = require('./global');
+const { ANALYTICS_FILE } = require('./global');
 
 let analytics = {};
 
@@ -25,7 +25,6 @@ new CronJob('0 */5 * * * *', function() {
 
 function setupAnalytics() {
   try {
-    // Only load in previous analytics if in docker, otherwise wipe when server restarts
     if (fs.existsSync(ANALYTICS_FILE)) analytics = require(ANALYTICS_FILE);
   } catch (err) {
     console.error(err);
