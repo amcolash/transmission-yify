@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
-import { FaDownload, FaBatteryEmpty, FaBatteryQuarter, FaBatteryHalf, FaBatteryFull } from 'react-icons/fa';
-
-import Spinner from './Spinner';
-import Progress from './Progress';
 import '../css/Version.css';
+
+import React, { Component } from 'react';
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf, FaBatteryQuarter, FaDownload } from 'react-icons/fa';
+
+import Progress from './Progress';
+import Spinner from './Spinner';
 
 class Version extends Component {
   render() {

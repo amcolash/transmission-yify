@@ -1,7 +1,8 @@
+import '../css/TorrentList.css';
+
 import React, { Component } from 'react';
 
 import Progress from './Progress';
-import '../css/TorrentList.css';
 
 class TorrentList extends Component {
   render() {

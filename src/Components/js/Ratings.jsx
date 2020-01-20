@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-
 import '../css/Ratings.css';
+
+import React, { Component } from 'react';
 
 class Ratings extends Component {
   render() {

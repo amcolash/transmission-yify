@@ -1,8 +1,8 @@
 import './proj4';
-import Highcharts from 'highcharts';
-import HighchartsMap from 'highcharts/modules/map';
 
 import mapData from '@highcharts/map-collection/countries/us/us-all.geo.json';
+import Highcharts from 'highcharts';
+import HighchartsMap from 'highcharts/modules/map';
 
 if (typeof window !== 'undefined') {
   HighchartsMap(Highcharts);

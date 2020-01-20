@@ -1,22 +1,23 @@
-import React, { Component, Fragment } from 'react';
-import axios from 'axios';
-import openSocket from 'socket.io-client';
-import levenshtein from 'js-levenshtein';
-
 import '../css/MovieList.css';
-import Cover from './Cover';
-import Spinner from './Spinner';
-import Logo from './Logo';
-import DetailsBackdrop from './DetailsBackdrop';
-import TorrentList from './TorrentList';
-import Search from './Search';
+
+import axios from 'axios';
+import levenshtein from 'js-levenshtein';
+import React, { Component, Fragment } from 'react';
+import openSocket from 'socket.io-client';
+
 import Order from '../../Data/Order';
-import Pirate from './Pirate';
-import Menu from './Menu';
-import Analytics from './Analytics';
 import Cache from '../../Util/Cache';
-import { parseMedia, hasSubscription } from '../../Util/Parse';
+import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
+import Analytics from './Analytics';
+import Cover from './Cover';
+import DetailsBackdrop from './DetailsBackdrop';
+import Logo from './Logo';
+import Menu from './Menu';
+import Pirate from './Pirate';
+import Search from './Search';
+import Spinner from './Spinner';
+import TorrentList from './TorrentList';
 
 const hashMapping = {};
 const showMedia = false;

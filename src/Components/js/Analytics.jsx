@@ -1,11 +1,12 @@
-import React, { Component, Fragment } from 'react';
-import { FaSync } from 'react-icons/fa';
+import '../css/Analytics.css';
+
 import axios from 'axios';
-import Highcharts from '../../Util/Highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import geohash from 'ngeohash';
+import React, { Component, Fragment } from 'react';
+import { FaSync } from 'react-icons/fa';
 
-import '../css/Analytics.css';
+import Highcharts from '../../Util/Highcharts';
 
 // Default highcharts colors
 const colors = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];

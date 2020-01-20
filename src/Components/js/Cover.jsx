@@ -1,14 +1,16 @@
-import React, { Component, Fragment } from 'react';
-import { FaFilm, FaTv, FaLaughBeam, FaExclamationCircle, FaDownload, FaPlayCircle, FaTrash, FaRssSquare } from 'react-icons/fa';
-import axios from 'axios';
-import ScrollAnimation from 'react-animate-on-scroll';
 import 'animate.css/animate.min.css';
 
 import '../css/Cover.css';
-import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
-import Spinner from './Spinner';
+
+import axios from 'axios';
+import React, { Component, Fragment } from 'react';
+import ScrollAnimation from 'react-animate-on-scroll';
+import { FaDownload, FaExclamationCircle, FaFilm, FaLaughBeam, FaPlayCircle, FaRssSquare, FaTrash, FaTv } from 'react-icons/fa';
+
 import Cache from '../../Util/Cache';
+import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
+import Spinner from './Spinner';
 
 const CancelToken = axios.CancelToken;
 

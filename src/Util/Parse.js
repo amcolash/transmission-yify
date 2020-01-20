@@ -1,6 +1,7 @@
-import magnet from 'magnet-uri';
-import * as ptn from '../Util/TorrentName';
 import levenshtein from 'js-levenshtein';
+import magnet from 'magnet-uri';
+
+import * as ptn from '../Util/TorrentName';
 
 export function getMovies(media, pb, type) {
   if (type !== 'movies' || !pb) return [];

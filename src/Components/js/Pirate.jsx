@@ -1,12 +1,14 @@
-import React, { Component } from 'react';
-import { FaBatteryEmpty, FaBatteryQuarter, FaBatteryHalf, FaBatteryFull, FaDownload } from 'react-icons/fa';
-import magnet from 'magnet-uri';
-import ScrollAnimation from 'react-animate-on-scroll';
 import 'animate.css/animate.min.css';
+
+import '../css/Pirate.css';
+
+import magnet from 'magnet-uri';
+import React, { Component } from 'react';
+import ScrollAnimation from 'react-animate-on-scroll';
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf, FaBatteryQuarter, FaDownload } from 'react-icons/fa';
 
 import Progress from './Progress';
 import Spinner from './Spinner';
-import '../css/Pirate.css';
 
 class Pirate extends Component {
   render() {

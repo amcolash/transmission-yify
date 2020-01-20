@@ -1,7 +1,9 @@
-import React, { Component } from 'react';
-import MovieList from './MovieList';
-import { IconContext } from 'react-icons';
 import '../css/App.css';
+
+import React, { Component } from 'react';
+import { IconContext } from 'react-icons';
+
+import MovieList from './MovieList';
 
 class App extends Component {
   render() {

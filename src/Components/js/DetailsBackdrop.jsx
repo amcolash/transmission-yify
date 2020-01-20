@@ -1,27 +1,28 @@
-import React, { Component, Fragment } from 'react';
-import { FaDownload, FaPlayCircle, FaRssSquare, FaTimes, FaYoutube, FaChevronDown, FaChevronUp, FaStar } from 'react-icons/fa';
-import Modal from 'react-responsive-modal';
+import '../css/DetailsBackdrop.css';
+
 import axios from 'axios';
+import React, { Component, Fragment } from 'react';
+import { FaChevronDown, FaChevronUp, FaDownload, FaPlayCircle, FaRssSquare, FaStar, FaTimes, FaYoutube } from 'react-icons/fa';
+import Modal from 'react-responsive-modal';
 import YouTube from 'react-youtube';
 
-import '../css/DetailsBackdrop.css';
-import Version from './Version';
-import Spinner from './Spinner';
-import Ratings from './Ratings';
 import Genre from '../../Data/Genre';
+import Cache from '../../Util/Cache';
 import {
   getDetails,
+  getEpisodes,
   getMovies,
   getSeasons,
-  getEpisodes,
   getYear,
   hasFile,
   hasSubscription,
-  parseMedia,
   parseHorribleSubs,
+  parseMedia,
 } from '../../Util/Parse';
-import Cache from '../../Util/Cache';
 import { shouldUpdate } from '../../Util/Util';
+import Ratings from './Ratings';
+import Spinner from './Spinner';
+import Version from './Version';
 
 class DetailsBackdrop extends Component {
   constructor(props) {

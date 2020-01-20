@@ -1,8 +1,9 @@
-import React, { Component, Fragment } from 'react';
-import { FaTrash, FaExclamationCircle } from 'react-icons/fa';
-import * as ptn from '../../Util/TorrentName';
-
 import '../css/Progress.css';
+
+import React, { Component, Fragment } from 'react';
+import { FaExclamationCircle, FaTrash } from 'react-icons/fa';
+
+import * as ptn from '../../Util/TorrentName';
 
 class Progress extends Component {
   render() {

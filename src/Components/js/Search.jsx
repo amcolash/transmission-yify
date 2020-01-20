@@ -1,12 +1,13 @@
+import '../css/Search.css';
+
 import React, { Component } from 'react';
 import { DebounceInput } from 'react-debounce-input';
-import { FaTimes, FaTv, FaLaughBeam, FaSkullCrossbones, FaFilm } from 'react-icons/fa';
-import '../css/Search.css';
-import Spinner from './Spinner';
+import { FaFilm, FaLaughBeam, FaSkullCrossbones, FaTimes, FaTv } from 'react-icons/fa';
 
 import Genre from '../../Data/Genre';
 import Order from '../../Data/Order';
 import { shouldUpdate } from '../../Util/Util';
+import Spinner from './Spinner';
 
 class Search extends Component {
   shouldComponentUpdate(nextProps, nextState) {

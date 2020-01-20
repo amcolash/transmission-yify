@@ -1,20 +1,21 @@
+import '../css/Menu.css';
+
 import React, { Component } from 'react';
 import {
   FaBars,
+  FaChartBar,
+  FaDownload,
+  FaExclamationTriangle,
   FaFilm,
-  FaTv,
   FaLaughBeam,
-  FaSkullCrossbones,
   FaMagnet,
   FaPowerOff,
-  FaExclamationTriangle,
-  FaDownload,
-  FaRssSquare,
   FaRecycle,
-  FaChartBar,
+  FaRssSquare,
+  FaSkullCrossbones,
+  FaTv,
 } from 'react-icons/fa';
 
-import '../css/Menu.css';
 import { swipedetect } from '../../Util/Swipe';
 import { shouldUpdate } from '../../Util/Util';
 
