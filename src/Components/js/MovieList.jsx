@@ -201,11 +201,11 @@ class MovieList extends Component {
         return true;
       });
 
-      var resetError = this.state.error && this.state.error.message === 'Cannot access transmission';
+      const resetError = this.state.error && this.state.error.message === 'Cannot access transmission';
 
       this.setState({
-        torrents: torrents,
-        started: started,
+        torrents,
+        started,
         error: resetError ? null : this.state.error,
       });
     }
@@ -670,7 +670,7 @@ class MovieList extends Component {
                         click={this.onOpenModal}
                         downloadTorrent={this.downloadTorrent}
                         cancelTorrent={this.cancelTorrent}
-                        torrents={this.torrents}
+                        torrents={torrents} // only passed in so that versions are properly updated when needed
                         started={started}
                         getProgress={this.getProgress}
                         server={this.server}

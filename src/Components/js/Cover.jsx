@@ -178,8 +178,9 @@ class Cover extends Component {
                           if (
                             !fileExists ||
                             window.confirm('This file already exists in plex. Are you sure you want to download it again?')
-                          )
+                          ) {
                             downloadTorrent(version);
+                          }
                         }}
                       >
                         {started.indexOf(version.hashString) !== -1 ? <Spinner visible noMargin button /> : <FaDownload />}

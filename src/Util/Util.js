@@ -30,6 +30,13 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
       });
     }
   }
+
+  // If the number of torrents chages, always force change
+  if (propsDiff.torrents && Object.keys(propsDiff.torrents).length) propsChanged = true;
+
+  // If the number of torrents chages, always force change
+  if (stateDiff.torrents && Object.keys(stateDiff.torrents).length) stateChanged = true;
+
   // if (propsChanged) console.log('props', propsDiff);
   // if (stateChanged) console.log('state', stateDiff);
 
