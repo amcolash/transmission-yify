@@ -15,13 +15,19 @@ const analyticsType = {
   PIRATE: 'pirate',
   TRANSMISSION: 'transmission',
   SUBSCRIPTION: 'subscription',
-  ADMIN: 'admin'
-}
+  ADMIN: 'admin',
+};
 
 // Write updates to the analytics file every 5 minutes for perf reasons
-new CronJob('0 */5 * * * *', function() {
-  writeAnalytics();
-}, null, true, 'America/Los_Angeles');
+new CronJob(
+  '0 */5 * * * *',
+  function() {
+    writeAnalytics();
+  },
+  null,
+  true,
+  'America/Los_Angeles'
+);
 
 function setupAnalytics() {
   try {
@@ -58,15 +64,16 @@ function analyticsMiddleware(req, res, next) {
       clientId,
       location,
       method: req.method,
-      query: Object.values(query).length > 0 ? query : undefined
+      query: Object.values(query).length > 0 ? query : undefined,
     };
 
     // If we are heading through the remote proxy, exit and do not record
     if (url.indexOf('/remote') !== -1) return;
-    
+
     let type = analyticsType.EXPRESS_BASE;
     if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1 || query.movie) type = analyticsType.MOVIES;
-    if (url.indexOf('show') !== -1 || url.indexOf('tv') !== -1 || url.indexOf('tmdb/seasons') !== -1 || url.indexOf('eztv') !== -1) type = analyticsType.SHOWS;
+    if (url.indexOf('show') !== -1 || url.indexOf('tv') !== -1 || url.indexOf('tmdb/seasons') !== -1 || url.indexOf('eztv') !== -1)
+      type = analyticsType.SHOWS;
     if (url.indexOf('kitsu') !== -1 || url.indexOf('nyaa') !== -1 || url.indexOf('horribleSubs') !== -1) type = analyticsType.ANIMES;
     if (url.indexOf('pirate') !== -1 && !query.movie) type = analyticsType.PIRATE;
     if (url.indexOf('subscriptions') !== -1) type = analyticsType.SUBSCRIPTION;
@@ -89,15 +96,15 @@ function recordEvent(data, type, subtype) {
   analytics[type] = analytics[type] || (subtype ? {} : []);
 
   if (!subtype) {
-    analytics[type].push({timestamp: new Date(), ...data});
+    analytics[type].push({ timestamp: new Date(), ...data });
   } else {
     analytics[type][subtype] = analytics[type][subtype] || [];
-    analytics[type][subtype].push({timestamp: new Date(), ...data});
+    analytics[type][subtype].push({ timestamp: new Date(), ...data });
   }
 }
 
 function writeAnalytics() {
-  fs.writeFile(ANALYTICS_FILE, JSON.stringify(analytics), (err) => {
+  fs.writeFile(ANALYTICS_FILE, JSON.stringify(analytics), err => {
     if (err) console.error(err);
   });
 }

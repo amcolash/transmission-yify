@@ -13,8 +13,8 @@ function setupSubscriptions(currentStatus) {
     if (fs.existsSync(SUBSCRIPTION_FILE)) currentStatus.subscriptions = require(SUBSCRIPTION_FILE);
     else writeSubscriptions(currentStatus.subscriptions, SUBSCRIPTION_FILE);
   } catch (err) {
-      console.error(err);
-      writeSubscriptions(currentStatus.subscriptions, SUBSCRIPTION_FILE);
+    console.error(err);
+    writeSubscriptions(currentStatus.subscriptions, SUBSCRIPTION_FILE);
   }
 }
 
@@ -32,16 +32,16 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
   const url = getTMDBUrl(id, 'tv');
   let data;
   if (getCache()[url]) {
-      data = getCache()[url];
+    data = getCache()[url];
   } else {
-      try {
-          const res = await axios.get(url);
-          data = res.data;
-          getCache()[url] = data;
-      } catch (err) {
-          console.error(err);
-          return; // bail, things went wrong getting data
-      }
+    try {
+      const res = await axios.get(url);
+      data = res.data;
+      getCache()[url] = data;
+    } catch (err) {
+      console.error(err);
+      return; // bail, things went wrong getting data
+    }
   }
 
   // handle things this way so that the data stored is upgraded on the fly, it modifies the existing object this way
@@ -65,7 +65,8 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
   const matchedShow = searchShow(subscription.title, getEZTVShows());
   if (!matchedShow || !matchedShow.url) return;
 
-  getEZTVDetails(matchedShow.url).then(data => {
+  getEZTVDetails(matchedShow.url)
+    .then(data => {
       // Generate a list of all episodes from the query
       const { episodes, lastEpisode } = getEpisodes(subscription, data.torrents, onlyLast);
 
@@ -73,19 +74,20 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
 
       // Download each torrent
       episodes.forEach(e => {
-          console.log('Downloading new subscribed file: ' + e.filename);
-          transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
-              if (err) console.error(err);
-          });
+        console.log('Downloading new subscribed file: ' + e.filename);
+        transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
+          if (err) console.error(err);
+        });
       });
 
       // Update subscription
       subscription.lastSeason = lastEpisode.season;
       subscription.lastEpisode = lastEpisode.episode;
       writeSubscriptions(subscriptions);
-  }).catch(err => {
+    })
+    .catch(err => {
       console.error(err);
-  });
+    });
 }
 
 function getEpisodes(subscription, torrents, onlyLast) {
@@ -96,31 +98,31 @@ function getEpisodes(subscription, torrents, onlyLast) {
     const episode = t.episode || parsed.episode;
     const season = t.season || parsed.season;
     if (!episode || !season) return;
-    
+
     t.episode = Number.parseInt(episode);
     t.season = Number.parseInt(season);
-    
+
     episodes[season] = episodes[season] || [];
-    
+
     if (!episodes[season][episode]) episodes[season][episode] = t;
     else {
       const existing = episodes[season][episode];
       const parsedExisting = ptn(existing.filename);
-      
+
       if (t.seeds > existing.seeds && Number.parseInt(parsed.resolution) >= Number.parseInt(parsedExisting.resolution)) {
         episodes[season][episode] = t;
       }
     }
   });
-  
+
   // Filter out non-relevant episodes as needed
-  const lastSeason = episodes[episodes.length-1];
-  const lastEpisode = lastSeason[lastSeason.length-1];
+  const lastSeason = episodes[episodes.length - 1];
+  const lastEpisode = lastSeason[lastSeason.length - 1];
   if (onlyLast) {
     episodes = [lastEpisode];
   } else {
     const lastValue = subscription.lastSeason * 99 + subscription.lastEpisode;
-    
+
     const tmp = [];
     episodes = episodes.forEach(season => {
       if (season) {
@@ -136,8 +138,8 @@ function getEpisodes(subscription, torrents, onlyLast) {
 }
 
 function writeSubscriptions(subscriptions) {
-  fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(subscriptions), (err) => {
-      if (err) console.error(err);
+  fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(subscriptions), err => {
+    if (err) console.error(err);
   });
 }
 
