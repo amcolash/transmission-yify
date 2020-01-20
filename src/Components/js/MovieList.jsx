@@ -188,11 +188,10 @@ class MovieList extends Component {
       //     });
       // }
 
-      torrents.map(torrent => {
+      torrents.forEach(torrent => {
         if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
           torrent.name = hashMapping[torrent.hashString];
         }
-        return torrent;
       });
 
       const started = this.state.started.filter(hashString => {

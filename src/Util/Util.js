@@ -15,7 +15,7 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
     if (checkTorrents) {
       Object.keys(propsDiff.torrents).forEach(t => {
         const torrent = propsDiff.torrents[t];
-        if (torrent && (torrent.percentDone || torrent.rateDownload)) stateChanged = true;
+        if (torrent && (torrent.percentDone || torrent.rateDownload)) propsChanged = true;
       });
     }
   }
