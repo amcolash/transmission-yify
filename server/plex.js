@@ -18,7 +18,7 @@ try {
   console.error(error);
 }
 
-function getPlexFiles() {
+function getPlexFiles(currentFiles) {
   return new Promise((resolve, reject) => {
     if (!plexClient || !plexClient.query) resolve([]);
 
@@ -48,7 +48,7 @@ function getPlexFiles() {
                   files.push({ title: data[j].title, year: data[j].year, url: url });
                 }
               }
-              resolve(files);
+              resolve(files.sort((a, b) => a.title.localeCompare(b.title)));
             });
           })
           .catch(err => {

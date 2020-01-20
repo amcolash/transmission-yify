@@ -449,9 +449,19 @@ function initSocketDataWatchers() {
     () =>
       transmission.get((err, data) => {
         if (data) {
-          // remove peer data as it is pretty bulky and not used
-          Object.keys(data).forEach(k => {
-            data[k].peers = undefined;
+          // remove some data as it is pretty bulky and not used
+          data.torrents.forEach(t => {
+            t.peers = undefined;
+            t.rateUpload = undefined;
+            t.uploadRatio = undefined;
+            t.uploadedEver = undefined;
+            t.trackers = undefined;
+            t.trackerStats = undefined;
+            t.activityDate = undefined;
+            t.pieces = undefined;
+            t.peersFrom = undefined;
+            t.peersConnected = undefined;
+            t.peersGettingFromUs = undefined;
           });
         }
 
@@ -468,7 +478,7 @@ function initSocketDataWatchers() {
 
   setIntervalImmediately(
     () =>
-      getPlexFiles().then(data => {
+      getPlexFiles(currentFiles).then(data => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
           currentFiles = data;
           io.sockets.in('files').emit('files', currentFiles);

@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const ptn = require('../src/Util/TorrentName');
 
+const eztvHost = 'https://eztv.tf';
 let eztvShows = [];
 
 function getEZTVDetails(url) {
@@ -53,7 +54,7 @@ function getEZTVDetails(url) {
 
 function updateEZTVShows() {
   axios
-    .get('https://eztv.io/showlist/')
+    .get(`${eztvHost}/showlist/`)
     .then(response => {
       const $ = cheerio.load(response.data);
 
@@ -68,7 +69,7 @@ function updateEZTVShows() {
         if (title.endsWith(', The')) title = `The ${title.replace(', The', '')}`;
         shows.push({
           title,
-          url: 'https://eztv.io' + row.attr('href'),
+          url: `${eztvHost}${row.attr('href')}`,
         });
       });
 
