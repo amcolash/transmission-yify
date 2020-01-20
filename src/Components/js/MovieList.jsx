@@ -101,7 +101,9 @@ class MovieList extends Component {
     socket.on('connect', data => {
       socket.emit('subscribe', 'torrents');
       socket.emit('subscribe', 'status');
-      socket.emit('subscribe', 'files');
+
+      // Weird performance hack, this helps since it seems the server blocks while sending info and cannot get cover info
+      setTimeout(() => socket.emit('subscribe', 'files'), 3000);
     });
 
     socket.on('torrents', data => {
