@@ -27,7 +27,6 @@
     "deep-object-diff": "^1.1.0",
     "highcharts": "^7.2.1",
     "highcharts-react-official": "^2.2.2",
-    "husky": "^4.0.10",
     "import-sort-style-module": "^6.0.0",
     "magnet-uri": "^5.2.4",
     "ngeohash": "^0.6.3",
@@ -66,11 +65,6 @@
       "cache.json",
       "src"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
   },
   "importSort": {
     ".js, .jsx, .ts, .tsx": {
