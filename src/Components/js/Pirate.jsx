@@ -2,73 +2,69 @@ import React, { Component } from 'react';
 import { FaBatteryEmpty, FaBatteryQuarter, FaBatteryHalf, FaBatteryFull, FaDownload } from 'react-icons/fa';
 import magnet from 'magnet-uri';
 import ScrollAnimation from 'react-animate-on-scroll';
-import "animate.css/animate.min.css";
+import 'animate.css/animate.min.css';
 
-import Progress from  './Progress';
+import Progress from './Progress';
 import Spinner from './Spinner';
 import '../css/Pirate.css';
 
 class Pirate extends Component {
-    render() {
-      const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started } = this.props;
+  render() {
+    const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started } = this.props;
 
-      if (!media.magnetLink) return null;
+    if (!media.magnetLink) return null;
 
-      const hashString = magnet.decode(media.magnetLink).infoHash.toLowerCase();
-      const version = {
-        title: media.name,
-        url: media.magnetLink,
-        hashString
-      };
+    const hashString = magnet.decode(media.magnetLink).infoHash.toLowerCase();
+    const version = {
+      title: media.name,
+      url: media.magnetLink,
+      hashString,
+    };
 
-      let size, units;
+    let size, units;
 
-      if (media.size) {
-        units = media.size.match(/[A-Za-z]+/)[0].replace('i', '') ;
-        size = Number.parseFloat(media.size.match(/\d+\.?\d*/)[0]);
-        size = size < 10 ? size.toFixed(2) : size < 100 ? size.toFixed(1) : size.toFixed(0);
-      }
-
-      return (
-        <ScrollAnimation animateIn='fadeIn' animateOnce={true} className="pirateRow" offset={30} duration={0.5}>
-          <div className="categories">
-            <div className="category">{media.category}</div>
-            <div className="subcategory">{media.subCategory}</div>
-          </div>
-          <div className='peers'>
-            {
-              media.seeds === 0 ? <FaBatteryEmpty className='gray'/> :
-              media.seeds < 20 ?  <FaBatteryQuarter className='red'/> :
-              media.seeds < 50 ?  <FaBatteryHalf className='orange'/> :
-                                  <FaBatteryFull className='green'/>
-            }
-          </div>
-          
-          <div className="title" title={media.name}>{media.name}</div>
-          <div className="spacer"></div>
-          <div className="size">{size + ' ' + units}</div>
-
-          <div className="dl">
-            {getProgress(hashString) ? (
-              <Progress
-                torrent={getTorrent(hashString)}
-                cancelTorrent={cancelTorrent}
-                getProgress={getProgress}
-                hideInfo
-              />
-            ) : (
-              <button className="orange download" onClick={() => downloadTorrent(version, true)}>
-                {started.indexOf(hashString) !== -1 ? (
-                  <Spinner visible noMargin button />
-                ) : (
-                  <FaDownload/>
-                )}
-              </button>
-            )}
-          </div>
-        </ScrollAnimation>
-      );
+    if (media.size) {
+      units = media.size.match(/[A-Za-z]+/)[0].replace('i', '');
+      size = Number.parseFloat(media.size.match(/\d+\.?\d*/)[0]);
+      size = size < 10 ? size.toFixed(2) : size < 100 ? size.toFixed(1) : size.toFixed(0);
     }
+
+    return (
+      <ScrollAnimation animateIn="fadeIn" animateOnce={true} className="pirateRow" offset={30} duration={0.5}>
+        <div className="categories">
+          <div className="category">{media.category}</div>
+          <div className="subcategory">{media.subCategory}</div>
+        </div>
+        <div className="peers">
+          {media.seeds === 0 ? (
+            <FaBatteryEmpty className="gray" />
+          ) : media.seeds < 20 ? (
+            <FaBatteryQuarter className="red" />
+          ) : media.seeds < 50 ? (
+            <FaBatteryHalf className="orange" />
+          ) : (
+            <FaBatteryFull className="green" />
+          )}
+        </div>
+
+        <div className="title" title={media.name}>
+          {media.name}
+        </div>
+        <div className="spacer"></div>
+        <div className="size">{size + ' ' + units}</div>
+
+        <div className="dl">
+          {getProgress(hashString) ? (
+            <Progress torrent={getTorrent(hashString)} cancelTorrent={cancelTorrent} getProgress={getProgress} hideInfo />
+          ) : (
+            <button className="orange download" onClick={() => downloadTorrent(version, true)}>
+              {started.indexOf(hashString) !== -1 ? <Spinner visible noMargin button /> : <FaDownload />}
+            </button>
+          )}
+        </div>
+      </ScrollAnimation>
+    );
+  }
 }
 
 export default Pirate;

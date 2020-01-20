@@ -1,89 +1,92 @@
 .search {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding: 1em 3em 1.5em;
-    background-color: #444;
-    border-bottom: 4px solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 1em 3em 1.5em;
+  background-color: #444;
+  border-bottom: 4px solid #333;
 }
 
 .search button {
-    margin-top: 0.35em;
+  margin-top: 0.35em;
 }
 
-.search .form, .searchItem  {
-    display: inline-block;
-    margin-top: 0.5em;
+.search .form,
+.searchItem {
+  display: inline-block;
+  margin-top: 0.5em;
 }
 
-.search .form, .searchItem span {
-    margin-left: 0.75em;
+.search .form,
+.searchItem span {
+  margin-left: 0.75em;
 }
 
 .searchItem .iconHover {
-    position: relative;
-    display: inline-block;
-    margin-left: 1.1em;
-    margin-right: -0.5em;
+  position: relative;
+  display: inline-block;
+  margin-left: 1.1em;
+  margin-right: -0.5em;
 }
 
 .searchItem .iconHover:hover .icons {
-    opacity: 1;
-    visibility: visible;
+  opacity: 1;
+  visibility: visible;
 }
 
 .searchItem .iconHover .mainIcon {
-    padding: 0.5em;
-    margin-left: 0;
+  padding: 0.5em;
+  margin-left: 0;
 }
 
 .searchItem .iconHover .mainIcon svg {
-    vertical-align: top;
-    padding-top: 0.1em;
+  vertical-align: top;
+  padding-top: 0.1em;
 }
 
 .searchItem .iconHover .icons {
-    display: flex;
-    position: absolute;
-    top: 1.5em;
-    left: -3.25em;
-    z-index: 2;
-    background: #333;
-    padding: 0.25em;
-    border-radius: 0.5em;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.5s;
+  display: flex;
+  position: absolute;
+  top: 1.5em;
+  left: -3.25em;
+  z-index: 2;
+  background: #333;
+  padding: 0.25em;
+  border-radius: 0.5em;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s;
 }
 
 .searchItem .iconHover .icons svg {
-    padding: 0.25em;
-    margin: 0.25em;
-    border-radius: 0.25em;
-    transition: all 0.5s;
+  padding: 0.25em;
+  margin: 0.25em;
+  border-radius: 0.25em;
+  transition: all 0.5s;
 }
 
 .searchItem .iconHover .icons svg.active {
-    background: #555;
+  background: #555;
 }
 
 .searchItem .iconHover .icons svg:hover {
-    background: #666;
-    cursor: pointer;
+  background: #666;
+  cursor: pointer;
 }
 
 @media (max-width: 570px) {
-    .search .form, .searchItem {
-        display: block;
-        margin-bottom: 0.35em;
-    }
+  .search .form,
+  .searchItem {
+    display: block;
+    margin-bottom: 0.35em;
+  }
 
-    .search {
-        position: initial;
-        padding: 1.5em 0 0.75em 0;
-    }
+  .search {
+    position: initial;
+    padding: 1.5em 0 0.75em 0;
+  }
 
-    .search .spinner.invisible {
-        display: none;
-    }
+  .search .spinner.invisible {
+    display: none;
+  }
 }

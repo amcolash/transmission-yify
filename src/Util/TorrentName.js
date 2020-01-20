@@ -3,24 +3,26 @@ const { Parser, addDefaults } = require('parse-torrent-title');
 const parser = new Parser();
 
 // Add my parsers first
-parser.addHandler('complete', /COMPLETE/i, {type: 'boolean'});
-parser.addHandler('resolution', /1920x1080/i, {value: '1080p'});
-parser.addHandler('source', /\bTS\b/, {value: 'telesync'});
-parser.addHandler('season', /\[s([0-9]{1,3})\]/i, {type: 'integer'});
-parser.addHandler('episode', /\[e([0-9]{1,3})\]/i, {type: 'integer'});
-parser.addHandler('episode2', /-\s*([0-9]{1,3})/i, {type: 'integer'});
+parser.addHandler('complete', /COMPLETE/i, { type: 'boolean' });
+parser.addHandler('resolution', /1920x1080/i, { value: '1080p' });
+parser.addHandler('source', /\bTS\b/, { value: 'telesync' });
+parser.addHandler('season', /\[s([0-9]{1,3})\]/i, { type: 'integer' });
+parser.addHandler('episode', /\[e([0-9]{1,3})\]/i, { type: 'integer' });
+parser.addHandler('episode2', /-\s*([0-9]{1,3})/i, { type: 'integer' });
 
 // Then add default parsers
 addDefaults(parser);
 
 // Finally clean up some edge cases at the end
-parser.addHandler(({title, result}) => {
+parser.addHandler(({ title, result }) => {
   // Fix bogus years
   if (result.year === 1920 && title.indexOf('1920x1080') !== -1) delete result.year;
 
   // Fix bogus seasons
-  if ((result.season === 80 && result.episode === 72 && title.indexOf('1280x720') !== -1) ||
-      (result.season === 20 && result.episode === 10 && title.indexOf('1920x1080') !== -1)) {
+  if (
+    (result.season === 80 && result.episode === 72 && title.indexOf('1280x720') !== -1) ||
+    (result.season === 20 && result.episode === 10 && title.indexOf('1920x1080') !== -1)
+  ) {
     delete result.season;
     delete result.episode;
   }
@@ -43,4 +45,4 @@ module.exports = function(name) {
   const parsed = parser.parse(cleaned);
 
   return parsed;
-}
+};

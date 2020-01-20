@@ -42,7 +42,8 @@
   justify-content: flex-start;
 }
 
-.menu .list .item, .menu .toggleWrap {
+.menu .list .item,
+.menu .toggleWrap {
   border-radius: 0.2em;
   padding: 0.3em 0.75em;
   display: flex;

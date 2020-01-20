@@ -4,14 +4,14 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
   const propsDiff = diff(props, nextProps);
   const propsKeys = Object.keys(propsDiff);
   let propsChanged = propsKeys.length > 0;
-  
+
   const stateDiff = diff(state, nextState);
   const stateKeys = Object.keys(stateDiff);
   let stateChanged = stateKeys.length > 0;
-  
+
   if (propsKeys.length === 1 && propsDiff.torrents) {
     propsChanged = false;
-    
+
     if (checkTorrents) {
       Object.keys(propsDiff.torrents).forEach(t => {
         const torrent = propsDiff.torrents[t];
@@ -19,10 +19,10 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
       });
     }
   }
-  
+
   if (stateKeys.length === 1 && stateDiff.torrents) {
     stateChanged = false;
-    
+
     if (checkTorrents) {
       Object.keys(stateDiff.torrents).forEach(t => {
         const torrent = stateDiff.torrents[t];

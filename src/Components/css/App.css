@@ -1,119 +1,140 @@
 @import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
 
 body {
-    margin: 0;
-    background-color: #444;
+  margin: 0;
+  background-color: #444;
 
-    font-family: 'Lato', sans-serif;
-    font-size: 1.1em;
-    color: white;
-    text-align: center;
-    user-select: none;
+  font-family: 'Lato', sans-serif;
+  font-size: 1.1em;
+  color: white;
+  text-align: center;
+  user-select: none;
 }
 
 /* Disable scrolling when menu open */
 body.noscroll {
-    overflow: hidden;
+  overflow: hidden;
 
-    /* fix scrollbar hidden at least for chrome, mac/ios might do weird stuff now instead */
-    margin-right: 0.4em;
+  /* fix scrollbar hidden at least for chrome, mac/ios might do weird stuff now instead */
+  margin-right: 0.4em;
 }
 
 button {
-    background-color: #666;
-    border: 1px solid #111;
-    color: white;
-    padding: 0.3em 0.4em;
-    font-size: 1em;   
-    margin: 0.5em 0.3em;
-    line-height: 1em;
-    border-radius: 0.2em;
-    transition: all 0.3s;
+  background-color: #666;
+  border: 1px solid #111;
+  color: white;
+  padding: 0.3em 0.4em;
+  font-size: 1em;
+  margin: 0.5em 0.3em;
+  line-height: 1em;
+  border-radius: 0.2em;
+  transition: all 0.3s;
 }
 
-input:focus, select:focus {
-    outline: 0.3em solid rgb(70,170,230);
+input:focus,
+select:focus {
+  outline: 0.3em solid rgb(70, 170, 230);
 }
 
 button:hover {
-    background-color: #777;
-    border-color: rgba(0,0,0,0.2);
+  background-color: #777;
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
-button:hover, .pointer {
-    cursor: pointer;
+button:hover,
+.pointer {
+  cursor: pointer;
 }
 
 :focus {
-    outline: 0.2em solid rgb(70,170,230);
-    transition: outline 0.15s;
+  outline: 0.2em solid rgb(70, 170, 230);
+  transition: outline 0.15s;
 }
 
-[tabindex^="-"]:focus {
-    outline: none;
+[tabindex^='-']:focus {
+  outline: none;
 }
 
 progress {
-    margin: 0 0.5em;
-    filter: grayscale();
-    width: 10em;
-    min-width: 10em;
+  margin: 0 0.5em;
+  filter: grayscale();
+  width: 10em;
+  min-width: 10em;
 }
 
 ::-webkit-scrollbar {
-    height: 0.4em;
-    width: 0.4em;
-    background: #333;
+  height: 0.4em;
+  width: 0.4em;
+  background: #333;
 }
-  
+
 ::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 0.15em;
+  background: #555;
+  border-radius: 0.15em;
 }
 
-.green { color: greenyellow; }
-.red { color: red; }
-.orange { color: #e5a00d; } /* Plex orange */
-.gray { color: gray; }
-.purple { color: magenta; }
+.green {
+  color: greenyellow;
+}
+.red {
+  color: red;
+}
+.orange {
+  color: #e5a00d;
+} /* Plex orange */
+.gray {
+  color: gray;
+}
+.purple {
+  color: magenta;
+}
 
-.bold { font-weight: bold };
+.bold {
+  font-weight: bold;
+}
 
-.medium { font-size: 1.5em; }
-.large { font-size: 2em; }
+.medium {
+  font-size: 1.5em;
+}
+.large {
+  font-size: 2em;
+}
 
 .react-icons {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
-input, select {
-    margin: 0 0.6em;
-    background-color: white;
-    border: none;
-    transition: all 0.30s ease;
-    padding: 0.3em;
-    border-color: gray;
-    border-radius: 3px;
+input,
+select {
+  margin: 0 0.6em;
+  background-color: white;
+  border: none;
+  transition: all 0.3s ease;
+  padding: 0.3em;
+  border-color: gray;
+  border-radius: 3px;
 }
 
-input:disabled, select:disabled {
-    background-color: #aaa;
+input:disabled,
+select:disabled {
+  background-color: #aaa;
 }
 
-input:not(:disabled):hover, select:not(:disabled):hover {
-    box-shadow: 0px 0px 12px 5px rgba(255,255,255,0.4);
+input:not(:disabled):hover,
+select:not(:disabled):hover {
+  box-shadow: 0px 0px 12px 5px rgba(255, 255, 255, 0.4);
 }
 
 input {
-    width: 11.25em;
-    height: 1.5em;
+  width: 11.25em;
+  height: 1.5em;
 }
 
 select {
-    width: 8em;
-    height: 2.1em;
+  width: 8em;
+  height: 2.1em;
 }
 
 .spacer {
-    flex: 1;
+  flex: 1;
 }

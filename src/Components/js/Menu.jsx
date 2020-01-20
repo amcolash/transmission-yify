@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
-import { FaBars, FaFilm, FaTv, FaLaughBeam, FaSkullCrossbones, FaMagnet, FaPowerOff, FaExclamationTriangle, FaDownload, FaRssSquare,
-  FaRecycle, FaChartBar } from 'react-icons/fa';
+import {
+  FaBars,
+  FaFilm,
+  FaTv,
+  FaLaughBeam,
+  FaSkullCrossbones,
+  FaMagnet,
+  FaPowerOff,
+  FaExclamationTriangle,
+  FaDownload,
+  FaRssSquare,
+  FaRecycle,
+  FaChartBar,
+} from 'react-icons/fa';
 
 import '../css/Menu.css';
 import { swipedetect } from '../../Util/Swipe';
 import { shouldUpdate } from '../../Util/Util';
 
-const plexIcon = <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path></svg>;
+const plexIcon = (
+  <svg width="1em" height="1em" fill="currentColor" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+    <path d="m128 0c-70.63 0-128 57.37-128 128 0 70.63 57.37 128 128 128 70.63 0 128-57.37 128-128 0-70.63-57.37-128-128-128zm0 10.548c64.929 0 117.45 52.522 117.45 117.45 0 64.929-52.522 117.45-117.45 117.45-64.929 0-117.45-52.522-117.45-117.45 0-64.929 52.522-117.45 117.45-117.45zm-53.481 29.688 56.112 87.764-56.112 87.764h50.851l56.112-87.764-56.112-87.764z"></path>
+  </svg>
+);
 
 class Menu extends Component {
   constructor(props) {
     super(props);
-    this.state = {visible: false};
+    this.state = { visible: false };
 
     this.touch = 0;
-    
+
     this.outsideClick = this.outsideClick.bind(this);
     this.onFocus = this.onFocus.bind(this);
   }
@@ -23,7 +39,7 @@ class Menu extends Component {
     document.addEventListener('click', this.outsideClick, false);
     document.addEventListener('focusin', this.onFocus, false);
 
-    swipedetect(document, (swipedir) => {
+    swipedetect(document, swipedir => {
       if (swipedir === 'left') this.setVisible(false);
       else if (swipedir === 'right') this.setVisible(true);
     });
@@ -48,16 +64,20 @@ class Menu extends Component {
   setVisible(visible) {
     if (Date.now() > this.touch + 300) {
       this.touch = Date.now();
-      this.setState({visible: visible});
+      this.setState({ visible: visible });
       document.body.classList.toggle('noscroll', visible);
     }
   }
 
   onFocus(e) {
     // This is a bit nasty and depends on the dom structure to stay the same... We'll see about this
-    if (this.state.visible && !e.target.parentElement.classList.contains('menu') &&
+    if (
+      this.state.visible &&
+      !e.target.parentElement.classList.contains('menu') &&
       !e.target.parentElement.parentElement.classList.contains('menu') &&
-      !e.target.parentElement.parentElement.parentElement.classList.contains('menu')) this.setVisible(false);
+      !e.target.parentElement.parentElement.parentElement.classList.contains('menu')
+    )
+      this.setVisible(false);
   }
 
   selectItem(value) {
@@ -72,16 +92,20 @@ class Menu extends Component {
   }
 
   generateItem(icon, text, value) {
-    const callback = (typeof value === 'string' ? () => this.selectItem(value) : e => value(e));
-    return <div
-      className={'item ' + (this.props.type === value ? 'selected' : '')}
-      onClick={e => callback(e)}
-      onKeyDown={e => { if (e.key === 'Enter') callback(e); }}
-      tabIndex={this.state.visible ? '0' : '-1'}
-    >
-      {icon}
-      <span>{text}</span>
-    </div>
+    const callback = typeof value === 'string' ? () => this.selectItem(value) : e => value(e);
+    return (
+      <div
+        className={'item ' + (this.props.type === value ? 'selected' : '')}
+        onClick={e => callback(e)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') callback(e);
+        }}
+        tabIndex={this.state.visible ? '0' : '-1'}
+      >
+        {icon}
+        <span>{text}</span>
+      </div>
+    );
   }
 
   render() {
@@ -89,42 +113,69 @@ class Menu extends Component {
     const { status, torrents } = this.props;
 
     return (
-      <div className={`menu ${visible ? '' : 'hidden'}`}
-        ref={node => this.menu = node}
+      <div
+        className={`menu ${visible ? '' : 'hidden'}`}
+        ref={node => (this.menu = node)}
         onClick={() => this.setVisible(false)}
-        onKeyDown={e => { if (e.key === 'Escape') this.setVisible(false); }}
+        onKeyDown={e => {
+          if (e.key === 'Escape') this.setVisible(false);
+        }}
       >
         <div className="list">
           <div className="toggleWrap">
             <span>Pirate Flix</span>
             <div className="spacer"></div>
-            <div className="toggle" tabIndex="0" onKeyPress={e => { if (e.key === 'Enter') this.setVisible(!this.state.visible) }}>
-              <FaBars className="toggleButton" onClick={e => {e.stopPropagation(); this.setVisible(!this.state.visible); }}/>
-              {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn"/> : null}
+            <div
+              className="toggle"
+              tabIndex="0"
+              onKeyPress={e => {
+                if (e.key === 'Enter') this.setVisible(!this.state.visible);
+              }}
+            >
+              <FaBars
+                className="toggleButton"
+                onClick={e => {
+                  e.stopPropagation();
+                  this.setVisible(!this.state.visible);
+                }}
+              />
+              {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
             </div>
           </div>
-          {this.generateItem(<FaFilm/>, 'Movies', 'movies')}
-          {this.generateItem(<FaTv/>, 'TV Shows', 'shows')}
-          {this.generateItem(<FaLaughBeam/>, 'Anime', 'animes')}
-          {this.generateItem(<FaSkullCrossbones/>, 'Pirate Bay', 'pirate')}
+          {this.generateItem(<FaFilm />, 'Movies', 'movies')}
+          {this.generateItem(<FaTv />, 'TV Shows', 'shows')}
+          {this.generateItem(<FaLaughBeam />, 'Anime', 'animes')}
+          {this.generateItem(<FaSkullCrossbones />, 'Pirate Bay', 'pirate')}
           <div className="item disabled"></div>
-          {this.generateItem(<FaDownload/>, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
-          {this.generateItem(<FaRssSquare/>, 'Subscriptions', 'subscriptions')}
+          {this.generateItem(<FaDownload />, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
+          {this.generateItem(<FaRssSquare />, 'Subscriptions', 'subscriptions')}
           <div className="item disabled"></div>
-          {status ? this.generateItem(plexIcon, 'Plex', () => { window.open(status.plex, '_blank'); this.setVisible(false); }) : null}
-          {this.generateItem(<FaMagnet/>, 'Add Magnet', e => { e.stopPropagation(); this.props.addMagnet(); })}
+          {status
+            ? this.generateItem(plexIcon, 'Plex', () => {
+                window.open(status.plex, '_blank');
+                this.setVisible(false);
+              })
+            : null}
+          {this.generateItem(<FaMagnet />, 'Add Magnet', e => {
+            e.stopPropagation();
+            this.props.addMagnet();
+          })}
           <div className="spacer"></div>
-          {this.generateItem(<FaChartBar/>, 'Analytics', 'analytics')}
-          {this.generateItem(<FaRecycle/>, 'Clear Cache', this.props.clearCache)}
-          {this.generateItem(<FaPowerOff/>, 'Upgrade Server', this.props.upgrade)}
+          {this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
+          {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
+          {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
 
           {status ? (
             <div className="status">
-              {status && status.ip ? <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>
-                Server Location: {`${status.ip.city}, ${status.ip.country_code}`}
-              </p> : null}
-              {(status.buildTime && status.buildTime.indexOf('Dev Build') === -1) ? (
-                <p><span>Build Time: {new Date(status.buildTime).toLocaleString()}</span></p>
+              {status && status.ip ? (
+                <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>
+                  Server Location: {`${status.ip.city}, ${status.ip.country_code}`}
+                </p>
+              ) : null}
+              {status.buildTime && status.buildTime.indexOf('Dev Build') === -1 ? (
+                <p>
+                  <span>Build Time: {new Date(status.buildTime).toLocaleString()}</span>
+                </p>
               ) : null}
               <p>
                 <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>

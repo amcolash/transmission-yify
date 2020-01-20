@@ -1,47 +1,47 @@
 .message {
-    font-size: 2.5em;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  font-size: 2.5em;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .warning {
-    padding: 1em 0 0.25em 0;
+  padding: 1em 0 0.25em 0;
 }
 
 .warning .big {
-    font-size: 4em;
+  font-size: 4em;
 }
 
 .warning div span {
-    padding-left: 0.25em;
+  padding-left: 0.25em;
 }
 
 .warning div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .arrow {
-    font-size: 1.25em;
+  font-size: 1.25em;
 }
 
 .arrow:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .marginLeft {
-    margin-left: 1.25em;
+  margin-left: 1.25em;
 }
 
 #overlay {
-    overflow-y: hidden;
-    padding: 0;
+  overflow-y: hidden;
+  padding: 0;
 }
 
 .movie-list {
-    padding: 1em 0;
+  padding: 1em 0;
 }

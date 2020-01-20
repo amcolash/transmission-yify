@@ -1,110 +1,109 @@
 .movie {
-    display: inline-block;
-    vertical-align: top;
-    text-align: center;
-    max-width: 13em;
-    margin: 0.6em;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+  max-width: 13em;
+  margin: 0.6em;
 }
 
 .movie:not(.disabled):hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .movie a {
-    color: white;
-    text-decoration: none;
+  color: white;
+  text-decoration: none;
 }
 
 .cover {
-    border: 0.1em solid white;
-    border-radius: 0.2em;
-    width: 13em;
-    height: 19.5em;
-    background-repeat: no-repeat;
-    background-size: cover;
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: 0.4em;
-    position: relative;
-    transition: all 0.5s ease;
-    overflow: hidden;
-    transform: scale(1);
+  border: 0.1em solid white;
+  border-radius: 0.2em;
+  width: 13em;
+  height: 19.5em;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.4em;
+  position: relative;
+  transition: all 0.5s ease;
+  overflow: hidden;
+  transform: scale(1);
 }
 
 .cover:focus {
-    border: 0.1em solid rgb(70,170,230);
-    outline-width: 0.1em;
+  border: 0.1em solid rgb(70, 170, 230);
+  outline-width: 0.1em;
 }
 
 .movie:not(.disabled) .cover:hover {
-    box-shadow: 0px 0px 12px 5px rgba(255,255,255,0.25);
-    transform: scale(1.025);
+  box-shadow: 0px 0px 12px 5px rgba(255, 255, 255, 0.25);
+  transform: scale(1.025);
 }
 
 .movieCover {
-    position: absolute;
-    z-index: -1;
-    height: 19.5em;
-    margin: auto;
-    left: -50%;
-    right: -50%;
+  position: absolute;
+  z-index: -1;
+  height: 19.5em;
+  margin: auto;
+  left: -50%;
+  right: -50%;
 }
 
 .movieIcon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 4em;
-    transform: translate(-50%, -50%);
-    z-index: -2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 4em;
+  transform: translate(-50%, -50%);
+  z-index: -2;
 }
 
 .quality {
-    margin-left: auto;
-    text-align: right;
-    background-color: rgba(30,30,30,0.8);
-    padding: 0.25em 0.4em;
-    border-radius: 0.2em;
+  margin-left: auto;
+  text-align: right;
+  background-color: rgba(30, 30, 30, 0.8);
+  padding: 0.25em 0.4em;
+  border-radius: 0.2em;
 }
 
 .fileExists {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: 0.25em;
-    background-color: #e5a00d;
-    border-top-right-radius: 0.2em;
-    border-top: 0.1em solid white;
-    border-right: 0.1em solid white;
-    transition: all 0.5s ease;
-    cursor: pointer;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 0.25em;
+  background-color: #e5a00d;
+  border-top-right-radius: 0.2em;
+  border-top: 0.1em solid white;
+  border-right: 0.1em solid white;
+  transition: all 0.5s ease;
+  cursor: pointer;
 }
 
 .fileExists.hover:hover {
-    box-shadow: 0px 0px 15px 15px rgba(229,160,13,0.9);
+  box-shadow: 0px 0px 15px 15px rgba(229, 160, 13, 0.9);
 }
 
 .notSubscribed {
-    background-color: #555;
-    color: #999;
+  background-color: #555;
+  color: #999;
 }
 
 .quality button {
-    margin: 0.3em; 
+  margin: 0.3em;
 }
 
-
 @media (max-width: 680px) {
-    .movie {
-        max-width: 8.66em;
-    }
+  .movie {
+    max-width: 8.66em;
+  }
 
-    .cover {
-        width: 8.66em;
-        height: 13em;
-    }
+  .cover {
+    width: 8.66em;
+    height: 13em;
+  }
 
-    .movieCover {
-        height: 13em;
-    }
+  .movieCover {
+    height: 13em;
+  }
 }

@@ -31,7 +31,8 @@
   margin: 0 !important;
 }
 
-.pirateRow .size, .pirateRow .categories {
+.pirateRow .size,
+.pirateRow .categories {
   white-space: nowrap;
 }
 
@@ -44,7 +45,8 @@
 }
 
 @media (max-width: 900px) {
-  .pirateRow .size, .pirateRow .categories {
+  .pirateRow .size,
+  .pirateRow .categories {
     display: none;
   }
   .pirateRow div {

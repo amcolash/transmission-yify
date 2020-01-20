@@ -8,7 +8,7 @@ import geohash from 'ngeohash';
 import '../css/Analytics.css';
 
 // Default highcharts colors
-const colors = ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1"];
+const colors = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
 
 class Analytics extends Component {
   constructor(props) {
@@ -21,14 +21,17 @@ class Analytics extends Component {
   }
 
   updateData() {
-    const key = localStorage.getItem('key') || window.prompt("Password?", "");
-    axios.get(this.props.server + '/analytics?key=' + key).then(response => {
-      localStorage.setItem('key', key);
-      this.setState({analytics: response.data}, () => this.updateOptions());
-    }).catch(err => {
-      localStorage.removeItem('key');
-      console.error(err);
-    });
+    const key = localStorage.getItem('key') || window.prompt('Password?', '');
+    axios
+      .get(this.props.server + '/analytics?key=' + key)
+      .then(response => {
+        localStorage.setItem('key', key);
+        this.setState({ analytics: response.data }, () => this.updateOptions());
+      })
+      .catch(err => {
+        localStorage.removeItem('key');
+        console.error(err);
+      });
   }
 
   // Remove last section of a url path so remove things like id or page
@@ -51,12 +54,12 @@ class Analytics extends Component {
     Object.keys(data).forEach(url => {
       data[url].forEach(entry => {
         let date = new Date(entry.timestamp);
-        date.setHours(0,0,0,0);
+        date.setHours(0, 0, 0, 0);
         date = date.getTime();
-  
+
         if (date < filterDate.getTime()) return;
-  
-        const e = {url: type || url, simpleUrl: this.getSimpleUrl(url), ...entry};
+
+        const e = { url: type || url, simpleUrl: this.getSimpleUrl(url), ...entry };
         flat.push(e);
       });
     });
@@ -68,15 +71,15 @@ class Analytics extends Component {
     const aggregated = {};
     data.forEach(entry => {
       const simpleurl = this.getSimpleUrl(entry.url);
-      const key = simpleurl + ":" + entry.method;
+      const key = simpleurl + ':' + entry.method;
       aggregated[key] = aggregated[key] || {};
 
       let date = new Date(entry.timestamp);
-      date.setHours(0,0,0,0);
+      date.setHours(0, 0, 0, 0);
       date = date.getTime();
 
       if (aggregated[key][date]) aggregated[key][date]++;
-      else aggregated[key][date] = 1; 
+      else aggregated[key][date] = 1;
     });
 
     return aggregated;
@@ -103,8 +106,8 @@ class Analytics extends Component {
         color: colors[index % colors.length],
         events: {
           hide: e => this.onToggleType(e),
-          show: e => this.onToggleType(e)
-        }
+          show: e => this.onToggleType(e),
+        },
       });
     });
 
@@ -115,7 +118,7 @@ class Analytics extends Component {
     const { analytics, type } = this.state;
     const mapOptions = this.getMapOptions(analytics, type, e.target.chart);
 
-    this.setState({mapOptions});
+    this.setState({ mapOptions });
   }
 
   flattenTypeAnalytics(analytics, type, newChart) {
@@ -135,7 +138,7 @@ class Analytics extends Component {
     } else {
       Object.keys(analytics).forEach(t => {
         let matched = true;
-        
+
         if (newChart) {
           newChart.series.forEach(s => {
             if (s.name.indexOf(t) !== -1) matched = s.visible;
@@ -170,7 +173,7 @@ class Analytics extends Component {
       if (i.location.state && i.location.country === 'US') {
         const key = geohash.encode(i.location.lat, i.location.lng, 3);
         locationData[key] = locationData[key] || 0;
-        locationData[key] ++;
+        locationData[key]++;
         cities[key] = i.location.city;
       }
     });
@@ -183,7 +186,7 @@ class Analytics extends Component {
         name: cities[key],
         lat: loc.latitude,
         lon: loc.longitude,
-        z: locationData[key]
+        z: locationData[key],
       });
     });
 
@@ -193,24 +196,24 @@ class Analytics extends Component {
   getChartOptions(series, type) {
     return {
       chart: {
-        type: 'column'
+        type: 'column',
       },
       title: {
-        text: type.charAt(0).toUpperCase() + type.slice(1)
+        text: type.charAt(0).toUpperCase() + type.slice(1),
       },
       xAxis: {
         labels: {
-          format: '{value:%b %d, %Y}'
+          format: '{value:%b %d, %Y}',
         },
-        type: 'datetime'
+        type: 'datetime',
       },
       yAxis: {
         minTickInterval: 1,
         title: {
-          text: 'Requests'
-        }
+          text: 'Requests',
+        },
       },
-      series
+      series,
     };
   }
 
@@ -220,13 +223,13 @@ class Analytics extends Component {
     if (chartData.length > 0) {
       mapOptions = {
         title: {
-          text: 'Geographic User Distribution'
+          text: 'Geographic User Distribution',
         },
         chart: {
-          map: 'countries/us/us-all'
+          map: 'countries/us/us-all',
         },
         legend: {
-          enabled: false
+          enabled: false,
         },
         series: [
           {
@@ -246,11 +249,11 @@ class Analytics extends Component {
             dataLabels: {
               enabled: true,
               format: '{point.name}: {point.z}',
-              y: 15
+              y: 15,
             },
-          }
-        ]
-      }
+          },
+        ],
+      };
     }
 
     return mapOptions;
@@ -263,7 +266,7 @@ class Analytics extends Component {
     const chartOptions = this.getChartOptions(series, type);
     const mapOptions = this.getMapOptions(analytics, type);
 
-    this.setState({chartOptions, mapOptions});
+    this.setState({ chartOptions, mapOptions });
   }
 
   render() {
@@ -277,35 +280,45 @@ class Analytics extends Component {
         <div>
           <div className="searchItem">
             <span>Date Filter</span>
-            <select onChange={(event) => this.setState({filter: Number.parseInt(event.target.value)}, () => this.updateOptions())} value={filter} >
-              <option key="none" value="none">All Data</option>
-              {dateFilter.map(t => <option key={t} value={t}>{t} Days</option>)}
+            <select
+              onChange={event => this.setState({ filter: Number.parseInt(event.target.value) }, () => this.updateOptions())}
+              value={filter}
+            >
+              <option key="none" value="none">
+                All Data
+              </option>
+              {dateFilter.map(t => (
+                <option key={t} value={t}>
+                  {t} Days
+                </option>
+              ))}
             </select>
           </div>
           {types.length > 0 ? (
             <div className="searchItem">
-                <span>Type</span>
-                <select onChange={(event) => this.setState({type: event.target.value}, () => this.updateOptions())} value={type} >
-                  <option key="all" value="all">All</option>
-                  {types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                </select>
+              <span>Type</span>
+              <select onChange={event => this.setState({ type: event.target.value }, () => this.updateOptions())} value={type}>
+                <option key="all" value="all">
+                  All
+                </option>
+                {types.map(t => (
+                  <option key={t} value={t}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </option>
+                ))}
+              </select>
             </div>
           ) : null}
-          <button onClick={() => this.updateData()}><FaSync/></button>
+          <button onClick={() => this.updateData()}>
+            <FaSync />
+          </button>
         </div>
-        <br/>
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={chartOptions}
-        />
+        <br />
+        <HighchartsReact highcharts={Highcharts} options={chartOptions} />
         {mapOptions.series ? (
           <Fragment>
-            <br/>
-            <HighchartsReact
-              highcharts={Highcharts}
-              constructorType={'mapChart'}
-              options={mapOptions}
-            />
+            <br />
+            <HighchartsReact highcharts={Highcharts} constructorType={'mapChart'} options={mapOptions} />
           </Fragment>
         ) : null}
         {/* {analytics && type ? JSON.stringify(analytics[type]) : null} */}
@@ -313,5 +326,5 @@ class Analytics extends Component {
     );
   }
 }
-  
+
 export default Analytics;
