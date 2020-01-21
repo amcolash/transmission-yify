@@ -541,21 +541,6 @@ class MovieList extends Component {
   onOpenModal = media => {
     window.location.hash = media.id;
     this.setState({ media: media });
-
-    if (this.state.viewMode === 'carousel') {
-      // this.backdropRef.current.focus();
-    }
-    //   // Scroll to selected movie
-    //   const list = this.listRef.current;
-    //   const covers = list.getElementsByClassName('cover');
-    //   for (let i = 0; i < covers.length; i++) {
-    //     const cover = covers[i];
-    //     if (parseInt(cover.id) === media.id) {
-    //       const movie = cover.parentElement;
-    //       list.scrollTo({ behavior: 'smooth', left: movie.offsetLeft - parseFloat(getComputedStyle(movie).marginLeft) });
-    //     }
-    //   }
-    // }
   };
 
   onCloseModal = () => {

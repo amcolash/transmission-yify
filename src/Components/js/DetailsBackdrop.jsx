@@ -28,6 +28,8 @@ class DetailsBackdrop extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.getDefaultState(), onLoad: props.media ? true : false };
+
+    this.containerRef = React.createRef();
   }
 
   getDefaultState() {
@@ -160,6 +162,18 @@ class DetailsBackdrop extends Component {
     this.setState({ horribleSubs: parsed.batches, nyaa });
   }
 
+  // Focus on first focusable element if possible
+  focusOnFirst() {
+    setTimeout(() => {
+      const focusableEls = this.containerRef.current.querySelectorAll(
+        'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
+          'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+      );
+
+      if (focusableEls.length > 0) focusableEls[0].focus();
+    }, 250);
+  }
+
   componentDidUpdate(prevProps, prevState, snapshot) {
     const { media, type } = this.props;
 
@@ -248,12 +262,12 @@ class DetailsBackdrop extends Component {
               const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
 
               if (Cache[pirateUrl]) {
-                this.setState({ pb: Cache[pirateUrl] });
+                this.setState({ pb: Cache[pirateUrl] }, () => this.focusOnFirst());
               } else {
                 axios
                   .get(pirateUrl)
                   .then(response => {
-                    this.setState({ pb: response.data });
+                    this.setState({ pb: response.data }, () => this.focusOnFirst());
                   })
                   .catch(err => {
                     console.error(err);
@@ -370,6 +384,7 @@ class DetailsBackdrop extends Component {
 
     const innerContent = (
       <div
+        ref={this.containerRef}
         className={'backdropContainer ' + viewMode}
         onClick={e => {
           if (viewMode === 'standard') {

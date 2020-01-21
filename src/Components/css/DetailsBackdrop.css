@@ -48,6 +48,10 @@
   overflow: hidden;
 }
 
+.backdropContainer.carousel {
+  height: calc(100vh - 12em);
+}
+
 .backdropContainer .left {
   display: flex;
   flex-direction: column;
@@ -165,13 +169,15 @@
   background-color: rgba(0, 0, 0, 0.5);
   padding: 1.5em 1em 1em 2em;
   max-width: 400px;
-  border-radius: 0.5em 0 0 0;
+  height: fit-content;
   max-height: calc(100vh - 6.5em);
+  border-radius: 0.5em 0 0 0;
   overflow-y: auto;
 }
 
 .backdropContainer.carousel .right {
-  max-height: calc(100% - 7em);
+  max-height: calc(100% - 9em);
+  margin-bottom: 3.5em;
 }
 
 .backdropContainer .right .padding {
