@@ -541,7 +541,7 @@ class MovieList extends Component {
     window.location.hash = media.id;
     this.setState({ media: media });
 
-    if (this.state.viewMode === 'carosuel') {
+    if (this.state.viewMode === 'carousel') {
       // Scroll to selected movie
       const list = this.listRef.current;
       const covers = list.getElementsByClassName('cover');

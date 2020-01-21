@@ -16,6 +16,10 @@
   overflow: hidden;
 }
 
+.backdropCarousel .fileExists {
+  display: inline-block;
+}
+
 .transitionEnter {
   transform: scale(0);
 }
@@ -304,6 +308,7 @@ h4 {
   flex-direction: row;
   width: 100vw;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .otherVideos .toggle {
@@ -330,9 +335,16 @@ h4 {
   padding: 0 0.5em;
 }
 
+.otherVideos.hidden .video {
+  height: 0;
+  padding: 0;
+}
+
 .otherVideos .video {
   padding: 1em;
   max-width: 16em;
+  height: 100%;
+  transition: all 0.5s;
 }
 
 .otherVideos .video img {
