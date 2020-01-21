@@ -411,7 +411,7 @@ class MovieList extends Component {
           if (!lastPage) setTimeout(() => this.updateScroll(), 1000);
 
           // Show media after loaded
-          if ((process.env.NODE_ENV === 'development' && showMedia) || this.state.viewMode === 'carousel') {
+          if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
             setTimeout(() => this.setState({ media: data[0] }), 500);
           }
         }
@@ -547,6 +547,14 @@ class MovieList extends Component {
   onOpenModal = media => {
     window.location.hash = media.id;
     this.setState({ media: media });
+
+    let currentIndex = 0;
+    this.state.results.forEach((m, i) => {
+      if (media && media.id === m.id) currentIndex = i;
+    });
+
+    const covers = this.listRef.current.querySelectorAll('.cover');
+    covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
   };
 
   onCloseModal = () => {
@@ -580,7 +588,7 @@ class MovieList extends Component {
     let newIndex = (currentIndex + dir) % results.length;
     if (newIndex < 0) newIndex = results.length - 1;
 
-    this.onOpenModal(newIndex);
+    this.onOpenModal(results[newIndex]);
   }
 
   render() {
