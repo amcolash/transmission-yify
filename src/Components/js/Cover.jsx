@@ -98,7 +98,7 @@ class Cover extends Component {
   }
 
   render() {
-    const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status, viewMode } = this.props;
+    const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status, viewMode, selected } = this.props;
     const { pb, subscribing } = this.state;
 
     if (!media.poster_path) media.poster_path = 'broken image';
@@ -129,7 +129,8 @@ class Cover extends Component {
         ref={this.ref}
       >
         <div
-          className="cover"
+          className={'cover' + (viewMode === 'carousel' && parseInt(selected.id) === media.id ? ' selected' : '')}
+          id={media.id}
           onClick={e => {
             if (click) click(media);
           }}

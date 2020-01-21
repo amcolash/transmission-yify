@@ -9,6 +9,7 @@ body {
   color: white;
   text-align: center;
   user-select: none;
+  overflow: hidden;
 }
 
 #root {

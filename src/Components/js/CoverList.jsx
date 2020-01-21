@@ -7,6 +7,7 @@ export default class CoverList extends Component {
   render() {
     const {
       results,
+      selected,
       type,
       click,
       downloadTorrent,
@@ -36,6 +37,7 @@ export default class CoverList extends Component {
           <Cover
             key={media.id}
             media={media}
+            selected={selected}
             type={type}
             click={click}
             downloadTorrent={downloadTorrent}

@@ -36,8 +36,12 @@
 }
 
 .cover:focus {
-  border: 0.1em solid rgb(70, 170, 230);
+  border-color: rgb(70, 170, 230);
   outline-width: 0.1em;
+}
+
+.cover.selected {
+  border-color: #66e646;
 }
 
 .movie.carousel .cover {

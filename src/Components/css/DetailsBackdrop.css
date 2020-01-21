@@ -10,6 +10,12 @@
   transition: all 0.5s;
 }
 
+.backdropCarousel {
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
 .transitionEnter {
   transform: scale(0);
 }
@@ -26,7 +32,6 @@
 }
 
 .container {
-  height: 100vh;
   width: 100vw;
   display: flex;
   align-items: flex-end;
@@ -35,6 +40,7 @@
   text-align: left;
   color: #ddd;
   text-shadow: 2px 2px 3px #000000, -1px 0px 0px #888, 1px 0px 0px #888, 0px -1px 0px #888, 0px 1px 0px #888;
+  overflow: hidden;
 }
 
 .left {
@@ -301,8 +307,11 @@ h4 {
 }
 
 .otherVideos .toggle {
-  text-align: center;
   margin: 1em;
+}
+
+.standard .otherVideos .toggle {
+  text-align: center;
 }
 
 .otherVideos .toggle span {

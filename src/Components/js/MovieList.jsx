@@ -404,7 +404,7 @@ class MovieList extends Component {
           if (!lastPage) setTimeout(() => this.updateScroll(), 1000);
 
           // Show media after loaded
-          if (process.env.NODE_ENV === 'development' && showMedia) {
+          if ((process.env.NODE_ENV === 'development' && showMedia) || this.props.viewMode === 'carousel') {
             setTimeout(() => this.setState({ media: data[0] }), 500);
           }
         }
@@ -540,6 +540,19 @@ class MovieList extends Component {
   onOpenModal = media => {
     window.location.hash = media.id;
     this.setState({ media: media });
+
+    if (this.state.viewMode === 'carosuel') {
+      // Scroll to selected movie
+      const list = this.listRef.current;
+      const covers = list.getElementsByClassName('cover');
+      for (let i = 0; i < covers.length; i++) {
+        const cover = covers[i];
+        if (parseInt(cover.id) === media.id) {
+          const movie = cover.parentElement;
+          list.scrollTo({ behavior: 'smooth', left: movie.offsetLeft - parseFloat(getComputedStyle(movie).marginLeft) });
+        }
+      }
+    }
   };
 
   onCloseModal = () => {
@@ -612,25 +625,6 @@ class MovieList extends Component {
             />
           )}
 
-          <DetailsBackdrop
-            loading={logo || !isLoaded}
-            media={media}
-            type={type}
-            server={this.server}
-            torrents={torrents}
-            started={started}
-            updateTorrents={this.updateTorrents}
-            cancelTorrent={this.cancelTorrent}
-            downloadTorrent={this.downloadTorrent}
-            getProgress={this.getProgress}
-            getTorrent={this.getTorrent}
-            onOpenModal={this.onOpenModal}
-            onCloseModal={this.onCloseModal}
-            files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
-            status={status}
-            toggleSubscription={this.toggleSubscription}
-          />
-
           {type === 'downloads' ? (
             <TorrentList
               torrents={torrents}
@@ -641,7 +635,7 @@ class MovieList extends Component {
               }}
             />
           ) : type === 'subscriptions' ? (
-            <div className="movie-list" ref={this.listRef} onScroll={this.updateScroll}>
+            <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll}>
               {results.length === 0 ? <h2>No Subscriptions</h2> : <h2>Subscriptions ({results.length})</h2>}
               <CoverList
                 results={results}
@@ -651,7 +645,7 @@ class MovieList extends Component {
                 toggleSubscription={this.toggleSubscription}
                 click={this.onOpenModal}
                 isSearching={isSearching}
-                viewMode={viewMode}
+                viewMode="standard"
               />
             </div>
           ) : type === 'analytics' ? (
@@ -669,7 +663,7 @@ class MovieList extends Component {
                 page={this.state.page}
               />
 
-              <div className="movie-list" ref={this.listRef} onScroll={this.updateScroll}>
+              <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll}>
                 {isSearching && this.state.page === 1 ? null : type === 'pirate' ? (
                   results && results.torrents && results.torrents.length > 0 ? (
                     <div className="pirateList">
@@ -695,6 +689,7 @@ class MovieList extends Component {
                   <h1>No Results</h1>
                 ) : (
                   <CoverList
+                    selected={media}
                     results={results}
                     type={type}
                     click={this.onOpenModal}
@@ -712,6 +707,25 @@ class MovieList extends Component {
                   />
                 )}
               </div>
+              <DetailsBackdrop
+                loading={logo || !isLoaded}
+                media={media}
+                type={type}
+                server={this.server}
+                torrents={torrents}
+                started={started}
+                updateTorrents={this.updateTorrents}
+                cancelTorrent={this.cancelTorrent}
+                downloadTorrent={this.downloadTorrent}
+                getProgress={this.getProgress}
+                getTorrent={this.getTorrent}
+                onOpenModal={this.onOpenModal}
+                onCloseModal={this.onCloseModal}
+                files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
+                status={status}
+                toggleSubscription={this.toggleSubscription}
+                viewMode={viewMode}
+              />
             </Fragment>
           ) : null}
         </Fragment>
