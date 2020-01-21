@@ -44,4 +44,13 @@
 
 .movie-list {
   padding: 1em 0;
+  overflow: auto;
+}
+
+/* Disable scrolling when menu open */
+.movie-list.noscroll {
+  overflow: hidden;
+
+  /* fix scrollbar hidden at least for chrome, mac/ios might do weird stuff now instead */
+  margin-right: 0.4em;
 }

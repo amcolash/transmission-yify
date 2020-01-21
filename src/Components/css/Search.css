@@ -1,6 +1,4 @@
 .search {
-  position: sticky;
-  top: 0;
   z-index: 1;
   padding: 1em 3em 1.5em;
   background-color: #444;

@@ -11,12 +11,11 @@ body {
   user-select: none;
 }
 
-/* Disable scrolling when menu open */
-body.noscroll {
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-
-  /* fix scrollbar hidden at least for chrome, mac/ios might do weird stuff now instead */
-  margin-right: 0.4em;
 }
 
 button {

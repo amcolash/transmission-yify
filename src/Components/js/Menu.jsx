@@ -13,7 +13,9 @@ import {
   FaRecycle,
   FaRssSquare,
   FaSkullCrossbones,
+  FaTh,
   FaTv,
+  FaWindowMaximize,
 } from 'react-icons/fa';
 
 import { swipedetect } from '../../Util/Swipe';
@@ -66,7 +68,7 @@ class Menu extends Component {
     if (Date.now() > this.touch + 300) {
       this.touch = Date.now();
       this.setState({ visible: visible });
-      document.body.classList.toggle('noscroll', visible);
+      this.props.listRef.current.classList.toggle('noscroll', visible);
     }
   }
 
@@ -111,7 +113,7 @@ class Menu extends Component {
 
   render() {
     const visible = this.state.visible;
-    const { status, torrents } = this.props;
+    const { status, torrents, viewMode, toggleViewMode } = this.props;
 
     return (
       <div
@@ -165,6 +167,7 @@ class Menu extends Component {
           {this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
           {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
           {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
+          {this.generateItem(viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />, `View Mode: ${viewMode}`, toggleViewMode)}
 
           {status ? (
             <div className="status">

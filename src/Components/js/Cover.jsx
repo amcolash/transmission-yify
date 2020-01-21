@@ -4,12 +4,12 @@ import '../css/Cover.css';
 
 import axios from 'axios';
 import React, { Component, Fragment } from 'react';
-import ScrollAnimation from 'react-animate-on-scroll';
 import { FaDownload, FaExclamationCircle, FaFilm, FaLaughBeam, FaPlayCircle, FaRssSquare, FaTrash, FaTv } from 'react-icons/fa';
 
 import Cache from '../../Util/Cache';
 import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
+import ScrollAnimation from './ScrollAnimation';
 import Spinner from './Spinner';
 
 const CancelToken = axios.CancelToken;
@@ -20,6 +20,7 @@ class Cover extends Component {
   constructor(props) {
     super(props);
     this.state = { pb: null, subscribing: false };
+    this.ref = React.createRef();
   }
 
   componentWillUnmount() {
@@ -27,8 +28,10 @@ class Cover extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.type === 'movies' && prevProps.media !== this.props.media) {
-      this.cancelPB();
+    if (
+      this.props.type === 'movies' &&
+      (prevProps.media !== this.props.media || (prevProps.viewMode === 'carousel' && this.props.viewMode === 'standard'))
+    ) {
       this.updatePB();
     }
   }
@@ -65,10 +68,13 @@ class Cover extends Component {
           // Only update things if we are still actually showing the same cover
           if (media.title === this.props.media.title) {
             this.setState({ pb: response.data });
+          } else {
+            this.setState({ pb: null });
           }
         })
         .catch(err => {
           console.error(err);
+          this.setState({ pb: null });
         });
     }
   }
@@ -92,7 +98,7 @@ class Cover extends Component {
   }
 
   render() {
-    const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status } = this.props;
+    const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status, viewMode } = this.props;
     const { pb, subscribing } = this.state;
 
     if (!media.poster_path) media.poster_path = 'broken image';
@@ -111,13 +117,16 @@ class Cover extends Component {
 
     return (
       <ScrollAnimation
+        initiallyVisible={viewMode !== 'standard'}
         animateIn="fadeIn"
         animateOnce={true}
         offset={100}
-        className="movie"
+        scrollableParentSelector=".movie-list"
+        className={'movie ' + viewMode}
         afterAnimatedIn={() => {
-          if (this.props.type === 'movies') this.updatePB();
+          if (this.props.type === 'movies' && this.props.viewMode === 'standard') this.updatePB();
         }}
+        ref={this.ref}
       >
         <div
           className="cover"
@@ -152,7 +161,7 @@ class Cover extends Component {
               {subscribing ? <Spinner visible noMargin button /> : <FaRssSquare />}
             </div>
           ) : null}
-          {type === 'movies' ? (
+          {type === 'movies' && viewMode === 'standard' ? (
             <div className="quality">
               {versions.length > 0 ? (
                 versions.reverse().map(version => (
@@ -199,10 +208,14 @@ class Cover extends Component {
             </div>
           ) : null}
         </div>
-        <span onClick={e => click(media)}>
-          {media.title} {media.year ? <span>({media.year})</span> : null}
-        </span>
-        <br />
+        {viewMode === 'standard' ? (
+          <Fragment>
+            <span onClick={e => click(media)}>
+              {media.title} {media.year ? <span>({media.year})</span> : null}
+            </span>
+            <br />
+          </Fragment>
+        ) : null}
         {subscription ? (
           <span>
             Latest: S{subscription.lastSeason}E{subscription.lastEpisode}

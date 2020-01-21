@@ -10,7 +10,7 @@ import Cache from '../../Util/Cache';
 import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import Analytics from './Analytics';
-import Cover from './Cover';
+import CoverList from './CoverList';
 import DetailsBackdrop from './DetailsBackdrop';
 import Logo from './Logo';
 import Menu from './Menu';
@@ -64,8 +64,11 @@ class MovieList extends Component {
       height: 0,
       lastPage: false,
       files: [],
+      viewMode: window.localStorage.getItem('viewMode') || 'standard',
       ...devOverrides,
     };
+
+    // window.localStorage.setItem('viewMode', this.state.viewMode);
 
     this.updateSearch = this.updateSearch.bind(this);
     this.getProgress = this.getProgress.bind(this);
@@ -77,6 +80,10 @@ class MovieList extends Component {
     this.clearCache = this.clearCache.bind(this);
     this.updateHash = this.updateHash.bind(this);
     this.updateHistory = this.updateHistory.bind(this);
+    this.updateScroll = this.updateScroll.bind(this);
+    this.toggleViewMode = this.toggleViewMode.bind(this);
+
+    this.listRef = React.createRef();
 
     this.server = 'https://' + window.location.hostname;
     if (port) this.server += `:${port}`;
@@ -90,9 +97,6 @@ class MovieList extends Component {
     // Update window size
     this.updateWindowDimensions();
     window.addEventListener('resize', this.updateWindowDimensions);
-
-    // Update window scroll
-    window.addEventListener('scroll', this.updateScroll);
 
     // Update on hash change
     window.addEventListener('hashchange', this.updateHash);
@@ -127,7 +131,6 @@ class MovieList extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.updateScroll);
     window.removeEventListener('resize', this.updateWindowDimensions);
     window.removeEventListener('hashchange', this.updateHash);
     window.removeEventListener('popstate', this.updateHistory);
@@ -162,17 +165,27 @@ class MovieList extends Component {
     }
   }
 
-  updateScroll = () => {
-    let scroll =
-      (document.documentElement.scrollTop + document.body.scrollTop) /
-      (document.documentElement.scrollHeight - document.documentElement.clientHeight + 0.0001);
-    if (document.documentElement.scrollHeight === document.documentElement.clientHeight) scroll = 1;
+  updateScroll() {
+    const element = this.listRef.current;
+    if (!element) return;
+
+    let scroll;
+    // This isn't super precise, but good enough for me!
+    if (this.state.viewMode === 'standard') {
+      scroll = (element.scrollTop + element.offsetHeight) / (element.scrollHeight - element.offsetTop);
+    } else {
+      scroll = (element.scrollLeft + element.offsetLeft) / (element.scrollWidth - element.offsetWidth);
+    }
+
     if (!isNaN(scroll)) {
       if (scroll > 0.9 && !this.state.isSearching && !this.state.lastPage && !this.state.media) {
+        if (this.state.viewMode === 'standard') element.scrollTop -= 10;
+        else element.scrollLeft -= 10;
+
         this.changePage(1);
       }
     }
-  };
+  }
 
   updateTorrents(data) {
     if (data.errno === 'ECONNREFUSED') {
@@ -293,14 +306,26 @@ class MovieList extends Component {
         .get(ENDPOINT)
         .then(response => {
           Cache[ENDPOINT] = response.data;
-          this.handleData(response.data);
+          // Handle errors which were not marked as such from the proxy server
+          if (response.data.name === 'Error') {
+            console.error(response.data);
+            this.setState({
+              isLoaded: true,
+              isSearching: false,
+              lastPage: true,
+              results: [],
+            });
+          } else {
+            this.handleData(response.data);
+          }
         })
         .catch(error => {
           console.error(error);
           this.setState({
-            error: error,
             isLoaded: true,
             isSearching: false,
+            lastPage: true,
+            results: [],
           });
         });
     }
@@ -323,7 +348,8 @@ class MovieList extends Component {
       return;
     }
 
-    let lastPage = data.page !== undefined && data.total_pages !== undefined && data.page === data.total_pages;
+    let lastPage =
+      (data.page !== undefined && data.total_pages !== undefined && data.page === data.total_pages) || data.total_results === 0;
 
     if (data.data) data.results = data.data;
 
@@ -375,7 +401,7 @@ class MovieList extends Component {
         },
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
-          setTimeout(() => this.updateScroll(), 1000);
+          if (!lastPage) setTimeout(() => this.updateScroll(), 1000);
 
           // Show media after loaded
           if (process.env.NODE_ENV === 'development' && showMedia) {
@@ -530,8 +556,14 @@ class MovieList extends Component {
     this.setState({ page: newPage }, () => this.updateData());
   };
 
+  toggleViewMode() {
+    const viewMode = this.state.viewMode === 'standard' ? 'carousel' : 'standard';
+    this.setState({ viewMode });
+    window.localStorage.setItem('viewMode', viewMode);
+  }
+
   render() {
-    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching } = this.state;
+    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode } = this.state;
 
     // Filter out completed torrents from all views
     const torrents = this.state.torrents.filter(t => t.percentDone < 1);
@@ -574,6 +606,9 @@ class MovieList extends Component {
               updateSearch={this.updateSearch}
               status={status}
               torrents={torrents}
+              listRef={this.listRef}
+              viewMode={viewMode}
+              toggleViewMode={this.toggleViewMode}
             />
           )}
 
@@ -606,21 +641,18 @@ class MovieList extends Component {
               }}
             />
           ) : type === 'subscriptions' ? (
-            <div className="movie-list">
+            <div className="movie-list" ref={this.listRef} onScroll={this.updateScroll}>
               {results.length === 0 ? <h2>No Subscriptions</h2> : <h2>Subscriptions ({results.length})</h2>}
-              <div>
-                {results.map(media => (
-                  <Cover
-                    key={media.id}
-                    media={media}
-                    type={type}
-                    server={this.server}
-                    status={status}
-                    toggleSubscription={this.toggleSubscription}
-                    click={this.onOpenModal}
-                  />
-                ))}
-              </div>
+              <CoverList
+                results={results}
+                type={type}
+                server={this.server}
+                status={status}
+                toggleSubscription={this.toggleSubscription}
+                click={this.onOpenModal}
+                isSearching={isSearching}
+                viewMode={viewMode}
+              />
             </div>
           ) : type === 'analytics' ? (
             <Analytics server={this.server} />
@@ -637,7 +669,7 @@ class MovieList extends Component {
                 page={this.state.page}
               />
 
-              <div className="movie-list">
+              <div className="movie-list" ref={this.listRef} onScroll={this.updateScroll}>
                 {isSearching && this.state.page === 1 ? null : type === 'pirate' ? (
                   results && results.torrents && results.torrents.length > 0 ? (
                     <div className="pirateList">
@@ -652,6 +684,7 @@ class MovieList extends Component {
                           getTorrent={this.getTorrent}
                         />
                       ))}
+                      {isSearching ? <Spinner visible big /> : null}
                     </div>
                   ) : search.length === 0 ? (
                     <h2>Please enter a search term</h2>
@@ -661,29 +694,24 @@ class MovieList extends Component {
                 ) : results.length === 0 ? (
                   <h1>No Results</h1>
                 ) : (
-                  <div>
-                    {results.map(media => (
-                      <Cover
-                        key={media.id}
-                        media={media}
-                        type={type}
-                        click={this.onOpenModal}
-                        downloadTorrent={this.downloadTorrent}
-                        cancelTorrent={this.cancelTorrent}
-                        torrents={torrents} // only passed in so that versions are properly updated when needed
-                        started={started}
-                        getProgress={this.getProgress}
-                        server={this.server}
-                        files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
-                        status={status}
-                        toggleSubscription={this.toggleSubscription}
-                      />
-                    ))}
-                  </div>
+                  <CoverList
+                    results={results}
+                    type={type}
+                    click={this.onOpenModal}
+                    downloadTorrent={this.downloadTorrent}
+                    cancelTorrent={this.cancelTorrent}
+                    torrents={torrents}
+                    started={started}
+                    getProgress={this.getProgress}
+                    server={this.server}
+                    files={type === 'movies' ? files : []} // only show downloaded files for movies
+                    status={status}
+                    toggleSubscription={this.toggleSubscription}
+                    isSearching={isSearching}
+                    viewMode={viewMode}
+                  />
                 )}
               </div>
-
-              {isSearching ? <Spinner visible big /> : null}
             </Fragment>
           ) : null}
         </Fragment>
