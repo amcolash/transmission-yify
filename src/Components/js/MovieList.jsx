@@ -84,7 +84,6 @@ class MovieList extends Component {
     this.toggleViewMode = this.toggleViewMode.bind(this);
 
     this.listRef = React.createRef();
-    this.backdropRef = React.createRef();
 
     this.server = 'https://' + window.location.hostname;
     if (port) this.server += `:${port}`;
@@ -702,7 +701,6 @@ class MovieList extends Component {
                 )}
               </div>
               <DetailsBackdrop
-                ref={this.backdropRef}
                 loading={logo || !isLoaded}
                 media={media}
                 type={type}
