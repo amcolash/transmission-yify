@@ -103,13 +103,19 @@ class MovieList extends Component {
     window.addEventListener('hashchange', this.updateHash);
     window.addEventListener('popstate', this.updateHistory);
 
-    var socket = openSocket(this.server);
+    // Open a socket and try to force using a websocket
+    const socket = openSocket(this.server, { transports: ['websocket'] });
     socket.on('connect', data => {
       socket.emit('subscribe', 'torrents');
       socket.emit('subscribe', 'status');
 
       // Weird performance hack, this helps since it seems the server blocks while sending info and cannot get cover info
       setTimeout(() => socket.emit('subscribe', 'files'), 3000);
+    });
+
+    // If something fails with connecting, reset to defaults
+    socket.on('reconnect_attempt', () => {
+      socket.io.opts.transports = ['polling', 'websocket'];
     });
 
     socket.on('torrents', data => {
