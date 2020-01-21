@@ -35,7 +35,8 @@
   transition: transform 1000ms ease;
 }
 
-.container {
+.backdropContainer {
+  height: 100%;
   width: 100vw;
   display: flex;
   align-items: flex-end;
@@ -47,7 +48,7 @@
   overflow: hidden;
 }
 
-.left {
+.backdropContainer .left {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 2em);
@@ -55,24 +56,28 @@
   max-width: 350px;
 }
 
+.backdropContainer.carousel .left {
+  height: calc(100% - 2em);
+}
+
 .info {
   font-size: 1.25em;
 }
 
-#modalFullscreen .subscription .spinner {
+.backdropContainer .subscription .spinner {
   width: 0.5em;
   height: 0.5em;
   margin: 0.05em 0 0 0.1em;
 }
 
-#modalFullscreen .subscription {
+.backdropContainer .subscription {
   margin-left: 0.5em;
   vertical-align: top;
   cursor: pointer;
   filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.75));
 }
 
-#modalFullscreen .coverWrap {
+.backdropContainer .coverWrap {
   max-height: 350px;
   display: flex;
   flex: 4;
@@ -83,25 +88,25 @@
   margin-bottom: -1em;
 }
 
-#modalFullscreen .coverInner {
+.backdropContainer .coverInner {
   display: inline-block;
 }
 
-#modalFullscreen .coverWrap img {
+.backdropContainer .coverWrap img {
   border-radius: 3px;
   box-shadow: 0px 0px 15px 4px rgba(0, 0, 0, 0.5);
   border: 1px solid #888;
   height: calc(100% - 2px);
 }
 
-#modalFullscreen .coverWrap .fileExists {
+.backdropContainer .coverWrap .fileExists {
   bottom: 1em;
   left: 1em;
   border: solid 1px #888;
   border-bottom-left-radius: 3px;
 }
 
-#modalFullscreen .info .fileExists {
+.backdropContainer .info .fileExists {
   border: none;
   border-radius: 0.2em;
   position: unset;
@@ -109,19 +114,21 @@
   margin-left: 0.5em;
 }
 
-#modalFullscreen .info .trailer {
+.backdropContainer .info .trailer {
   display: inline-flex;
   align-items: center;
-  padding-top: 0.4em;
   font-size: 1.1em;
   cursor: pointer;
+  margin-top: 0.4em;
+  margin-left: -0.2em;
+  padding: 0.2em;
 }
 
-#modalFullscreen .info .trailer div {
+.backdropContainer .info .trailer div {
   padding-left: 0.25em;
 }
 
-#modalFullscreen .ytContainer {
+.backdropContainer .ytContainer {
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -131,7 +138,7 @@
   z-index: 2;
 }
 
-#modalFullscreen .ytContainer button {
+.backdropContainer .ytContainer button {
   position: absolute;
   font-size: 1.75em;
   top: 0;
@@ -142,11 +149,11 @@
   transition: all 0.5s;
 }
 
-#modalFullscreen .ytContainer button:hover {
+.backdropContainer .ytContainer button:hover {
   color: rgba(255, 255, 255, 1);
 }
 
-#modalFullscreen #youtube {
+.backdropContainer #youtube {
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -154,7 +161,7 @@
   left: 0;
 }
 
-.right {
+.backdropContainer .right {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 1.5em 1em 1em 2em;
   max-width: 400px;
@@ -163,11 +170,15 @@
   overflow-y: auto;
 }
 
-.right .padding {
+.backdropContainer.carousel .right {
+  max-height: calc(100% - 7em);
+}
+
+.backdropContainer .right .padding {
   padding: 0.45em 0;
 }
 
-.right h4 {
+.backdropContainer .right h4 {
   padding-top: 1em;
 }
 
@@ -363,7 +374,7 @@ h4 {
 }
 
 @media (max-width: 680px) {
-  .container {
+  .backdropContainer {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -385,11 +396,11 @@ h4 {
     padding-bottom: 3.5em;
   }
 
-  #modalFullscreen .coverWrap {
+  .backdropContainer .coverWrap {
     display: none;
   }
 
-  #modalFullscreen .info .fileExists {
+  .backdropContainer .info .fileExists {
     display: inline-block;
   }
 

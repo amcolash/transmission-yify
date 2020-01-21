@@ -101,10 +101,12 @@ class Cover extends Component {
     const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status, viewMode, selected } = this.props;
     const { pb, subscribing } = this.state;
 
+    const id = media ? media.id : '';
+
     if (!media.poster_path) media.poster_path = 'broken image';
 
     const fileExists = hasFile(media, files || []);
-    const subscription = status ? hasSubscription(media.id, status.subscriptions) : null;
+    const subscription = status ? hasSubscription(id, status.subscriptions) : null;
 
     let versions = [];
     if (pb) {
@@ -129,8 +131,8 @@ class Cover extends Component {
         ref={this.ref}
       >
         <div
-          className={'cover' + (viewMode === 'carousel' && parseInt(selected.id) === media.id ? ' selected' : '')}
-          id={media.id}
+          className={'cover' + (viewMode === 'carousel' && parseInt(selected ? selected.id : -1) === id ? ' selected' : '')}
+          id={id}
           onClick={e => {
             if (click) click(media);
           }}

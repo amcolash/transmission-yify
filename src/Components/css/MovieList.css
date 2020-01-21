@@ -45,10 +45,12 @@
 .movie-list {
   padding: 1em 0;
   overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .movie-list.carousel {
   padding: 0;
+  margin: 0 0.25em;
   min-height: 9.5em;
   margin-bottom: 1em;
 }

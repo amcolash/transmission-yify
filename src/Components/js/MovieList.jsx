@@ -84,6 +84,7 @@ class MovieList extends Component {
     this.toggleViewMode = this.toggleViewMode.bind(this);
 
     this.listRef = React.createRef();
+    this.backdropRef = React.createRef();
 
     this.server = 'https://' + window.location.hostname;
     if (port) this.server += `:${port}`;
@@ -404,7 +405,7 @@ class MovieList extends Component {
           if (!lastPage) setTimeout(() => this.updateScroll(), 1000);
 
           // Show media after loaded
-          if ((process.env.NODE_ENV === 'development' && showMedia) || this.props.viewMode === 'carousel') {
+          if ((process.env.NODE_ENV === 'development' && showMedia) || this.state.viewMode === 'carousel') {
             setTimeout(() => this.setState({ media: data[0] }), 500);
           }
         }
@@ -542,17 +543,19 @@ class MovieList extends Component {
     this.setState({ media: media });
 
     if (this.state.viewMode === 'carousel') {
-      // Scroll to selected movie
-      const list = this.listRef.current;
-      const covers = list.getElementsByClassName('cover');
-      for (let i = 0; i < covers.length; i++) {
-        const cover = covers[i];
-        if (parseInt(cover.id) === media.id) {
-          const movie = cover.parentElement;
-          list.scrollTo({ behavior: 'smooth', left: movie.offsetLeft - parseFloat(getComputedStyle(movie).marginLeft) });
-        }
-      }
+      // this.backdropRef.current.focus();
     }
+    //   // Scroll to selected movie
+    //   const list = this.listRef.current;
+    //   const covers = list.getElementsByClassName('cover');
+    //   for (let i = 0; i < covers.length; i++) {
+    //     const cover = covers[i];
+    //     if (parseInt(cover.id) === media.id) {
+    //       const movie = cover.parentElement;
+    //       list.scrollTo({ behavior: 'smooth', left: movie.offsetLeft - parseFloat(getComputedStyle(movie).marginLeft) });
+    //     }
+    //   }
+    // }
   };
 
   onCloseModal = () => {
@@ -708,6 +711,7 @@ class MovieList extends Component {
                 )}
               </div>
               <DetailsBackdrop
+                ref={this.backdropRef}
                 loading={logo || !isLoaded}
                 media={media}
                 type={type}

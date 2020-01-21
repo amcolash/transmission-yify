@@ -370,7 +370,7 @@ class DetailsBackdrop extends Component {
 
     const innerContent = (
       <div
-        className={'container ' + viewMode}
+        className={'backdropContainer ' + viewMode}
         onClick={e => {
           if (viewMode === 'standard') {
             this.setState(this.getDefaultState());
