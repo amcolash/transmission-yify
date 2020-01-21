@@ -2,7 +2,18 @@ import '../css/DetailsBackdrop.css';
 
 import axios from 'axios';
 import React, { Component, Fragment } from 'react';
-import { FaChevronDown, FaChevronUp, FaDownload, FaPlayCircle, FaRssSquare, FaStar, FaTimes, FaYoutube } from 'react-icons/fa';
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaChevronLeft,
+  FaChevronRight,
+  FaDownload,
+  FaPlayCircle,
+  FaRssSquare,
+  FaStar,
+  FaTimes,
+  FaYoutube,
+} from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import YouTube from 'react-youtube';
 
@@ -164,14 +175,13 @@ class DetailsBackdrop extends Component {
 
   // Focus on first focusable element if possible
   focusOnFirst() {
-    setTimeout(() => {
-      const focusableEls = this.containerRef.current.querySelectorAll(
-        'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
-          'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
-      );
-
-      if (focusableEls.length > 0) focusableEls[0].focus();
-    }, 250);
+    // setTimeout(() => {
+    //   const focusableEls = this.containerRef.current.querySelectorAll(
+    //     'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
+    //       'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+    //   );
+    //   if (focusableEls.length > 0) focusableEls[0].focus();
+    // }, 250);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -325,6 +335,7 @@ class DetailsBackdrop extends Component {
       status,
       loading,
       viewMode,
+      changeItem,
     } = this.props;
 
     const {
@@ -479,6 +490,17 @@ class DetailsBackdrop extends Component {
             </div>
           ) : null}
         </div>
+        {viewMode === 'carousel' ? (
+          <div className="arrows">
+            <button onClick={() => changeItem(-1)}>
+              <FaChevronLeft />
+            </button>
+
+            <button onClick={() => changeItem(1)}>
+              <FaChevronRight />
+            </button>
+          </div>
+        ) : null}
         <div className="spacer"></div>
         <div
           className={'right' + (tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? ' videos' : '')}

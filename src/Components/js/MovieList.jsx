@@ -82,6 +82,7 @@ class MovieList extends Component {
     this.updateHistory = this.updateHistory.bind(this);
     this.updateScroll = this.updateScroll.bind(this);
     this.toggleViewMode = this.toggleViewMode.bind(this);
+    this.changeItem = this.changeItem.bind(this);
 
     this.listRef = React.createRef();
 
@@ -568,6 +569,20 @@ class MovieList extends Component {
     window.localStorage.setItem('viewMode', viewMode);
   }
 
+  changeItem(dir) {
+    const { media, results } = this.state;
+
+    let currentIndex = 0;
+    this.state.results.forEach((m, i) => {
+      if (media && media.id === m.id) currentIndex = i;
+    });
+
+    let newIndex = (currentIndex + dir) % results.length;
+    if (newIndex < 0) newIndex = results.length - 1;
+
+    this.onOpenModal(newIndex);
+  }
+
   render() {
     const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode } = this.state;
 
@@ -718,6 +733,7 @@ class MovieList extends Component {
                 status={status}
                 toggleSubscription={this.toggleSubscription}
                 viewMode={viewMode}
+                changeItem={this.changeItem}
               />
             </Fragment>
           ) : null}
