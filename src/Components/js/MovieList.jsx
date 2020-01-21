@@ -179,7 +179,7 @@ class MovieList extends Component {
     }
 
     if (!isNaN(scroll)) {
-      if (scroll > 0.9 && !this.state.isSearching && !this.state.lastPage && !this.state.media) {
+      if (scroll > 0.9 && !this.state.isSearching && !this.state.lastPage && (!this.state.media || this.state.viewMode === 'carousel')) {
         if (this.state.viewMode === 'standard') element.scrollTop -= 10;
         else element.scrollLeft -= 10;
 
