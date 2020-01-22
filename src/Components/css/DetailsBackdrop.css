@@ -14,6 +14,7 @@
   background-size: cover;
   background-position: center;
   overflow: hidden;
+  flex: 1;
 }
 
 .backdropCarousel .fileExists {
@@ -47,10 +48,6 @@
   text-shadow: 2px 2px 3px #000000, -1px 0px 0px #888, 1px 0px 0px #888, 0px -1px 0px #888, 0px 1px 0px #888;
   overflow: hidden;
   position: relative;
-}
-
-.backdropContainer.carousel {
-  height: calc(100vh - 12em);
 }
 
 .backdropContainer .left {
@@ -178,7 +175,6 @@
 
 .backdropContainer.carousel .right {
   max-height: calc(100% - 9em);
-  margin-bottom: 3.5em;
 }
 
 .backdropContainer .right .padding {
@@ -316,7 +312,7 @@ h4 {
   display: flex;
   flex-direction: column;
   position: absolute;
-  bottom: 3.5em;
+  bottom: 0;
   z-index: 1;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.5);
@@ -339,6 +335,7 @@ h4 {
   width: 100vw;
   overflow-x: auto;
   overflow-y: hidden;
+  margin: 0.5em;
 }
 
 .otherVideos .toggle {
@@ -365,16 +362,10 @@ h4 {
   padding: 0 0.5em;
 }
 
-.otherVideos.hidden .video {
-  height: 0;
-  padding: 0;
-}
-
 .otherVideos .video {
   padding: 1em;
   max-width: 16em;
   height: 100%;
-  transition: height 0.5s;
 }
 
 .otherVideos .video img {
@@ -398,19 +389,19 @@ h4 {
     align-items: flex-start;
   }
 
-  .left {
+  .backdropContainer .left {
     height: auto;
     max-width: unset;
   }
 
-  .right {
+  .backdropContainer .right {
     max-height: 77vh;
     max-width: calc(100% - 2em);
     padding: 1em;
     border-radius: 1em 1em 0 0;
   }
 
-  .right.videos {
+  .backdropContainer .right.videos {
     max-height: 75vh;
     padding-bottom: 3.5em;
   }
@@ -443,7 +434,7 @@ h4 {
 }
 
 @media (max-height: 450px) {
-  .right {
+  .backdropContainer .right {
     max-width: 330px;
     max-height: calc(100vh - 6em);
     padding: 1em;
