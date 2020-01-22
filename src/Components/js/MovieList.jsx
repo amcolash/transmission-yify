@@ -84,6 +84,7 @@ class MovieList extends Component {
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.changeItem = this.changeItem.bind(this);
     this.handleKeys = this.handleKeys.bind(this);
+    this.onfocus = this.onfocus.bind(this);
 
     this.listRef = React.createRef();
 
@@ -104,8 +105,9 @@ class MovieList extends Component {
     window.addEventListener('hashchange', this.updateHash);
     window.addEventListener('popstate', this.updateHistory);
 
-    // Handle key presses
+    // Handle key presses / focus events
     window.addEventListener('keydown', this.handleKeys);
+    window.addEventListener('focusin', this.onfocus);
 
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
@@ -550,7 +552,7 @@ class MovieList extends Component {
   }
 
   onOpenModal = media => {
-    if (media.id === this.state.media.id) return;
+    if (this.state.media && media.id === this.state.media.id) return;
 
     window.location.hash = media.id;
     this.setState({ media: media });
@@ -570,8 +572,28 @@ class MovieList extends Component {
     this.setState({ media: null });
   };
 
-  focusItem(el, dir, active) {
-    const focusableEls = el.querySelectorAll(
+  onfocus(e) {
+    const backdrop = document.querySelector('.backdropCarousel');
+    if (backdrop) {
+      const focused = backdrop.contains(e.target);
+      document.querySelector('.search').classList.toggle('collapsed', focused);
+      document.querySelector('.movie-list').classList.toggle('collapsed', focused);
+    }
+  }
+
+  focusCover() {
+    const covers = document.querySelectorAll('.cover');
+    for (let i = 0; i < covers.length; i++) {
+      if (parseInt(covers[i].id) === this.state.media.id || covers[i].id === this.state.media.id) {
+        console.log(covers[i]);
+        covers[i].focus();
+      }
+    }
+  }
+
+  focusItem(el, dir) {
+    const active = document.activeElement;
+    const focusableEls = (el || document).querySelectorAll(
       'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
         'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), ' +
         '[tabindex="0"]:not([disabled])'
@@ -595,34 +617,53 @@ class MovieList extends Component {
     if (this.state.viewMode !== 'carousel') return;
 
     const active = document.activeElement;
-    const activeTag = active.tagName.toLowerCase();
+
+    const backdropEl = document.querySelector('.backdropContainer');
+    const searchEl = document.querySelector('input');
 
     const coverFocus = active.classList.contains('cover');
-    const inputFocus = activeTag === 'input' || activeTag === 'select';
+    
+    let searchFocus = false;
+    if (searchEl) searchFocus = searchEl.contains(active);
+    let backdropFocus = false;
+    if (backdropEl) backdropFocus = backdropEl.contains(active);
 
-    // const backdropEl = document.querySelector('.backdropContainer');
-    // console.log(e, active, coverFocus, inputFocus);
+    console.log(e, active, coverFocus, searchFocus);
 
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        // if (coverFocus) this.changeItem(-1);
-        this.focusItem(document, -1, active);
+        if (backdropFocus) this.focusItem(backdropEl, -1);
+        else this.focusItem(document, -1);
         break;
       case 'ArrowRight':
         e.preventDefault();
-        // if (coverFocus) this.changeItem(1);
-        this.focusItem(document, 1, active);
+        if (backdropFocus) this.focusItem(backdropEl, 1);
+        else this.focusItem(document, 1);
         break;
       case 'ArrowUp':
-        // if (menuOpen) this.focusItem(document, -1, active);
-        // if (coverFocus) this.focusItem(document, 0);
-        // else if (!inputFocus) this.focusItem(backdropEl, 0);
+        e.preventDefault();
+        if (backdropFocus) this.focusItem(backdropEl, -1);
+        else if (coverFocus && searchEl) searchEl.focus();
+        else this.focusItem(document, -1);
         break;
       case 'ArrowDown':
-        // if (menuOpen) this.focusItem(document, 1, active);
-        // if (coverFocus) this.focusItem(backdropEl, 0);
-        // else if (!inputFocus) this.focusItem(document, 0);
+        e.preventDefault();
+        if (backdropFocus) this.focusItem(backdropEl, 1);
+        else if (coverFocus) this.focusItem(backdropEl, 0);
+        else if (searchFocus) this.focusCover();
+        else this.focusItem(document, 1);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        if (backdropFocus) this.focusCover();
+        else if (searchEl) searchEl.focus();
+        break;
+      case 'Enter':
+        if (coverFocus) {
+          e.preventDefault();
+          this.focusItem(backdropEl, 0);
+        }
         break;
       default:
         break;

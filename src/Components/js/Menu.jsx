@@ -68,7 +68,7 @@ class Menu extends Component {
     if (Date.now() > this.touch + 300) {
       this.touch = Date.now();
       this.setState({ visible: visible });
-      this.props.listRef.current.classList.toggle('noscroll', visible);
+      if (this.props.listRef.current) this.props.listRef.current.classList.toggle('noscroll', visible);
     }
   }
 
