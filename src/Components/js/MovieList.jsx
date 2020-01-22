@@ -555,16 +555,19 @@ class MovieList extends Component {
     if (this.state.media && media.id === this.state.media.id) return;
 
     window.location.hash = media.id;
-    this.setState({ media: media });
+    this.setState({ media: media }, () => {
 
-    let currentIndex = 0;
+    let currentIndex = -1;
     this.state.results.forEach((m, i) => {
       if (media && media.id === m.id) currentIndex = i;
     });
 
-    const covers = this.listRef.current.querySelectorAll('.cover');
-    covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
-    covers[currentIndex].focus();
+    if (currentIndex !== -1) {
+      const covers = this.listRef.current.querySelectorAll('.cover');
+      covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
+      covers[currentIndex].focus();
+    }
+    });
   };
 
   onCloseModal = () => {
@@ -578,17 +581,18 @@ class MovieList extends Component {
       const focused = backdrop.contains(e.target);
       document.querySelector('.search').classList.toggle('collapsed', focused);
       document.querySelector('.movie-list').classList.toggle('collapsed', focused);
+      backdrop.classList.toggle('expanded', focused);
     }
   }
 
   focusCover() {
     const covers = document.querySelectorAll('.cover');
+    let foundIndex = 0;
     for (let i = 0; i < covers.length; i++) {
-      if (parseInt(covers[i].id) === this.state.media.id || covers[i].id === this.state.media.id) {
-        console.log(covers[i]);
-        covers[i].focus();
-      }
+      if (parseInt(covers[i].id) === this.state.media.id || covers[i].id === this.state.media.id) foundIndex = i;
     }
+
+    if (covers.length > foundIndex) covers[foundIndex].focus();
   }
 
   focusItem(el, dir) {
@@ -628,7 +632,7 @@ class MovieList extends Component {
     let backdropFocus = false;
     if (backdropEl) backdropFocus = backdropEl.contains(active);
 
-    console.log(e, active, coverFocus, searchFocus);
+    // console.log(e, active, coverFocus, searchFocus);
 
     switch (e.key) {
       case 'ArrowLeft':

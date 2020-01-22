@@ -17,11 +17,11 @@
   flex: 1;
 }
 
-.backdropCarousel:focus-within {
+.backdropCarousel.expanded {
   z-index: 2;
 }
 
-.backdropCarousel:focus-within .arrows {
+.backdropCarousel.expanded .arrows {
   opacity: 0;
 }
 
