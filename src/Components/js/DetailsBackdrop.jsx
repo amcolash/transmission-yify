@@ -403,7 +403,7 @@ class DetailsBackdrop extends Component {
             onCloseModal();
           }
         }}
-        style={{ height: viewMode === 'standard' ? '100vh' : undefined }}
+        style={{ height: viewMode === 'standard' ? '100vh' : undefined, position: viewMode === 'carousel' && youtubeId ? 'unset' : undefined}}
       >
         <div className="left">
           <div className="info">
