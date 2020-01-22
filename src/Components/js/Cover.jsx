@@ -139,6 +139,9 @@ class Cover extends Component {
           onKeyDown={e => {
             if (e.key === 'Enter' && click) click(media);
           }}
+          onFocus={() => {
+            if (viewMode === 'carousel' && click) click(media);
+          }}
           tabIndex="0"
         >
           <img className="movieCover" src={media.poster_path} alt="" />

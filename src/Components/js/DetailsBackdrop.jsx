@@ -4,9 +4,9 @@ import axios from 'axios';
 import React, { Component, Fragment } from 'react';
 import {
   FaChevronDown,
-  FaChevronUp,
   FaChevronLeft,
   FaChevronRight,
+  FaChevronUp,
   FaDownload,
   FaPlayCircle,
   FaRssSquare,
@@ -403,8 +403,24 @@ class DetailsBackdrop extends Component {
             onCloseModal();
           }
         }}
-        style={{ height: viewMode === 'standard' ? '100vh' : undefined, position: viewMode === 'carousel' && youtubeId ? 'unset' : undefined}}
+        style={{
+          height: viewMode === 'standard' ? '100vh' : undefined,
+          position: viewMode === 'carousel' && youtubeId ? 'unset' : undefined,
+        }}
       >
+        {youtubeId ? (
+          <div className="ytContainer" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                this.setState({ youtubeId: null });
+              }}
+            >
+              <FaTimes />
+            </button>
+            <YouTube videoId={youtubeId} opts={trailerOpts} id="youtube" onEnd={() => this.setState({ youtubeId: null })} />
+          </div>
+        ) : null}
         <div className="left">
           <div className="info">
             <h3>
@@ -490,13 +506,53 @@ class DetailsBackdrop extends Component {
             </div>
           ) : null}
         </div>
+        {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? (
+          <div className={'otherVideos' + (!otherVideos ? ' hidden' : '')} onClick={e => e.stopPropagation()}>
+            <div className="toggle">
+              <span
+                onClick={e => {
+                  e.stopPropagation();
+                  this.setState({ otherVideos: !this.state.otherVideos });
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') this.setState({ otherVideos: !this.state.otherVideos });
+                }}
+                tabIndex="0"
+              >
+                <FaYoutube className="red" /> YouTube Extras {otherVideos ? <FaChevronDown /> : <FaChevronUp />}
+              </span>
+            </div>
+            <div className="videoContainer" tabIndex="-1">
+              {tmdbData.videos.results.map(v => {
+                if (v.site === 'YouTube') {
+                  return (
+                    <div className="video" key={v.key}>
+                      <img
+                        src={`https://img.youtube.com/vi/${v.key}/0.jpg`}
+                        alt="video thumbnail"
+                        onClick={() => this.setState({ youtubeId: v.key })}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') this.setState({ youtubeId: v.key });
+                        }}
+                        tabIndex={this.state.otherVideos ? '0' : '-1'}
+                      />
+                      <div className="title">{v.name}</div>
+                    </div>
+                  );
+                } else {
+                  return null;
+                }
+              })}
+            </div>
+          </div>
+        ) : null}
         {viewMode === 'carousel' ? (
           <div className="arrows">
-            <button onClick={() => changeItem(-1)}>
+            <button className="arrow" onClick={() => changeItem(-1)}>
               <FaChevronLeft />
             </button>
 
-            <button onClick={() => changeItem(1)}>
+            <button className="arrow" onClick={() => changeItem(1)}>
               <FaChevronRight />
             </button>
           </div>
@@ -693,59 +749,6 @@ class DetailsBackdrop extends Component {
             </Fragment>
           ) : null}
         </div>
-        {youtubeId ? (
-          <div className="ytContainer" onClick={e => e.stopPropagation()}>
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                this.setState({ youtubeId: null });
-              }}
-            >
-              <FaTimes />
-            </button>
-            <YouTube videoId={youtubeId} opts={trailerOpts} id="youtube" onEnd={() => this.setState({ youtubeId: null })} />
-          </div>
-        ) : null}
-        {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? (
-          <div className={'otherVideos' + (!otherVideos ? ' hidden' : '')} onClick={e => e.stopPropagation()}>
-            <div className="toggle">
-              <span
-                onClick={e => {
-                  e.stopPropagation();
-                  this.setState({ otherVideos: !this.state.otherVideos });
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') this.setState({ otherVideos: !this.state.otherVideos });
-                }}
-                tabIndex="0"
-              >
-                <FaYoutube className="red" /> YouTube Extras {otherVideos ? <FaChevronDown /> : <FaChevronUp />}
-              </span>
-            </div>
-            <div className="videoContainer" tabIndex="-1">
-              {tmdbData.videos.results.map(v => {
-                if (v.site === 'YouTube') {
-                  return (
-                    <div className="video" key={v.key}>
-                      <img
-                        src={`https://img.youtube.com/vi/${v.key}/0.jpg`}
-                        alt="video thumbnail"
-                        onClick={() => this.setState({ youtubeId: v.key })}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') this.setState({ youtubeId: v.key });
-                        }}
-                        tabIndex={this.state.otherVideos ? '0' : '-1'}
-                      />
-                      <div className="title">{v.name}</div>
-                    </div>
-                  );
-                } else {
-                  return null;
-                }
-              })}
-            </div>
-          </div>
-        ) : null}
       </div>
     );
 

@@ -83,6 +83,7 @@ class MovieList extends Component {
     this.updateScroll = this.updateScroll.bind(this);
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.changeItem = this.changeItem.bind(this);
+    this.handleKeys = this.handleKeys.bind(this);
 
     this.listRef = React.createRef();
 
@@ -102,6 +103,9 @@ class MovieList extends Component {
     // Update on hash change
     window.addEventListener('hashchange', this.updateHash);
     window.addEventListener('popstate', this.updateHistory);
+
+    // Handle key presses
+    window.addEventListener('keydown', this.handleKeys);
 
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
@@ -141,6 +145,7 @@ class MovieList extends Component {
     window.removeEventListener('resize', this.updateWindowDimensions);
     window.removeEventListener('hashchange', this.updateHash);
     window.removeEventListener('popstate', this.updateHistory);
+    window.removeEventListener('keydown', this.handleKeys);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -412,7 +417,7 @@ class MovieList extends Component {
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
-            setTimeout(() => this.setState({ media: data[0] }), 500);
+            setTimeout(() => this.onOpenModal(this.state.media || data[0]), 500);
           }
         }
       );
@@ -545,6 +550,8 @@ class MovieList extends Component {
   }
 
   onOpenModal = media => {
+    if (media.id === this.state.media.id) return;
+
     window.location.hash = media.id;
     this.setState({ media: media });
 
@@ -555,12 +562,72 @@ class MovieList extends Component {
 
     const covers = this.listRef.current.querySelectorAll('.cover');
     covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
+    covers[currentIndex].focus();
   };
 
   onCloseModal = () => {
     window.location.hash = '';
     this.setState({ media: null });
   };
+
+  focusItem(el, dir, active) {
+    const focusableEls = el.querySelectorAll(
+      'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
+        'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), ' +
+        '[tabindex="0"]:not([disabled])'
+    );
+
+    let index = 0;
+
+    if (active) {
+      for (let i = 0; i < focusableEls.length; i++) {
+        if (focusableEls[i] === active) index = i + dir;
+      }
+    }
+
+    // Never wrap around focus
+    if (index >= focusableEls.length) index = focusableEls.length - 1;
+    if (index >= 0) focusableEls[index].focus();
+  }
+
+  handleKeys(e) {
+    // For now, only have the arrow key navigation work for carousel
+    if (this.state.viewMode !== 'carousel') return;
+
+    const active = document.activeElement;
+    const activeTag = active.tagName.toLowerCase();
+
+    const coverFocus = active.classList.contains('cover');
+    const inputFocus = activeTag === 'input' || activeTag === 'select';
+
+    // const backdropEl = document.querySelector('.backdropContainer');
+    // console.log(e, active, coverFocus, inputFocus);
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        // if (coverFocus) this.changeItem(-1);
+        this.focusItem(document, -1, active);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        // if (coverFocus) this.changeItem(1);
+        this.focusItem(document, 1, active);
+        break;
+      case 'ArrowUp':
+        // if (menuOpen) this.focusItem(document, -1, active);
+        // if (coverFocus) this.focusItem(document, 0);
+        // else if (!inputFocus) this.focusItem(backdropEl, 0);
+        break;
+      case 'ArrowDown':
+        // if (menuOpen) this.focusItem(document, 1, active);
+        // if (coverFocus) this.focusItem(backdropEl, 0);
+        // else if (!inputFocus) this.focusItem(document, 0);
+        break;
+      default:
+        break;
+    }
+  }
 
   changePage = direction => {
     const page = this.state.page;
