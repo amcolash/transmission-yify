@@ -597,21 +597,29 @@ class MovieList extends Component {
     if (covers.length > foundIndex) covers[foundIndex].focus();
   }
 
-  focusItem(el, dir, shouldWrap) {
-    const active = document.activeElement;
-    const focusableEls = (el || document).querySelectorAll(
+  getFocusable(el) {
+    return (el || document).querySelectorAll(
       'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
         'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), ' +
         '[tabindex="0"]:not([disabled])'
     );
+  }
 
-    let index = 0;
+  getFocusIndex(els) {
+    const active = document.activeElement;
 
     if (active) {
-      for (let i = 0; i < focusableEls.length; i++) {
-        if (focusableEls[i] === active) index = i + dir;
+      for (let i = 0; i < els.length; i++) {
+        if (els[i] === active) return i;
       }
     }
+
+    return 0;
+  }
+
+  focusItem(el, dir, shouldWrap) {
+    const focusableEls = this.getFocusable(el);
+    let index = this.getFocusIndex(focusableEls) + dir;
 
     if (shouldWrap) {
       if (index >= focusableEls.length) index = 0;
@@ -655,6 +663,16 @@ class MovieList extends Component {
       return;
     }
 
+    // Always focus onto search when body is active element
+    if (
+      active === document.body &&
+      searchEl &&
+      (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')
+    ) {
+      searchEl.querySelector('input').focus();
+      return;
+    }
+
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
@@ -673,8 +691,13 @@ class MovieList extends Component {
         if (videosOpen && videosButtonEl) {
           videosButtonEl.click();
           videosButtonEl.focus();
-        } else if (backdropFocus) this.focusItem(backdropEl, -1, true);
-        else if (coverFocus && searchEl) searchEl.querySelector('input').focus();
+        } else if (backdropFocus) {
+          // If on the 1st item and up press, go back to covers
+          const focusableEls = this.getFocusable(backdropEl);
+          const index = this.getFocusIndex(focusableEls);
+          if (index === 0) this.focusCover();
+          else this.focusItem(backdropEl, -1, true);
+        } else if (coverFocus && searchEl) searchEl.querySelector('input').focus();
         else this.focusItem(document, -1);
         break;
       case 'ArrowDown':
@@ -693,7 +716,7 @@ class MovieList extends Component {
           videosButtonEl.click();
           videosButtonEl.focus();
         } else if (backdropFocus) this.focusCover();
-        else if (searchEl) searchEl.focus();
+        else if (searchEl) searchEl.querySelector('input').focus();
         break;
       case 'Enter':
         if (videosEl && videosButtonEl && active === videosButtonEl) setTimeout(() => videosEl.querySelector('img').focus(), 250);
