@@ -119,6 +119,13 @@
   margin-left: 0.5em;
 }
 
+/* Only allow changing view mode on non-mobile */
+@media (max-width: 680px) {
+  .menu .list #viewMode-carousel {
+    display: none;
+  }
+}
+
 .menu .downloads {
   position: relative;
 }

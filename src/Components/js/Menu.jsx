@@ -94,11 +94,12 @@ class Menu extends Component {
     setTimeout(() => this.props.updateSearch('', '', '', value, 1), 500);
   }
 
-  generateItem(icon, text, value) {
+  generateItem(icon, text, value, id) {
     const callback = typeof value === 'string' ? () => this.selectItem(value) : e => value(e);
     return (
       <div
-        className={'item ' + (this.props.type === value ? 'selected' : '')}
+        id={id}
+        className={'item' + (this.props.type === value ? ' selected' : '')}
         onClick={e => callback(e)}
         onKeyDown={e => {
           if (e.key === 'Enter') callback(e);
@@ -167,7 +168,12 @@ class Menu extends Component {
           {this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
           {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
           {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
-          {this.generateItem(viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />, `View Mode: ${viewMode}`, toggleViewMode)}
+          {this.generateItem(
+            viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
+            `View Mode: ${viewMode}`,
+            toggleViewMode,
+            `viewMode-${viewMode}`
+          )}
 
           {status ? (
             <div className="status">
