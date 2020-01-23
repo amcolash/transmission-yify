@@ -362,6 +362,7 @@ h4 {
   overflow-x: auto;
   overflow-y: hidden;
   margin: 0.5em;
+  scroll-behavior: smooth;
 }
 
 .otherVideos .toggle {

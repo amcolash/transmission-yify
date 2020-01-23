@@ -141,6 +141,9 @@ class MovieList extends Component {
     socket.on('files', data => {
       if (data) this.setState({ files: data });
     });
+
+    const searchEl = document.querySelector('.search .form input');
+    if (searchEl && this.state.viewMode === 'carousel') searchEl.focus();
   }
 
   componentWillUnmount() {
@@ -556,17 +559,16 @@ class MovieList extends Component {
 
     window.location.hash = media.id;
     this.setState({ media: media }, () => {
+      let currentIndex = -1;
+      this.state.results.forEach((m, i) => {
+        if (media && media.id === m.id) currentIndex = i;
+      });
 
-    let currentIndex = -1;
-    this.state.results.forEach((m, i) => {
-      if (media && media.id === m.id) currentIndex = i;
-    });
-
-    if (currentIndex !== -1) {
-      const covers = this.listRef.current.querySelectorAll('.cover');
-      covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
-      covers[currentIndex].focus();
-    }
+      if (currentIndex !== -1) {
+        const covers = this.listRef.current.querySelectorAll('.cover');
+        covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
+        covers[currentIndex].focus();
+      }
     });
   };
 
@@ -595,7 +597,7 @@ class MovieList extends Component {
     if (covers.length > foundIndex) covers[foundIndex].focus();
   }
 
-  focusItem(el, dir) {
+  focusItem(el, dir, shouldWrap) {
     const active = document.activeElement;
     const focusableEls = (el || document).querySelectorAll(
       'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
@@ -611,9 +613,15 @@ class MovieList extends Component {
       }
     }
 
-    // Never wrap around focus
-    if (index >= focusableEls.length) index = focusableEls.length - 1;
-    if (index >= 0) focusableEls[index].focus();
+    if (shouldWrap) {
+      if (index >= focusableEls.length) index = 0;
+      if (index < 0) index = focusableEls.length - 1;
+    } else {
+      if (index >= focusableEls.length) index = focusableEls.length - 1;
+      index = Math.max(0, index);
+    }
+
+    focusableEls[index].focus();
   }
 
   handleKeys(e) {
@@ -623,47 +631,65 @@ class MovieList extends Component {
     const active = document.activeElement;
 
     const backdropEl = document.querySelector('.backdropContainer');
-    const searchEl = document.querySelector('input');
+    const searchEl = document.querySelector('.search .form');
+    const videosContainerEl = document.querySelector('.otherVideos');
+    const videosButtonEl = document.querySelector('.otherVideos .toggle span');
+    const videosEl = document.querySelector('.otherVideos .videoContainer');
 
     const coverFocus = active.classList.contains('cover');
-    
+
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
     let backdropFocus = false;
     if (backdropEl) backdropFocus = backdropEl.contains(active);
+
+    let videosOpen = false;
+    if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
     // console.log(e, active, coverFocus, searchFocus);
 
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        if (backdropFocus) this.focusItem(backdropEl, -1);
+        if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
+        else if (backdropFocus) this.focusItem(backdropEl, -1, true);
         else this.focusItem(document, -1);
         break;
       case 'ArrowRight':
         e.preventDefault();
-        if (backdropFocus) this.focusItem(backdropEl, 1);
+        if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
+        else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else this.focusItem(document, 1);
         break;
       case 'ArrowUp':
         e.preventDefault();
-        if (backdropFocus) this.focusItem(backdropEl, -1);
-        else if (coverFocus && searchEl) searchEl.focus();
+        if (videosOpen && videosButtonEl) {
+          videosButtonEl.click();
+          videosButtonEl.focus();
+        } else if (backdropFocus) this.focusItem(backdropEl, -1, true);
+        else if (coverFocus && searchEl) searchEl.querySelector('input').focus();
         else this.focusItem(document, -1);
         break;
       case 'ArrowDown':
         e.preventDefault();
-        if (backdropFocus) this.focusItem(backdropEl, 1);
+        if (videosOpen && videosButtonEl) {
+          videosButtonEl.click();
+          videosButtonEl.focus();
+        } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) this.focusItem(backdropEl, 0);
         else if (searchFocus) this.focusCover();
         else this.focusItem(document, 1);
         break;
       case 'Escape':
         e.preventDefault();
-        if (backdropFocus) this.focusCover();
+        if (videosOpen && videosButtonEl) {
+          videosButtonEl.click();
+          videosButtonEl.focus();
+        } else if (backdropFocus) this.focusCover();
         else if (searchEl) searchEl.focus();
         break;
       case 'Enter':
+        if (videosEl && videosButtonEl && active === videosButtonEl) setTimeout(() => videosEl.querySelector('img').focus(), 250);
         if (coverFocus) {
           e.preventDefault();
           this.focusItem(backdropEl, 0);
