@@ -409,7 +409,7 @@ class DetailsBackdrop extends Component {
         }}
       >
         {youtubeId ? (
-          <div className="ytContainer" onClick={e => e.stopPropagation()}>
+          <div className={'ytContainer ' + viewMode} onClick={e => e.stopPropagation()}>
             <button
               onClick={e => {
                 e.stopPropagation();

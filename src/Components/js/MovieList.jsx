@@ -635,6 +635,7 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
+    const youtubeCloseButton = document.querySelector('.ytContainer button');
 
     const coverFocus = active.classList.contains('cover');
 
@@ -646,7 +647,13 @@ class MovieList extends Component {
     let videosOpen = false;
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
-    // console.log(e, active, coverFocus, searchFocus);
+    // console.log(e, active);
+
+    // For now, no interaction with the actual youtube player - just close it when esc is pressed
+    if (youtubeCloseButton) {
+      if (e.key === 'Escape') youtubeCloseButton.click();
+      return;
+    }
 
     switch (e.key) {
       case 'ArrowLeft':
