@@ -77,6 +77,10 @@
   transform: translateX(225%);
 }
 
+.cordova .menu.hidden .toggle {
+  transform: translate(225%, -0.6em);
+}
+
 .menu .toggle .toggleButton {
   padding: 0.35em;
   border-radius: 0.1em;

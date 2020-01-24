@@ -12,7 +12,7 @@
 
 .backdropCarousel {
   background-size: cover;
-  background-position: center;
+  background-position: top center;
   overflow: hidden;
   flex: 1;
 }
@@ -21,12 +21,7 @@
   z-index: 2;
 }
 
-.backdropCarousel.expanded .arrows {
-  opacity: 0;
-}
-
 .backdropCarousel,
-.backdropCarousel .arrows,
 .search,
 .movie-list .cover {
   transition: all 0.5s;
@@ -204,9 +199,14 @@
   max-height: calc(100vh - 6.5em);
   border-radius: 0.5em 0 0 0;
   overflow-y: auto;
+  transition: all 0.5s;
 }
 
-.backdropContainer.carousel .right {
+.backdropCarousel .backdropContainer.carousel .right {
+  max-height: calc(100% - 5em);
+}
+
+.backdropCarousel.expanded .backdropContainer.carousel .right {
   max-height: calc(100% - 9em);
 }
 
@@ -216,18 +216,6 @@
 
 .backdropContainer .right h4 {
   padding-top: 1em;
-}
-
-.backdropContainer .arrows {
-  position: absolute;
-  top: 0.25em;
-  right: 0.25em;
-}
-
-.backdropContainer .arrows button {
-  margin: 0.25em;
-  background-color: transparent;
-  border: none;
 }
 
 .recommendationContainer {

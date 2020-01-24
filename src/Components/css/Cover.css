@@ -44,9 +44,10 @@
   border-color: #66e646;
 }
 
-.movie.carousel .cover {
-  width: 5.3em;
+.movie.carousel .cover,
+.movie.carousel .cover .movieCover {
   height: 8em;
+  width: 5.3em;
 }
 
 .movie:not(.disabled) .cover:hover {
@@ -61,10 +62,6 @@
   margin: auto;
   left: -50%;
   right: -50%;
-}
-
-.movie.carousel .cover .movieCover {
-  height: 8em;
 }
 
 .movieIcon {

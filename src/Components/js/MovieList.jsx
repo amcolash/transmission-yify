@@ -577,7 +577,7 @@ class MovieList extends Component {
 
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
-        covers[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+        covers[currentIndex].scrollIntoView(false);
         covers[currentIndex].focus();
       }
     });
@@ -687,7 +687,8 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
-    const coverFocus = active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
+    const coverFocus =
+      active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
 
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
@@ -941,7 +942,6 @@ class MovieList extends Component {
                 status={status}
                 toggleSubscription={this.toggleSubscription}
                 viewMode={viewMode}
-                changeItem={this.changeItem}
               />
             </Fragment>
           ) : null}

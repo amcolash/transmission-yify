@@ -10,6 +10,7 @@ document.body.onload = () => {
   if (!window.cordova) {
     startApp();
   } else {
+    document.querySelector('#root').classList.add('cordova');
     document.addEventListener('deviceready', startApp, false);
   }
 };

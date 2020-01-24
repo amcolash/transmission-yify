@@ -2,18 +2,7 @@ import '../css/DetailsBackdrop.css';
 
 import axios from 'axios';
 import React, { Component, Fragment } from 'react';
-import {
-  FaChevronDown,
-  FaChevronLeft,
-  FaChevronRight,
-  FaChevronUp,
-  FaDownload,
-  FaPlayCircle,
-  FaRssSquare,
-  FaStar,
-  FaTimes,
-  FaYoutube,
-} from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaDownload, FaPlayCircle, FaRssSquare, FaStar, FaTimes, FaYoutube } from 'react-icons/fa';
 import Modal from 'react-responsive-modal';
 import YouTube from 'react-youtube';
 
@@ -335,7 +324,6 @@ class DetailsBackdrop extends Component {
       status,
       loading,
       viewMode,
-      changeItem,
     } = this.props;
 
     const {
@@ -450,7 +438,7 @@ class DetailsBackdrop extends Component {
                 <Fragment>
                   <span>{details.header || ''}</span>
                   {moreData ? <div className="mpaa-rating">{details.mpaa}</div> : null}
-                  {fileExists ? (
+                  {fileExists && viewMode !== 'carousel' ? (
                     <div className="fileExists">
                       <FaPlayCircle
                         onClick={e => {
@@ -546,24 +534,15 @@ class DetailsBackdrop extends Component {
             </div>
           </div>
         ) : null}
-        {viewMode === 'carousel' ? (
-          <div className="arrows">
-            <button className="arrow" onClick={() => changeItem(-1)}>
-              <FaChevronLeft />
-            </button>
-
-            <button className="arrow" onClick={() => changeItem(1)}>
-              <FaChevronRight />
-            </button>
-          </div>
-        ) : null}
         <div className="spacer"></div>
         <div
           className={'right' + (tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? ' videos' : '')}
           onClick={e => e.stopPropagation()}
           tabIndex="-1"
         >
-          <div className="plot padding" tabIndex="0">{details.plot}</div>
+          <div className="plot padding" tabIndex="0">
+            {details.plot}
+          </div>
           {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
 
           {type === 'movies' ? (

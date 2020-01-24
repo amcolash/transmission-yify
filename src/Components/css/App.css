@@ -19,6 +19,10 @@ body {
   overflow: hidden;
 }
 
+#root.cordova {
+  font-size: 0.75em;
+}
+
 button {
   background-color: #666;
   border: 1px solid #111;
@@ -130,9 +134,17 @@ input {
   height: 1.5em;
 }
 
+.cordova input {
+  height: 1em;
+}
+
 select {
   width: 8em;
   height: 2.1em;
+}
+
+.cordova select {
+  height: 1.8em;
 }
 
 .spacer {

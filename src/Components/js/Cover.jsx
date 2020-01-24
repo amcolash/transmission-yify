@@ -160,7 +160,7 @@ class Cover extends Component {
           <img className="movieCover" src={media.poster_path} alt="" />
           <div className="movieIcon">{this.getIcon()}</div>
           {fileExists ? (
-            <div className="fileExists hover" tabIndex="0">
+            <div className="fileExists hover" tabIndex={viewMode === 'carousel' ? undefined : '0'}>
               <FaPlayCircle
                 onClick={e => {
                   e.stopPropagation();
