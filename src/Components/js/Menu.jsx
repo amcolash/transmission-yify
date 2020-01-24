@@ -156,29 +156,35 @@ class Menu extends Component {
           {this.generateItem(<FaDownload />, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
           {this.generateItem(<FaRssSquare />, 'Subscriptions', 'subscriptions')}
           <div className="item disabled"></div>
-          {status
+          {window.cordova
+            ? null
+            : status
             ? this.generateItem(plexIcon, 'Plex', () => {
                 window.open(status.plex, '_blank');
                 this.setVisible(false);
               })
             : null}
-          {this.generateItem(<FaMagnet />, 'Add Magnet', e => {
-            e.stopPropagation();
-            this.props.addMagnet();
-          })}
+          {window.cordova
+            ? null
+            : this.generateItem(<FaMagnet />, 'Add Magnet', e => {
+                e.stopPropagation();
+                this.props.addMagnet();
+              })}
           <div className="spacer"></div>
-          {this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
+          {window.cordova ? null : this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
           {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
           {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
-          {this.generateItem(
-            viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
-            `View Mode: ${viewMode}`,
-            e => {
-              e.preventDefault();
-              toggleViewMode();
-            },
-            `viewMode`
-          )}
+          {window.cordova
+            ? null
+            : this.generateItem(
+                viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
+                `View Mode: ${viewMode}`,
+                e => {
+                  e.preventDefault();
+                  toggleViewMode();
+                },
+                `viewMode`
+              )}
 
           {status ? (
             <div className="status">

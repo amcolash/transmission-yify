@@ -176,6 +176,12 @@ class Cover extends Component {
                 e.stopPropagation();
                 this.toggleSubscription();
               }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation();
+                  this.toggleSubscription();
+                }
+              }}
               tabIndex={type === 'subscriptions' ? '0' : undefined}
             >
               {subscribing ? <Spinner visible noMargin button /> : <FaRssSquare />}

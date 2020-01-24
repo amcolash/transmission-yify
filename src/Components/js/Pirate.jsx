@@ -12,7 +12,7 @@ import Spinner from './Spinner';
 
 class Pirate extends Component {
   render() {
-    const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started } = this.props;
+    const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started, viewMode } = this.props;
 
     if (!media.magnetLink) return null;
 
@@ -32,7 +32,14 @@ class Pirate extends Component {
     }
 
     return (
-      <ScrollAnimation animateIn="fadeIn" animateOnce={true} className="pirateRow" offset={30} duration={0.5}>
+      <ScrollAnimation
+        animateIn="fadeIn"
+        animateOnce={true}
+        className="pirateRow"
+        offset={30}
+        duration={0.5}
+        initiallyVisible={viewMode === 'carousel'}
+      >
         <div className="categories">
           <div className="category">{media.category}</div>
           <div className="subcategory">{media.subCategory}</div>

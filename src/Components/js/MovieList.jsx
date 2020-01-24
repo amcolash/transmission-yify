@@ -64,7 +64,7 @@ class MovieList extends Component {
       height: 0,
       lastPage: false,
       files: [],
-      viewMode: window.localStorage.getItem('viewMode') || 'standard',
+      viewMode: window.localStorage.getItem('viewMode') || window.cordova ? 'carousel' : 'standard',
       ...devOverrides,
     };
 
@@ -253,7 +253,9 @@ class MovieList extends Component {
     let page1 = (page || 1) === 1;
     if (page1) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.querySelector('.movie-list').scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+
+      const movieList = document.querySelector('.movie-list');
+      if (movieList) movieList.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
 
     let newurl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${type}`;
@@ -646,6 +648,8 @@ class MovieList extends Component {
   }
 
   handleBack(e) {
+    console.log('handleBack');
+
     const active = document.activeElement;
 
     const menuToggleEl = document.querySelector('.menu .toggle');
@@ -665,9 +669,10 @@ class MovieList extends Component {
       videosButtonEl.click();
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
-    else if (menuToggleEl && movieListEl) {
+    else if (menuToggleEl) {
       menuToggleEl.focus();
-      movieListEl.scrollTo(0, 0);
+      document.querySelector('#root').scrollTo(0, 0);
+      if (movieListEl) movieListEl.scrollTo(0, 0);
     }
 
     return false;
@@ -743,7 +748,7 @@ class MovieList extends Component {
           videosButtonEl.focus();
         } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) this.focusItem(backdropEl, 0);
-        else if (searchFocus) this.focusCover();
+        else if (searchFocus && !document.querySelector('.pirateList')) this.focusCover();
         else this.focusItem(document, 1);
         break;
       case 'Escape':
@@ -893,6 +898,7 @@ class MovieList extends Component {
                           cancelTorrent={this.cancelTorrent}
                           getProgress={this.getProgress}
                           getTorrent={this.getTorrent}
+                          viewMode={viewMode}
                         />
                       ))}
                       {isSearching ? <Spinner visible big /> : null}
@@ -924,25 +930,27 @@ class MovieList extends Component {
                   />
                 )}
               </div>
-              <DetailsBackdrop
-                loading={logo || !isLoaded}
-                media={media}
-                type={type}
-                server={this.server}
-                torrents={torrents}
-                started={started}
-                updateTorrents={this.updateTorrents}
-                cancelTorrent={this.cancelTorrent}
-                downloadTorrent={this.downloadTorrent}
-                getProgress={this.getProgress}
-                getTorrent={this.getTorrent}
-                onOpenModal={this.onOpenModal}
-                onCloseModal={this.onCloseModal}
-                files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
-                status={status}
-                toggleSubscription={this.toggleSubscription}
-                viewMode={viewMode}
-              />
+              {type === 'movies' || type === 'shows' || type === 'animes' ? (
+                <DetailsBackdrop
+                  loading={logo || !isLoaded}
+                  media={media}
+                  type={type}
+                  server={this.server}
+                  torrents={torrents}
+                  started={started}
+                  updateTorrents={this.updateTorrents}
+                  cancelTorrent={this.cancelTorrent}
+                  downloadTorrent={this.downloadTorrent}
+                  getProgress={this.getProgress}
+                  getTorrent={this.getTorrent}
+                  onOpenModal={this.onOpenModal}
+                  onCloseModal={this.onCloseModal}
+                  files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
+                  status={status}
+                  toggleSubscription={this.toggleSubscription}
+                  viewMode={viewMode}
+                />
+              ) : null}
             </Fragment>
           ) : null}
         </Fragment>
