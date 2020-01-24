@@ -155,7 +155,7 @@ class Cover extends Component {
           onFocus={() => {
             if (viewMode === 'carousel' && click) click(media);
           }}
-          tabIndex={type === 'shows' || type === 'subscriptions' ? undefined : '0'}
+          tabIndex={type === 'subscriptions' ? undefined : '0'}
         >
           <img className="movieCover" src={media.poster_path} alt="" />
           <div className="movieIcon">{this.getIcon()}</div>
@@ -176,7 +176,7 @@ class Cover extends Component {
                 e.stopPropagation();
                 this.toggleSubscription();
               }}
-              tabIndex="0"
+              tabIndex={type === 'subscriptions' ? '0' : undefined}
             >
               {subscribing ? <Spinner visible noMargin button /> : <FaRssSquare />}
             </div>

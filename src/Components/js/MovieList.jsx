@@ -112,7 +112,8 @@ class MovieList extends Component {
     document.addEventListener('backbutton', this.handleBack, false);
 
     window.addEventListener('scroll', () => {
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
+      document.querySelector('#root').scrollTo(0, 0);
     });
 
     // Open a socket and try to force using a websocket
@@ -250,7 +251,10 @@ class MovieList extends Component {
 
   updateSearch(search, genre, order, type, page) {
     let page1 = (page || 1) === 1;
-    if (page1) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (page1) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelector('.movie-list').scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
 
     let newurl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${type}`;
     if (window.location.href !== newurl) {
@@ -573,7 +577,7 @@ class MovieList extends Component {
 
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
-        covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
+        covers[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
         covers[currentIndex].focus();
       }
     });
