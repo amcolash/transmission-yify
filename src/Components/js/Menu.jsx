@@ -41,6 +41,7 @@ class Menu extends Component {
   componentDidMount() {
     document.addEventListener('click', this.outsideClick, false);
     document.addEventListener('focusin', this.onFocus, false);
+    document.addEventListener('backbutton', () => this.setVisible(false), false);
 
     swipedetect(document, swipedir => {
       if (swipedir === 'left') this.setVisible(false);

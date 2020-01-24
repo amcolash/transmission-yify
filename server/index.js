@@ -74,6 +74,12 @@ if (fs.existsSync('./.cert/fullchain.pem')) {
   credentials.cert = fs.readFileSync('./.cert/cert.pem');
 }
 
+// If the nas cert exists, use that instead of default cert
+if (fs.existsSync('./.cert/default/fullchain.pem')) {
+  credentials.key = fs.readFileSync('./.cert/default/privkey.pem');
+  credentials.cert = fs.readFileSync('./.cert/default/fullchain.pem');
+}
+
 // Make the server
 const server = require('https').createServer(credentials, app);
 const io = require('socket.io')(server);

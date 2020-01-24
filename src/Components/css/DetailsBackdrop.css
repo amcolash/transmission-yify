@@ -82,7 +82,7 @@
   flex-direction: column;
   height: calc(100vh - 2em);
   padding: 1em;
-  max-width: 350px;
+  max-width: 19em;
 }
 
 .backdropContainer.carousel .left {
@@ -107,7 +107,7 @@
 }
 
 .backdropContainer .coverWrap {
-  max-height: 350px;
+  max-height: 19em;
   display: flex;
   flex: 4;
   position: relative;
@@ -200,7 +200,7 @@
 .backdropContainer .right {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 1.5em 1em 1em 2em;
-  max-width: 400px;
+  max-width: 24em;
   height: fit-content;
   max-height: calc(100vh - 6.5em);
   border-radius: 0.5em 0 0 0;
@@ -470,7 +470,7 @@ h4 {
 
 @media (max-height: 450px) {
   .backdropContainer .right {
-    max-width: 330px;
+    max-width: 13em;
     max-height: calc(100vh - 6em);
     padding: 1em;
   }

@@ -26,7 +26,7 @@ class MovieList extends Component {
   constructor(props) {
     super(props);
 
-    let port;
+    let port = window.cordova ? 9000 : undefined;
     let devOverrides = {};
     if (process.env.NODE_ENV === 'development') {
       port = 9000;
@@ -84,6 +84,7 @@ class MovieList extends Component {
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.changeItem = this.changeItem.bind(this);
     this.handleKeys = this.handleKeys.bind(this);
+    this.handleBack = this.handleBack.bind(this);
     this.onfocus = this.onfocus.bind(this);
 
     this.listRef = React.createRef();
@@ -108,6 +109,7 @@ class MovieList extends Component {
     // Handle key presses / focus events
     window.addEventListener('keydown', this.handleKeys);
     window.addEventListener('focusin', this.onfocus);
+    document.addEventListener('backbutton', this.handleBack, false);
 
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
@@ -151,6 +153,7 @@ class MovieList extends Component {
     window.removeEventListener('hashchange', this.updateHash);
     window.removeEventListener('popstate', this.updateHistory);
     window.removeEventListener('keydown', this.handleKeys);
+    document.removeEventListener('backbutton', this.handleBack, false);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -564,7 +567,7 @@ class MovieList extends Component {
         if (media && media.id === m.id) currentIndex = i;
       });
 
-      if (currentIndex !== -1) {
+      if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
         covers[currentIndex].scrollIntoView({ behavior: 'smooth' });
         covers[currentIndex].focus();
@@ -632,7 +635,34 @@ class MovieList extends Component {
     focusableEls[index].focus();
   }
 
+  handleBack(e) {
+    const active = document.activeElement;
+
+    const backdropEl = document.querySelector('.backdropContainer');
+    const searchEl = document.querySelector('.search .form');
+    const videosContainerEl = document.querySelector('.otherVideos');
+    const videosButtonEl = document.querySelector('.otherVideos .toggle span');
+    const youtubeCloseButton = document.querySelector('.ytContainer button');
+
+    let backdropFocus = false;
+    if (backdropEl) backdropFocus = backdropEl.contains(active);
+    let videosOpen = false;
+    if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
+
+    if (youtubeCloseButton) youtubeCloseButton.click();
+    if (videosOpen && videosButtonEl) {
+      videosButtonEl.click();
+      videosButtonEl.focus();
+    } else if (backdropFocus) this.focusCover();
+    else searchEl.querySelector('input').focus();
+
+    return false;
+  }
+
   handleKeys(e) {
+    console.log(e.which);
+    console.log(e.code);
+
     // For now, only have the arrow key navigation work for carousel
     if (this.state.viewMode !== 'carousel') return;
 
@@ -643,25 +673,16 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
-    const youtubeCloseButton = document.querySelector('.ytContainer button');
-
     const coverFocus = active.classList.contains('cover');
 
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
     let backdropFocus = false;
     if (backdropEl) backdropFocus = backdropEl.contains(active);
-
     let videosOpen = false;
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
     // console.log(e, active);
-
-    // For now, no interaction with the actual youtube player - just close it when esc is pressed
-    if (youtubeCloseButton) {
-      if (e.key === 'Escape') youtubeCloseButton.click();
-      return;
-    }
 
     // Always focus onto search when body is active element
     if (
@@ -711,12 +732,7 @@ class MovieList extends Component {
         else this.focusItem(document, 1);
         break;
       case 'Escape':
-        e.preventDefault();
-        if (videosOpen && videosButtonEl) {
-          videosButtonEl.click();
-          videosButtonEl.focus();
-        } else if (backdropFocus) this.focusCover();
-        else if (searchEl) searchEl.querySelector('input').focus();
+        this.handleBack();
         break;
       case 'Enter':
         if (videosEl && videosButtonEl && active === videosButtonEl) setTimeout(() => videosEl.querySelector('img').focus(), 250);

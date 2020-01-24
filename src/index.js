@@ -1,5 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import App from './Components/js/App';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const startApp = () => ReactDOM.render(<App />, document.getElementById('root'));
+
+document.body.onload = () => {
+  console.log('cordova? ', window.cordova);
+  if (!window.cordova) {
+    startApp();
+  } else {
+    document.addEventListener('deviceready', startApp, false);
+  }
+};
