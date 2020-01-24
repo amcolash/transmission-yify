@@ -98,7 +98,20 @@ class Cover extends Component {
   }
 
   render() {
-    const { click, files, media, started, downloadTorrent, cancelTorrent, type, getProgress, status, viewMode, selected } = this.props;
+    const {
+      click,
+      files,
+      media,
+      started,
+      downloadTorrent,
+      cancelTorrent,
+      type,
+      getProgress,
+      status,
+      viewMode,
+      selected,
+      showLatest,
+    } = this.props;
     const { pb, subscribing } = this.state;
 
     const id = media ? media.id : '';
@@ -142,12 +155,12 @@ class Cover extends Component {
           onFocus={() => {
             if (viewMode === 'carousel' && click) click(media);
           }}
-          tabIndex="0"
+          tabIndex={type === 'shows' || type === 'subscriptions' ? undefined : '0'}
         >
           <img className="movieCover" src={media.poster_path} alt="" />
           <div className="movieIcon">{this.getIcon()}</div>
           {fileExists ? (
-            <div className="fileExists hover">
+            <div className="fileExists hover" tabIndex="0">
               <FaPlayCircle
                 onClick={e => {
                   e.stopPropagation();
@@ -163,6 +176,7 @@ class Cover extends Component {
                 e.stopPropagation();
                 this.toggleSubscription();
               }}
+              tabIndex="0"
             >
               {subscribing ? <Spinner visible noMargin button /> : <FaRssSquare />}
             </div>
@@ -222,7 +236,7 @@ class Cover extends Component {
             <br />
           </Fragment>
         ) : null}
-        {subscription ? (
+        {subscription && showLatest ? (
           <span>
             Latest: S{subscription.lastSeason}E{subscription.lastEpisode}
           </span>

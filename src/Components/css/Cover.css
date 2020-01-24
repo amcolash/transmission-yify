@@ -101,6 +101,10 @@
   box-shadow: 0px 0px 15px 15px rgba(229, 160, 13, 0.9);
 }
 
+.fileExists:focus {
+  background-color: rgb(70, 170, 230);
+}
+
 .notSubscribed {
   background-color: #555;
   color: #999;

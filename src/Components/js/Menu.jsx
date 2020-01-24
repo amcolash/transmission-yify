@@ -125,6 +125,7 @@ class Menu extends Component {
         onKeyDown={e => {
           if (e.key === 'Escape') this.setVisible(false);
         }}
+        tabIndex="-1"
       >
         <div className="list">
           <div className="toggleWrap">
@@ -172,7 +173,10 @@ class Menu extends Component {
           {this.generateItem(
             viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
             `View Mode: ${viewMode}`,
-            toggleViewMode,
+            e => {
+              e.preventDefault();
+              toggleViewMode();
+            },
             `viewMode`
           )}
 

@@ -563,7 +563,7 @@ class DetailsBackdrop extends Component {
           onClick={e => e.stopPropagation()}
           tabIndex="-1"
         >
-          <div className="plot padding">{details.plot}</div>
+          <div className="plot padding" tabIndex="0">{details.plot}</div>
           {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
 
           {type === 'movies' ? (

@@ -111,6 +111,10 @@ class MovieList extends Component {
     window.addEventListener('focusin', this.onfocus);
     document.addEventListener('backbutton', this.handleBack, false);
 
+    window.addEventListener('scroll', () => {
+      window.scrollTo(0,0);
+    });
+
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
     socket.on('connect', data => {
@@ -591,6 +595,8 @@ class MovieList extends Component {
   }
 
   focusCover() {
+    if (!this.state.media) return;
+
     const covers = document.querySelectorAll('.cover');
     let foundIndex = 0;
     for (let i = 0; i < covers.length; i++) {
@@ -638,8 +644,9 @@ class MovieList extends Component {
   handleBack(e) {
     const active = document.activeElement;
 
+    const menuToggleEl = document.querySelector('.menu .toggle');
+    const movieListEl = document.querySelector('.movie-list');
     const backdropEl = document.querySelector('.backdropContainer');
-    const searchEl = document.querySelector('.search .form');
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const youtubeCloseButton = document.querySelector('.ytContainer button');
@@ -654,7 +661,10 @@ class MovieList extends Component {
       videosButtonEl.click();
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
-    else searchEl.querySelector('input').focus();
+    else if (menuToggleEl && movieListEl) {
+      menuToggleEl.focus();
+      movieListEl.scrollTo(0, 0);
+    }
 
     return false;
   }
@@ -673,7 +683,7 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
-    const coverFocus = active.classList.contains('cover');
+    const coverFocus = active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
 
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
@@ -756,6 +766,7 @@ class MovieList extends Component {
   };
 
   toggleViewMode() {
+    console.log('toggle view mode');
     const viewMode = this.state.viewMode === 'standard' ? 'carousel' : 'standard';
     this.setState({ viewMode });
     window.localStorage.setItem('viewMode', viewMode);
@@ -846,6 +857,7 @@ class MovieList extends Component {
                 click={this.onOpenModal}
                 isSearching={isSearching}
                 viewMode="standard"
+                showLatest
               />
             </div>
           ) : type === 'analytics' ? (

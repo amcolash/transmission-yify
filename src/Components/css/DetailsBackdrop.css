@@ -28,7 +28,6 @@
 .backdropCarousel,
 .backdropCarousel .arrows,
 .search,
-.movie-list,
 .movie-list .cover {
   transition: all 0.5s;
 }

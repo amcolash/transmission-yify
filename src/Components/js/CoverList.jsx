@@ -21,6 +21,7 @@ export default class CoverList extends Component {
       toggleSubscription,
       isSearching,
       viewMode,
+      showLatest,
     } = this.props;
 
     const style =
@@ -50,6 +51,7 @@ export default class CoverList extends Component {
             status={status}
             toggleSubscription={toggleSubscription}
             viewMode={viewMode}
+            showLatest={showLatest}
           />
         ))}
         <br />
