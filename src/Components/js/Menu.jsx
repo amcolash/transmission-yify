@@ -172,7 +172,7 @@ class Menu extends Component {
             viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
             `View Mode: ${viewMode}`,
             toggleViewMode,
-            `viewMode-${viewMode}`
+            `viewMode`
           )}
 
           {status ? (

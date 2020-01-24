@@ -121,7 +121,7 @@
 
 /* Only allow changing view mode on non-mobile */
 @media (max-width: 680px) {
-  .menu .list #viewMode-carousel {
+  .menu .list #viewMode {
     display: none;
   }
 }
