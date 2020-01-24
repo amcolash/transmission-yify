@@ -117,7 +117,8 @@ function getEpisodes(subscription, torrents, onlyLast) {
 
   // Filter out non-relevant episodes as needed
   const lastSeason = episodes[episodes.length - 1];
-  const lastEpisode = lastSeason[lastSeason.length - 1];
+  let lastEpisode;
+  if (lastEpisode) lastEpisode = lastSeason[lastSeason.length - 1];
   if (onlyLast) {
     episodes = [lastEpisode];
   } else {
