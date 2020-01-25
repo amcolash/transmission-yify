@@ -649,7 +649,7 @@ class MovieList extends Component {
   }
 
   handleBack(e) {
-    console.log('handleBack');
+    // console.log('handleBack', e);
 
     const active = document.activeElement;
 
@@ -692,11 +692,14 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
+
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
 
-    let menuFocus = false;
-    if (menuEl) menuFocus = !menuEl.classList.contains('hidden');
+    let menuToggleFocus = false;
+    if (menuEl) menuToggleFocus = active === menuToggleEl;
+    let menuOpen = false;
+    if (menuEl) menuOpen = !menuEl.classList.contains('hidden');
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
     let backdropFocus = false;
@@ -706,13 +709,13 @@ class MovieList extends Component {
 
     // console.log(e, active);
 
-    // Always focus onto search when body is active element
+    // Always focus onto menu button when body is active element
     if (
       active === document.body &&
-      searchEl &&
+      menuToggleEl &&
       (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')
     ) {
-      searchEl.querySelector('input').focus();
+      menuToggleEl.focus();
       return;
     }
 
@@ -721,7 +724,7 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
         else if (backdropFocus) this.focusItem(backdropEl, -1, true);
-        else if (menuFocus && menuToggleEl) {
+        else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
         } else this.focusItem(document, -1);
@@ -730,7 +733,7 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
         else if (backdropFocus) this.focusItem(backdropEl, 1, true);
-        else if (menuFocus && menuToggleEl) {
+        else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
         } else this.focusItem(document, 1);
@@ -746,7 +749,7 @@ class MovieList extends Component {
           const index = this.getFocusIndex(focusableEls);
           if (index === 0) this.focusCover();
           else this.focusItem(backdropEl, -1, true);
-        } else if (coverFocus && searchEl) searchEl.querySelector('input').focus();
+        } else if (coverFocus && menuToggleEl) menuToggleEl.focus();
         else this.focusItem(document, -1);
         break;
       case 'ArrowDown':
@@ -756,7 +759,7 @@ class MovieList extends Component {
           videosButtonEl.focus();
         } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) this.focusItem(backdropEl, 0);
-        else if (searchFocus && !document.querySelector('.pirateList')) this.focusCover();
+        else if ((searchFocus || menuToggleFocus) && !document.querySelector('.pirateList')) this.focusCover();
         else this.focusItem(document, 1);
         break;
       case 'Escape':
