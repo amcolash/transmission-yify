@@ -671,6 +671,18 @@ class MovieList extends Component {
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
     else if (menuToggleEl) {
+      if (active === menuToggleEl) {
+        if (navigator.notification) {
+          navigator.notification.confirm(
+            'Would you like to exit the app?',
+            index => {
+              if (index === 1) navigator.app.exitApp();
+            },
+            ['Yes', 'No']
+          );
+        }
+      }
+
       menuToggleEl.focus();
       document.querySelector('#root').scrollTo(0, 0);
       if (movieListEl) movieListEl.scrollTo(0, 0);
@@ -707,7 +719,7 @@ class MovieList extends Component {
     let videosOpen = false;
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
-    // console.log(e, active);
+    console.log(e, active);
 
     // Always focus onto menu button when body is active element
     if (
