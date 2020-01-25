@@ -162,17 +162,6 @@ class DetailsBackdrop extends Component {
     this.setState({ horribleSubs: parsed.batches, nyaa });
   }
 
-  // Focus on first focusable element if possible
-  focusOnFirst() {
-    // setTimeout(() => {
-    //   const focusableEls = this.containerRef.current.querySelectorAll(
-    //     'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
-    //       'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
-    //   );
-    //   if (focusableEls.length > 0) focusableEls[0].focus();
-    // }, 250);
-  }
-
   componentDidUpdate(prevProps, prevState, snapshot) {
     const { media, type } = this.props;
 
@@ -261,12 +250,12 @@ class DetailsBackdrop extends Component {
               const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
 
               if (Cache[pirateUrl]) {
-                this.setState({ pb: Cache[pirateUrl] }, () => this.focusOnFirst());
+                this.setState({ pb: Cache[pirateUrl] });
               } else {
                 axios
                   .get(pirateUrl)
                   .then(response => {
-                    this.setState({ pb: response.data }, () => this.focusOnFirst());
+                    this.setState({ pb: response.data });
                   })
                   .catch(err => {
                     console.error(err);
@@ -438,7 +427,7 @@ class DetailsBackdrop extends Component {
                 <Fragment>
                   <span>{details.header || ''}</span>
                   {moreData ? <div className="mpaa-rating">{details.mpaa}</div> : null}
-                  {fileExists && viewMode !== 'carousel' ? (
+                  {/* {fileExists && viewMode !== 'carousel' ? (
                     <div className="fileExists">
                       <FaPlayCircle
                         onClick={e => {
@@ -451,7 +440,7 @@ class DetailsBackdrop extends Component {
                         tabIndex="0"
                       />
                     </div>
-                  ) : null}
+                  ) : null} */}
                 </Fragment>
               </h4>
             ) : null}
