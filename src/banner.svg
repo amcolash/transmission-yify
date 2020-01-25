@@ -18,7 +18,7 @@
    id="svg4"
    sodipodi:docname="banner.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   inkscape:export-filename="/home/amcolash/Desktop/hello/platforms/android/banner.png"
+   inkscape:export-filename="/home/amcolash/Desktop/pirateFlix-cordova/platforms/android/app/src/main/res/drawable-land-xhdpi/banner.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    width="320"
@@ -31,7 +31,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -82,7 +82,7 @@
      id="namedview6"
      showgrid="false"
      inkscape:zoom="2"
-     inkscape:cx="154.14201"
+     inkscape:cx="61.64201"
      inkscape:cy="52.736665"
      inkscape:window-x="61"
      inkscape:window-y="27"
@@ -124,8 +124,7 @@
        style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:6.33414555;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke" />
   </g>
   <g
-     aria-label="Pirate
-Flix"
+     aria-label="Pirate Flix"
      style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
      id="text844"
      transform="translate(-25.313435,22.68531)">

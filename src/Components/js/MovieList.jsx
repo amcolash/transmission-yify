@@ -671,16 +671,8 @@ class MovieList extends Component {
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
     else if (menuToggleEl) {
-      if (active === menuToggleEl) {
-        if (navigator.notification) {
-          navigator.notification.confirm(
-            'Would you like to exit the app?',
-            index => {
-              if (index === 1) navigator.app.exitApp();
-            },
-            ['Yes', 'No']
-          );
-        }
+      if (active === menuToggleEl && navigator.app) {
+        navigator.app.exitApp();
       }
 
       menuToggleEl.focus();
