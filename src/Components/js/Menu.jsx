@@ -70,6 +70,10 @@ class Menu extends Component {
       this.touch = Date.now();
       this.setState({ visible: visible });
       if (this.props.listRef.current) this.props.listRef.current.classList.toggle('noscroll', visible);
+      if (visible) {
+        const currentlySelected = document.querySelector('.menu .selected');
+        if (currentlySelected) currentlySelected.focus();
+      }
     }
   }
 
@@ -119,11 +123,12 @@ class Menu extends Component {
 
     return (
       <div
-        className={`menu ${visible ? '' : 'hidden'}`}
+        className={`menu${visible ? '' : ' hidden'}`}
         ref={node => (this.menu = node)}
         onClick={() => this.setVisible(false)}
         onKeyDown={e => {
           if (e.key === 'Escape') this.setVisible(false);
+          if (e.key === 'RightArrow' && visible) this.setVisible(false);
         }}
         tabIndex="-1"
       >
@@ -136,7 +141,14 @@ class Menu extends Component {
               tabIndex="0"
               onKeyPress={e => {
                 if (e.key === 'Enter') this.setVisible(!this.state.visible);
+                if (e.key === 'DownArrow') {
+                }
               }}
+              // onBlur={e => {
+              //   console.log(e.target);
+              //   const currentlySelected = e.target.parentElement.parentElement.querySelector('.selected');
+              //   if (currentlySelected && this.state.visible) currentlySelected.focus();
+              // }}
             >
               <FaBars
                 className="toggleButton"

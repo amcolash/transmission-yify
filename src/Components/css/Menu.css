@@ -71,14 +71,19 @@
   transform: translateX(0.75em);
   transition: all 0.25s;
   will-change: transform;
+  opacity: 1;
 }
 
 .menu.hidden .toggle {
   transform: translateX(225%);
 }
 
+.menu.collapsed .toggle {
+  opacity: 0;
+}
+
 .cordova .menu.hidden .toggle {
-  transform: translate(225%, -0.6em);
+  transform: translate(225%, -0.7em);
 }
 
 .menu .toggle .toggleButton {
@@ -87,7 +92,7 @@
   transition: all 0.25s;
 }
 
-.menu.menu.hidden .toggle .toggleButton {
+.menu.hidden .toggle .toggleButton {
   background: #555;
 }
 

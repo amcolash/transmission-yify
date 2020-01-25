@@ -596,6 +596,7 @@ class MovieList extends Component {
       const focused = backdrop.contains(e.target);
       document.querySelector('.search').classList.toggle('collapsed', focused);
       document.querySelector('.movie-list').classList.toggle('collapsed', focused);
+      document.querySelector('.menu').classList.toggle('collapsed', focused);
       backdrop.classList.toggle('expanded', focused);
     }
   }
@@ -679,14 +680,13 @@ class MovieList extends Component {
   }
 
   handleKeys(e) {
-    console.log(e.which);
-    console.log(e.code);
-
     // For now, only have the arrow key navigation work for carousel
     if (this.state.viewMode !== 'carousel') return;
 
     const active = document.activeElement;
 
+    const menuEl = document.querySelector('.menu');
+    const menuToggleEl = document.querySelector('.menu .toggle');
     const backdropEl = document.querySelector('.backdropContainer');
     const searchEl = document.querySelector('.search .form');
     const videosContainerEl = document.querySelector('.otherVideos');
@@ -695,6 +695,8 @@ class MovieList extends Component {
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
 
+    let menuFocus = false;
+    if (menuEl) menuFocus = !menuEl.classList.contains('hidden');
     let searchFocus = false;
     if (searchEl) searchFocus = searchEl.contains(active);
     let backdropFocus = false;
@@ -719,13 +721,19 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
         else if (backdropFocus) this.focusItem(backdropEl, -1, true);
-        else this.focusItem(document, -1);
+        else if (menuFocus && menuToggleEl) {
+          menuToggleEl.focus();
+          menuToggleEl.click();
+        } else this.focusItem(document, -1);
         break;
       case 'ArrowRight':
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
         else if (backdropFocus) this.focusItem(backdropEl, 1, true);
-        else this.focusItem(document, 1);
+        else if (menuFocus && menuToggleEl) {
+          menuToggleEl.focus();
+          menuToggleEl.click();
+        } else this.focusItem(document, 1);
         break;
       case 'ArrowUp':
         e.preventDefault();

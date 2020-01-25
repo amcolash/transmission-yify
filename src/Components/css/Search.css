@@ -1,13 +1,11 @@
 .search {
   z-index: 1;
-  padding: 1em 3em 1.5em;
+  padding: 0.5em 1em 0.5em;
   background-color: #444;
   border-bottom: 4px solid #333;
+  height: 3em;
+  overflow: hidden;
   transition: all 0.5s;
-}
-
-.cordova .search:not(.collapsed) {
-  padding: 0 3em 0.75em;
 }
 
 .search button {
