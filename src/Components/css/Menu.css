@@ -83,7 +83,7 @@
 }
 
 .cordova .menu.hidden .toggle {
-  transform: translate(225%, -0.7em);
+  transform: translate(225%, -0.5em);
 }
 
 .menu .toggle .toggleButton {
