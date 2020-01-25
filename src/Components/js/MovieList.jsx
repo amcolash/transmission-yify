@@ -673,6 +673,7 @@ class MovieList extends Component {
     else if (menuToggleEl) {
       if (active === menuToggleEl && navigator.app) {
         navigator.app.exitApp();
+        return;
       }
 
       menuToggleEl.focus();
