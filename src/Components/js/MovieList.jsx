@@ -711,7 +711,7 @@ class MovieList extends Component {
     let videosOpen = false;
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
-    console.log(e, active);
+    // console.log(e, active);
 
     // Always focus onto menu button when body is active element
     if (
