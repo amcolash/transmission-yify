@@ -19,7 +19,7 @@ class Search extends Component {
   }
 
   render() {
-    const { search, genre, order, type, isSearching, updateSearch } = this.props;
+    const { search, genre, order, type, isSearching, updateSearch, viewMode } = this.props;
     const clearVisible = search.length > 0 || genre.length > 0 || order !== '';
 
     let ordering = [];
@@ -51,7 +51,7 @@ class Search extends Component {
     }
 
     return (
-      <div className="search">
+      <div className={`search ${viewMode}`}>
         <div className="form">
           <div className="searchItem">
             <div className="iconHover">

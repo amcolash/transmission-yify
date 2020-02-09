@@ -1,11 +1,15 @@
 .search {
   z-index: 1;
-  padding: 0.5em 1em 0.5em;
+  padding: 1em 3em 1.5em;
   background-color: #444;
   border-bottom: 4px solid #333;
-  height: 3em;
+  min-height: fit-content;
   overflow: hidden;
   transition: all 0.5s;
+}
+
+.search.carousel {
+  padding: 0.5em 1em 1em;
 }
 
 .search button {

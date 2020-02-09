@@ -45,6 +45,9 @@ class MovieList extends Component {
 
     let isLoaded = type !== 'movies' && type !== 'shows' && type !== 'animes';
 
+    let viewMode = window.localStorage.getItem('viewMode');
+    if (!viewMode) viewMode = window.cordova ? 'carousel' : 'standard';
+
     this.state = {
       error: null,
       showLogo: true,
@@ -64,7 +67,7 @@ class MovieList extends Component {
       height: 0,
       lastPage: false,
       files: [],
-      viewMode: window.localStorage.getItem('viewMode') || window.cordova ? 'carousel' : 'standard',
+      viewMode,
       ...devOverrides,
     };
 
@@ -899,6 +902,7 @@ class MovieList extends Component {
                 order={this.state.order}
                 type={this.state.type}
                 page={this.state.page}
+                viewMode={viewMode}
               />
 
               <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll}>

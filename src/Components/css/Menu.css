@@ -78,6 +78,10 @@
   transform: translateX(225%);
 }
 
+.menu.hidden .toggle.carousel {
+  transform: translateX(225%) translateY(-0.5em);
+}
+
 .menu.collapsed .toggle {
   opacity: 0;
 }

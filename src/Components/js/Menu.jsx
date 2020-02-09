@@ -137,7 +137,7 @@ class Menu extends Component {
             <span>Pirate Flix</span>
             <div className="spacer"></div>
             <div
-              className="toggle"
+              className={`toggle ${viewMode}`}
               tabIndex="0"
               onKeyPress={e => {
                 if (e.key === 'Enter') this.setVisible(!this.state.visible);
