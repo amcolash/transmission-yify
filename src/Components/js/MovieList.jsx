@@ -571,7 +571,7 @@ class MovieList extends Component {
   }
 
   onOpenModal = media => {
-    if (this.state.media && media.id === this.state.media.id) return;
+    if (!media || (this.state.media && this.state.media.id === media.id)) return;
 
     window.location.hash = media.id;
     this.setState({ media: media }, () => {

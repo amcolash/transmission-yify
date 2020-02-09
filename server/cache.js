@@ -52,6 +52,12 @@ function setupCache() {
     console.error(err);
     writeCache();
   }
+
+  // Clear cache on boot in dev environment
+  if (process.env.NODE_ENV === 'development') {
+    cache = {};
+    trackerCache = {};
+  }
 }
 
 function clearCache() {

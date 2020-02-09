@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const ptn = require('../src/Util/TorrentName');
 
-const eztvHost = 'https://eztv.tf';
+const eztvHost = 'https://eztv.io';
 let eztvShows = [];
 
 function getEZTVDetails(url) {
