@@ -4,7 +4,6 @@
   background-color: #444;
   border-bottom: 4px solid #333;
   min-height: fit-content;
-  overflow: hidden;
   transition: all 0.5s;
 }
 
