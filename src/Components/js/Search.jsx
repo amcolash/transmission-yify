@@ -64,7 +64,21 @@ class Search extends Component {
               </div>
             </div>
             <span>Search</span>
-            <DebounceInput value={search} debounceTimeout={500} onChange={event => updateSearch(event.target.value, genre, order, type)} />
+            <DebounceInput
+              value={search}
+              debounceTimeout={500}
+              onChange={event => updateSearch(event.target.value, genre, order, type)}
+              inputRef={ref => {
+                // Only open soft keyboard when enter is pressed when running in cordova
+                if (ref && window.cordova) {
+                  ref.readOnly = true;
+                  ref.onkeydown = e => {
+                    if (e.key === 'Enter') ref.readOnly = false;
+                  };
+                  ref.onblur = () => (ref.readOnly = true);
+                }
+              }}
+            />
           </div>
 
           <div className="searchItem">
