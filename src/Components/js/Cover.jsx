@@ -139,7 +139,10 @@ class Cover extends Component {
         scrollableParentSelector=".movie-list"
         className={'movie ' + viewMode}
         afterAnimatedIn={() => {
-          if (this.props.type === 'movies' && this.props.viewMode === 'standard') this.updatePB();
+          if (this.props.type === 'movies') {
+            if (this.props.viewMode === 'standard') this.updatePB();
+            else setTimeout(() => this.updatePB(), Math.random() * 1000);
+          }
         }}
         ref={this.ref}
       >

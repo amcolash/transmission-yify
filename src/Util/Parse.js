@@ -273,7 +273,7 @@ export function parseMedia(media, type) {
 
   // TMDB does not add an absolute url to returned poster paths
   if (media.poster_path && media.poster_path.indexOf('http') === -1) {
-    media.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + media.poster_path;
+    media.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2' + media.poster_path;
   }
 
   // Fake tv data

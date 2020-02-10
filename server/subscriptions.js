@@ -49,7 +49,7 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
   subscription.imdb = data.external_ids.imdb_id;
   subscription.title = data.name;
   subscription.year = new Date(data.first_air_date).getFullYear();
-  subscription.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + data.poster_path;
+  subscription.poster_path = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2' + data.poster_path;
 
   // Only update these if needed
   subscription.lastSeason = subscription.lastSeason || 0;

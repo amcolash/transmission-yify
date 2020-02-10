@@ -338,7 +338,7 @@ class DetailsBackdrop extends Component {
     let posterPath = media.poster_path;
     if (tmdbData) {
       backdrop = tmdbData.backdrop_path;
-      posterPath = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/' + tmdbData.poster_path;
+      posterPath = 'https://image.tmdb.org/t/p/w300_and_h450_bestv2' + tmdbData.poster_path;
     }
     if (moreData && moreData.PosterPath) posterPath = moreData.PosterPath;
 
