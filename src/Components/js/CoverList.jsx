@@ -55,7 +55,18 @@ export default class CoverList extends Component {
           />
         ))}
         <br />
-        {isSearching ? <Spinner visible big /> : null}
+        {isSearching ? (
+          <div
+            style={{
+              marginBottom: viewMode === 'standard' ? '1em' : undefined,
+              padding: viewMode === 'carousel' ? '1.5em' : undefined,
+              display: viewMode === 'carousel' ? 'flex' : undefined,
+              alignItems: 'center',
+            }}
+          >
+            <Spinner visible big noMargin />
+          </div>
+        ) : null}
       </div>
     );
   }

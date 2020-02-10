@@ -208,7 +208,6 @@ class MovieList extends Component {
     if (!isNaN(scroll)) {
       if (scroll > 0.9 && !this.state.isSearching && !this.state.lastPage && (!this.state.media || this.state.viewMode === 'carousel')) {
         if (this.state.viewMode === 'standard') element.scrollTop -= 10;
-        else element.scrollLeft -= 10;
 
         this.changePage(1);
       }
@@ -263,12 +262,13 @@ class MovieList extends Component {
 
     let newurl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${type}`;
     if (window.location.href !== newurl) {
-      if (this.state.media) newurl += `#${this.state.media.id}`;
+      if (this.state.media && this.state.type === type) newurl += `#${this.state.media.id}`;
       window.history.pushState({ path: newurl }, '', newurl);
     }
 
     this.setState(
       {
+        media: this.state.type === type ? this.state.media : null,
         search: search,
         genre: genre,
         order: order,
@@ -921,7 +921,7 @@ class MovieList extends Component {
                           viewMode={viewMode}
                         />
                       ))}
-                      {isSearching ? <Spinner visible big /> : null}
+                      {isSearching ? <div style={{marginBottom: '1em'}}><Spinner visible big /></div> : null}
                     </div>
                   ) : search.length === 0 ? (
                     <h2>Please enter a search term</h2>

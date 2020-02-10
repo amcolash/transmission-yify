@@ -39,6 +39,7 @@ class Pirate extends Component {
         offset={30}
         duration={0.5}
         initiallyVisible={viewMode === 'carousel'}
+        scrollableParentSelector=".movie-list"
       >
         <div className="categories">
           <div className="category">{media.category}</div>
