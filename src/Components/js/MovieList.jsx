@@ -950,28 +950,28 @@ class MovieList extends Component {
                   />
                 )}
               </div>
-              {type === 'movies' || type === 'shows' || type === 'animes' ? (
-                <DetailsBackdrop
-                  loading={logo || !isLoaded}
-                  media={media}
-                  type={type}
-                  server={this.server}
-                  torrents={torrents}
-                  started={started}
-                  updateTorrents={this.updateTorrents}
-                  cancelTorrent={this.cancelTorrent}
-                  downloadTorrent={this.downloadTorrent}
-                  getProgress={this.getProgress}
-                  getTorrent={this.getTorrent}
-                  onOpenModal={this.onOpenModal}
-                  onCloseModal={this.onCloseModal}
-                  files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
-                  status={status}
-                  toggleSubscription={this.toggleSubscription}
-                  viewMode={viewMode}
-                />
-              ) : null}
             </Fragment>
+          ) : null}
+          {type === 'movies' || type === 'shows' || type === 'animes' || type === 'subscriptions' ? (
+            <DetailsBackdrop
+              loading={logo || !isLoaded}
+              media={media}
+              type={type}
+              server={this.server}
+              torrents={torrents}
+              started={started}
+              updateTorrents={this.updateTorrents}
+              cancelTorrent={this.cancelTorrent}
+              downloadTorrent={this.downloadTorrent}
+              getProgress={this.getProgress}
+              getTorrent={this.getTorrent}
+              onOpenModal={this.onOpenModal}
+              onCloseModal={this.onCloseModal}
+              files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
+              status={status}
+              toggleSubscription={this.toggleSubscription}
+              viewMode={viewMode}
+            />
           ) : null}
         </Fragment>
       );
