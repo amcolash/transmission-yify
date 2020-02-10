@@ -36,6 +36,7 @@ let currentStatus = {
   plex: process.env.PLEX_SERVER,
   subscriptions: [],
   pirateBay: 'https://thepiratebay10.org/',
+  eztv: 'https://eztv.io/',
 };
 
 let isUpgrading = false;
@@ -494,27 +495,42 @@ function initSocketDataWatchers() {
   );
 }
 
+function updatePirateBayEndpoint() {
+  axios
+    .get('https://piratebayproxy.info')
+    .then(response => {
+      const $ = cheerio.load(response.data);
+      const links = $('.t1');
+      // choose a random link from the top half of the list
+      const rnd = Math.floor((Math.random() * links.length) / 2);
+      currentStatus.pirateBay = links.eq(rnd).attr('href');
+    })
+    .catch(err => {
+      console.error(err);
+    });
+}
+
+function updateEZTVEndpoint() {
+  axios
+    .get('https://eztvstatus.com')
+    .then(response => {
+      const $ = cheerio.load(response.data);
+      currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
+    })
+    .catch(err => {
+      console.error(err);
+    });
+}
+
 function initStatusWatchers() {
   // Autoprune every minute
   setIntervalImmediately(() => autoPrune(currentTorrents, transmission), interval * 30);
 
-  // Grab piratebay proxy list every 10 minutes
-  setIntervalImmediately(
-    () =>
-      axios
-        .get('https://piratebayproxy.info')
-        .then(response => {
-          const $ = cheerio.load(response.data);
-          const links = $('.t1');
-          // choose a random link from the top half of the list
-          const rnd = Math.floor((Math.random() * links.length) / 2);
-          currentStatus.pirateBay = links.eq(rnd).attr('href');
-        })
-        .catch(err => {
-          console.error(err);
-        }),
-    interval * 300
-  );
+  // Grab piratebay/eztv proxy list every 10 minutes
+  setIntervalImmediately(() => {
+    updatePirateBayEndpoint();
+    updateEZTVEndpoint();
+  }, interval * 300);
 
   // Get storage info every minute
   setIntervalImmediately(() => {
@@ -579,6 +595,6 @@ function initStatusWatchers() {
 
   // Refresh list of eztv / horriblesubs shows every day
   const day = 1000 * 60 * 60 * 24;
-  setIntervalImmediately(() => updateEZTVShows(), day);
+  setIntervalImmediately(() => updateEZTVShows(currentStatus.eztv), day);
   setIntervalImmediately(() => updateHorribleSubsShows(), day);
 }
