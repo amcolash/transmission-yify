@@ -207,7 +207,8 @@ class MovieList extends Component {
 
     if (!isNaN(scroll)) {
       if (scroll > 0.9 && !this.state.isSearching && !this.state.lastPage && (!this.state.media || this.state.viewMode === 'carousel')) {
-        if (this.state.viewMode === 'standard') element.scrollTop -= 10;
+        // if (this.state.viewMode === 'standard') element.scrollTop -= 10;
+        // if (this.state.viewMode === 'carousel') element.scrollLeft -= 10;
 
         this.changePage(1);
       }
@@ -700,6 +701,7 @@ class MovieList extends Component {
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
+    const movieListEl = document.querySelector('.movie-list');
 
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
@@ -732,6 +734,7 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
         else if (backdropFocus) this.focusItem(backdropEl, -1, true);
+        else if (coverFocus) this.focusItem(movieListEl, -1);
         else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -741,6 +744,7 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
         else if (backdropFocus) this.focusItem(backdropEl, 1, true);
+        else if (coverFocus) this.focusItem(movieListEl, 1);
         else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -921,7 +925,11 @@ class MovieList extends Component {
                           viewMode={viewMode}
                         />
                       ))}
-                      {isSearching ? <div style={{marginBottom: '1em'}}><Spinner visible big /></div> : null}
+                      {isSearching ? (
+                        <div style={{ marginBottom: '1em' }}>
+                          <Spinner visible big />
+                        </div>
+                      ) : null}
                     </div>
                   ) : search.length === 0 ? (
                     <h2>Please enter a search term</h2>
