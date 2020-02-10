@@ -593,8 +593,10 @@ function initStatusWatchers() {
     IS_DOCKER ? interval * 30 : interval * 5
   );
 
-  // Refresh list of eztv / horriblesubs shows every day
-  const day = 1000 * 60 * 60 * 24;
-  setIntervalImmediately(() => updateEZTVShows(currentStatus.eztv), day);
+  // Refresh list of eztv / horriblesubs shows twice a day
+  const day = 1000 * 60 * 60 * 12;
   setIntervalImmediately(() => updateHorribleSubsShows(), day);
+
+  // Wait a moment before getting shows so that the correct eztv domain cna be resolved (if needed)
+  setTimeout(() => setIntervalImmediately(() => updateEZTVShows(currentStatus.eztv), day), 10000);
 }
