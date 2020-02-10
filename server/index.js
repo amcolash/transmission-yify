@@ -586,7 +586,12 @@ function initStatusWatchers() {
       // Check subscriptions every hour
       setIntervalImmediately(() => {
         currentStatus.subscriptions.forEach(subscription => {
-          downloadSubscription(subscription.id, currentStatus.subscriptions, false);
+          try {
+            downloadSubscription(subscription.id, currentStatus.subscriptions, false);
+          } catch (e) {
+            // Last ditch attempt to try and prevent issues with subscriptions
+            console.error(e);
+          }
         });
       }, interval * 30 * 60);
     },

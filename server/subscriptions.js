@@ -74,16 +74,19 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
 
       // Download each torrent
       episodes.forEach(e => {
-        console.log('Downloading new subscribed file: ' + e.filename);
+        console.log(`Downloading new subscribed file: ${e.filename}`);
         transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
           if (err) console.error(err);
         });
       });
 
-      // Update subscription
-      subscription.lastSeason = lastEpisode.season;
-      subscription.lastEpisode = lastEpisode.episode;
-      writeSubscriptions(subscriptions);
+      if (!lastEpisode) console.error(`Error: Could not find last episode for ${subscription.title}`);
+      else {
+        // Update subscription database
+        subscription.lastSeason = lastEpisode.season;
+        subscription.lastEpisode = lastEpisode.episode;
+        writeSubscriptions(subscriptions);
+      }
     })
     .catch(err => {
       console.error(err);
