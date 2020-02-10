@@ -411,12 +411,12 @@ class MovieList extends Component {
             return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
           });
         }
-        if (data.length === 0) lastPage = true;
       } else if (type === 'movies' || type === 'shows') {
         // Filter by popularity and vote count to remove obscure results
         data = data.filter(d => d.popularity > 1 && d.vote_count > 3);
       }
-
+      if (data.length === 0) lastPage = true;
+      
       // Concat and filter dupes if infiniscrolling
       if (page > 1) {
         let filtered = [];
