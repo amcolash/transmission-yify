@@ -152,8 +152,7 @@ class MovieList extends Component {
       if (data) this.setState({ files: data });
     });
 
-    const searchEl = document.querySelector('.search .form input');
-    if (searchEl && this.state.viewMode === 'carousel') searchEl.focus();
+    if (this.state.viewMode === 'carousel') setTimeout(() => this.focusCover(), 150);
   }
 
   componentWillUnmount() {
