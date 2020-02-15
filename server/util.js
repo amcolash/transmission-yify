@@ -53,7 +53,14 @@ function filterMovieResults(results) {
 
     // Not going to show 2160p or 4k since they are UUUUGE
     const parsedResolution = Number.parseInt(parsed.resolution);
-    const shouldAdd = !(parsedResolution < 480 || parsedResolution > 1080 || (hasNonCam && isCam));
+    let shouldAdd = !(parsedResolution < 480 || parsedResolution > 1080 || (hasNonCam && isCam));
+
+    // Filter out movies larger than 4gb
+    if (t.size) {
+      const mb = t.size.toLowerCase().indexOf('mib') !== -1;
+      const size = Number.parseFloat(t.size) * (mb ? 1 : 1000);
+      if (size > 4000) shouldAdd = false;
+    }
 
     if (shouldAdd) {
       if (versions[parsed.resolution] && versions[parsed.resolution].seeds > t.seeds) return;
