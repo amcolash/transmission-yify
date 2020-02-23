@@ -76,7 +76,6 @@ class MovieList extends Component {
     this.updateSearch = this.updateSearch.bind(this);
     this.getProgress = this.getProgress.bind(this);
     this.getTorrent = this.getTorrent.bind(this);
-    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     this.upgrade = this.upgrade.bind(this);
     this.addMagnet = this.addMagnet.bind(this);
     this.toggleSubscription = this.toggleSubscription.bind(this);
@@ -101,9 +100,8 @@ class MovieList extends Component {
     // Get movie list
     this.updateData();
 
-    // Update window size
-    this.updateWindowDimensions();
-    window.addEventListener('resize', this.updateWindowDimensions);
+    // Update base window size
+    this.setState({ width: window.innerWidth, height: window.innerHeight });
 
     // Update on hash change
     window.addEventListener('hashchange', this.updateHash);
@@ -156,7 +154,6 @@ class MovieList extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateWindowDimensions);
     window.removeEventListener('hashchange', this.updateHash);
     window.removeEventListener('popstate', this.updateHistory);
     window.removeEventListener('keydown', this.handleKeys);
@@ -165,10 +162,6 @@ class MovieList extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return shouldUpdate(this.props, this.state, nextProps, nextState, true);
-  }
-
-  updateWindowDimensions() {
-    this.setState({ width: window.innerWidth, height: window.innerHeight });
   }
 
   updateHash() {
@@ -415,7 +408,7 @@ class MovieList extends Component {
         data = data.filter(d => d.popularity > 1 && d.vote_count > 3);
       }
       if (data.length === 0) lastPage = true;
-      
+
       // Concat and filter dupes if infiniscrolling
       if (page > 1) {
         let filtered = [];
@@ -819,7 +812,7 @@ class MovieList extends Component {
   }
 
   render() {
-    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode } = this.state;
+    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode, height } = this.state;
 
     // Filter out completed torrents from all views
     const torrents = this.state.torrents.filter(t => t.percentDone < 1);
@@ -906,6 +899,7 @@ class MovieList extends Component {
                 type={this.state.type}
                 page={this.state.page}
                 viewMode={viewMode}
+                baseHeight={height}
               />
 
               <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll}>

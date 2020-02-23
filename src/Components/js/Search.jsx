@@ -71,7 +71,9 @@ class Search extends Component {
               inputRef={ref => {
                 // Only open soft keyboard when enter is pressed when running in cordova
                 if (ref && window.cordova) {
-                  ref.readOnly = true;
+                  // Only set readonly when the keyboard is hidden
+                  if (this.props.baseHeight === window.innerHeight) ref.readOnly = true;
+
                   ref.onkeydown = e => {
                     if (e.key === 'Enter') ref.readOnly = false;
                   };
