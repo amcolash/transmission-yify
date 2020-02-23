@@ -29,6 +29,7 @@
 }
 
 .search.collapsed,
+.search.carousel.collapsed,
 .movie-list.collapsed,
 .movie-list.collapsed .cover {
   height: 0;
