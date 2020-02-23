@@ -728,8 +728,17 @@ class MovieList extends Component {
 
     // If we are focused on the info on the right side, scroll if possible
     if (active === infoEl && rightEl) {
-      if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) return;
-      if (e.key === 'ArrowDown' && rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight) return;
+      // Since android + cordova doesn't seem to scroll as the default, force the scroll
+      e.preventDefault();
+
+      if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) {
+        rightEl.scrollTop -= 15;
+        return;
+      }
+      if (e.key === 'ArrowDown' && rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight) {
+        rightEl.scrollTop += 15;
+        return;
+      }
     }
 
     switch (e.key) {

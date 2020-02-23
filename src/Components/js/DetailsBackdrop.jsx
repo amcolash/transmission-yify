@@ -382,7 +382,7 @@ class DetailsBackdrop extends Component {
         }}
         onScroll={e => {
           // Prevent scrolling vertically
-          this.containerRef.current.scrollTop = 0;
+          if (this.containerRef.current.scrollTop !== 0) this.containerRef.current.scrollTop = 0;
         }}
         style={{
           height: viewMode === 'standard' ? '100vh' : undefined,

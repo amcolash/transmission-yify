@@ -7,10 +7,17 @@ const startApp = () => ReactDOM.render(<App />, document.getElementById('root'))
 
 document.body.onload = () => {
   console.log('cordova? ', window.cordova);
+  const root = document.getElementById('root');
+  // Prevent scrolling the root element
+  root.onscroll = e => {
+    e.preventDefault();
+    root.scrollTop = 0;
+  };
+
   if (!window.cordova) {
     startApp();
   } else {
-    document.querySelector('#root').classList.add('cordova');
+    root.classList.add('cordova');
     document.addEventListener('deviceready', startApp, false);
   }
 };

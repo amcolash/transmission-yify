@@ -241,7 +241,7 @@
 .recommendations .item {
   display: flex;
   flex-direction: column;
-  margin: 0.3em;
+  padding: 0.4em;
   cursor: pointer;
   min-width: 7em;
 }
