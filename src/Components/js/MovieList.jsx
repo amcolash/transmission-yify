@@ -665,7 +665,7 @@ class MovieList extends Component {
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
     if (youtubeCloseButton) youtubeCloseButton.click();
-    if (videosOpen && videosButtonEl) {
+    else if (videosOpen && videosButtonEl) {
       videosButtonEl.click();
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
@@ -790,7 +790,10 @@ class MovieList extends Component {
         this.handleBack();
         break;
       case 'Enter':
-        if (videosEl && videosButtonEl && active === videosButtonEl) setTimeout(() => videosEl.querySelector('img').focus(), 250);
+        if (videosEl && videosButtonEl && active === videosButtonEl) {
+          e.preventDefault();
+          setTimeout(() => videosEl.querySelector('img').focus(), 250);
+        }
         if (coverFocus) {
           e.preventDefault();
           this.focusItem(backdropEl, 0);
