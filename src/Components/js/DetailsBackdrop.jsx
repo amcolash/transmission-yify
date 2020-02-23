@@ -380,6 +380,10 @@ class DetailsBackdrop extends Component {
             onCloseModal();
           }
         }}
+        onScroll={e => {
+          // Prevent scrolling vertically
+          this.containerRef.current.scrollTop = 0;
+        }}
         style={{
           height: viewMode === 'standard' ? '100vh' : undefined,
           position: viewMode === 'carousel' && youtubeId ? 'unset' : undefined,
@@ -529,31 +533,31 @@ class DetailsBackdrop extends Component {
           onClick={e => e.stopPropagation()}
           tabIndex="-1"
         >
-          <div className="plot padding" tabIndex="0">
-            {details.plot}
-          </div>
-          {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
+          <div className="details" tabIndex="0">
+            <div className="plot padding">{details.plot}</div>
+            {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
 
-          {type === 'movies' ? (
-            moreData !== 'ERROR' && moreData !== null ? (
-              <Fragment>
-                {details.director ? <div className="padding">{details.director}</div> : null}
-                {details.writers ? <div className="padding">{details.writers}</div> : null}
-                <div className="padding">Actors: {moreData.Actors}</div>
-              </Fragment>
-            ) : (
-              <Fragment>
-                {moreData === 'ERROR' || moreData !== null ? null : (
-                  <Fragment>
-                    <span>
-                      Loading additional data...
-                      <Spinner visible />
-                    </span>
-                  </Fragment>
-                )}
-              </Fragment>
-            )
-          ) : null}
+            {type === 'movies' ? (
+              moreData !== 'ERROR' && moreData !== null ? (
+                <Fragment>
+                  {details.director ? <div className="padding">{details.director}</div> : null}
+                  {details.writers ? <div className="padding">{details.writers}</div> : null}
+                  <div className="padding">Actors: {moreData.Actors}</div>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  {moreData === 'ERROR' || moreData !== null ? null : (
+                    <Fragment>
+                      <span>
+                        Loading additional data...
+                        <Spinner visible />
+                      </span>
+                    </Fragment>
+                  )}
+                </Fragment>
+              )
+            ) : null}
+          </div>
 
           <br />
 

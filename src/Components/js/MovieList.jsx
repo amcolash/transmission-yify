@@ -697,6 +697,8 @@ class MovieList extends Component {
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
     const videosEl = document.querySelector('.otherVideos .videoContainer');
     const movieListEl = document.querySelector('.movie-list');
+    const infoEl = document.querySelector('.backdropContainer .right .details');
+    const rightEl = backdropEl.querySelector('.backdropContainer .right');
 
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
@@ -722,6 +724,12 @@ class MovieList extends Component {
     ) {
       menuToggleEl.focus();
       return;
+    }
+
+    // If we are focused on the info on the right side, scroll if possible
+    if (active === infoEl && rightEl) {
+      if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) return;
+      if (e.key === 'ArrowDown' && rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight) return;
     }
 
     switch (e.key) {
