@@ -299,6 +299,14 @@ class DetailsBackdrop extends Component {
     this.props.toggleSubscription(media, () => setTimeout(() => this.setState({ subscribing: false }), 2000));
   }
 
+  playYoutubeVideo(youtubeId) {
+    if (window.cordova) {
+      window.open(`http://www.youtube.com/watch?v=${youtubeId}`, '_blank');
+    } else {
+      this.setState({ youtubeId });
+    }
+  }
+
   render() {
     const {
       downloadTorrent,
@@ -454,10 +462,10 @@ class DetailsBackdrop extends Component {
                 className="trailer"
                 onClick={e => {
                   e.stopPropagation();
-                  this.setState({ youtubeId: details.trailer.key });
+                  this.playYoutubeVideo(details.trailer.key);
                 }}
                 onKeyDown={e => {
-                  if (e.key === 'Enter') this.setState({ youtubeId: details.trailer.key });
+                  if (e.key === 'Enter') this.playYoutubeVideo(details.trailer.key);
                 }}
                 tabIndex="0"
               >
@@ -511,9 +519,9 @@ class DetailsBackdrop extends Component {
                       <img
                         src={`https://img.youtube.com/vi/${v.key}/0.jpg`}
                         alt="video thumbnail"
-                        onClick={() => this.setState({ youtubeId: v.key })}
+                        onClick={() => this.playYoutubeVideo(v.key)}
                         onKeyDown={e => {
-                          if (e.key === 'Enter') this.setState({ youtubeId: v.key });
+                          if (e.key === 'Enter') this.playYoutubeVideo(v.key);
                         }}
                         tabIndex={this.state.otherVideos ? '0' : '-1'}
                       />
