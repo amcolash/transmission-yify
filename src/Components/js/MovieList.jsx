@@ -124,7 +124,7 @@ class MovieList extends Component {
       socket.emit('subscribe', 'status');
 
       // Weird performance hack, this helps since it seems the server blocks while sending info and cannot get cover info
-      setTimeout(() => socket.emit('subscribe', 'files'), 3000);
+      setTimeout(() => socket.emit('subscribe', 'files'), 5000);
     });
 
     // If something fails with connecting, reset to defaults
@@ -590,10 +590,13 @@ class MovieList extends Component {
     const backdrop = document.querySelector('.backdropCarousel');
     if (backdrop) {
       const focused = backdrop.contains(e.target);
-      document.querySelector('.search').classList.toggle('collapsed', focused);
-      document.querySelector('.movie-list').classList.toggle('collapsed', focused);
-      document.querySelector('.menu').classList.toggle('collapsed', focused);
       backdrop.classList.toggle('expanded', focused);
+      const search = document.querySelector('.search');
+      if (search) search.classList.toggle('collapsed', focused);
+      const movieList = document.querySelector('.movie-list');
+      if (movieList) movieList.classList.toggle('collapsed', focused);
+      const menu = document.querySelector('.menu');
+      if (menu) menu.classList.toggle('collapsed', focused);
     }
   }
 
@@ -795,6 +798,7 @@ class MovieList extends Component {
     const viewMode = this.state.viewMode === 'standard' ? 'carousel' : 'standard';
     this.setState({ viewMode });
     window.localStorage.setItem('viewMode', viewMode);
+    window.location.reload();
   }
 
   changeItem(dir) {
