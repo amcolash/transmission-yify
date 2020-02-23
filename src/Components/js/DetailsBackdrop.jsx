@@ -707,7 +707,7 @@ class DetailsBackdrop extends Component {
                             });
                         }}
                       >
-                        <img src={r.poster_path} alt="cover" />
+                        <img src={r.poster_path} alt="" />
                         <div className="title">{r.title}</div>
                       </div>
                     );

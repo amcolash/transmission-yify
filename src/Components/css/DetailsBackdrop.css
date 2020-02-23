@@ -227,18 +227,22 @@
 
 .recommendations {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   text-align: center;
   margin-top: 1em;
+  padding-bottom: 0.5em;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: smooth;
 }
 
 .recommendations .item {
-  padding-right: 0.7em;
-  padding-bottom: 0.3em;
+  display: flex;
+  flex-direction: column;
+  margin: 0.3em;
   cursor: pointer;
-  width: 6.5em;
+  min-width: 7em;
 }
 
 .recommendations .item:last-of-type {
@@ -252,7 +256,9 @@
 }
 
 .recommendations img {
-  width: 6.5em;
+  width: 100%;
+  flex: 1 1;
+  object-fit: cover;
   border: 1px solid #777;
   border-radius: 0.2em;
   margin-top: 0.1em;
@@ -363,7 +369,7 @@ h4 {
 }
 
 .otherVideos .toggle {
-  margin: 1em;
+  margin: 1.2em 1em;
 }
 
 .standard .otherVideos .toggle {
