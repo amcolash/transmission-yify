@@ -31,7 +31,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -82,7 +82,7 @@
      id="namedview6"
      showgrid="false"
      inkscape:zoom="2.8284271"
-     inkscape:cx="138.33854"
+     inkscape:cx="77.88091"
      inkscape:cy="98.888328"
      inkscape:window-x="61"
      inkscape:window-y="27"
@@ -185,13 +185,13 @@
   </g>
   <text
      xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:26.3399601px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#64dd17;fill-opacity:1;stroke:none;stroke-width:0.658499"
-     x="237.27298"
-     y="123.36605"
+     style="font-style:normal;font-weight:normal;font-size:28.92287636px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#64dd17;fill-opacity:1;stroke:none;stroke-width:0.72307187"
+     x="235.24164"
+     y="123.34411"
      id="text857"><tspan
        sodipodi:role="line"
        id="tspan855"
-       x="237.27298"
-       y="123.36605"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.80397606px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#64dd17;fill-opacity:1;stroke-width:0.658499">Dev</tspan></text>
+       x="235.24164"
+       y="123.34411"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.35372543px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#64dd17;fill-opacity:1;stroke-width:0.72307187">Dev</tspan></text>
 </svg>
