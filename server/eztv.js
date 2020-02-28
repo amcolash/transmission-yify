@@ -4,7 +4,7 @@ const ptn = require('../src/Util/TorrentName');
 
 let eztvShows = [];
 
-function getEZTVDetails(url) {
+function getEZTVDetails(url, title) {
   return new Promise((resolve, reject) => {
     axios
       .get(url)
@@ -42,11 +42,11 @@ function getEZTVDetails(url) {
           torrents.push(torrent);
         });
 
-        resolve({ page: 1, total: torrents.length, limit: torrents.length, torrents });
+        resolve({ page: 1, total: torrents.length, limit: torrents.length, torrents, url, title });
       })
       .catch(err => {
         console.error(err);
-        resolve({ page: 1, total: 0, limit: 30, torrents: [] });
+        resolve({ page: 1, total: 0, limit: 30, torrents: [], url, title });
       });
   });
 }
@@ -66,9 +66,10 @@ function updateEZTVShows(endpoint) {
         const row = $('a', el);
         let title = row.text();
         if (title.endsWith(', The')) title = `The ${title.replace(', The', '')}`;
+        const url = `${endpoint}${row.attr('href').substring(1)}`;
         shows.push({
           title,
-          url: `${endpoint}${row.attr('href')}`,
+          url,
         });
       });
 

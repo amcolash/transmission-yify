@@ -376,7 +376,7 @@ app.get('/eztv/:search', function(req, res) {
       if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
       res.send(trackerCache[url]);
     } else {
-      getEZTVDetails(url).then(torrents => {
+      getEZTVDetails(url, search).then(torrents => {
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(torrents);
         trackerCache[url] = torrents;
