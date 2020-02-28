@@ -12,8 +12,6 @@ import { shouldUpdate } from '../../Util/Util';
 import ScrollAnimation from './ScrollAnimation';
 import Spinner from './Spinner';
 
-const CancelToken = axios.CancelToken;
-
 class Cover extends Component {
   cancelToken = null;
 
@@ -53,14 +51,14 @@ class Cover extends Component {
 
     this.cancelPB();
 
-    this.cancelToken = CancelToken.source();
+    this.cancelToken = axios.CancelToken.source();
     const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
 
     if (Cache[url]) {
       this.setState({ pb: Cache[url] });
     } else {
       axios
-        .get(url, { cancelToken: CancelToken.token })
+        .get(url, { cancelToken: this.cancelToken.token })
         .then(response => {
           Cache[url] = response.data;
           this.cancelToken = null;

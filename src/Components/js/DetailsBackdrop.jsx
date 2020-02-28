@@ -19,12 +19,13 @@ import {
   parseHorribleSubs,
   parseMedia,
 } from '../../Util/Parse';
-import { shouldUpdate } from '../../Util/Util';
 import Ratings from './Ratings';
 import Spinner from './Spinner';
 import Version from './Version';
 
 class DetailsBackdrop extends Component {
+  cancelTokens = [];
+
   constructor(props) {
     super(props);
     this.state = { ...this.getDefaultState(), onLoad: props.media ? true : false };
@@ -51,14 +52,25 @@ class DetailsBackdrop extends Component {
     };
   }
 
+  axiosGetHelper(url) {
+    const cancelToken = axios.CancelToken.source();
+    this.cancelTokens.push(cancelToken);
+
+    return axios.get(url, { cancelToken: cancelToken.token });
+  }
+
+  cancelRequests() {
+    this.cancelTokens.forEach(t => t.cancel());
+    this.cancelTokens = [];
+  }
+
   getEztv(media) {
     const url = `${this.props.server}/eztv/${media.title}`;
 
     if (Cache[url]) {
       this.handleEztv(Cache[url]);
     } else {
-      axios
-        .get(url)
+      this.axiosGetHelper(url)
         .then(response => {
           const data = response.data;
           Cache[url] = data;
@@ -66,6 +78,7 @@ class DetailsBackdrop extends Component {
           this.handleEztv(data);
         })
         .catch(err => {
+          if (axios.isCancel(err)) return;
           console.error(err);
           this.setState({ loadingEpisodes: false });
         });
@@ -73,22 +86,21 @@ class DetailsBackdrop extends Component {
   }
 
   handleEztv(data) {
+    // If we loaded data for another show, don't handle it now
+    if (data.title !== this.props.media.title) return;
+
     if (data.torrents) {
       const moreData = this.state.moreData;
 
-      let maxSeason = this.state.maxSeason;
-      let newMax = false;
+      let maxSeason = 1;
       data.torrents.forEach(t => {
         const s = parseInt(t.season);
         if (s > maxSeason && moreData && moreData.seasons && s <= moreData.seasons.length) {
           maxSeason = s;
-          newMax = true;
         }
       });
 
-      let eztv = this.state.eztv || data;
-
-      this.setState({ eztv: eztv, season: newMax ? maxSeason : this.state.season, maxSeason: maxSeason }, () => {
+      this.setState({ eztv: data, season: maxSeason, maxSeason }, () => {
         this.setState({ loadingEpisodes: false });
       });
     } else {
@@ -103,14 +115,14 @@ class DetailsBackdrop extends Component {
     if (Cache[url]) {
       this.handleNyaa(Cache[url], title, page, limit);
     } else {
-      axios
-        .get(url)
+      this.axiosGetHelper(url)
         .then(response => {
           const data = response.data;
           Cache[url] = data;
           this.handleNyaa(data, title, page, limit);
         })
         .catch(err => {
+          if (axios.isCancel(err)) return;
           console.error(err);
           this.setState({ loadingEpisodes: false });
         });
@@ -140,8 +152,7 @@ class DetailsBackdrop extends Component {
     if (Cache[url]) {
       this.handleHorribleSubs(Cache[url]);
     } else {
-      axios
-        .get(url)
+      this.axiosGetHelper(url)
         .then(response => {
           const data = response.data;
           Cache[url] = data;
@@ -149,6 +160,7 @@ class DetailsBackdrop extends Component {
           this.handleHorribleSubs(data);
         })
         .catch(err => {
+          if (axios.isCancel(err)) return;
           console.error(err);
         });
     }
@@ -170,13 +182,13 @@ class DetailsBackdrop extends Component {
       return;
     }
 
-    if (media && (this.state.onLoad || (media.id !== (prevProps.media ? prevProps.media.id : '') && this.state === prevState))) {
+    if (media && (this.state.onLoad || media.id !== (prevProps.media ? prevProps.media.id : ''))) {
+      this.cancelRequests();
+
       if (type === 'animes') {
-        axios
-          .get(`${this.props.server}/kitsu/${media.id}`)
+        this.axiosGetHelper(`${this.props.server}/kitsu/${media.id}`)
           .then(response => {
             const data = response.data.data;
-            console.log(data);
             media.title = media.title || data.attributes.canonicalTitle;
             media.year = media.year || getYear(data);
 
@@ -196,12 +208,12 @@ class DetailsBackdrop extends Component {
             this.getHorribleSubs();
           })
           .catch(err => {
+            if (axios.isCancel(err)) return;
             console.error(err);
             this.setState({ moreData: 'ERROR' });
           });
       } else {
-        axios
-          .get(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id)
+        this.axiosGetHelper(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id)
           .then(response => {
             const data = response.data;
             const updated = { tmdbData: data, loadingEpisodes: type === 'shows' || type === 'subscriptions', showCover: true };
@@ -215,8 +227,7 @@ class DetailsBackdrop extends Component {
               const moreData = data;
               if (moreData.seasons) {
                 moreData.seasons.forEach(season => {
-                  axios
-                    .get(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`)
+                  this.axiosGetHelper(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`)
                     .then(response => {
                       if (moreData.seasons[season.season_number - 1]) {
                         moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
@@ -224,6 +235,7 @@ class DetailsBackdrop extends Component {
                       }
                     })
                     .catch(err => {
+                      if (axios.isCancel(err)) return;
                       console.error(err);
                     });
                 });
@@ -235,13 +247,13 @@ class DetailsBackdrop extends Component {
               if (Cache[omdbUrl]) {
                 this.setState({ moreData: Cache[omdbUrl] });
               } else {
-                axios
-                  .get(omdbUrl)
+                this.axiosGetHelper(omdbUrl)
                   .then(response => {
                     this.setState({ moreData: response.data });
                   })
-                  .catch(error => {
-                    console.error(error);
+                  .catch(err => {
+                    if (axios.isCancel(err)) return;
+                    console.error(err);
                     this.setState({ moreData: 'ERROR' });
                   });
               }
@@ -252,19 +264,20 @@ class DetailsBackdrop extends Component {
               if (Cache[pirateUrl]) {
                 this.setState({ pb: Cache[pirateUrl] });
               } else {
-                axios
-                  .get(pirateUrl)
+                this.axiosGetHelper(pirateUrl)
                   .then(response => {
                     this.setState({ pb: response.data });
                   })
                   .catch(err => {
+                    if (axios.isCancel(err)) return;
                     console.error(err);
                   });
               }
             }
           })
-          .catch(error => {
-            console.error(error);
+          .catch(err => {
+            if (axios.isCancel(err)) return;
+            console.error(err);
             this.setState({ moreData: 'ERROR' });
           });
       }
@@ -273,10 +286,6 @@ class DetailsBackdrop extends Component {
       //     this.setState({tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true});
       // }
     }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shouldUpdate(this.props, this.state, nextProps, nextState, false);
   }
 
   imageError() {
