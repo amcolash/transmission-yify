@@ -587,7 +587,7 @@ class MovieList extends Component {
 
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
-        covers[currentIndex].scrollIntoView(false);
+        // covers[currentIndex].scrollIntoView(false);
         covers[currentIndex].focus();
       }
     });
