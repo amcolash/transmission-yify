@@ -263,6 +263,7 @@
   border: 1px solid #777;
   border-radius: 0.2em;
   margin-top: 0.1em;
+  max-height: 10em;
 }
 
 .recommendations .item:focus {
@@ -272,6 +273,7 @@
 .recommendations .item:focus img {
   border-color: rgb(70, 170, 230);
   outline: 0.2em solid rgb(70, 170, 230);
+  border-radius: 0;
 }
 
 .versions {

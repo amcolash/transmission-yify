@@ -39,6 +39,7 @@
 .cover.selected:focus {
   border-color: rgb(70, 170, 230);
   outline-width: 0.2em;
+  border-radius: 0;
 }
 
 .cover.selected {

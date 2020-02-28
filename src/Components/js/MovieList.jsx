@@ -703,8 +703,8 @@ class MovieList extends Component {
     const videosEl = document.querySelector('.otherVideos .videoContainer');
     const movieListEl = document.querySelector('.movie-list');
     const infoEl = document.querySelector('.backdropContainer .right .details');
-    const rightEl = backdropEl.querySelector('.backdropContainer .right');
-    const recommendationsEl = backdropEl.querySelector('.recommendations');
+    const rightEl = document.querySelector('.backdropContainer .right');
+    const recommendationsEl = document.querySelector('.recommendations');
 
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
@@ -761,7 +761,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          this.focusItem(movieListEl, -1);
+          setTimeout(() => this.focusItem(movieListEl, -1), 25);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -774,7 +774,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          this.focusItem(movieListEl, 1);
+          setTimeout(() => this.focusItem(movieListEl, 1), 25);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -801,6 +801,7 @@ class MovieList extends Component {
           videosButtonEl.focus();
         } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) this.focusItem(backdropEl, 0);
+        else if (menuOpen) this.focusItem(menuEl, 1);
         else if ((searchFocus || menuToggleFocus) && !document.querySelector('.pirateList')) this.focusCover();
         else this.focusItem(document, 1);
         break;
