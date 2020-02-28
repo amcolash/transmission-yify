@@ -746,8 +746,10 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
         else if (backdropFocus) this.focusItem(backdropEl, -1, true);
-        else if (coverFocus) this.focusItem(movieListEl, -1);
-        else if (menuOpen && menuToggleEl) {
+        else if (coverFocus) {
+          this.focusItem(movieListEl, -1);
+          if (rightEl) rightEl.scrollTop = 0;
+        } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
         } else this.focusItem(document, -1);
@@ -756,8 +758,10 @@ class MovieList extends Component {
         e.preventDefault();
         if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
         else if (backdropFocus) this.focusItem(backdropEl, 1, true);
-        else if (coverFocus) this.focusItem(movieListEl, 1);
-        else if (menuOpen && menuToggleEl) {
+        else if (coverFocus) {
+          this.focusItem(movieListEl, 1);
+          if (rightEl) rightEl.scrollTop = 0;
+        } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
         } else this.focusItem(document, 1);
