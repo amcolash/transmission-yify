@@ -143,6 +143,25 @@ class MovieList extends Component {
         } else {
           this.setState({ status: data });
         }
+
+        const lastBuild = window.localStorage.getItem('lastBuild');
+        if (window.cordova && data.buildTime !== lastBuild) {
+          window.cordova.exec(
+            status => {
+              console.log(status);
+              window.localStorage.setItem('lastBuild', data.buildTime);
+              window.localStorage.setItem('viewMode', this.state.viewMode);
+
+              window.location.reload(true);
+            },
+            error => {
+              console.error(error);
+            },
+            'CacheClear',
+            'task',
+            []
+          );
+        }
       }
     });
 
@@ -844,8 +863,8 @@ class MovieList extends Component {
       rightEl.scrollTop = rightEl.scrollHeight - rightEl.clientHeight;
     }
 
-    // Scroll to far left if 1st item in cover list
-    if (coverFocus && movieListEl) {
+    // Scroll to far left if 1st item in cover list, need to re-check active since focus may have changed
+    if (coverFocus && document.activeElement.classList.contains('cover') && movieListEl) {
       const focusableEls = this.getFocusable(movieListEl);
       const index = this.getFocusIndex(focusableEls);
       if (index === 0) movieListEl.scrollLeft = 0;
