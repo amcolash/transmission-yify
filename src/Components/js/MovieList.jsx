@@ -759,9 +759,9 @@ class MovieList extends Component {
         if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
         else if (backdropFocus) this.focusItem(backdropEl, -1, true);
         else if (coverFocus) {
-          this.focusItem(movieListEl, -1);
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
+          this.focusItem(movieListEl, -1);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -772,9 +772,9 @@ class MovieList extends Component {
         if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
         else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) {
-          this.focusItem(movieListEl, 1);
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
+          this.focusItem(movieListEl, 1);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -829,6 +829,14 @@ class MovieList extends Component {
       rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight - 10
     ) {
       rightEl.scrollTop = rightEl.scrollHeight - rightEl.clientHeight;
+    }
+
+    // Scroll to far left if 1st item in cover list
+    if (coverFocus && movieListEl) {
+      const focusableEls = this.getFocusable(movieListEl);
+      const index = this.getFocusIndex(focusableEls);
+      if (index === 0) movieListEl.scrollLeft = 0;
+      if (index === focusableEls.length - 1) movieListEl.scrollLeft = movieListEl.scrollWidth - movieListEl.clientWidth;
     }
   }
 

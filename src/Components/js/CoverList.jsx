@@ -30,6 +30,7 @@ export default class CoverList extends Component {
         : {
             display: 'flex',
             flexDirection: 'row',
+            scrollBehavior: 'smooth',
           };
 
     return (
