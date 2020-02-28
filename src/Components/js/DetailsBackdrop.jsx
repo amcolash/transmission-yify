@@ -381,7 +381,7 @@ class DetailsBackdrop extends Component {
           ? `url(${moreData.CoverImage})`
           : ''
         : backdrop
-        ? `url(https://image.tmdb.org/t/p/w1280/${backdrop})`
+        ? `url(https://image.tmdb.org/t/p/w1280${backdrop})`
         : 'unset';
 
     let recommendations =
@@ -759,7 +759,7 @@ class DetailsBackdrop extends Component {
         {innerContent}
       </Modal>
     ) : (
-      <div className="backdropCarousel" style={{ backgroundImage }}>
+      <div className="backdropCarousel" style={{ backgroundImage, backgroundColor: '#444' }}>
         {innerContent}
       </div>
     );

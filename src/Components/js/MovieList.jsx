@@ -573,6 +573,18 @@ class MovieList extends Component {
         if (media && media.id === m.id) currentIndex = i;
       });
 
+      // Precache previous background image
+      if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
+        const tempImg = new Image();
+        tempImg.src = 'https://image.tmdb.org/t/p/w1280' + this.state.results[currentIndex - 1].backdrop_path;
+      }
+
+      // Precache next background image
+      if (currentIndex < this.state.results.length - 1 && this.state.results[currentIndex + 1].backdrop_path) {
+        const tempImg = new Image();
+        tempImg.src = 'https://image.tmdb.org/t/p/w1280' + this.state.results[currentIndex + 1].backdrop_path;
+      }
+
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
         covers[currentIndex].scrollIntoView(false);
