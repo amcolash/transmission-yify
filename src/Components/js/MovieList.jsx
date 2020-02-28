@@ -632,7 +632,7 @@ class MovieList extends Component {
     return 0;
   }
 
-  focusItem(el, dir, shouldWrap) {
+  getFocusableItem(el, dir, shouldWrap) {
     const focusableEls = this.getFocusable(el);
     let index = this.getFocusIndex(focusableEls) + dir;
 
@@ -644,7 +644,12 @@ class MovieList extends Component {
       index = Math.max(0, index);
     }
 
-    focusableEls[index].focus();
+    return focusableEls[index];
+  }
+
+  focusItem(el, dir, shouldWrap) {
+    const item = this.getFocusableItem(el, dir, shouldWrap);
+    if (item) item.focus();
   }
 
   handleBack(e) {
@@ -699,6 +704,7 @@ class MovieList extends Component {
     const movieListEl = document.querySelector('.movie-list');
     const infoEl = document.querySelector('.backdropContainer .right .details');
     const rightEl = backdropEl.querySelector('.backdropContainer .right');
+    const recommendationsEl = backdropEl.querySelector('.recommendations');
 
     const coverFocus =
       active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
@@ -728,16 +734,22 @@ class MovieList extends Component {
 
     // If we are focused on the info on the right side, scroll if possible
     if (active === infoEl && rightEl) {
-      // Since android + cordova doesn't seem to scroll as the default, force the scroll
-      e.preventDefault();
-
       if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) {
         rightEl.scrollTop -= 15;
+
+        // Since android + cordova doesn't seem to scroll as the default, force the scroll
+        e.preventDefault();
         return;
       }
-      if (e.key === 'ArrowDown' && rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight) {
-        rightEl.scrollTop += 15;
-        return;
+      if (e.key === 'ArrowDown') {
+        const next = this.getFocusableItem(backdropEl, 1, false);
+        if (next && rightEl.scrollTop + rightEl.clientHeight < next.offsetTop + 100) {
+          rightEl.scrollTop += 15;
+
+          // Since android + cordova doesn't seem to scroll as the default, force the scroll
+          e.preventDefault();
+          return;
+        }
       }
     }
 
@@ -749,6 +761,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           this.focusItem(movieListEl, -1);
           if (rightEl) rightEl.scrollTop = 0;
+          if (recommendationsEl) recommendationsEl.scrollLeft = 0;
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -761,6 +774,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           this.focusItem(movieListEl, 1);
           if (rightEl) rightEl.scrollTop = 0;
+          if (recommendationsEl) recommendationsEl.scrollLeft = 0;
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -805,6 +819,16 @@ class MovieList extends Component {
         break;
       default:
         break;
+    }
+
+    // Scroll to bottom when recommendation is first selected
+    if (
+      document.activeElement &&
+      rightEl &&
+      document.activeElement.classList.contains('item') &&
+      rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight - 10
+    ) {
+      rightEl.scrollTop = rightEl.scrollHeight - rightEl.clientHeight;
     }
   }
 
