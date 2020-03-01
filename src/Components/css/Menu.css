@@ -91,6 +91,10 @@
   font-size: 1.35em;
 }
 
+.cordova .carouselMenuButton {
+  padding-bottom: 0.35em;
+}
+
 .carouselMenuButton:focus {
   outline: none;
   background: #eee;
