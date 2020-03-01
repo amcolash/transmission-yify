@@ -1,6 +1,6 @@
 import '../css/Menu.css';
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   FaBars,
   FaChartBar,
@@ -73,6 +73,8 @@ class Menu extends Component {
       if (visible) {
         const currentlySelected = document.querySelector('.menu .selected');
         if (currentlySelected) currentlySelected.focus();
+      } else if (this.menuButton) {
+        this.menuButton.focus();
       }
     }
   }
@@ -122,105 +124,122 @@ class Menu extends Component {
     const { status, torrents, viewMode, toggleViewMode } = this.props;
 
     return (
-      <div
-        className={`menu${visible ? '' : ' hidden'}`}
-        ref={node => (this.menu = node)}
-        onClick={() => this.setVisible(false)}
-        onKeyDown={e => {
-          if (e.key === 'Escape') this.setVisible(false);
-          if (e.key === 'RightArrow' && visible) this.setVisible(false);
-        }}
-        tabIndex="-1"
-      >
-        <div className="list">
-          <div className="toggleWrap">
-            <span>Pirate Flix</span>
-            <div className="spacer"></div>
-            <div
-              className={`toggle ${viewMode}`}
-              tabIndex="0"
-              onKeyPress={e => {
-                if (e.key === 'Enter') this.setVisible(!this.state.visible);
-                if (e.key === 'DownArrow') {
-                }
-              }}
-              // onBlur={e => {
-              //   console.log(e.target);
-              //   const currentlySelected = e.target.parentElement.parentElement.querySelector('.selected');
-              //   if (currentlySelected && this.state.visible) currentlySelected.focus();
-              // }}
-            >
-              <FaBars
-                className="toggleButton"
-                onClick={e => {
-                  e.stopPropagation();
-                  this.setVisible(!this.state.visible);
-                }}
-              />
-              {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
-            </div>
-          </div>
-          {this.generateItem(<FaFilm />, 'Movies', 'movies')}
-          {this.generateItem(<FaTv />, 'TV Shows', 'shows')}
-          {this.generateItem(<FaLaughBeam />, 'Anime', 'animes')}
-          {this.generateItem(<FaSkullCrossbones />, 'Pirate Bay', 'pirate')}
-          <div className="item disabled"></div>
-          {this.generateItem(<FaDownload />, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
-          {this.generateItem(<FaRssSquare />, 'Subscriptions', 'subscriptions')}
-          <div className="item disabled"></div>
-          {window.cordova
-            ? null
-            : status
-            ? this.generateItem(plexIcon, 'Plex', () => {
-                window.open(status.plex, '_blank');
-                this.setVisible(false);
-              })
-            : null}
-          {window.cordova
-            ? null
-            : this.generateItem(<FaMagnet />, 'Add Magnet', e => {
+      <Fragment>
+        {viewMode === 'carousel' ? (
+          <div
+            ref={node => (this.menuButton = node)}
+            className={`carouselMenuButton`}
+            tabIndex="0"
+            onKeyPress={e => {
+              if (e.key === 'Enter') this.setVisible(!this.state.visible);
+            }}
+          >
+            <FaBars
+              className="toggleButton"
+              onClick={e => {
                 e.stopPropagation();
-                this.props.addMagnet();
-              })}
-          <div className="spacer"></div>
-          {window.cordova ? null : this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
-          {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
-          {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
-          {window.cordova
-            ? null
-            : this.generateItem(
-                viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
-                `View Mode: ${viewMode}`,
-                e => {
-                  e.preventDefault();
-                  toggleViewMode();
-                },
-                `viewMode`
-              )}
+                this.setVisible(!this.state.visible);
+              }}
+            />
+            {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
+          </div>
+        ) : null}
+        <div
+          className={`menu ${viewMode}${visible ? '' : ' hidden'}`}
+          ref={node => (this.menu = node)}
+          onClick={() => this.setVisible(false)}
+          onKeyDown={e => {
+            if (e.key === 'Escape') this.setVisible(false);
+            if (e.key === 'RightArrow' && visible) this.setVisible(false);
+          }}
+          tabIndex="-1"
+        >
+          <div className="list">
+            {viewMode === 'standard' ? (
+              <div className="toggleWrap">
+                <span>Pirate Flix</span>
+                <div className="spacer"></div>
+                <div
+                  className={`toggle ${viewMode}`}
+                  ref={node => (this.menuButton = node)}
+                  tabIndex="0"
+                  onKeyPress={e => {
+                    if (e.key === 'Enter') this.setVisible(!this.state.visible);
+                  }}
+                >
+                  <FaBars
+                    className="toggleButton"
+                    onClick={e => {
+                      e.stopPropagation();
+                      this.setVisible(!this.state.visible);
+                    }}
+                  />
+                  {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
+                </div>
+              </div>
+            ) : null}
+            {this.generateItem(<FaFilm />, 'Movies', 'movies')}
+            {this.generateItem(<FaTv />, 'TV Shows', 'shows')}
+            {this.generateItem(<FaLaughBeam />, 'Anime', 'animes')}
+            {this.generateItem(<FaSkullCrossbones />, 'Pirate Bay', 'pirate')}
+            <div className="item disabled"></div>
+            {this.generateItem(<FaDownload />, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
+            {this.generateItem(<FaRssSquare />, 'Subscriptions', 'subscriptions')}
+            <div className="item disabled"></div>
+            {window.cordova
+              ? null
+              : status
+              ? this.generateItem(plexIcon, 'Plex', () => {
+                  window.open(status.plex, '_blank');
+                  this.setVisible(false);
+                })
+              : null}
+            {window.cordova
+              ? null
+              : this.generateItem(<FaMagnet />, 'Add Magnet', e => {
+                  e.stopPropagation();
+                  this.props.addMagnet();
+                })}
+            <div className="spacer"></div>
+            {window.cordova ? null : this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
+            {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}
+            {this.generateItem(<FaPowerOff />, 'Upgrade Server', this.props.upgrade)}
+            {window.cordova
+              ? null
+              : this.generateItem(
+                  viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
+                  `View Mode: ${viewMode}`,
+                  e => {
+                    e.preventDefault();
+                    toggleViewMode();
+                  },
+                  `viewMode`
+                )}
 
-          {status ? (
-            <div className="status">
-              {status && status.ip ? (
-                <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>
-                  Server Location: {`${status.ip.city}, ${status.ip.country_code}`}
-                </p>
-              ) : null}
-              {status.buildTime && status.buildTime.indexOf('Dev Build') === -1 ? (
+            {status ? (
+              <div className="status">
+                {status && status.ip ? (
+                  <p className={status.ip.city === 'Seattle' ? 'red bold' : ''}>
+                    Server Location: {`${status.ip.city}, ${status.ip.country_code}`}
+                  </p>
+                ) : null}
+                {status.buildTime && status.buildTime.indexOf('Dev Build') === -1 ? (
+                  <p>
+                    <span>Build Time: {new Date(status.buildTime).toLocaleString()}</span>
+                  </p>
+                ) : null}
                 <p>
-                  <span>Build Time: {new Date(status.buildTime).toLocaleString()}</span>
+                  <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>
+                  {/* <progress value={status.storageUsage} max="100"/> */}
                 </p>
-              ) : null}
-              <p>
-                <span>Disk Usage: {parseFloat(status.storageUsage).toFixed(1)}%</span>
-                {/* <progress value={status.storageUsage} max="100"/> */}
-              </p>
-              <p>
-                <span>Cache Size: {status.cacheUsage}</span>
-              </p>
-            </div>
-          ) : null}
+                <p>
+                  <span>Cache Size: {status.cacheUsage}</span>
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 }

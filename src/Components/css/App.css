@@ -2,21 +2,25 @@
 
 body {
   margin: 0;
-  background-color: #444;
-
   font-family: 'Lato', sans-serif;
   font-size: 1.1em;
-  color: white;
   text-align: center;
   user-select: none;
   overflow: hidden;
 }
 
 #root {
+  background-color: #444;
+  color: white;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+#root.carousel {
+  background-color: #222;
+  color: #ddd;
 }
 
 #root.cordova {
@@ -143,8 +147,13 @@ select {
   height: 2.1em;
 }
 
+.carousel select {
+  width: 7em;
+  height: 2.5em;
+}
+
 .cordova select {
-  height: 1.8em;
+  height: 2.2em;
 }
 
 .spacer {

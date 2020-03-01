@@ -52,6 +52,55 @@
   margin: 0.15em 0;
 }
 
+.menu.carousel {
+  height: calc(100vh - 2em);
+  padding: 1em;
+  border: none;
+  background-color: unset;
+  backdrop-filter: saturate(100%) blur(40px);
+}
+
+.menu.carousel.hidden {
+  position: absolute;
+}
+
+.menu.carousel .list .item {
+  border-radius: 0;
+  margin-left: -1em;
+  margin-right: -1em;
+}
+
+.menu.carousel .list .item:focus,
+.menu.carousel .list .item.selected:focus {
+  outline: none;
+  background: white;
+  color: #333;
+}
+
+.menu.carousel .status {
+  border: none;
+}
+
+.carouselMenuButton {
+  position: absolute;
+  top: 1em;
+  left: 0.5em;
+  cursor: pointer;
+  padding: 0.15em 0.3em;
+  z-index: 2;
+  font-size: 1.35em;
+}
+
+.carouselMenuButton:focus {
+  outline: none;
+  background: #eee;
+  color: #333;
+}
+
+.carouselMenuButton .warn {
+  right: 0.5em !important;
+}
+
 .menu .toggleWrap span {
   margin-bottom: -0.2em;
 }
@@ -78,16 +127,12 @@
   transform: translateX(225%);
 }
 
+.menu .toggle.carousel {
+  transform: translateY(0);
+}
+
 .menu.hidden .toggle.carousel {
-  transform: translateX(225%) translateY(-0.5em);
-}
-
-.menu.collapsed .toggle {
-  opacity: 0;
-}
-
-.cordova .menu.hidden .toggle {
-  transform: translate(225%, -0.5em);
+  transform: translateX(225%);
 }
 
 .menu .toggle .toggleButton {
@@ -108,7 +153,8 @@
   background: #777;
 }
 
-.menu .toggle .warn {
+.menu .toggle .warn,
+.carouselMenuButton .warn {
   position: relative;
   top: -0.65em;
   right: 1em;
@@ -127,6 +173,10 @@
 
 .menu .list .item.selected {
   background: #333;
+}
+
+.menu.carousel .list .item.selected {
+  background: #666;
 }
 
 .menu .list .item:not(.selected):not(.disabled):hover {

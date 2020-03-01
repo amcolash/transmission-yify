@@ -20,4 +20,9 @@ document.body.onload = () => {
     root.classList.add('cordova');
     document.addEventListener('deviceready', startApp, false);
   }
+
+  let viewMode = window.localStorage.getItem('viewMode');
+  if (!viewMode) viewMode = window.cordova ? 'carousel' : 'standard';
+
+  root.classList.add(viewMode);
 };

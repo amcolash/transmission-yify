@@ -688,7 +688,7 @@ class MovieList extends Component {
 
     const active = document.activeElement;
 
-    const menuToggleEl = document.querySelector('.menu .toggle');
+    const menuToggleEl = document.querySelector('.carouselMenuButton');
     const movieListEl = document.querySelector('.movie-list');
     const backdropEl = document.querySelector('.backdropContainer');
     const videosContainerEl = document.querySelector('.otherVideos');
@@ -726,7 +726,7 @@ class MovieList extends Component {
     const active = document.activeElement;
 
     const menuEl = document.querySelector('.menu');
-    const menuToggleEl = document.querySelector('.menu .toggle');
+    const menuToggleEl = document.querySelector('.carouselMenuButton');
     const backdropEl = document.querySelector('.backdropContainer');
     const searchEl = document.querySelector('.search .form');
     const videosContainerEl = document.querySelector('.otherVideos');

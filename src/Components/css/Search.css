@@ -1,7 +1,6 @@
 .search {
   z-index: 1;
   padding: 1em 3em 1.5em;
-  background-color: #444;
   border-bottom: 4px solid #333;
   min-height: fit-content;
   transition: all 0.5s;
@@ -9,6 +8,30 @@
 
 .search.carousel {
   padding: 0.5em 1em 1em;
+}
+
+.search.carousel input,
+.search.carousel select {
+  border-radius: 0;
+  background-color: #666;
+  padding: 0.5em;
+}
+
+.search.carousel input,
+.search.carousel select,
+.search.carousel input::placeholder {
+  color: #ccc;
+}
+
+.search.carousel input:focus::placeholder {
+  color: #999;
+}
+
+.search.carousel input:focus,
+.search.carousel select:focus {
+  outline: none;
+  background-color: #eee;
+  color: #333;
 }
 
 .search button {
@@ -31,6 +54,10 @@
   display: inline-block;
   margin-left: 1.1em;
   margin-right: -0.5em;
+}
+
+.carousel .searchItem .iconHover {
+  margin-right: 0;
 }
 
 .searchItem .iconHover:hover .icons {
