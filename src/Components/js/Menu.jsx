@@ -73,7 +73,7 @@ class Menu extends Component {
       if (visible) {
         const currentlySelected = document.querySelector('.menu .selected');
         if (currentlySelected) currentlySelected.focus();
-      } else if (this.menuButton) {
+      } else if (this.menuButton && this.props.viewMode === 'standard') {
         this.menuButton.focus();
       }
     }
