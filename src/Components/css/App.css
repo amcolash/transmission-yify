@@ -39,6 +39,11 @@ button {
   transition: all 0.3s;
 }
 
+.carousel button:focus {
+  border-radius: 0;
+  border-color: rgb(70, 170, 230);
+}
+
 input:focus,
 select:focus {
   outline: 0.3em solid rgb(70, 170, 230);

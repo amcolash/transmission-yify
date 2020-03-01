@@ -8,6 +8,7 @@
 
 .search.carousel {
   padding: 0.5em 1em 1em;
+  border-bottom: none;
 }
 
 .search.carousel input,
@@ -42,6 +43,10 @@
 .searchItem {
   display: inline-block;
   margin-top: 0.5em;
+}
+
+.carousel .searchItem {
+  margin-right: 0.5em;
 }
 
 .search .form,

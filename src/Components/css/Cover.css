@@ -35,6 +35,14 @@
   transform: scale(1);
 }
 
+.carousel .cover {
+  border-color: #555;
+}
+
+.carousel .fileExists {
+  border: none;
+}
+
 .cover:focus,
 .cover.selected:focus {
   border-color: rgb(70, 170, 230);

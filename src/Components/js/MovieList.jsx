@@ -774,7 +774,7 @@ class MovieList extends Component {
       }
       if (e.key === 'ArrowDown') {
         const next = this.getFocusableItem(backdropEl, 1, false);
-        if (next && rightEl.scrollTop + rightEl.clientHeight < next.offsetTop + 100) {
+        if (next && rightEl.scrollTop + rightEl.clientHeight < next.offsetTop) {
           rightEl.scrollTop += 15;
 
           // Since android + cordova doesn't seem to scroll as the default, force the scroll
