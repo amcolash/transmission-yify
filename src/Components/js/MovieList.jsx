@@ -709,7 +709,7 @@ class MovieList extends Component {
       videosButtonEl.focus();
     } else if (backdropFocus) this.focusCover();
     else if (menuToggleEl) {
-      if (active === menuToggleEl && navigator.app) {
+      if (active === menuToggleEl && navigator.app && new Date().getTime() - (this.lastBack || 0) < 1000) {
         navigator.app.exitApp();
         return;
       }
@@ -717,6 +717,8 @@ class MovieList extends Component {
       menuToggleEl.focus();
       document.querySelector('#root').scrollTo(0, 0);
     }
+
+    this.lastBack = new Date().getTime();
 
     return false;
   }
