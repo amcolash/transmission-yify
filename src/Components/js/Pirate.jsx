@@ -37,7 +37,7 @@ class Pirate extends Component {
         animateOnce={true}
         className="pirateRow"
         offset={30}
-        duration={0.5}
+        duration={viewMode === 'carousel' ? 0 : 0.5}
         initiallyVisible={viewMode === 'carousel'}
         scrollableParentSelector=".movie-list"
       >

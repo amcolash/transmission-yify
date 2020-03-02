@@ -211,7 +211,7 @@ class MovieList extends Component {
 
     let scroll;
     // This isn't super precise, but good enough for me!
-    if (this.state.viewMode === 'standard') {
+    if (this.state.viewMode === 'standard' || this.state.type === 'pirate') {
       scroll = (element.scrollTop + element.offsetHeight) / (element.scrollHeight - element.offsetTop);
     } else {
       scroll = (element.scrollLeft + element.offsetLeft) / (element.scrollWidth - element.offsetWidth);
