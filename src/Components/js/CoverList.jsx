@@ -30,11 +30,10 @@ export default class CoverList extends Component {
         : {
             display: 'flex',
             flexDirection: 'row',
-            scrollBehavior: 'smooth',
           };
 
     return (
-      <div style={style}>
+      <div style={style} ref={node => (this.list = node)}>
         {results.map(media => (
           <Cover
             key={media.id}
@@ -53,6 +52,7 @@ export default class CoverList extends Component {
             toggleSubscription={toggleSubscription}
             viewMode={viewMode}
             showLatest={showLatest}
+            onFocus={e => this.list.parentElement.scrollTo(e.target.offsetLeft - 7, 0)}
           />
         ))}
         <br />

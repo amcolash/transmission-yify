@@ -50,6 +50,10 @@
   border-radius: 0;
 }
 
+.carousel .cover.selected {
+  border-color: #eee;
+}
+
 .cover.selected {
   border-color: #66e646;
 }

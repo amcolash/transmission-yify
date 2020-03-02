@@ -713,7 +713,6 @@ class MovieList extends Component {
 
       menuToggleEl.focus();
       document.querySelector('#root').scrollTo(0, 0);
-      if (movieListEl) movieListEl.scrollTo(0, 0);
     }
 
     return false;
@@ -864,12 +863,12 @@ class MovieList extends Component {
     }
 
     // Scroll to far left if 1st item in cover list, need to re-check active since focus may have changed
-    if (coverFocus && document.activeElement.classList.contains('cover') && movieListEl) {
-      const focusableEls = this.getFocusable(movieListEl);
-      const index = this.getFocusIndex(focusableEls);
-      if (index === 0) movieListEl.scrollLeft = 0;
-      if (index === focusableEls.length - 1) movieListEl.scrollLeft = movieListEl.scrollWidth - movieListEl.clientWidth;
-    }
+    // if (coverFocus && document.activeElement.classList.contains('cover') && movieListEl) {
+    // const focusableEls = this.getFocusable(movieListEl);
+    // const index = this.getFocusIndex(focusableEls);
+    // if (index === 0) movieListEl.scrollLeft = 0;
+    // if (index === focusableEls.length - 1) movieListEl.scrollLeft = movieListEl.scrollWidth - movieListEl.clientWidth;
+    // }
   }
 
   changePage = direction => {

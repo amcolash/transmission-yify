@@ -70,10 +70,11 @@
   margin-right: -1em;
 }
 
+.carouselMenuButton:focus,
 .menu.carousel .list .item:focus,
 .menu.carousel .list .item.selected:focus {
   outline: none;
-  background: white;
+  background: #eee;
   color: #333;
 }
 
@@ -93,12 +94,6 @@
 
 .cordova .carouselMenuButton {
   padding-bottom: 0.35em;
-}
-
-.carouselMenuButton:focus {
-  outline: none;
-  background: #eee;
-  color: #333;
 }
 
 .carouselMenuButton .warn {

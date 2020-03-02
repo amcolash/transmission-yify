@@ -109,6 +109,7 @@ class Cover extends Component {
       viewMode,
       selected,
       showLatest,
+      onFocus,
     } = this.props;
     const { pb, subscribing } = this.state;
 
@@ -153,8 +154,11 @@ class Cover extends Component {
           onKeyDown={e => {
             if (e.key === 'Enter' && click) click(media);
           }}
-          onFocus={() => {
-            if (viewMode === 'carousel' && click) click(media);
+          onFocus={e => {
+            if (viewMode === 'carousel') {
+              if (click) click(media);
+              if (onFocus) onFocus(e);
+            }
           }}
           tabIndex={type === 'subscriptions' ? undefined : '0'}
         >
