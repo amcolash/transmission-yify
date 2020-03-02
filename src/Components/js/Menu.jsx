@@ -67,13 +67,14 @@ class Menu extends Component {
 
   setVisible(visible) {
     if (Date.now() > this.touch + 300) {
+      const viewMode = this.props.viewMode;
       this.touch = Date.now();
       this.setState({ visible: visible });
-      if (this.props.listRef.current) this.props.listRef.current.classList.toggle('noscroll', visible);
+      if (this.props.listRef.current && viewMode === 'standard') this.props.listRef.current.classList.toggle('noscroll', visible);
       if (visible) {
         const currentlySelected = document.querySelector('.menu .selected');
         if (currentlySelected) currentlySelected.focus();
-      } else if (this.menuButton && this.props.viewMode === 'standard') {
+      } else if (this.menuButton && viewMode === 'standard') {
         this.menuButton.focus();
       }
     }
