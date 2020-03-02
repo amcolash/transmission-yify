@@ -454,7 +454,7 @@ class MovieList extends Component {
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
-            setTimeout(() => this.onOpenModal(firstLoad ? this.state.media : data[0]), 100);
+            setTimeout(() => this.onOpenModal(firstLoad ? this.state.media || data[0] : data[0]), 100);
           }
         }
       );
@@ -865,14 +865,6 @@ class MovieList extends Component {
     ) {
       rightEl.scrollTop = rightEl.scrollHeight - rightEl.clientHeight;
     }
-
-    // Scroll to far left if 1st item in cover list, need to re-check active since focus may have changed
-    // if (coverFocus && document.activeElement.classList.contains('cover') && movieListEl) {
-    // const focusableEls = this.getFocusable(movieListEl);
-    // const index = this.getFocusIndex(focusableEls);
-    // if (index === 0) movieListEl.scrollLeft = 0;
-    // if (index === focusableEls.length - 1) movieListEl.scrollLeft = movieListEl.scrollWidth - movieListEl.clientWidth;
-    // }
   }
 
   changePage = direction => {
