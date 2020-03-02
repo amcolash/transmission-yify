@@ -689,7 +689,6 @@ class MovieList extends Component {
     const active = document.activeElement;
 
     const menuToggleEl = document.querySelector('.carouselMenuButton');
-    const movieListEl = document.querySelector('.movie-list');
     const backdropEl = document.querySelector('.backdropContainer');
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
@@ -832,7 +831,7 @@ class MovieList extends Component {
         } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
         else if (coverFocus) this.focusItem(backdropEl, 0);
         else if (menuOpen) this.focusItem(menuEl, 1);
-        else if ((searchFocus || menuToggleFocus) && !document.querySelector('.pirateList')) this.focusCover();
+        else if ((searchFocus || menuToggleFocus) && backdropEl) this.focusCover();
         else this.focusItem(document, 1);
         break;
       case 'Escape':
@@ -1044,7 +1043,7 @@ class MovieList extends Component {
               </div>
             </Fragment>
           ) : null}
-          {type === 'movies' || type === 'shows' || type === 'animes' || type === 'subscriptions' ? (
+          {type === 'movies' || type === 'shows' || type === 'animes' || (type === 'subscriptions' && viewMode === 'standard') ? (
             <DetailsBackdrop
               loading={logo || !isLoaded}
               media={media}

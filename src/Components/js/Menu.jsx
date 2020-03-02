@@ -109,7 +109,10 @@ class Menu extends Component {
         className={'item' + (this.props.type === value ? ' selected' : '')}
         onClick={e => callback(e)}
         onKeyDown={e => {
-          if (e.key === 'Enter') callback(e);
+          if (e.key === 'Enter') {
+            if (this.menuButton) this.menuButton.focus();
+            callback(e);
+          }
         }}
         tabIndex={this.state.visible ? '0' : '-1'}
       >

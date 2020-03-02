@@ -39,8 +39,14 @@ button {
   transition: all 0.3s;
 }
 
-.carousel button:focus {
+.carousel button {
+  border: none;
   border-radius: 0;
+}
+
+.carousel button:focus {
+  outline: none;
+  background-color: #eee;
 }
 
 input:focus,
