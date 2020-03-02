@@ -22,6 +22,20 @@
   margin-bottom: -100vh;
 }
 
+.menu-darken {
+  width: calc(100vw);
+  height: 100vh;
+  position: absolute;
+  background: black;
+  opacity: 0;
+  z-index: 1;
+  transition: all 0.5s;
+}
+
+.menu:not(.hidden) + .menu-darken {
+  opacity: 0.4;
+}
+
 .menu.hidden {
   position: sticky;
   transform: translateX(-100%);
@@ -57,7 +71,8 @@
   padding: 1em;
   border: none;
   background-color: unset;
-  backdrop-filter: saturate(140%) blur(40px);
+  backdrop-filter: saturate(140%) brightness(140%) blur(40px);
+  text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.75);
 }
 
 .menu.carousel.hidden {
@@ -76,6 +91,7 @@
   outline: none;
   background: #eee;
   color: #333;
+  text-shadow: none;
 }
 
 .menu.carousel .status {

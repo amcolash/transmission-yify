@@ -242,6 +242,7 @@ class Menu extends Component {
             ) : null}
           </div>
         </div>
+        <div className="menu-darken"></div>
       </Fragment>
     );
   }
