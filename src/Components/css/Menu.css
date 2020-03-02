@@ -57,7 +57,7 @@
   padding: 1em;
   border: none;
   background-color: unset;
-  backdrop-filter: saturate(100%) blur(40px);
+  backdrop-filter: saturate(140%) blur(40px);
 }
 
 .menu.carousel.hidden {
