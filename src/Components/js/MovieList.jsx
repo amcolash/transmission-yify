@@ -859,6 +859,7 @@ class MovieList extends Component {
     if (
       document.activeElement &&
       rightEl &&
+      document.activeElement.parentElement.classList.contains('recommendations') &&
       document.activeElement.classList.contains('item') &&
       rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight - 10
     ) {
