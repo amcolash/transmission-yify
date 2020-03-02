@@ -248,9 +248,6 @@ app.post('/torrents', function(req, res) {
   }
 });
 
-app.get('/upgrade', function(req, res) {
-  res.send('Please POST to this endpoint with your upgrade key');
-});
 app.post('/upgrade', function(req, res) {
   try {
     if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
@@ -263,6 +260,7 @@ app.post('/upgrade', function(req, res) {
     isUpgrading = true;
 
     console.log('starting upgrade');
+    res.status(200);
     res.send('starting upgrade, remember to check the logs ;)');
 
     exec("ip route | awk '/default/ { print $3 }'", (error, stdout, stderr) => {
