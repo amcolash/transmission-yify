@@ -40,6 +40,7 @@ let currentStatus = {
 };
 
 let isUpgrading = false;
+let eztvIndex = 0;
 
 // Figure out build time
 if (fs.existsSync('./build_time') && IS_DOCKER) {
@@ -509,14 +510,29 @@ function updatePirateBayEndpoint() {
 }
 
 function updateEZTVEndpoint() {
+  // axios
+  // .get('https://eztvstatus.com')
+  // .then(response => {
+  //   const $ = cheerio.load(response.data);
+  //   currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
+  // })
+  // .catch(err => {
+  //   console.error(err);
+  // });
+
+  const endpointList = ['https://eztv.io', 'https://eztv.ag', 'https://eztv.re', 'https://eztv.it', 'https://eztv.ch'];
+  const chosen = endpointList[eztvIndex];
   axios
-    .get('https://eztvstatus.com')
+    .get(chosen)
     .then(response => {
-      const $ = cheerio.load(response.data);
-      currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
+      // All good
     })
     .catch(err => {
       console.error(err);
+
+      // If things failed, try the next one
+      eztvIndex = (eztvIndex + 1) % endpointList.length;
+      setTimeout(updateEZTVEndpoint, 5000);
     });
 }
 
