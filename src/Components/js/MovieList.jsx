@@ -68,6 +68,7 @@ class MovieList extends Component {
       lastPage: false,
       files: [],
       viewMode,
+      firstLoad: true,
       ...devOverrides,
     };
 
@@ -437,12 +438,15 @@ class MovieList extends Component {
         data = filtered;
       }
 
+      const firstLoad = this.state.firstLoad;
+
       this.setState(
         {
           results: data,
           isLoaded: true,
           isSearching: false,
           lastPage,
+          firstLoad: false,
         },
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
@@ -450,7 +454,7 @@ class MovieList extends Component {
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
-            setTimeout(() => this.onOpenModal(this.state.media || data[0]), 500);
+            setTimeout(() => this.onOpenModal(firstLoad ? this.state.media : data[0]), 100);
           }
         }
       );
