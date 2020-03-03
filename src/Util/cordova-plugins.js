@@ -2,8 +2,14 @@
 // empty shell that redirects and I am hacking things together to make it simpler.
 
 // cordova-plugin-cache-clear
+
 export function cacheClear(success, error) {
   window.cordova.exec(success, error, 'CacheClear', 'task', []);
+}
+
+// cordova-plugin-appinfo
+export function getIdentifier(success, fail) {
+  window.cordova.exec(success, fail, 'AppInfo', 'getIdentifier', []);
 }
 
 // cordova-plugin-dialogs

@@ -3,11 +3,12 @@ import '../css/MovieList.css';
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
 import React, { Component, Fragment } from 'react';
+import { FaFlask } from 'react-icons/fa';
 import openSocket from 'socket.io-client';
 
 import Order from '../../Data/Order';
 import Cache from '../../Util/Cache';
-import { alert, cacheClear, confirm, prompt } from '../../Util/cordova-plugins';
+import { alert, cacheClear, confirm, getIdentifier, prompt } from '../../Util/cordova-plugins';
 import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import Analytics from './Analytics';
@@ -70,6 +71,7 @@ class MovieList extends Component {
       files: [],
       viewMode,
       firstLoad: true,
+      cordovaDev: false,
       ...devOverrides,
     };
 
@@ -103,7 +105,17 @@ class MovieList extends Component {
     this.updateData();
 
     // Update base window size
-    this.setState({ width: window.innerWidth, height: window.innerHeight });
+    this.setState({ width: window.innerWidth, height: window.innerHeight }, () => {
+      // Check if dev version of cordova app
+      if (window.cordova) {
+        getIdentifier(
+          data => {
+            this.setState({ cordovaDev: data.indexOf('pirateflix_dev') !== -1 });
+          },
+          err => console.error(err)
+        );
+      }
+    });
 
     // Update on hash change
     window.addEventListener('hashchange', this.updateHash);
@@ -1002,6 +1014,13 @@ class MovieList extends Component {
               toggleViewMode={this.toggleViewMode}
             />
           )}
+
+          {window.cordova && this.state.cordovaDev ? (
+            <div className="cordovaDev">
+              <FaFlask />
+              DEV
+            </div>
+          ) : null}
 
           {type === 'downloads' ? (
             <TorrentList

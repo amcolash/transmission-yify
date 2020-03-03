@@ -25,6 +25,20 @@
   justify-content: center;
 }
 
+.cordovaDev {
+  position: absolute;
+  top: 1.3em;
+  right: 0.8em;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: lime;
+}
+
+.cordovaDev svg {
+  margin-top: -0.15em;
+  margin-right: 0.35em;
+}
+
 .arrow {
   font-size: 1.25em;
 }
