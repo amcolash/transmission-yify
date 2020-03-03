@@ -7,6 +7,7 @@ import openSocket from 'socket.io-client';
 
 import Order from '../../Data/Order';
 import Cache from '../../Util/Cache';
+import { alert, cacheClear, confirm, prompt } from '../../Util/cordova-plugins';
 import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import Analytics from './Analytics';
@@ -147,7 +148,7 @@ class MovieList extends Component {
 
         const lastBuild = window.localStorage.getItem('lastBuild');
         if (window.cordova && data.buildTime !== lastBuild) {
-          window.cordova.exec(
+          cacheClear(
             status => {
               console.log(status);
               window.localStorage.setItem('lastBuild', data.buildTime);
@@ -157,10 +158,7 @@ class MovieList extends Component {
             },
             error => {
               console.error(error);
-            },
-            'CacheClear',
-            'task',
-            []
+            }
           );
         }
       }
@@ -474,34 +472,34 @@ class MovieList extends Component {
   };
 
   downloadTorrent = (version, asktv) => {
-    let tv = version.tv;
-    if (asktv) tv = window.confirm('Is this a tv show?');
-
-    this.setState({
-      started: [...this.state.started, version.hashString],
-    });
-
-    hashMapping[version.hashString] = version.title;
-
-    // fix dead links
-    let url = version.url;
-    if (url.indexOf('nyaa.se') !== -1)
-      url =
-        url
-          .replace('nyaa.se', 'nyaa.si')
-          .replace('?page=download', 'download/')
-          .replace('&tid=', '') + '.torrent';
-
-    axios.post(this.server + '/torrents', { url, tv }).catch(error => {
-      console.error(error);
-
-      // Reset started state if download failed
+    const callback = tv => {
       this.setState({
-        started: this.state.started.filter(item => item !== version.hashString),
+        started: [...this.state.started, version.hashString],
       });
-    });
 
-    // this.torrentList.expand();
+      hashMapping[version.hashString] = version.title;
+
+      // fix dead links
+      let url = version.url;
+      if (url.indexOf('nyaa.se') !== -1)
+        url =
+          url
+            .replace('nyaa.se', 'nyaa.si')
+            .replace('?page=download', 'download/')
+            .replace('&tid=', '') + '.torrent';
+
+      axios.post(this.server + '/torrents', { url, tv }).catch(error => {
+        console.error(error);
+
+        // Reset started state if download failed
+        this.setState({
+          started: this.state.started.filter(item => item !== version.hashString),
+        });
+      });
+    };
+
+    if (asktv && window.cordova) confirm('Is this a tv show?', button => callback(button === 2), 'Confirm', ['No', 'Yes']);
+    else callback(asktv ? window.confirm('Is this a tv show?') : version.tv);
   };
 
   addMagnet = () => {
@@ -517,37 +515,92 @@ class MovieList extends Component {
   };
 
   upgrade = () => {
-    const key = localStorage.getItem('key') || window.prompt('Password?', '');
-    if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to upgrade the server?')) return;
-    axios
-      .post(this.server + '/upgrade?upgradeKey=' + key)
-      .then(response => {
-        localStorage.setItem('key', key);
-        console.log(response.data);
-        alert('Starting upgrade');
-      })
-      .catch(err => {
-        localStorage.removeItem('key');
-        console.error(err);
-        alert('Something went wrong...');
-      });
+    const promptCallback = key => {
+      if (!key || key.length === 0) return;
+      if (window.cordova)
+        confirm(
+          'Are you sure you would like to upgrade the server?',
+          button => {
+            if (button === 2) confirmCallback(key);
+          },
+          'Confirm',
+          ['No', 'Yes']
+        );
+      else if (window.confirm('Are you sure you would like to upgrade the server?')) confirmCallback(key);
+    };
+
+    const confirmCallback = key => {
+      axios
+        .post(this.server + '/upgrade?upgradeKey=' + key)
+        .then(response => {
+          localStorage.setItem('key', key);
+          console.log(response.data);
+          if (window.cordova) alert('Starting upgrade', () => {}, 'Success');
+          else window.alert('Starting upgrade');
+        })
+        .catch(err => {
+          localStorage.removeItem('key');
+          console.error(err);
+          if (window.cordova) alert('Something went wrong...', () => {}, 'Error');
+          else window.alert('Something went wrong...');
+        });
+    };
+
+    let key = localStorage.getItem('key');
+    if (key) {
+      promptCallback(key);
+    } else {
+      if (window.cordova)
+        prompt('Password?', results => {
+          if (results.buttonIndex === 1) promptCallback(results.input1);
+        });
+      else key = promptCallback(window.prompt('Password?', ''));
+    }
   };
 
   clearCache = () => {
-    const key = localStorage.getItem('key') || window.prompt('Password?', '');
-    if (localStorage.getItem('key') && !window.confirm('Are you sure you would like to clear the cache?')) return;
-    axios
-      .delete(this.server + '/cache?key=' + key)
-      .then(response => {
-        localStorage.setItem('key', key);
-        console.log(response.data);
-        alert('Clearing Cache');
-      })
-      .catch(err => {
-        localStorage.removeItem('key');
-        console.error(err);
-        alert('Something went wrong...');
-      });
+    const promptCallback = key => {
+      if (!key || key.length === 0) return;
+      if (window.cordova)
+        confirm(
+          'Are you sure you would like to clear the cache?',
+          button => {
+            if (button === 2) confirmCallback(key);
+          },
+          'Confirm',
+          ['No', 'Yes']
+        );
+      else if (window.confirm('Are you sure you would like to clear the cache?')) confirmCallback(key);
+    };
+
+    const confirmCallback = key => {
+      axios
+        .delete(this.server + '/cache?key=' + key)
+        .then(response => {
+          localStorage.setItem('key', key);
+          console.log(response.data);
+          if (window.cordova) alert('Clearing Cache', () => {}, 'Success');
+          else window.alert('Clearing Cache');
+        })
+        .catch(err => {
+          localStorage.removeItem('key');
+          console.error(err);
+          if (window.cordova) alert('Something went wrong...', () => {}, 'Error');
+          else window.alert('Something went wrong...');
+        });
+    };
+
+    let key = localStorage.getItem('key');
+    if (key) {
+      promptCallback(key);
+    } else {
+      if (window.cordova)
+        prompt('Password?', results => {
+          console.log(results);
+          if (results.buttonIndex === 1) promptCallback(results.input1);
+        });
+      else key = promptCallback(window.prompt('Password?', ''));
+    }
   };
 
   getTorrent(hashString) {
@@ -610,8 +663,8 @@ class MovieList extends Component {
 
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
-        // covers[currentIndex].scrollIntoView(false);
-        covers[currentIndex].focus();
+        const currentCover = covers[currentIndex];
+        if (currentCover) currentCover.focus();
       }
     });
   };
