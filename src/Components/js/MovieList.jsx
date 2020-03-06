@@ -42,8 +42,8 @@ class MovieList extends Component {
     }
 
     let type, media;
-    if (window.location.search.length > 0) type = window.location.search.substring(1);
-    if (window.location.hash.length > 0) media = { id: window.location.hash.substring(1) };
+    if (window.location.search.length > 0 && !window.cordova) type = window.location.search.substring(1);
+    if (window.location.hash.length > 0 && !window.cordova) media = { id: window.location.hash.substring(1) };
 
     let isLoaded = type !== 'movies' && type !== 'shows' && type !== 'animes';
 
@@ -663,14 +663,18 @@ class MovieList extends Component {
 
       // Precache previous background image
       if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
-        const tempImg = new Image();
-        tempImg.src = 'https://image.tmdb.org/t/p/w1280' + this.state.results[currentIndex - 1].backdrop_path;
+        const largeImg = new Image();
+        largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex - 1].backdrop_path;
+        const smallImg = new Image();
+        smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex - 1].backdrop_path;
       }
 
       // Precache next background image
       if (currentIndex < this.state.results.length - 1 && this.state.results[currentIndex + 1].backdrop_path) {
-        const tempImg = new Image();
-        tempImg.src = 'https://image.tmdb.org/t/p/w1280' + this.state.results[currentIndex + 1].backdrop_path;
+        const largeImg = new Image();
+        largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex + 1].backdrop_path;
+        const smallImg = new Image();
+        smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex + 1].backdrop_path;
       }
 
       if (currentIndex !== -1 && this.listRef.current) {

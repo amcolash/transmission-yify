@@ -19,6 +19,7 @@ import {
   parseHorribleSubs,
   parseMedia,
 } from '../../Util/Parse';
+import MultiImage from './MultiImage';
 import Ratings from './Ratings';
 import Spinner from './Spinner';
 import Version from './Version';
@@ -375,14 +376,16 @@ class DetailsBackdrop extends Component {
       },
     };
 
-    const backgroundImage =
+    const backgroundUrl =
       type === 'animes'
         ? moreData && moreData !== 'ERROR'
-          ? `url(${moreData.CoverImage})`
+          ? `${moreData.CoverImage}`
           : ''
         : backdrop
-        ? `url(https://image.tmdb.org/t/p/w1280${backdrop})`
+        ? `https://image.tmdb.org/t/p/w300${backdrop}`
         : 'unset';
+
+    const backgroundImage = backgroundUrl.indexOf('http') !== -1 ? `url(${backgroundUrl})` : backgroundUrl;
 
     let recommendations =
       tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;
@@ -527,7 +530,8 @@ class DetailsBackdrop extends Component {
                     <div className="video" key={v.key}>
                       <img
                         src={`https://img.youtube.com/vi/${v.key}/0.jpg`}
-                        alt="video thumbnail"
+                        loading="lazy"
+                        alt={v.name}
                         onClick={() => this.playYoutubeVideo(v.key)}
                         onKeyDown={e => {
                           if (e.key === 'Enter') this.playYoutubeVideo(v.key);
@@ -732,7 +736,7 @@ class DetailsBackdrop extends Component {
                               });
                           }}
                         >
-                          <img src={r.poster_path} alt="" />
+                          <img src={r.poster_path} alt={r.title} loading="lazy" />
                           <div className="title">{r.title}</div>
                         </div>
                       );
@@ -764,7 +768,8 @@ class DetailsBackdrop extends Component {
         {innerContent}
       </Modal>
     ) : (
-      <div className="backdropCarousel" style={{ backgroundImage, backgroundColor: '#444' }}>
+      <div className="backdropCarousel" style={{ backgroundColor: '#444', position: 'relative' }}>
+        <MultiImage src={backgroundUrl} />
         {innerContent}
       </div>
     );
