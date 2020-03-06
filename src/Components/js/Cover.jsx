@@ -7,6 +7,7 @@ import React, { Component, Fragment } from 'react';
 import { FaDownload, FaExclamationCircle, FaFilm, FaLaughBeam, FaPlayCircle, FaRssSquare, FaTrash, FaTv } from 'react-icons/fa';
 
 import Cache from '../../Util/Cache';
+import { confirm } from '../../Util/cordova-plugins';
 import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import ScrollAnimation from './ScrollAnimation';
@@ -217,9 +218,19 @@ class Cover extends Component {
                           e.nativeEvent.stopImmediatePropagation();
                           if (
                             !fileExists ||
-                            window.confirm('This file already exists in plex. Are you sure you want to download it again?')
+                            (!window.cordova &&
+                              window.confirm('This file already exists in plex. Are you sure you want to download it again?'))
                           ) {
                             downloadTorrent(version);
+                          } else if (window.cordova) {
+                            confirm(
+                              'This file already exists in plex. Are you sure you want to download it again?',
+                              button => {
+                                if (button === 2) downloadTorrent(version);
+                              },
+                              'Confirm',
+                              ['No', 'Yes']
+                            );
                           }
                         }}
                       >

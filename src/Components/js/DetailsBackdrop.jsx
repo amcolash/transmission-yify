@@ -8,6 +8,7 @@ import YouTube from 'react-youtube';
 
 import Genre from '../../Data/Genre';
 import Cache from '../../Util/Cache';
+import { confirm } from '../../Util/cordova-plugins';
 import {
   getDetails,
   getEpisodes,
@@ -607,8 +608,22 @@ class DetailsBackdrop extends Component {
                       getProgress={getProgress}
                       getTorrent={getTorrent}
                       downloadTorrent={version => {
-                        if (!fileExists || window.confirm('This file already exists in plex. Are you sure you want to download it again?'))
+                        if (
+                          !fileExists ||
+                          (!window.cordova &&
+                            window.confirm('This file already exists in plex. Are you sure you want to download it again?'))
+                        ) {
                           downloadTorrent(version);
+                        } else if (window.cordova) {
+                          confirm(
+                            'This file already exists in plex. Are you sure you want to download it again?',
+                            button => {
+                              if (button === 2) downloadTorrent(version);
+                            },
+                            'Confirm',
+                            ['No', 'Yes']
+                          );
+                        }
                       }}
                       cancelTorrent={cancelTorrent}
                       hideInfo={true}
