@@ -136,9 +136,7 @@ class MovieList extends Component {
     socket.on('connect', data => {
       socket.emit('subscribe', 'torrents');
       socket.emit('subscribe', 'status');
-
-      // Weird performance hack, this helps since it seems the server blocks while sending info and cannot get cover info
-      setTimeout(() => socket.emit('subscribe', 'files'), 5000);
+      socket.emit('subscribe', 'files');
     });
 
     // If something fails with connecting, reset to defaults
@@ -1131,7 +1129,7 @@ class MovieList extends Component {
               getTorrent={this.getTorrent}
               onOpenModal={this.onOpenModal}
               onCloseModal={this.onCloseModal}
-              files={type === 'movies' ? this.state.files : []} // only show downloaded files for movies
+              files={type === 'movies' && viewMode === 'standard' ? this.state.files : []} // only show downloaded files for movies
               status={status}
               toggleSubscription={this.toggleSubscription}
               viewMode={viewMode}
