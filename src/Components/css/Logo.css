@@ -1,5 +1,6 @@
 .logoContainer {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100vw;
@@ -9,6 +10,12 @@
 .logo {
   width: 55vw;
   height: 55vh;
+  transform: scale(0);
+  animation: 3.5s scaleLogo forwards;
+}
+
+.logoContainer .text {
+  font-size: 2em;
   transform: scale(0);
   animation: 3.5s scaleLogo forwards;
 }

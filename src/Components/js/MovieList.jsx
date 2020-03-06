@@ -163,6 +163,7 @@ class MovieList extends Component {
               console.log(status);
               window.localStorage.setItem('lastBuild', data.buildTime);
               window.localStorage.setItem('viewMode', this.state.viewMode);
+              window.localStorage.setItem('update', true);
 
               window.location.reload(true);
             },
