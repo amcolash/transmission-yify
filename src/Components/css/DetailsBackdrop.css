@@ -28,20 +28,6 @@
   transition: all 0.5s;
 }
 
-.search.collapsed,
-.search.carousel.collapsed,
-.movie-list.collapsed,
-.movie-list.collapsed .cover {
-  height: 0;
-  min-height: 0;
-  padding: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-  border-top: 0;
-  border-bottom: 0;
-  overflow-x: hidden;
-}
-
 .backdropCarousel .fileExists {
   display: inline-block;
 }

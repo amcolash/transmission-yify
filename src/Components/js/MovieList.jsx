@@ -695,11 +695,9 @@ class MovieList extends Component {
     if (backdrop) {
       const focused = backdrop.contains(e.target);
       backdrop.classList.toggle('expanded', focused);
-      const search = document.querySelector('.search');
-      if (search) search.classList.toggle('collapsed', focused);
-      const movieList = document.querySelector('.movie-list');
-      if (movieList) movieList.classList.toggle('collapsed', focused);
-      const menu = document.querySelector('.menu');
+      const top = document.querySelector('.carouselTop');
+      if (top) top.classList.toggle('collapsed', focused);
+      const menu = document.querySelector('.carouselMenuButton');
       if (menu) menu.classList.toggle('collapsed', focused);
     }
   }
@@ -1053,7 +1051,7 @@ class MovieList extends Component {
           ) : type === 'analytics' ? (
             <Analytics server={this.server} />
           ) : !logo && isLoaded ? (
-            <Fragment>
+            <div className="carouselTop">
               <Search
                 updateSearch={this.updateSearch}
                 isSearching={this.state.isSearching}
@@ -1116,7 +1114,7 @@ class MovieList extends Component {
                   />
                 )}
               </div>
-            </Fragment>
+            </div>
           ) : null}
           {type === 'movies' || type === 'shows' || type === 'animes' || (type === 'subscriptions' && viewMode === 'standard') ? (
             <DetailsBackdrop

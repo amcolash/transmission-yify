@@ -108,6 +108,12 @@
   padding: 0.15em 0.3em;
   z-index: 2;
   font-size: 1.35em;
+  opacity: 1;
+  transition: all 0.5s;
+}
+
+.carouselMenuButton.collapsed {
+  opacity: 0;
 }
 
 .cordova .carouselMenuButton {
