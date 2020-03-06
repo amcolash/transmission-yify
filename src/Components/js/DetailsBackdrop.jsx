@@ -390,7 +390,7 @@ class DetailsBackdrop extends Component {
     let recommendations =
       tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;
 
-    const innerContent = (
+    const innerContent = !media.id ? null : (
       <div
         ref={this.containerRef}
         className={'backdropContainer ' + viewMode}
@@ -548,205 +548,213 @@ class DetailsBackdrop extends Component {
             </div>
           </div>
         ) : null}
-        <div className="spacer"></div>
-        {media.id ? (
+        {viewMode === 'carousel' && !window.cordova ? (
           <div
-            className={'right' + (tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? ' videos' : '')}
-            onClick={e => e.stopPropagation()}
-            tabIndex="-1"
+            className="closeButton"
+            tabIndex="0"
+            onClick={e => {
+              e.preventDefault();
+              const menu = document.querySelector('.carouselMenuButton');
+              if (menu) menu.focus();
+            }}
           >
-            <div className="details" tabIndex="0">
-              <div className="plot padding">{details.plot}</div>
-              {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
-
-              {type === 'movies' ? (
-                moreData !== 'ERROR' && moreData !== null ? (
-                  <Fragment>
-                    {details.director ? <div className="padding">{details.director}</div> : null}
-                    {details.writers ? <div className="padding">{details.writers}</div> : null}
-                    <div className="padding">Actors: {moreData.Actors}</div>
-                  </Fragment>
-                ) : (
-                  <Fragment>
-                    {moreData === 'ERROR' || moreData !== null ? null : (
-                      <Fragment>
-                        <span>
-                          Loading additional data...
-                          <Spinner visible />
-                        </span>
-                      </Fragment>
-                    )}
-                  </Fragment>
-                )
-              ) : null}
-            </div>
-
-            <br />
+            <FaTimes />
+          </div>
+        ) : null}
+        <div className="spacer"></div>
+        <div
+          className={'right' + (tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? ' videos' : '')}
+          onClick={e => e.stopPropagation()}
+          tabIndex="-1"
+        >
+          <div className="details" tabIndex="0">
+            <div className="plot padding">{details.plot}</div>
+            {details.genres ? <div className="capitalize padding">{details.genres}</div> : null}
 
             {type === 'movies' ? (
-              pb ? (
-                versions.length > 0 ? (
-                  <div className="versions">
-                    {versions.map(version => (
-                      <Version
-                        key={version.hashString}
-                        version={version}
-                        started={started}
-                        getProgress={getProgress}
-                        getTorrent={getTorrent}
-                        downloadTorrent={version => {
-                          if (
-                            !fileExists ||
-                            window.confirm('This file already exists in plex. Are you sure you want to download it again?')
-                          )
-                            downloadTorrent(version);
-                        }}
-                        cancelTorrent={cancelTorrent}
-                        hideInfo={true}
-                        hideBar={true}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <h4>No Torrents Found</h4>
-                )
+              moreData !== 'ERROR' && moreData !== null ? (
+                <Fragment>
+                  {details.director ? <div className="padding">{details.director}</div> : null}
+                  {details.writers ? <div className="padding">{details.writers}</div> : null}
+                  <div className="padding">Actors: {moreData.Actors}</div>
+                </Fragment>
               ) : (
+                <Fragment>
+                  {moreData === 'ERROR' || moreData !== null ? null : (
+                    <Fragment>
+                      <span>
+                        Loading additional data...
+                        <Spinner visible />
+                      </span>
+                    </Fragment>
+                  )}
+                </Fragment>
+              )
+            ) : null}
+          </div>
+
+          <br />
+
+          {type === 'movies' ? (
+            pb ? (
+              versions.length > 0 ? (
+                <div className="versions">
+                  {versions.map(version => (
+                    <Version
+                      key={version.hashString}
+                      version={version}
+                      started={started}
+                      getProgress={getProgress}
+                      getTorrent={getTorrent}
+                      downloadTorrent={version => {
+                        if (!fileExists || window.confirm('This file already exists in plex. Are you sure you want to download it again?'))
+                          downloadTorrent(version);
+                      }}
+                      cancelTorrent={cancelTorrent}
+                      hideInfo={true}
+                      hideBar={true}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <h4>No Torrents Found</h4>
+              )
+            ) : (
+              <span>
+                Loading torrent data...
+                <Spinner visible />
+              </span>
+            )
+          ) : (
+            <Fragment>
+              {loadingEpisodes ? (
                 <span>
                   Loading torrent data...
                   <Spinner visible />
                 </span>
-              )
-            ) : (
-              <Fragment>
-                {loadingEpisodes ? (
-                  <span>
-                    Loading torrent data...
-                    <Spinner visible />
-                  </span>
-                ) : null}
-                {!eztv && !nyaa ? null : episodes.length === 0 ? (
-                  <h4>No Torrents Found</h4>
-                ) : (
-                  <Fragment>
-                    <h3 className="season">
-                      Season
-                      {seasons.length > 1 ? (
-                        <select onChange={event => this.updateSeason(event.target.value)} value={season}>
-                          {seasons.map(season => (
-                            <option key={season} value={season}>
-                              {season}
-                            </option>
+              ) : null}
+              {!eztv && !nyaa ? null : episodes.length === 0 ? (
+                <h4>No Torrents Found</h4>
+              ) : (
+                <Fragment>
+                  <h3 className="season">
+                    Season
+                    {seasons.length > 1 ? (
+                      <select onChange={event => this.updateSeason(event.target.value)} value={season}>
+                        {seasons.map(season => (
+                          <option key={season} value={season}>
+                            {season}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      ' 1'
+                    )}
+                    {episodes[season] && episodes[season].length > 0 ? (
+                      <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
+                        <FaDownload />
+                      </button>
+                    ) : null}
+                  </h3>
+                  {horribleSubs && horribleSubs.length > 0 ? (
+                    <div>
+                      <h4 className="episode">
+                        <FaStar className="purple" />
+                        Horrible Subs Bundle (ep {horribleSubs[0].episode})
+                        <FaStar className="purple" />
+                      </h4>
+                      <div className="versions">
+                        {horribleSubs
+                          .sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality))
+                          .map(t => (
+                            <Version
+                              key={t.filename + t.quality}
+                              version={t}
+                              started={started}
+                              getProgress={getProgress}
+                              getTorrent={getTorrent}
+                              downloadTorrent={downloadTorrent}
+                              cancelTorrent={cancelTorrent}
+                              hideInfo={true}
+                              hideBar={true}
+                            />
                           ))}
-                        </select>
-                      ) : (
-                        ' 1'
-                      )}
-                      {episodes[season] && episodes[season].length > 0 ? (
-                        <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
-                          <FaDownload />
-                        </button>
-                      ) : null}
-                    </h3>
-                    {horribleSubs && horribleSubs.length > 0 ? (
-                      <div>
-                        <h4 className="episode">
-                          <FaStar className="purple" />
-                          Horrible Subs Bundle (ep {horribleSubs[0].episode})
-                          <FaStar className="purple" />
-                        </h4>
-                        <div className="versions">
-                          {horribleSubs
-                            .sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality))
-                            .map(t => (
-                              <Version
-                                key={t.filename + t.quality}
-                                version={t}
-                                started={started}
-                                getProgress={getProgress}
-                                getTorrent={getTorrent}
-                                downloadTorrent={downloadTorrent}
-                                cancelTorrent={cancelTorrent}
-                                hideInfo={true}
-                                hideBar={true}
-                              />
-                            ))}
-                        </div>
-                        <hr />
                       </div>
-                    ) : null}
-                    {(type === 'shows' || type === 'subscriptions') && moreData && moreData.seasons && moreData.seasons[season - 1] ? (
-                      <span>{moreData.seasons[season - 1].overview}</span>
-                    ) : null}
-                    <div className="episodeList">
-                      {episodes[season] && episodes[season].length > 0
-                        ? episodes[season].map(episode =>
-                            episode ? (
-                              <Fragment key={episode.episode}>
-                                <h4 className="episode">{episode.title}</h4>
-
-                                <div className="versions">
-                                  {episode.torrents
-                                    ? episode.torrents.map(version => (
-                                        <Version
-                                          key={version.hashString}
-                                          version={version}
-                                          started={started}
-                                          getProgress={getProgress}
-                                          getTorrent={getTorrent}
-                                          downloadTorrent={downloadTorrent}
-                                          cancelTorrent={cancelTorrent}
-                                          hideInfo={true}
-                                          hideBar={true}
-                                        />
-                                      ))
-                                    : null}
-                                </div>
-                              </Fragment>
-                            ) : null
-                          )
-                        : null}
+                      <hr />
                     </div>
-                  </Fragment>
-                )}
-              </Fragment>
-            )}
+                  ) : null}
+                  {(type === 'shows' || type === 'subscriptions') && moreData && moreData.seasons && moreData.seasons[season - 1] ? (
+                    <span>{moreData.seasons[season - 1].overview}</span>
+                  ) : null}
+                  <div className="episodeList">
+                    {episodes[season] && episodes[season].length > 0
+                      ? episodes[season].map(episode =>
+                          episode ? (
+                            <Fragment key={episode.episode}>
+                              <h4 className="episode">{episode.title}</h4>
 
-            {recommendations && recommendations.length > 0 ? (
-              <Fragment>
-                <h4>You Might Also Like...</h4>
-                <div className="recommendationContainer">
-                  <div className="recommendations" tabIndex="-1">
-                    {recommendations.map(r => {
-                      const recommendation = parseMedia(r, 'movies');
+                              <div className="versions">
+                                {episode.torrents
+                                  ? episode.torrents.map(version => (
+                                      <Version
+                                        key={version.hashString}
+                                        version={version}
+                                        started={started}
+                                        getProgress={getProgress}
+                                        getTorrent={getTorrent}
+                                        downloadTorrent={downloadTorrent}
+                                        cancelTorrent={cancelTorrent}
+                                        hideInfo={true}
+                                        hideBar={true}
+                                      />
+                                    ))
+                                  : null}
+                              </div>
+                            </Fragment>
+                          ) : null
+                        )
+                      : null}
+                  </div>
+                </Fragment>
+              )}
+            </Fragment>
+          )}
 
-                      return (
-                        <div
-                          key={r.id}
-                          className="item"
-                          tabIndex="0"
-                          onClick={() => {
+          {recommendations && recommendations.length > 0 ? (
+            <Fragment>
+              <h4>You Might Also Like...</h4>
+              <div className="recommendationContainer">
+                <div className="recommendations" tabIndex="-1">
+                  {recommendations.map(r => {
+                    const recommendation = parseMedia(r, 'movies');
+
+                    return (
+                      <div
+                        key={r.id}
+                        className="item"
+                        tabIndex="0"
+                        onClick={() => {
+                          this.setState(this.getDefaultState(), () => {
+                            onOpenModal(recommendation);
+                          });
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter')
                             this.setState(this.getDefaultState(), () => {
                               onOpenModal(recommendation);
                             });
-                          }}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter')
-                              this.setState(this.getDefaultState(), () => {
-                                onOpenModal(recommendation);
-                              });
-                          }}
-                        >
-                          <img src={r.poster_path} alt={r.title} loading="lazy" />
-                          <div className="title">{r.title}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        }}
+                      >
+                        <img src={r.poster_path} alt={r.title} loading="lazy" />
+                        <div className="title">{r.title}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </Fragment>
-            ) : null}
-          </div>
-        ) : null}
+              </div>
+            </Fragment>
+          ) : null}
+        </div>
       </div>
     );
 
@@ -768,7 +776,7 @@ class DetailsBackdrop extends Component {
         {innerContent}
       </Modal>
     ) : (
-      <div className="backdropCarousel" style={{ backgroundColor: '#444', position: 'relative' }}>
+      <div className="backdropCarousel" style={{ position: 'relative' }}>
         <MultiImage src={backgroundUrl} />
         {innerContent}
       </div>

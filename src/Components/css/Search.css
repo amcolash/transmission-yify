@@ -11,30 +11,6 @@
   border-bottom: none;
 }
 
-.search.carousel input,
-.search.carousel select {
-  border-radius: 0;
-  background-color: #666;
-  padding: 0.5em;
-}
-
-.search.carousel input,
-.search.carousel select,
-.search.carousel input::placeholder {
-  color: #ccc;
-}
-
-.search.carousel input:focus::placeholder {
-  color: #999;
-}
-
-.search.carousel input:focus,
-.search.carousel select:focus {
-  outline: none;
-  background-color: #eee;
-  color: #333;
-}
-
 .search button {
   margin-top: 0.35em;
 }

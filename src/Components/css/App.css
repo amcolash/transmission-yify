@@ -172,6 +172,30 @@ select {
   height: 2.2em;
 }
 
+.carousel input,
+.carousel select {
+  border-radius: 0;
+  background-color: #666;
+  padding: 0.5em;
+}
+
+.carousel input,
+.carousel select,
+.carousel input::placeholder {
+  color: #ccc;
+}
+
+.carousel input:focus::placeholder {
+  color: #999;
+}
+
+.carousel input:focus,
+.carousel select:focus {
+  outline: none;
+  background-color: #eee;
+  color: #333;
+}
+
 .spacer {
   flex: 1;
 }

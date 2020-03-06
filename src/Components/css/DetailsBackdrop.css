@@ -214,6 +214,19 @@
   max-height: calc(100% - 9em);
 }
 
+.backdropCarousel .closeButton {
+  opacity: 0;
+  position: absolute;
+  padding: 0.15em 0.25em;
+  top: 1em;
+  right: 1em;
+  transition: all 0.5s;
+}
+
+.backdropCarousel.expanded .closeButton {
+  opacity: 1;
+}
+
 .backdropContainer .right .padding {
   padding: 0.45em 0;
 }
