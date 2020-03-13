@@ -975,6 +975,12 @@ class MovieList extends Component {
     // Make it a tiny bit quicker on local dev
     const logo = process.env.NODE_ENV === 'development' ? false : showLogo;
 
+    // This is a terrible hack but I don't have the patience to do it better
+    const searchEl = document.querySelector('.search');
+    let movieListStyle = {};
+    if (searchEl && viewMode === 'standard')
+      movieListStyle = { maxHeight: `calc(100vh - ${searchEl.getBoundingClientRect().height + 30}px)` };
+
     if (error) {
       return (
         <div className="message">
@@ -1064,7 +1070,7 @@ class MovieList extends Component {
                 baseHeight={height}
               />
 
-              <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll}>
+              <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll} style={movieListStyle}>
                 {isSearching && this.state.page === 1 ? null : type === 'pirate' ? (
                   results && results.torrents && results.torrents.length > 0 ? (
                     <div className="pirateList">

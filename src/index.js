@@ -21,7 +21,6 @@ document.body.onload = () => {
 
   // Prevent scrolling the root element
   root.onscroll = e => {
-    if (viewMode === 'standard') return;
     e.preventDefault();
     root.scrollTop = 0;
   };

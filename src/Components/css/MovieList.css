@@ -62,6 +62,7 @@
   scroll-behavior: smooth;
 }
 
+/* Backup in case js doesn't work properly in render */
 .movie-list.standard {
   max-height: 85vh;
 }
@@ -73,7 +74,7 @@
   margin-bottom: 1em;
 }
 
-.carouselTop {
+.carousel .carouselTop {
   transition: all 0.5s;
   max-height: 30em;
 }
