@@ -8,11 +8,6 @@ const startApp = () => ReactDOM.render(<App />, document.getElementById('root'))
 document.body.onload = () => {
   console.log('cordova? ', window.cordova);
   const root = document.getElementById('root');
-  // Prevent scrolling the root element
-  root.onscroll = e => {
-    e.preventDefault();
-    root.scrollTop = 0;
-  };
 
   if (!window.cordova) {
     startApp();
@@ -23,6 +18,13 @@ document.body.onload = () => {
 
   let viewMode = window.localStorage.getItem('viewMode');
   if (!viewMode) viewMode = window.cordova ? 'carousel' : 'standard';
+
+  // Prevent scrolling the root element
+  root.onscroll = e => {
+    if (viewMode === 'standard') return;
+    e.preventDefault();
+    root.scrollTop = 0;
+  };
 
   root.classList.add(viewMode);
 };
