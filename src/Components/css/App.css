@@ -15,12 +15,13 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 #root.carousel {
   background-color: #222;
   color: #ddd;
+  overflow: hidden;
 }
 
 #root.cordova {
