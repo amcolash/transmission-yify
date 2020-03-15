@@ -6,21 +6,29 @@ export default class MultiImage extends Component {
     this.state = { finalImage: null };
   }
 
+  componentDidMount() {
+    this.updateImage();
+  }
+
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.src !== prevProps.src) {
-      const src = this.props.src;
-      if (src.indexOf('image.tmdb') !== -1) {
-        const finalImage = src.replace('w300', 'original');
-        const image = new Image();
-        image.src = finalImage;
-
-        image.onload = () => {
-          this.setState({ finalImage });
-        };
-      }
-
-      this.setState({ finalImage: null });
+      this.updateImage();
     }
+  }
+
+  updateImage() {
+    const src = this.props.src;
+    if (src.indexOf('image.tmdb') !== -1) {
+      const finalImage = src.replace('w300', 'original');
+      const image = new Image();
+      image.src = finalImage;
+
+      image.onload = () => {
+        this.setState({ finalImage });
+      };
+    }
+
+    this.setState({ finalImage: null });
   }
 
   render() {

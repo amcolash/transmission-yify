@@ -780,7 +780,6 @@ class DetailsBackdrop extends Component {
         overlayId="overlay"
         onClose={onCloseModal}
         styles={{
-          modal: { backgroundImage },
           closeIcon: { fill: '#bbb', stroke: '#bbb' },
         }}
         closeIconId="closeButton"
@@ -788,6 +787,7 @@ class DetailsBackdrop extends Component {
           initialFocus: '#modalFullscreen #closeButton',
         }}
       >
+        <MultiImage src={backgroundUrl} />
         {innerContent}
       </Modal>
     ) : (
