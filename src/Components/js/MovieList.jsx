@@ -157,20 +157,26 @@ class MovieList extends Component {
         }
 
         const lastBuild = window.localStorage.getItem('lastBuild');
-        if (window.cordova && data.buildTime !== lastBuild) {
-          cacheClear(
-            status => {
-              console.log(status);
-              window.localStorage.setItem('lastBuild', data.buildTime);
-              window.localStorage.setItem('viewMode', this.state.viewMode);
-              window.localStorage.setItem('update', true);
+        if (data.buildTime !== lastBuild) {
+          if (window.cordova) {
+            cacheClear(
+              status => {
+                console.log(status);
+                window.localStorage.setItem('lastBuild', data.buildTime);
+                window.localStorage.setItem('viewMode', this.state.viewMode);
+                window.localStorage.setItem('update', true);
 
-              window.location.reload(true);
-            },
-            error => {
-              console.error(error);
-            }
-          );
+                window.location.reload(true);
+              },
+              error => {
+                console.error(error);
+              }
+            );
+          } else {
+            window.localStorage.setItem('lastBuild', data.buildTime);
+
+            window.location.reload(true);
+          }
         }
       }
     });
