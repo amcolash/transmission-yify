@@ -8,6 +8,11 @@
   align-items: center;
 }
 
+/* Can you actually do this? Not sure but it fixes the styling */
+.ratings a {
+  display: flex;
+}
+
 .ratings img {
   padding-right: 0.3em;
   height: 1.2em;

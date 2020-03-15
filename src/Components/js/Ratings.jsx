@@ -1,6 +1,6 @@
 import '../css/Ratings.css';
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 class Ratings extends Component {
   render() {
@@ -8,11 +8,27 @@ class Ratings extends Component {
 
     if (!moreData || moreData === 'ERROR' || !moreData.Ratings) return null;
 
+    console.log(moreData.Ratings);
+
     return (
       <div className="ratings">
         {moreData.Ratings.map(rating => (
           <div key={rating.Source}>
-            {this.getIcon(rating)} {rating.Value}
+            {rating.Source === 'Internet Movie Database' && !window.cordova && this.props.imdb ? (
+              <a
+                href={`https://imdb.com/title/${this.props.imdb}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'inherit' }}
+                onClick={e => e.stopPropagation()}
+              >
+                {this.getIcon(rating)} {rating.Value}
+              </a>
+            ) : (
+              <Fragment>
+                {this.getIcon(rating)} {rating.Value}
+              </Fragment>
+            )}
           </div>
         ))}
       </div>

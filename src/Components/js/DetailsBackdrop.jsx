@@ -386,8 +386,6 @@ class DetailsBackdrop extends Component {
         ? `https://image.tmdb.org/t/p/w300${backdrop}`
         : 'unset';
 
-    const backgroundImage = backgroundUrl.indexOf('http') !== -1 ? `url(${backgroundUrl})` : backgroundUrl;
-
     let recommendations =
       tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;
 
@@ -469,7 +467,7 @@ class DetailsBackdrop extends Component {
                 </Fragment>
               </h4>
             ) : null}
-            <Ratings moreData={moreData} />
+            <Ratings moreData={moreData} imdb={tmdbData ? tmdbData.imdb_id : null} />
             {details.trailer ? (
               <div
                 className="trailer"
