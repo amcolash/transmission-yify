@@ -776,7 +776,14 @@ class DetailsBackdrop extends Component {
         open={this.props.media !== null && !loading}
         modalId={'modalFullscreen'}
         overlayId="overlay"
-        onClose={onCloseModal}
+        onClose={() => {
+          if (youtubeId) {
+            this.setState({ youtubeId: null });
+            return;
+          }
+
+          onCloseModal();
+        }}
         styles={{
           closeIcon: { fill: '#bbb', stroke: '#bbb' },
         }}
