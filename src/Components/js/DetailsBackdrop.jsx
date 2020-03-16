@@ -89,7 +89,7 @@ class DetailsBackdrop extends Component {
 
   handleEztv(data) {
     // If we loaded data for another show, don't handle it now
-    if (data.title !== this.props.media.title) return;
+    if (data.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
 
     if (data.torrents) {
       const moreData = this.state.moreData;
@@ -102,9 +102,7 @@ class DetailsBackdrop extends Component {
         }
       });
 
-      this.setState({ eztv: data, season: maxSeason, maxSeason }, () => {
-        this.setState({ loadingEpisodes: false });
-      });
+      this.setState({ eztv: data, season: maxSeason, maxSeason, loadingEpisodes: false });
     } else {
       this.setState({ loadingEpisodes: false });
     }
@@ -642,7 +640,7 @@ class DetailsBackdrop extends Component {
             <Fragment>
               {loadingEpisodes ? (
                 <span>
-                  Loading torrent data...
+                  Loading torrent data - episodes...
                   <Spinner visible />
                 </span>
               ) : null}

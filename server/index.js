@@ -361,6 +361,10 @@ app.get('/pirate/:search/:precache?', function(req, res) {
   }
 });
 
+app.get('/eztv_shows', function(req, res) {
+  res.send(getEZTVShows());
+});
+
 app.get('/eztv/:search', function(req, res) {
   const search = req.params.search;
   const match = searchShow(search, getEZTVShows());
