@@ -64,7 +64,7 @@
 
 /* Backup in case js doesn't work properly in render */
 .movie-list.standard {
-  max-height: 85vh;
+  max-height: 100vh;
 }
 
 .movie-list.carousel {
