@@ -1,5 +1,6 @@
 .torrentList {
   padding-top: 1em;
+  overflow: auto;
 }
 
 .torrentList .innerList {
