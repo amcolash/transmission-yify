@@ -702,7 +702,7 @@ class MovieList extends Component {
       backdrop.classList.toggle('expanded', focused);
       const top = document.querySelector('.carouselTop');
       if (top) top.classList.toggle('collapsed', focused);
-      const menu = document.querySelector('.carouselMenuButton');
+      const menu = document.querySelector('.toggleButton');
       if (menu) menu.classList.toggle('collapsed', focused);
     }
   }
@@ -764,7 +764,7 @@ class MovieList extends Component {
 
     const active = document.activeElement;
 
-    const menuToggleEl = document.querySelector('.carouselMenuButton');
+    const menuToggleEl = document.querySelector('.toggleButton');
     const backdropEl = document.querySelector('.backdropContainer');
     const videosContainerEl = document.querySelector('.otherVideos');
     const videosButtonEl = document.querySelector('.otherVideos .toggle span');
@@ -802,7 +802,7 @@ class MovieList extends Component {
     const active = document.activeElement;
 
     const menuEl = document.querySelector('.menu');
-    const menuToggleEl = document.querySelector('.carouselMenuButton');
+    const menuToggleEl = document.querySelector('.toggleButton');
     const backdropEl = document.querySelector('.backdropContainer');
     const searchEl = document.querySelector('.search .form');
     const videosContainerEl = document.querySelector('.otherVideos');

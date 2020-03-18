@@ -7,7 +7,6 @@
   left: 0;
   width: 14em;
   max-width: calc(100vw - 1em);
-  height: calc(100vh - 1em - 0.2em);
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 3;
@@ -15,11 +14,12 @@
   transition: all 0.5s;
   will-change: transform;
   font-size: 1.35em;
-  background-color: #666;
-  padding: 0.5em;
-  border: 0.1em solid #333;
   box-shadow: 0 0 1em black;
   margin-bottom: -100vh;
+  height: calc(100vh - 2em);
+  padding: 1em;
+  backdrop-filter: saturate(140%) brightness(140%) blur(40px);
+  text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.75);
 }
 
 .menu-darken {
@@ -38,16 +38,12 @@
 }
 
 .menu.hidden {
-  position: sticky;
   transform: translateX(-100%);
   will-change: transform;
   box-shadow: none;
   overflow-x: unset;
   overflow-y: unset;
-}
-
-.menu .spacer {
-  min-width: 3em;
+  position: absolute;
 }
 
 .menu .list {
@@ -59,48 +55,16 @@
   justify-content: flex-start;
 }
 
-.menu .list .item,
-.menu .toggleWrap {
-  border-radius: 0.2em;
-  padding: 0.3em 0.75em;
+.menu .list .item {
+  border-radius: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  margin: 0.15em 0;
+  padding: 0.3em 0.75em;
+  margin: 0.15em -1em 0.15em;
 }
 
-.menu.carousel {
-  height: calc(100vh - 2em);
-  padding: 1em;
-  border: none;
-  background-color: unset;
-  backdrop-filter: saturate(140%) brightness(140%) blur(40px);
-  text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.75);
-}
-
-.menu.carousel.hidden {
-  position: absolute;
-}
-
-.menu.carousel .list .item {
-  border-radius: 0;
-  margin-left: -1em;
-  margin-right: -1em;
-}
-
-.carouselMenuButton:focus,
-.menu.carousel .list .item:focus,
-.menu.carousel .list .item.selected:focus {
-  outline: none;
-  background: #eee;
-  color: #333;
-  text-shadow: none;
-}
-
-.menu.carousel .status {
-  border: none;
-}
-
-.carouselMenuButton {
+.toggleButton {
   position: absolute;
   top: 1em;
   left: 0.5em;
@@ -112,98 +76,36 @@
   transition: all 0.5s;
 }
 
-.carouselMenuButton.collapsed {
-  opacity: 0;
-}
-
-.cordova .carouselMenuButton {
+.cordova .toggleButton {
   padding-bottom: 0.35em;
 }
 
-.carouselMenuButton .warn {
-  right: 0.5em !important;
+.toggleButton.collapsed {
+  opacity: 0;
 }
 
-.menu .toggleWrap span {
-  margin-bottom: -0.2em;
-}
-
-.menu .toggleWrap {
-  position: sticky;
-  top: -0.65em;
-  border-radius: 0;
-  border-bottom: 2px solid #444;
-  margin-bottom: 0.5em;
-  background: #666;
-  padding-top: 0.5em;
-}
-
-.menu .toggle {
-  cursor: pointer;
-  transform: translateX(0.75em);
-  transition: all 0.25s;
-  will-change: transform;
-  opacity: 1;
-}
-
-.menu.hidden .toggle {
-  transform: translateX(225%);
-}
-
-.menu .toggle.carousel {
-  transform: translateY(0);
-}
-
-.menu.hidden .toggle.carousel {
-  transform: translateX(225%);
-}
-
-.menu .toggle .toggleButton {
-  padding: 0.35em;
-  border-radius: 0.1em;
-  transition: all 0.25s;
-}
-
-.menu.hidden .toggle .toggleButton {
-  background: #555;
-}
-
-.menu .toggle .toggleButton:hover {
-  background: #555;
-}
-
-.menu.hidden .toggle .toggleButton:hover {
-  background: #777;
-}
-
-.menu .toggle .warn,
-.carouselMenuButton .warn {
+.toggleButton .warn {
   position: relative;
   top: -0.65em;
-  right: 1em;
+  right: 0.5em;
   margin-right: -1em;
   font-size: 0.75em;
   pointer-events: none;
-}
-
-.menu .list .item {
-  cursor: pointer;
 }
 
 .menu .list .item.disabled {
   cursor: auto;
 }
 
-.menu .list .item.selected {
-  background: #333;
-}
-
-.menu.carousel .list .item.selected {
-  background: #666;
-}
-
-.menu .list .item:not(.selected):not(.disabled):hover {
-  background: #555;
+.toggleButton:hover,
+.toggleButton:focus,
+.menu .list .item:not(.selected):not(.disabled):hover,
+.menu .list .item:focus,
+.menu .list .item.selected:focus {
+  outline: none;
+  background: #eee;
+  color: #333;
+  text-shadow: none;
 }
 
 .menu .list .item span {
@@ -224,7 +126,6 @@
 .menu .status {
   padding-top: 0.75em;
   margin-top: 0.5em;
-  border-top: 2px solid #444;
 }
 
 .menu .status p {

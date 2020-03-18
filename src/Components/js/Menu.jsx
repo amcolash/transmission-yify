@@ -74,8 +74,6 @@ class Menu extends Component {
       if (visible) {
         const currentlySelected = document.querySelector('.menu .selected');
         if (currentlySelected) currentlySelected.focus();
-      } else if (this.menuButton && viewMode === 'standard') {
-        this.menuButton.focus();
       }
     }
   }
@@ -129,25 +127,22 @@ class Menu extends Component {
 
     return (
       <Fragment>
-        {viewMode === 'carousel' ? (
-          <div
-            ref={node => (this.menuButton = node)}
-            className={`carouselMenuButton`}
-            tabIndex="0"
-            onKeyPress={e => {
-              if (e.key === 'Enter') this.setVisible(!this.state.visible);
+        <div
+          ref={node => (this.menuButton = node)}
+          className={`toggleButton`}
+          tabIndex="0"
+          onKeyPress={e => {
+            if (e.key === 'Enter') this.setVisible(!this.state.visible);
+          }}
+        >
+          <FaBars
+            onClick={e => {
+              e.stopPropagation();
+              this.setVisible(!this.state.visible);
             }}
-          >
-            <FaBars
-              className="toggleButton"
-              onClick={e => {
-                e.stopPropagation();
-                this.setVisible(!this.state.visible);
-              }}
-            />
-            {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
-          </div>
-        ) : null}
+          />
+          {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
+        </div>
         <div
           className={`menu ${viewMode}${visible ? '' : ' hidden'}`}
           ref={node => (this.menu = node)}
@@ -159,29 +154,6 @@ class Menu extends Component {
           tabIndex="-1"
         >
           <div className="list">
-            {viewMode === 'standard' ? (
-              <div className="toggleWrap">
-                <span>Pirate Flix</span>
-                <div className="spacer"></div>
-                <div
-                  className={`toggle ${viewMode}`}
-                  ref={node => (this.menuButton = node)}
-                  tabIndex="0"
-                  onKeyPress={e => {
-                    if (e.key === 'Enter') this.setVisible(!this.state.visible);
-                  }}
-                >
-                  <FaBars
-                    className="toggleButton"
-                    onClick={e => {
-                      e.stopPropagation();
-                      this.setVisible(!this.state.visible);
-                    }}
-                  />
-                  {status && status.ip && status.ip.city === 'Seattle' ? <FaExclamationTriangle className="red warn" /> : null}
-                </div>
-              </div>
-            ) : null}
             {this.generateItem(<FaFilm />, 'Movies', 'movies')}
             {this.generateItem(<FaTv />, 'TV Shows', 'shows')}
             {this.generateItem(<FaLaughBeam />, 'Anime', 'animes')}

@@ -551,7 +551,7 @@ class DetailsBackdrop extends Component {
             tabIndex="0"
             onClick={e => {
               e.preventDefault();
-              const menu = document.querySelector('.carouselMenuButton');
+              const menu = document.querySelector('.toggleButton');
               if (menu) menu.focus();
             }}
           >
