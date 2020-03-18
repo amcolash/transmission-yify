@@ -20,6 +20,7 @@ import {
   parseHorribleSubs,
   parseMedia,
 } from '../../Util/Parse';
+import { getPirateSearchUrl } from '../../Util/Util';
 import MultiImage from './MultiImage';
 import Ratings from './Ratings';
 import Spinner from './Spinner';
@@ -258,8 +259,7 @@ class DetailsBackdrop extends Component {
                   });
               }
 
-              const cleanedTitle = media.title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
-              const pirateUrl = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
+              const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
 
               if (Cache[pirateUrl]) {
                 this.setState({ pb: Cache[pirateUrl] });

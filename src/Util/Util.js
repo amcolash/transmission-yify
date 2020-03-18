@@ -42,3 +42,16 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
 
   return propsChanged || stateChanged;
 }
+
+export function getPirateSearchUrl(server, title, year) {
+  let cleanedTitle = title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
+
+  console.log(cleanedTitle);
+
+  // Exceptions for weird cases
+  if (year === 2020 && cleanedTitle === 'Guns Akimbo') year = ''; // There was one released in 2019, just use that
+  if (cleanedTitle.startsWith('Birds of Prey') && year === 2020) cleanedTitle = 'Birds of Prey'; // Shorten the title to match easier
+
+  const url = `${server}/pirate/${cleanedTitle} ${year}?movie=true`;
+  return url;
+}

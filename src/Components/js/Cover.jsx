@@ -9,7 +9,7 @@ import { FaDownload, FaExclamationCircle, FaFilm, FaLaughBeam, FaPlayCircle, FaR
 import Cache from '../../Util/Cache';
 import { confirm } from '../../Util/cordova-plugins';
 import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
-import { shouldUpdate } from '../../Util/Util';
+import { getPirateSearchUrl, shouldUpdate } from '../../Util/Util';
 import ScrollAnimation from './ScrollAnimation';
 import Spinner from './Spinner';
 
@@ -48,12 +48,10 @@ class Cover extends Component {
 
   updatePB() {
     const media = this.props.media;
-    const cleanedTitle = media.title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
-
     this.cancelPB();
 
     this.cancelToken = axios.CancelToken.source();
-    const url = `${this.props.server}/pirate/${cleanedTitle} ${media.year}?movie=true`;
+    const url = getPirateSearchUrl(this.props.server, media.title, media.year);
 
     if (Cache[url]) {
       this.setState({ pb: Cache[url] });
