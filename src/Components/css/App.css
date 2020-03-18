@@ -131,22 +131,12 @@ progress {
 input,
 select {
   margin: 0 0.6em;
-  background-color: white;
+  background-color: #666;
   border: none;
   transition: all 0.3s ease;
-  padding: 0.3em;
+  padding: 0.5em;
   border-color: gray;
   border-radius: 3px;
-}
-
-input:disabled,
-select:disabled {
-  background-color: #aaa;
-}
-
-input:not(:disabled):hover,
-select:not(:disabled):hover {
-  box-shadow: 0px 0px 12px 5px rgba(255, 255, 255, 0.4);
 }
 
 input {
@@ -159,11 +149,6 @@ input {
 }
 
 select {
-  width: 8em;
-  height: 2.1em;
-}
-
-.carousel select {
   width: 7em;
   height: 2.5em;
 }
@@ -172,28 +157,32 @@ select {
   height: 2.2em;
 }
 
-.carousel input,
-.carousel select {
-  border-radius: 0;
-  background-color: #666;
-  padding: 0.5em;
-}
-
-.carousel input,
-.carousel select,
-.carousel input::placeholder {
+input,
+select,
+input::placeholder {
   color: #ccc;
 }
 
-.carousel input:focus::placeholder {
+input:focus::placeholder {
   color: #999;
+}
+
+input:focus,
+select:focus,
+.standard input:hover,
+.standard select:hover {
+  background-color: #eee;
+  color: #333;
 }
 
 .carousel input:focus,
 .carousel select:focus {
   outline: none;
-  background-color: #eee;
-  color: #333;
+}
+
+input:disabled,
+select:disabled {
+  background-color: #aaa;
 }
 
 .spacer {

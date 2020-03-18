@@ -15,30 +15,20 @@
   margin-top: 0.35em;
 }
 
-.search .form,
 .searchItem {
   display: inline-block;
   margin-top: 0.5em;
-}
-
-.carousel .searchItem {
   margin-right: 0.5em;
 }
 
-.search .form,
-.searchItem span {
-  margin-left: 0.75em;
+.searchItem span:not(.mainIcon) {
+  vertical-align: text-top;
 }
 
 .searchItem .iconHover {
   position: relative;
   display: inline-block;
   margin-left: 1.1em;
-  margin-right: -0.5em;
-}
-
-.carousel .searchItem .iconHover {
-  margin-right: 0;
 }
 
 .searchItem .iconHover:hover .icons {

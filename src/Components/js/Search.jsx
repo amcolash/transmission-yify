@@ -63,10 +63,9 @@ class Search extends Component {
                 <FaSkullCrossbones className={type === 'pirate' ? 'active' : ''} onClick={() => updateSearch('', '', '', 'pirate', 1)} />
               </div>
             </div>
-            {viewMode === 'standard' ? <span>Search</span> : null}
             <DebounceInput
               value={search}
-              placeholder={viewMode === 'carousel' ? 'Search' : null}
+              placeholder={'Search'}
               debounceTimeout={500}
               onChange={event => updateSearch(event.target.value, genre, order, type)}
               inputRef={ref => {
