@@ -241,7 +241,7 @@ class Cover extends Component {
                   </Fragment>
                 ))
               ) : pb ? (
-                <span className="red medium">
+                <span className="red medium" title="No Torrents Available">
                   <FaExclamationCircle />
                 </span>
               ) : (
