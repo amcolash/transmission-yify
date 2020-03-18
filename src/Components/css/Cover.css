@@ -102,8 +102,8 @@
   padding: 0.25em;
   background-color: #e5a00d;
   border-top-right-radius: 0.2em;
-  border-top: 0.1em solid white;
-  border-right: 0.1em solid white;
+  border-top: 0.1em solid #777;
+  border-right: 0.1em solid #777;
   transition: all 0.5s ease;
   cursor: pointer;
 }
