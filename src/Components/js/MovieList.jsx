@@ -986,6 +986,8 @@ class MovieList extends Component {
     let movieListStyle = {};
     if (searchEl && viewMode === 'standard')
       movieListStyle = { maxHeight: `calc(100vh - ${searchEl.getBoundingClientRect().height + 30}px)` };
+    if (searchEl && viewMode === 'carousel' && type === 'pirate')
+      movieListStyle = { maxHeight: `calc(100vh - ${searchEl.getBoundingClientRect().height}px)` };
 
     if (error) {
       return (
