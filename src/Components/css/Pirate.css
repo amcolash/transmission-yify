@@ -16,9 +16,10 @@
 }
 
 .pirateRow .title {
-  white-space: nowrap;
+  /* Can't get overlow working but this should be ok... */
   overflow: hidden;
-  text-overflow: ellipsis;
+  max-height: 2.3em;
+  overflow-wrap: break-word;
 }
 
 .pirateRow div:not(.spinner):not(.spacer) {
