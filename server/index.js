@@ -332,13 +332,12 @@ app.get('/pirate/:search/:precache?', function(req, res) {
   const filter = req.query.all ? '/99/0' : '/99/200';
   const cacheName = search + (req.query.page ? `-page${req.query.page}` : '') + (req.query.movie ? '-movie' : '') + filter;
   const trackerCache = getTrackerCache();
-  if (req.params.precache) {
-    res.sendStatus(200);
-    return;
-  }
+
+  // If precache, send a-ok now
+  if (req.params.precache) res.sendStatus(200);
 
   // Add a simple cache here to make things faster on the client
-  if (trackerCache[cacheName]) {
+  if (trackerCache[cacheName] && !req.params.precache) {
     // cache for 6 hours
     if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
     res.send(trackerCache[cacheName]);
@@ -348,14 +347,21 @@ app.get('/pirate/:search/:precache?', function(req, res) {
       .then(results => {
         // Filter if we asked specifically for movies
         if (req.query.movie) results = filterMovieResults(results);
+        trackerCache[cacheName] = results;
+
+        // No response if we are precaching
+        if (req.params.precache) return;
 
         // cache for 6 hours
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(results);
-        trackerCache[cacheName] = results;
       })
       .catch(err => {
         console.error(err);
+
+        // No response if we are precaching
+        if (req.params.precache) return;
+
         res.send({ page: 1, total: 0, limit: 30, torrents: [] });
       });
   }
