@@ -6,7 +6,7 @@
   top: 0;
   left: 0;
   width: 14em;
-  max-width: calc(100vw - 1em);
+  max-width: calc(100vw - 3em);
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 3;

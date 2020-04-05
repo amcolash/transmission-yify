@@ -92,6 +92,7 @@ class MovieList extends Component {
     this.handleKeys = this.handleKeys.bind(this);
     this.handleBack = this.handleBack.bind(this);
     this.onfocus = this.onfocus.bind(this);
+    this.updateSize = this.updateSize.bind(this);
 
     this.listRef = React.createRef();
 
@@ -104,8 +105,6 @@ class MovieList extends Component {
     // Get movie list
     this.updateData();
 
-    // Update base window size
-    this.setState({ width: window.innerWidth, height: window.innerHeight }, () => {
       // Check if dev version of cordova app
       if (window.cordova) {
         getIdentifier(
@@ -115,7 +114,9 @@ class MovieList extends Component {
           err => console.error(err)
         );
       }
-    });
+
+    // Update base window size
+    this.updateSize();
 
     // Update on hash change
     window.addEventListener('hashchange', this.updateHash);
@@ -126,6 +127,7 @@ class MovieList extends Component {
     window.addEventListener('focusin', this.onfocus);
     document.addEventListener('backbutton', this.handleBack, false);
 
+    window.addEventListener('resize', this.updateSize);
     window.addEventListener('scroll', () => {
       window.scrollTo(0, 0);
       document.querySelector('#root').scrollTo(0, 0);
@@ -197,6 +199,10 @@ class MovieList extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return shouldUpdate(this.props, this.state, nextProps, nextState, true);
+  }
+
+  updateSize() {
+    this.setState({ width: window.innerWidth, height: window.innerHeight });
   }
 
   updateHash() {
