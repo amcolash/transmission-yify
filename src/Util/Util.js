@@ -46,7 +46,7 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
 export function getPirateSearchUrl(server, title, year) {
   let cleanedTitle = title.replace(/('|")/g, '').replace(/[^\w\s]/gi, ' ');
 
-  console.log(cleanedTitle);
+  // console.log(cleanedTitle);
 
   // Exceptions for weird cases
   if (year === 2020 && cleanedTitle === 'Guns Akimbo') year = ''; // There was one released in 2019, just use that

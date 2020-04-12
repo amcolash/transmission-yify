@@ -1014,7 +1014,7 @@ class MovieList extends Component {
         <Fragment>
           {logo ? (
             <Logo />
-          ) : !isLoaded ? (
+          ) : !isLoaded || !status ? (
             <div className="message">
               <span>
                 Loading...
