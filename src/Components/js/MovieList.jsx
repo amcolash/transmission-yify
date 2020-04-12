@@ -471,7 +471,10 @@ class MovieList extends Component {
         },
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
-          if (!lastPage) setTimeout(() => this.updateScroll(), 1000);
+          const movieList = document.querySelector('.movie-list');
+          const searchEl = document.querySelector('.search');
+          if (!lastPage && movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight)
+            setTimeout(() => this.changePage(1), 1000);
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
@@ -990,10 +993,9 @@ class MovieList extends Component {
     // This is a terrible hack but I don't have the patience to do it better
     const searchEl = document.querySelector('.search');
     let movieListStyle = {};
-    if (searchEl && viewMode === 'standard')
-      movieListStyle = { maxHeight: `calc(100vh - ${searchEl.getBoundingClientRect().height + 30}px)` };
+    if (searchEl && viewMode === 'standard') movieListStyle = { maxHeight: `calc(100vh - ${searchEl.clientHeight + 30}px)` };
     if (searchEl && viewMode === 'carousel' && type === 'pirate')
-      movieListStyle = { maxHeight: `calc(100vh - ${searchEl.getBoundingClientRect().height}px)` };
+      movieListStyle = { maxHeight: `calc(100vh - ${searchEl.clientHeight}px)` };
 
     if (error) {
       return (
