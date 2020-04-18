@@ -67,14 +67,14 @@ class Search extends Component {
               value={search}
               placeholder={'Search'}
               debounceTimeout={500}
-              onChange={event => updateSearch(event.target.value, genre, order, type)}
-              inputRef={ref => {
+              onChange={(event) => updateSearch(event.target.value, genre, order, type)}
+              inputRef={(ref) => {
                 // Only open soft keyboard when enter is pressed when running in cordova
                 if (ref && window.cordova) {
                   // Only set readonly when the keyboard is hidden
                   if (this.props.baseHeight === window.innerHeight) ref.readOnly = true;
 
-                  ref.onkeydown = e => {
+                  ref.onkeydown = (e) => {
                     if (e.key === 'Enter') ref.readOnly = false;
                   };
                   ref.onblur = () => (ref.readOnly = true);
@@ -85,8 +85,8 @@ class Search extends Component {
 
           <div className="searchItem">
             <span>Genre</span>
-            <select onChange={event => updateSearch(search, event.target.value, order, type)} value={genre} disabled={type === 'pirate'}>
-              {genres.map(genre => (
+            <select onChange={(event) => updateSearch(search, event.target.value, order, type)} value={genre} disabled={type === 'pirate'}>
+              {genres.map((genre) => (
                 <option key={genre.label} value={genre.value}>
                   {genre.label}
                 </option>
@@ -96,8 +96,8 @@ class Search extends Component {
 
           <div className="searchItem">
             <span>Order</span>
-            <select onChange={event => updateSearch(search, genre, event.target.value, type)} value={order} disabled={type === 'pirate'}>
-              {ordering.map(order => (
+            <select onChange={(event) => updateSearch(search, genre, event.target.value, type)} value={order} disabled={type === 'pirate'}>
+              {ordering.map((order) => (
                 <option key={order.label} value={order.value}>
                   {order.label}
                 </option>

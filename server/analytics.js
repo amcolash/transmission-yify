@@ -21,7 +21,7 @@ const analyticsType = {
 // Write updates to the analytics file every 5 minutes for perf reasons
 new CronJob(
   '0 */5 * * * *',
-  function() {
+  function () {
     writeAnalytics();
   },
   null,
@@ -104,7 +104,7 @@ function recordEvent(data, type, subtype) {
 }
 
 function writeAnalytics() {
-  fs.writeFile(ANALYTICS_FILE, JSON.stringify(analytics), err => {
+  fs.writeFile(ANALYTICS_FILE, JSON.stringify(analytics), (err) => {
     if (err) console.error(err);
   });
 }

@@ -108,10 +108,10 @@ class MovieList extends Component {
     // Check if dev version of cordova app
     if (window.cordova) {
       getIdentifier(
-        data => {
+        (data) => {
           this.setState({ cordovaDev: data.indexOf('pirateflix_dev') !== -1 });
         },
-        err => console.error(err)
+        (err) => console.error(err)
       );
     }
 
@@ -135,7 +135,7 @@ class MovieList extends Component {
 
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
-    socket.on('connect', data => {
+    socket.on('connect', (data) => {
       socket.emit('subscribe', 'torrents');
       socket.emit('subscribe', 'status');
       socket.emit('subscribe', 'files');
@@ -146,11 +146,11 @@ class MovieList extends Component {
       socket.io.opts.transports = ['polling', 'websocket'];
     });
 
-    socket.on('torrents', data => {
+    socket.on('torrents', (data) => {
       if (data) this.updateTorrents(data);
     });
 
-    socket.on('status', data => {
+    socket.on('status', (data) => {
       if (data) {
         if (this.state.type === 'subscriptions') {
           this.setState({ status: data, results: data.subscriptions.sort((a, b) => a.title.localeCompare(b.title)) });
@@ -162,7 +162,7 @@ class MovieList extends Component {
         if (data.buildTime !== lastBuild) {
           if (window.cordova) {
             cacheClear(
-              status => {
+              (status) => {
                 console.log(status);
                 window.localStorage.setItem('lastBuild', data.buildTime);
                 window.localStorage.setItem('viewMode', this.state.viewMode);
@@ -170,7 +170,7 @@ class MovieList extends Component {
 
                 window.location.reload(true);
               },
-              error => {
+              (error) => {
                 console.error(error);
               }
             );
@@ -183,7 +183,7 @@ class MovieList extends Component {
       }
     });
 
-    socket.on('files', data => {
+    socket.on('files', (data) => {
       if (data) this.setState({ files: data });
     });
 
@@ -262,13 +262,13 @@ class MovieList extends Component {
       //     });
       // }
 
-      torrents.forEach(torrent => {
+      torrents.forEach((torrent) => {
         if (torrent.eta < 0 && hashMapping[torrent.hashString]) {
           torrent.name = hashMapping[torrent.hashString];
         }
       });
 
-      const started = this.state.started.filter(hashString => {
+      const started = this.state.started.filter((hashString) => {
         for (var i = 0; i < torrents.length; i++) {
           if (torrents[i].hashString === hashString) return false;
         }
@@ -371,7 +371,7 @@ class MovieList extends Component {
     } else {
       axios
         .get(ENDPOINT)
-        .then(response => {
+        .then((response) => {
           Cache[ENDPOINT] = response.data;
           // Handle errors which were not marked as such from the proxy server
           if (response.data.name === 'Error') {
@@ -386,7 +386,7 @@ class MovieList extends Component {
             this.handleData(response.data);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
           this.setState({
             isLoaded: true,
@@ -423,22 +423,22 @@ class MovieList extends Component {
     const now = new Date();
 
     if (data.results && data.results.map) {
-      data = data.results.filter(media => {
+      data = data.results.filter((media) => {
         if (media.release_date && new Date(media.release_date) > now) return false;
         return true;
       });
 
-      data = data.map(media => {
+      data = data.map((media) => {
         return parseMedia(media, type);
       });
 
       if (type === 'animes') {
         // Filter out non-tv anime
-        data = data.filter(media => media.attributes.subtype === 'TV');
+        data = data.filter((media) => media.attributes.subtype === 'TV');
 
         // The search filtering is not great for kitsu :(
         if (search.length > 0) {
-          data = data.filter(media => {
+          data = data.filter((media) => {
             const lev = levenshtein(search.toLowerCase(), media.title.toLowerCase());
             const match = 1 - lev / Math.max(search.length, media.title.length);
             return match > 0.75 || media.title.toLowerCase().startsWith(search.toLowerCase());
@@ -446,15 +446,15 @@ class MovieList extends Component {
         }
       } else if (type === 'movies' || type === 'shows') {
         // Filter by popularity and vote count to remove obscure results
-        data = data.filter(d => d.popularity > 1 && d.vote_count > 3);
+        data = data.filter((d) => d.popularity > 1 && d.vote_count > 3);
       }
       if (data.length === 0) lastPage = true;
 
       // Concat and filter dupes if infiniscrolling
       if (page > 1) {
         let filtered = [];
-        results.concat(data).forEach(d => {
-          if (!filtered.find(f => f.title === d.title)) filtered.push(d);
+        results.concat(data).forEach((d) => {
+          if (!filtered.find((f) => f.title === d.title)) filtered.push(d);
         });
         data = filtered;
       }
@@ -497,13 +497,13 @@ class MovieList extends Component {
   }
 
   cancelTorrent = (hashString, deleteFiles) => {
-    axios.delete(this.server + '/torrents/' + hashString + '?deleteFiles=' + deleteFiles).catch(error => {
+    axios.delete(this.server + '/torrents/' + hashString + '?deleteFiles=' + deleteFiles).catch((error) => {
       console.error(error);
     });
   };
 
   downloadTorrent = (version, asktv) => {
-    const callback = tv => {
+    const callback = (tv) => {
       this.setState({
         started: [...this.state.started, version.hashString],
       });
@@ -513,23 +513,19 @@ class MovieList extends Component {
       // fix dead links
       let url = version.url;
       if (url.indexOf('nyaa.se') !== -1)
-        url =
-          url
-            .replace('nyaa.se', 'nyaa.si')
-            .replace('?page=download', 'download/')
-            .replace('&tid=', '') + '.torrent';
+        url = url.replace('nyaa.se', 'nyaa.si').replace('?page=download', 'download/').replace('&tid=', '') + '.torrent';
 
-      axios.post(this.server + '/torrents', { url, tv }).catch(error => {
+      axios.post(this.server + '/torrents', { url, tv }).catch((error) => {
         console.error(error);
 
         // Reset started state if download failed
         this.setState({
-          started: this.state.started.filter(item => item !== version.hashString),
+          started: this.state.started.filter((item) => item !== version.hashString),
         });
       });
     };
 
-    if (asktv && window.cordova) confirm('Is this a tv show?', button => callback(button === 2), 'Confirm', ['No', 'Yes']);
+    if (asktv && window.cordova) confirm('Is this a tv show?', (button) => callback(button === 2), 'Confirm', ['No', 'Yes']);
     else callback(asktv ? window.confirm('Is this a tv show?') : version.tv);
   };
 
@@ -539,19 +535,19 @@ class MovieList extends Component {
     if (url && url.length > 0) {
       var tv = window.confirm('Is this a tv show?');
 
-      axios.post(this.server + '/torrents', { url: url, tv: tv }).catch(error => {
+      axios.post(this.server + '/torrents', { url: url, tv: tv }).catch((error) => {
         console.error(error);
       });
     }
   };
 
   upgrade = () => {
-    const promptCallback = key => {
+    const promptCallback = (key) => {
       if (!key || key.length === 0) return;
       if (window.cordova)
         confirm(
           'Are you sure you would like to upgrade the server?',
-          button => {
+          (button) => {
             if (button === 2) confirmCallback(key);
           },
           'Confirm',
@@ -560,16 +556,16 @@ class MovieList extends Component {
       else if (window.confirm('Are you sure you would like to upgrade the server?')) confirmCallback(key);
     };
 
-    const confirmCallback = key => {
+    const confirmCallback = (key) => {
       axios
         .post(this.server + '/upgrade?upgradeKey=' + key)
-        .then(response => {
+        .then((response) => {
           localStorage.setItem('key', key);
           console.log(response.data);
           if (window.cordova) alert('Starting upgrade', () => {}, 'Success');
           else window.alert('Starting upgrade');
         })
-        .catch(err => {
+        .catch((err) => {
           localStorage.removeItem('key');
           console.error(err);
           if (window.cordova) alert('Something went wrong...', () => {}, 'Error');
@@ -582,7 +578,7 @@ class MovieList extends Component {
       promptCallback(key);
     } else {
       if (window.cordova)
-        prompt('Password?', results => {
+        prompt('Password?', (results) => {
           if (results.buttonIndex === 1) promptCallback(results.input1);
         });
       else key = promptCallback(window.prompt('Password?', ''));
@@ -590,12 +586,12 @@ class MovieList extends Component {
   };
 
   clearCache = () => {
-    const promptCallback = key => {
+    const promptCallback = (key) => {
       if (!key || key.length === 0) return;
       if (window.cordova)
         confirm(
           'Are you sure you would like to clear the cache?',
-          button => {
+          (button) => {
             if (button === 2) confirmCallback(key);
           },
           'Confirm',
@@ -604,16 +600,16 @@ class MovieList extends Component {
       else if (window.confirm('Are you sure you would like to clear the cache?')) confirmCallback(key);
     };
 
-    const confirmCallback = key => {
+    const confirmCallback = (key) => {
       axios
         .delete(this.server + '/cache?key=' + key)
-        .then(response => {
+        .then((response) => {
           localStorage.setItem('key', key);
           console.log(response.data);
           if (window.cordova) alert('Clearing Cache', () => {}, 'Success');
           else window.alert('Clearing Cache');
         })
-        .catch(err => {
+        .catch((err) => {
           localStorage.removeItem('key');
           console.error(err);
           if (window.cordova) alert('Something went wrong...', () => {}, 'Error');
@@ -626,7 +622,7 @@ class MovieList extends Component {
       promptCallback(key);
     } else {
       if (window.cordova)
-        prompt('Password?', results => {
+        prompt('Password?', (results) => {
           console.log(results);
           if (results.buttonIndex === 1) promptCallback(results.input1);
         });
@@ -652,7 +648,7 @@ class MovieList extends Component {
     if (hasSubscription(media.id, this.state.status.subscriptions)) {
       axios
         .delete(`${this.server}/subscriptions?id=${media.id}`)
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         })
         .finally(() => {
@@ -661,7 +657,7 @@ class MovieList extends Component {
     } else {
       axios
         .post(`${this.server}/subscriptions?id=${media.id}`)
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         })
         .finally(() => {
@@ -670,7 +666,7 @@ class MovieList extends Component {
     }
   }
 
-  onOpenModal = media => {
+  onOpenModal = (media) => {
     if (!media || (this.state.media && this.state.media.id === media.id)) return;
 
     window.location.hash = media.id;
@@ -955,7 +951,7 @@ class MovieList extends Component {
     }
   }
 
-  changePage = direction => {
+  changePage = (direction) => {
     const page = this.state.page;
     var newPage = direction + page;
     if (page === newPage) return;
@@ -990,7 +986,7 @@ class MovieList extends Component {
     const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode, height } = this.state;
 
     // Filter out completed torrents from all views
-    const torrents = this.state.torrents.filter(t => t.percentDone < 1);
+    const torrents = this.state.torrents.filter((t) => t.percentDone < 1);
 
     // Make it a tiny bit quicker on local dev
     const logo = process.env.NODE_ENV === 'development' ? false : showLogo;
@@ -1057,7 +1053,7 @@ class MovieList extends Component {
               torrents={torrents}
               cancelTorrent={this.cancelTorrent}
               getProgress={this.getProgress}
-              ref={instance => {
+              ref={(instance) => {
                 this.torrentList = instance;
               }}
             />
@@ -1097,7 +1093,7 @@ class MovieList extends Component {
                 {isSearching && this.state.page === 1 ? null : type === 'pirate' ? (
                   results && results.torrents && results.torrents.length > 0 ? (
                     <div className="pirateList">
-                      {results.torrents.map(media => (
+                      {results.torrents.map((media) => (
                         <Pirate
                           key={media.link}
                           media={media}

@@ -33,8 +33,8 @@ export default class CoverList extends Component {
           };
 
     return (
-      <div style={style} ref={node => (this.list = node)}>
-        {results.map(media => (
+      <div style={style} ref={(node) => (this.list = node)}>
+        {results.map((media) => (
           <Cover
             key={media.id}
             media={media}

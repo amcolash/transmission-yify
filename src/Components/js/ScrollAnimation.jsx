@@ -206,7 +206,7 @@ export default class ScrollAnimation extends Component {
     var classes = this.props.className ? `${this.props.className} ${this.state.classes}` : this.state.classes;
     return (
       <div
-        ref={node => {
+        ref={(node) => {
           this.node = node;
         }}
         className={classes}

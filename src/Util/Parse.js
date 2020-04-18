@@ -8,7 +8,7 @@ export function getMovies(media, pb, type) {
 
   let versions = [];
 
-  pb.forEach(t => {
+  pb.forEach((t) => {
     const parsed = ptn(t.name);
     if (!parsed.quality || !parsed.resolution) return;
 
@@ -52,7 +52,7 @@ export function getEpisodes(torrents, moreData, type) {
   if (type === 'movies') return episodes;
 
   if (torrents && torrents.torrents) {
-    torrents.torrents.forEach(torrent => {
+    torrents.torrents.forEach((torrent) => {
       const parsed = ptn(torrent.filename || torrent.name);
       parsed.resolution = parsed.resolution || '480p';
 
@@ -115,8 +115,8 @@ export function getEpisodes(torrents, moreData, type) {
       }
     });
 
-    episodes.forEach(season => {
-      season.forEach(episode => {
+    episodes.forEach((season) => {
+      season.forEach((episode) => {
         episode.torrents = Object.values(episode.torrents).sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality));
       });
     });
@@ -139,7 +139,7 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
   let media = m || {};
   let genres;
   if (tmdbData && tmdbData.genres) {
-    genres = tmdbData.genres.map(g => g.name);
+    genres = tmdbData.genres.map((g) => g.name);
     genres = (genres.length > 1 ? 'Genres: ' : 'Genre: ') + genres.join(', ');
   } else if (moreData) {
     if (moreData) genres = moreData.genres || moreData.Genres;
@@ -162,7 +162,7 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
   }
 
   if (tmdbData && tmdbData.content_ratings) {
-    tmdbData.content_ratings.results.forEach(r => {
+    tmdbData.content_ratings.results.forEach((r) => {
       if (r.iso_3166_1 === 'US') mpaa = r.rating;
     });
   }
@@ -190,7 +190,7 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
 
   let trailer;
   if (tmdbData && tmdbData.videos) {
-    tmdbData.videos.results.some(video => {
+    tmdbData.videos.results.some((video) => {
       // If this is the first trailer, choose it and ignore others
       if (video.type === 'Trailer' && video.site === 'YouTube') {
         trailer = video;
@@ -232,7 +232,7 @@ export function hasFile(media, files) {
 }
 
 export function hasSubscription(id, subscriptions) {
-  const matched = subscriptions.filter(s => Number.parseInt(s.id) === Number.parseInt(id));
+  const matched = subscriptions.filter((s) => Number.parseInt(s.id) === Number.parseInt(id));
   return matched.length === 1 ? matched[0] : undefined;
 }
 
@@ -283,10 +283,10 @@ export function parseMedia(media, type) {
 }
 
 export function parseHorribleSubs(data) {
-  const parsedBatches = data.batches.map(t => {
+  const parsedBatches = data.batches.map((t) => {
     return { ...t, hashString: magnet.decode(t.magnet).infoHash.toLowerCase() };
   });
-  const parsedTorrents = data.torrents.map(t => {
+  const parsedTorrents = data.torrents.map((t) => {
     return { ...t, hashString: magnet.decode(t.magnet).infoHash.toLowerCase(), hs: true };
   });
 

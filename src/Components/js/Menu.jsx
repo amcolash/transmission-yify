@@ -43,7 +43,7 @@ class Menu extends Component {
     document.addEventListener('focusin', this.onFocus, false);
     document.addEventListener('backbutton', () => this.setVisible(false), false);
 
-    swipedetect(document, swipedir => {
+    swipedetect(document, (swipedir) => {
       if (swipedir === 'left') this.setVisible(false);
       else if (swipedir === 'right') this.setVisible(true);
     });
@@ -101,13 +101,13 @@ class Menu extends Component {
   }
 
   generateItem(icon, text, value, id) {
-    const callback = typeof value === 'string' ? () => this.selectItem(value) : e => value(e);
+    const callback = typeof value === 'string' ? () => this.selectItem(value) : (e) => value(e);
     return (
       <div
         id={id}
         className={'item' + (this.props.type === value ? ' selected' : '')}
-        onClick={e => callback(e)}
-        onKeyDown={e => {
+        onClick={(e) => callback(e)}
+        onKeyDown={(e) => {
           if (e.key === 'Enter') {
             if (this.menuButton) this.menuButton.focus();
             callback(e);
@@ -128,15 +128,15 @@ class Menu extends Component {
     return (
       <Fragment>
         <div
-          ref={node => (this.menuButton = node)}
+          ref={(node) => (this.menuButton = node)}
           className={`toggleButton`}
           tabIndex="0"
-          onKeyPress={e => {
+          onKeyPress={(e) => {
             if (e.key === 'Enter') this.setVisible(!this.state.visible);
           }}
         >
           <FaBars
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               this.setVisible(!this.state.visible);
             }}
@@ -145,9 +145,9 @@ class Menu extends Component {
         </div>
         <div
           className={`menu ${viewMode}${visible ? '' : ' hidden'}`}
-          ref={node => (this.menu = node)}
+          ref={(node) => (this.menu = node)}
           onClick={() => this.setVisible(false)}
-          onKeyDown={e => {
+          onKeyDown={(e) => {
             if (e.key === 'Escape') this.setVisible(false);
             if (e.key === 'RightArrow' && visible) this.setVisible(false);
           }}
@@ -172,7 +172,7 @@ class Menu extends Component {
               : null}
             {window.cordova
               ? null
-              : this.generateItem(<FaMagnet />, 'Add Magnet', e => {
+              : this.generateItem(<FaMagnet />, 'Add Magnet', (e) => {
                   e.stopPropagation();
                   this.props.addMagnet();
                 })}
@@ -185,7 +185,7 @@ class Menu extends Component {
               : this.generateItem(
                   viewMode === 'standard' ? <FaTh /> : <FaWindowMaximize />,
                   `View Mode: ${viewMode}`,
-                  e => {
+                  (e) => {
                     e.preventDefault();
                     toggleViewMode();
                   },

@@ -58,7 +58,7 @@ class Cover extends Component {
     } else {
       axios
         .get(url, { cancelToken: this.cancelToken.token })
-        .then(response => {
+        .then((response) => {
           Cache[url] = response.data;
           this.cancelToken = null;
 
@@ -69,7 +69,7 @@ class Cover extends Component {
             this.setState({ pb: null });
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
           this.setState({ pb: null });
         });
@@ -123,7 +123,7 @@ class Cover extends Component {
     if (pb) {
       versions = getMovies(media, pb.torrents, type);
       if (versions.length > 2) versions = versions.slice(0, 2);
-      versions = versions.map(version => {
+      versions = versions.map((version) => {
         return { ...version, progress: getProgress(version.hashString) };
       });
     }
@@ -133,13 +133,13 @@ class Cover extends Component {
         <div
           className={'cover' + (viewMode === 'carousel' && parseInt(selected ? selected.id : -1) === id ? ' selected' : '')}
           id={id}
-          onClick={e => {
+          onClick={(e) => {
             if (click) click(media);
           }}
-          onKeyDown={e => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter' && click) click(media);
           }}
-          onFocus={e => {
+          onFocus={(e) => {
             if (viewMode === 'carousel') {
               if (click) click(media);
               if (onFocus) onFocus(e);
@@ -152,7 +152,7 @@ class Cover extends Component {
           {fileExists ? (
             <div className="fileExists hover" tabIndex={viewMode === 'carousel' ? undefined : '0'}>
               <FaPlayCircle
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   window.open(fileExists.url, '_blank').focus();
                 }}
@@ -162,11 +162,11 @@ class Cover extends Component {
           {type === 'shows' || type === 'subscriptions' ? (
             <div
               className={'fileExists' + (subscription ? '' : ' notSubscribed')}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 this.toggleSubscription();
               }}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.stopPropagation();
                   this.toggleSubscription();
@@ -180,13 +180,13 @@ class Cover extends Component {
           {type === 'movies' && viewMode === 'standard' ? (
             <div className="quality">
               {versions.length > 0 ? (
-                versions.reverse().map(version => (
+                versions.reverse().map((version) => (
                   <Fragment key={version.hashString}>
                     <span>{version.quality}</span>
                     {version.progress != null ? (
                       <button
                         className="red"
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           e.nativeEvent.stopImmediatePropagation();
                           cancelTorrent(version.hashString, true);
@@ -197,7 +197,7 @@ class Cover extends Component {
                     ) : (
                       <button
                         className="orange download"
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           e.nativeEvent.stopImmediatePropagation();
                           if (
@@ -209,7 +209,7 @@ class Cover extends Component {
                           } else if (window.cordova) {
                             confirm(
                               'This file already exists in plex. Are you sure you want to download it again?',
-                              button => {
+                              (button) => {
                                 if (button === 2) downloadTorrent(version);
                               },
                               'Confirm',
@@ -236,7 +236,7 @@ class Cover extends Component {
         </div>
         {viewMode === 'standard' ? (
           <Fragment>
-            <span onClick={e => click(media)}>
+            <span onClick={(e) => click(media)}>
               {media.title} {media.year ? <span>({media.year})</span> : null}
             </span>
             <br />

@@ -13,7 +13,7 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
     propsChanged = false;
 
     if (checkTorrents) {
-      Object.keys(propsDiff.torrents).forEach(t => {
+      Object.keys(propsDiff.torrents).forEach((t) => {
         const torrent = propsDiff.torrents[t];
         if (torrent && (torrent.percentDone || torrent.rateDownload)) propsChanged = true;
       });
@@ -24,7 +24,7 @@ export function shouldUpdate(props, state, nextProps, nextState, checkTorrents) 
     stateChanged = false;
 
     if (checkTorrents) {
-      Object.keys(stateDiff.torrents).forEach(t => {
+      Object.keys(stateDiff.torrents).forEach((t) => {
         const torrent = stateDiff.torrents[t];
         if (torrent && (torrent.percentDone || torrent.rateDownload)) stateChanged = true;
       });

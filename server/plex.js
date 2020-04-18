@@ -24,13 +24,13 @@ function getPlexFiles(currentFiles) {
 
     plexClient
       .query('/')
-      .then(status => {
+      .then((status) => {
         const machineId = status.MediaContainer.machineIdentifier;
 
         plexClient
           .query('/library/sections')
-          .then(response => {
-            const sections = response.MediaContainer.Directory.filter(section => {
+          .then((response) => {
+            const sections = response.MediaContainer.Directory.filter((section) => {
               return section.type === 'movie';
             });
             const promises = [];
@@ -39,7 +39,7 @@ function getPlexFiles(currentFiles) {
               promises.push(plexClient.query('/library/sections/' + sections[i].key + '/all'));
             }
 
-            Promise.all(promises).then(values => {
+            Promise.all(promises).then((values) => {
               const files = [];
               for (var i = 0; i < values.length; i++) {
                 const data = values[i].MediaContainer.Metadata;
@@ -51,7 +51,7 @@ function getPlexFiles(currentFiles) {
               resolve(files.sort((a, b) => a.title.localeCompare(b.title)));
             });
           })
-          .catch(err => {
+          .catch((err) => {
             console.error('Could not connect to server', err);
 
             // If plex goes offline, keep in-memory copy living on
@@ -62,7 +62,7 @@ function getPlexFiles(currentFiles) {
             }
           });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         resolve([]);
       });

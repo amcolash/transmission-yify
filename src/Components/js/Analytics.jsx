@@ -25,11 +25,11 @@ class Analytics extends Component {
     const key = localStorage.getItem('key') || window.prompt('Password?', '');
     axios
       .get(this.props.server + '/analytics?key=' + key)
-      .then(response => {
+      .then((response) => {
         localStorage.setItem('key', key);
         this.setState({ analytics: response.data }, () => this.updateOptions());
       })
-      .catch(err => {
+      .catch((err) => {
         localStorage.removeItem('key');
         console.error(err);
       });
@@ -52,8 +52,8 @@ class Analytics extends Component {
     if (this.filter !== 'none') filterDate.setDate(filterDate.getDate() - filter);
 
     const flat = [];
-    Object.keys(data).forEach(url => {
-      data[url].forEach(entry => {
+    Object.keys(data).forEach((url) => {
+      data[url].forEach((entry) => {
         let date = new Date(entry.timestamp);
         date.setHours(0, 0, 0, 0);
         date = date.getTime();
@@ -70,7 +70,7 @@ class Analytics extends Component {
   // Structure data similarly to the final data, but aggregate based on base url and add up method calls
   aggregateData(data) {
     const aggregated = {};
-    data.forEach(entry => {
+    data.forEach((entry) => {
       const simpleurl = this.getSimpleUrl(entry.url);
       const key = simpleurl + ':' + entry.method;
       aggregated[key] = aggregated[key] || {};
@@ -92,7 +92,7 @@ class Analytics extends Component {
     Object.keys(data).forEach((url, index) => {
       const baseUrl = url.substring(0, url.indexOf(':'));
       let seriesData = [];
-      Object.keys(data[url]).forEach(day => {
+      Object.keys(data[url]).forEach((day) => {
         seriesData.push([Number.parseInt(day), data[url][day]]);
       });
 
@@ -106,8 +106,8 @@ class Analytics extends Component {
         stacking: 'column',
         color: colors[index % colors.length],
         events: {
-          hide: e => this.onToggleType(e),
-          show: e => this.onToggleType(e),
+          hide: (e) => this.onToggleType(e),
+          show: (e) => this.onToggleType(e),
         },
       });
     });
@@ -129,19 +129,19 @@ class Analytics extends Component {
 
       if (newChart) {
         let tmp = [];
-        flat.forEach(i => {
-          newChart.series.forEach(s => {
+        flat.forEach((i) => {
+          newChart.series.forEach((s) => {
             if (s.name.indexOf(i.simpleUrl) !== -1 && s.visible) tmp.push(i);
           });
         });
         flat = tmp;
       }
     } else {
-      Object.keys(analytics).forEach(t => {
+      Object.keys(analytics).forEach((t) => {
         let matched = true;
 
         if (newChart) {
-          newChart.series.forEach(s => {
+          newChart.series.forEach((s) => {
             if (s.name.indexOf(t) !== -1) matched = s.visible;
           });
         }
@@ -170,7 +170,7 @@ class Analytics extends Component {
     // Get a mapping of location data to regions that are geohashed
     const locationData = {};
     const cities = {};
-    flat.forEach(i => {
+    flat.forEach((i) => {
       if (i.location.state && i.location.country === 'US') {
         const key = geohash.encode(i.location.lat, i.location.lng, 3);
         locationData[key] = locationData[key] || 0;
@@ -181,7 +181,7 @@ class Analytics extends Component {
 
     // Convert data to a format usable by highmaps
     const chartData = [];
-    Object.keys(locationData).forEach(key => {
+    Object.keys(locationData).forEach((key) => {
       const loc = geohash.decode(key);
       chartData.push({
         name: cities[key],
@@ -282,13 +282,13 @@ class Analytics extends Component {
           <div className="searchItem">
             <span>Date Filter</span>
             <select
-              onChange={event => this.setState({ filter: Number.parseInt(event.target.value) }, () => this.updateOptions())}
+              onChange={(event) => this.setState({ filter: Number.parseInt(event.target.value) }, () => this.updateOptions())}
               value={filter}
             >
               <option key="none" value="none">
                 All Data
               </option>
-              {dateFilter.map(t => (
+              {dateFilter.map((t) => (
                 <option key={t} value={t}>
                   {t} Days
                 </option>
@@ -298,11 +298,11 @@ class Analytics extends Component {
           {types.length > 0 ? (
             <div className="searchItem">
               <span>Type</span>
-              <select onChange={event => this.setState({ type: event.target.value }, () => this.updateOptions())} value={type}>
+              <select onChange={(event) => this.setState({ type: event.target.value }, () => this.updateOptions())} value={type}>
                 <option key="all" value="all">
                   All
                 </option>
-                {types.map(t => (
+                {types.map((t) => (
                   <option key={t} value={t}>
                     {t.charAt(0).toUpperCase() + t.slice(1)}
                   </option>

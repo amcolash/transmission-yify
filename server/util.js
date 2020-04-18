@@ -6,7 +6,7 @@ function autoPrune(currentTorrents, transmission) {
   const maxWait = 60 * 60 * 24 * 3;
 
   if (currentTorrents && currentTorrents.torrents) {
-    currentTorrents.torrents.forEach(torrent => {
+    currentTorrents.torrents.forEach((torrent) => {
       let uploadComplete = torrent.uploadRatio > 3.0;
       let expired = Date.now() / 1000 > torrent.doneDate + maxWait;
 
@@ -16,7 +16,7 @@ function autoPrune(currentTorrents, transmission) {
           'removing complete torrent: ' + torrent.name + (uploadComplete ? ', upload complete' : '') + (expired ? ', expired' : '')
         );
 
-        transmission.remove(torrent.hashString, false, err => {
+        transmission.remove(torrent.hashString, false, (err) => {
           if (err) console.error(err);
         });
       }
@@ -37,7 +37,7 @@ function filterMovieResults(results) {
 
   // Only show cams if there are not other versions
   let hasNonCam = false;
-  torrents.forEach(t => {
+  torrents.forEach((t) => {
     const parsed = ptn(t.name);
     if (parsed.quality && parsed.resolution)
       hasNonCam |= parsed.quality.toLowerCase().indexOf('cam') === -1 && parsed.quality.toLowerCase().indexOf('telesync') === -1;
@@ -45,7 +45,7 @@ function filterMovieResults(results) {
 
   const versions = [];
 
-  torrents.forEach(t => {
+  torrents.forEach((t) => {
     const parsed = ptn(t.name);
     if (!parsed.quality || !parsed.resolution) return;
 
@@ -79,7 +79,7 @@ function JSONStringify(object) {
   var str = JSON.stringify(
     object,
     // custom replacer fxn - gets around "TypeError: Converting circular structure to JSON"
-    function(key, value) {
+    function (key, value) {
       if (typeof value === 'object' && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Circular reference found, discard key
@@ -98,7 +98,7 @@ function JSONStringify(object) {
 
 function searchShow(search, source) {
   let matched;
-  source.forEach(s => {
+  source.forEach((s) => {
     const lev = levenshtein(s.title.toLowerCase(), search.toLowerCase());
     const match = 1 - lev / Math.max(s.title.length, search.length);
     if (match > 0.9) matched = s;

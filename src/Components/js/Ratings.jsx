@@ -12,7 +12,7 @@ class Ratings extends Component {
 
     return (
       <div className="ratings">
-        {moreData.Ratings.map(rating => (
+        {moreData.Ratings.map((rating) => (
           <div key={rating.Source}>
             {rating.Source === 'Internet Movie Database' && !window.cordova && this.props.imdb ? (
               <a
@@ -20,7 +20,7 @@ class Ratings extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: 'inherit' }}
-                onClick={e => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
               >
                 {this.getIcon(rating)} {rating.Value}
               </a>

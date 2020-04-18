@@ -19,7 +19,7 @@ function setupSubscriptions(currentStatus) {
 }
 
 function findSubscription(id, subscriptions) {
-  const matched = subscriptions.filter(s => s.id === id);
+  const matched = subscriptions.filter((s) => s.id === id);
   return matched.length === 1 ? matched[0] : undefined;
 }
 
@@ -66,14 +66,14 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
   if (!matchedShow || !matchedShow.url) return;
 
   getEZTVDetails(matchedShow.url)
-    .then(data => {
+    .then((data) => {
       // Generate a list of all episodes from the query
       const { episodes, lastEpisode } = getEpisodes(subscription, data.torrents, onlyLast);
 
       if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`);
 
       // Download each torrent
-      episodes.forEach(e => {
+      episodes.forEach((e) => {
         console.log(`Downloading new subscribed file: ${e.filename}`);
         transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
           if (err) console.error(err);
@@ -88,7 +88,7 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
         writeSubscriptions(subscriptions);
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 }
@@ -96,7 +96,7 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
 function getEpisodes(subscription, torrents, onlyLast) {
   let episodes = [];
 
-  torrents.forEach(t => {
+  torrents.forEach((t) => {
     const parsed = ptn(t.filename);
     const episode = t.episode || parsed.episode;
     const season = t.season || parsed.season;
@@ -128,9 +128,9 @@ function getEpisodes(subscription, torrents, onlyLast) {
     const lastValue = subscription.lastSeason * 99 + subscription.lastEpisode;
 
     const tmp = [];
-    episodes = episodes.forEach(season => {
+    episodes = episodes.forEach((season) => {
       if (season) {
-        season.forEach(episode => {
+        season.forEach((episode) => {
           if (episode.season * 99 + episode.episode > lastValue) tmp.push(episode);
         });
       }
@@ -142,7 +142,7 @@ function getEpisodes(subscription, torrents, onlyLast) {
 }
 
 function writeSubscriptions(subscriptions) {
-  fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(subscriptions), err => {
+  fs.writeFile(SUBSCRIPTION_FILE, JSON.stringify(subscriptions), (err) => {
     if (err) console.error(err);
   });
 }

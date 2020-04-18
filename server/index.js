@@ -90,7 +90,7 @@ const io = require('socket.io')(server);
 try {
   // Set up data dir if not in docker environment
   if (!IS_DOCKER && !fs.existsSync(DATA)) {
-    fs.mkdirSync(DATA, { recursive: true }, err => {
+    fs.mkdirSync(DATA, { recursive: true }, (err) => {
       if (err) console.error(err);
     });
   }
@@ -115,38 +115,38 @@ try {
 // Set up static content, cache for a little bit
 app.use('/', express.static('build', IS_DOCKER ? { maxAge: '4h' } : {}));
 
-app.get('/test', function(req, res) {
+app.get('/test', function (req, res) {
   res.send(JSONStringify(req));
 });
 
-app.get('/omdb/:id', function(req, res) {
+app.get('/omdb/:id', function (req, res) {
   let url = 'https://www.omdbapi.com/?apikey=' + process.env.OMDB_KEY + '&i=' + req.params.id;
   checkCache(url, res, true);
 });
 
-app.get('/tmdbid/:type/:id', function(req, res) {
+app.get('/tmdbid/:type/:id', function (req, res) {
   const type = req.params.type;
   const id = req.params.id;
   const url = getTMDBUrl(id, type);
   checkCache(url, res, true);
 });
 
-app.get('/tmdb/seasons/:id/:season', function(req, res) {
+app.get('/tmdb/seasons/:id/:season', function (req, res) {
   let url = `https://api.themoviedb.org/3/tv/${req.params.id}/season/${req.params.season}?api_key=${process.env.THE_MOVIE_DB_KEY}`;
   checkCache(url, res, true);
 });
 
-app.get('/themoviedb/:id', function(req, res) {
+app.get('/themoviedb/:id', function (req, res) {
   let url = 'https://api.themoviedb.org/3/find/' + req.params.id + '?external_source=imdb_id&api_key=' + process.env.THE_MOVIE_DB_KEY;
   checkCache(url, res, true);
 });
 
-app.get('/kitsu/:id', function(req, res) {
+app.get('/kitsu/:id', function (req, res) {
   let url = `https://kitsu.io/api/edge/anime/${req.params.id}?include=genres`;
   checkCache(url, res, true);
 });
 
-app.get('/search/:type/:page', function(req, res) {
+app.get('/search/:type/:page', function (req, res) {
   let url;
   switch (req.params.type) {
     case 'movies':
@@ -175,7 +175,7 @@ app.get('/search/:type/:page', function(req, res) {
   checkCache(url, res);
 });
 
-app.get('/discover/:type/:page', function(req, res) {
+app.get('/discover/:type/:page', function (req, res) {
   let url;
   let sort = req.query.sort;
   switch (req.params.type) {
@@ -222,26 +222,26 @@ app.get('/discover/:type/:page', function(req, res) {
   checkCache(url, res);
 });
 
-app.get('/nyaa/:precache?', function(req, res) {
+app.get('/nyaa/:precache?', function (req, res) {
   const url = `https://nyaa.pantsu.cat/api/search?${querystring.stringify(req.query)}`;
   checkTrackerCache(url, req.params.precache ? undefined : res);
   if (req.params.precache) res.sendStatus(200);
 });
 
-app.get('/status', function(req, res) {
+app.get('/status', function (req, res) {
   res.send(currentStatus);
 });
-app.get('/torrents', function(req, res) {
+app.get('/torrents', function (req, res) {
   transmission.get((err, data) => handleResponse(res, err, data));
 });
-app.get('/torrents/:hash', function(req, res) {
+app.get('/torrents/:hash', function (req, res) {
   transmission.get(req.params.hash, (err, data) => handleResponse(res, err, data));
 });
-app.delete('/torrents/:hash', function(req, res) {
+app.delete('/torrents/:hash', function (req, res) {
   transmission.remove(req.params.hash, req.query.deleteFiles == 'true', (err, data) => handleResponse(res, err, data));
 });
 
-app.post('/torrents', function(req, res) {
+app.post('/torrents', function (req, res) {
   if (req.body.tv) {
     transmission.addUrl(req.body.url, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => handleResponse(res, err, data));
   } else {
@@ -249,7 +249,7 @@ app.post('/torrents', function(req, res) {
   }
 });
 
-app.post('/upgrade', function(req, res) {
+app.post('/upgrade', function (req, res) {
   try {
     if (!IS_DOCKER) throw new Error('You can only use the upgrade endpoint from a docker container');
     const UPGRADE_KEY = process.env.UPGRADE_KEY;
@@ -289,7 +289,7 @@ app.post('/upgrade', function(req, res) {
   }
 });
 
-app.post('/subscriptions', function(req, res) {
+app.post('/subscriptions', function (req, res) {
   const id = Number.parseInt(req.query.id);
 
   const matched = findSubscription(id, currentStatus.subscriptions);
@@ -303,20 +303,20 @@ app.post('/subscriptions', function(req, res) {
   downloadSubscription(id, currentStatus.subscriptions, true);
 });
 
-app.delete('/subscriptions', function(req, res) {
+app.delete('/subscriptions', function (req, res) {
   const id = Number.parseInt(req.query.id);
   const matched = findSubscription(id, currentStatus.subscriptions);
   if (matched) {
     res.sendStatus(200);
     console.log(`unsubscribing from ${matched.title} (${id})`);
-    currentStatus.subscriptions = currentStatus.subscriptions.filter(s => s.id !== id);
+    currentStatus.subscriptions = currentStatus.subscriptions.filter((s) => s.id !== id);
     writeSubscriptions(currentStatus.subscriptions);
   } else {
     res.sendStatus(404);
   }
 });
 
-app.delete('/cache', function(req, res) {
+app.delete('/cache', function (req, res) {
   const KEY = process.env.UPGRADE_KEY;
   if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
   if (req.query.key !== KEY) throw new Error('Invalid key');
@@ -327,7 +327,7 @@ app.delete('/cache', function(req, res) {
   res.sendStatus(200);
 });
 
-app.get('/pirate/:search/:precache?', function(req, res) {
+app.get('/pirate/:search/:precache?', function (req, res) {
   const search = req.params.search;
   const filter = req.query.all ? '/99/0' : '/99/200';
   const cacheName = search + (req.query.page ? `-page${req.query.page}` : '') + (req.query.movie ? '-movie' : '') + filter;
@@ -344,7 +344,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
   } else {
     piratePool
       .exec('searchPirateBay', [search, req.query.page || 1, filter, currentStatus.pirateBay])
-      .then(results => {
+      .then((results) => {
         // Filter if we asked specifically for movies
         if (req.query.movie) results = filterMovieResults(results);
         trackerCache[cacheName] = results;
@@ -356,7 +356,7 @@ app.get('/pirate/:search/:precache?', function(req, res) {
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(results);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
 
         // No response if we are precaching
@@ -367,11 +367,11 @@ app.get('/pirate/:search/:precache?', function(req, res) {
   }
 });
 
-app.get('/eztv_shows', function(req, res) {
+app.get('/eztv_shows', function (req, res) {
   res.send(getEZTVShows());
 });
 
-app.get('/eztv/:search', function(req, res) {
+app.get('/eztv/:search', function (req, res) {
   const search = req.params.search;
   const match = searchShow(search, getEZTVShows());
   const trackerCache = getTrackerCache();
@@ -385,7 +385,7 @@ app.get('/eztv/:search', function(req, res) {
       if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
       res.send(trackerCache[url]);
     } else {
-      getEZTVDetails(url, search).then(torrents => {
+      getEZTVDetails(url, search).then((torrents) => {
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(torrents);
         trackerCache[url] = torrents;
@@ -396,7 +396,7 @@ app.get('/eztv/:search', function(req, res) {
   }
 });
 
-app.get('/horriblesubs/:search', function(req, res) {
+app.get('/horriblesubs/:search', function (req, res) {
   const search = req.params.search;
   const match = searchShow(search, getHorribleSubsShows());
   const trackerCache = getTrackerCache();
@@ -410,7 +410,7 @@ app.get('/horriblesubs/:search', function(req, res) {
       if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
       res.send(trackerCache[url]);
     } else {
-      getHorribleSubsDetails(url).then(torrents => {
+      getHorribleSubsDetails(url).then((torrents) => {
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
         res.send(torrents);
         trackerCache[url] = torrents;
@@ -422,7 +422,7 @@ app.get('/horriblesubs/:search', function(req, res) {
 });
 
 // TODO: Password protect
-app.get('/analytics', function(req, res) {
+app.get('/analytics', function (req, res) {
   const KEY = process.env.UPGRADE_KEY;
   if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
   if (req.query.key !== KEY) throw new Error('Invalid key');
@@ -430,8 +430,8 @@ app.get('/analytics', function(req, res) {
   res.send(getAnalytics());
 });
 
-io.on('connection', client => {
-  client.on('subscribe', data => {
+io.on('connection', (client) => {
+  client.on('subscribe', (data) => {
     client.join(data);
 
     if (data === 'status') client.emit('status', currentStatus);
@@ -466,7 +466,7 @@ function initSocketDataWatchers() {
       transmission.get((err, data) => {
         if (data) {
           // remove some data as it is pretty bulky and not used
-          data.torrents.forEach(t => {
+          data.torrents.forEach((t) => {
             t.peers = undefined;
             t.rateUpload = undefined;
             t.uploadRatio = undefined;
@@ -494,7 +494,7 @@ function initSocketDataWatchers() {
 
   setIntervalImmediately(
     () =>
-      getPlexFiles(currentFiles).then(data => {
+      getPlexFiles(currentFiles).then((data) => {
         if (JSON.stringify(currentFiles) !== JSON.stringify(data)) {
           currentFiles = data;
           io.sockets.in('files').emit('files', currentFiles);
@@ -507,14 +507,14 @@ function initSocketDataWatchers() {
 function updatePirateBayEndpoint() {
   axios
     .get('https://piratebayproxy.info')
-    .then(response => {
+    .then((response) => {
       const $ = cheerio.load(response.data);
       const links = $('.t1');
       // choose a random link from the top half of the list
       const rnd = Math.floor((Math.random() * links.length) / 2);
       currentStatus.pirateBay = links.eq(rnd).attr('href');
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 }
@@ -534,10 +534,10 @@ function updateEZTVEndpoint() {
   const chosen = endpointList[eztvIndex];
   axios
     .get(chosen)
-    .then(response => {
+    .then((response) => {
       // All good
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
 
       // If things failed, try the next one
@@ -558,7 +558,7 @@ function initStatusWatchers() {
 
   // Get storage info every minute
   setIntervalImmediately(() => {
-    exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function(err, output) {
+    exec('df ' + DATA + " | grep -v 'Use%' | awk '{ print $5 }'", function (err, output) {
       if (err) {
         console.error(err);
         currentStatus.storageUsage = 'unknown';
@@ -588,7 +588,7 @@ function initStatusWatchers() {
           if (IS_DOCKER && fs.existsSync(DATA + '/ip.txt')) ip = fs.readFileSync(DATA + '/ip.txt', 'utf8');
 
           axios.get(`https://api.ipdata.co/${ip ? ip.trim() : ''}?api-key=${process.env.IP_KEY}`).then(
-            response => {
+            (response) => {
               const data = response.data;
               currentStatus.ip = {
                 city: data.city,
@@ -598,7 +598,7 @@ function initStatusWatchers() {
                 region_code: data.region_code,
               };
             },
-            error => {
+            (error) => {
               console.error(error);
             }
           );
@@ -609,7 +609,7 @@ function initStatusWatchers() {
 
       // Check subscriptions every hour
       setIntervalImmediately(() => {
-        currentStatus.subscriptions.forEach(subscription => {
+        currentStatus.subscriptions.forEach((subscription) => {
           try {
             downloadSubscription(subscription.id, currentStatus.subscriptions, false);
           } catch (e) {

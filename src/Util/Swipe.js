@@ -21,11 +21,11 @@ export function swipedetect(el, callback) {
     allowedTime = 300, // maximum time allowed to travel that distance
     elapsedTime,
     startTime,
-    handleswipe = callback || function(swipedir) {};
+    handleswipe = callback || function (swipedir) {};
 
   el.addEventListener(
     'touchstart',
-    function(e) {
+    function (e) {
       var touchobj = e.changedTouches[0];
       swipedir = 'none';
       distX = 0;
@@ -39,7 +39,7 @@ export function swipedetect(el, callback) {
 
   el.addEventListener(
     'touchmove',
-    function(e) {
+    function (e) {
       var touchobj = e.changedTouches[0];
       distX = touchobj.pageX - startX; // get horizontal dist traveled by finger while in contact with surface
       distY = touchobj.pageY - startY; // get vertical dist traveled by finger while in contact with surface

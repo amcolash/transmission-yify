@@ -67,7 +67,7 @@ class DetailsBackdrop extends Component {
   }
 
   cancelRequests() {
-    this.cancelTokens.forEach(t => t.cancel());
+    this.cancelTokens.forEach((t) => t.cancel());
     this.cancelTokens = [];
 
     // Also remove torrent data just in case
@@ -84,13 +84,13 @@ class DetailsBackdrop extends Component {
           this.handleEztv(Cache[url]);
         } else {
           this.axiosGetHelper(url)
-            .then(response => {
+            .then((response) => {
               const data = response.data;
               Cache[url] = data;
 
               this.handleEztv(data);
             })
-            .catch(err => {
+            .catch((err) => {
               if (axios.isCancel(err)) return;
               console.error(err);
               this.setState({ loadingEpisodes: false });
@@ -109,7 +109,7 @@ class DetailsBackdrop extends Component {
       const moreData = this.state.moreData;
 
       let maxSeason = 1;
-      data.torrents.forEach(t => {
+      data.torrents.forEach((t) => {
         const s = parseInt(t.season);
         if (s > maxSeason && moreData && moreData.seasons && s <= moreData.seasons.length) {
           maxSeason = s;
@@ -133,12 +133,12 @@ class DetailsBackdrop extends Component {
           this.handleNyaa(Cache[url], title, page, limit);
         } else {
           this.axiosGetHelper(url)
-            .then(response => {
+            .then((response) => {
               const data = response.data;
               Cache[url] = data;
               this.handleNyaa(data, title, page, limit);
             })
-            .catch(err => {
+            .catch((err) => {
               if (axios.isCancel(err)) return;
               console.error(err);
               this.setState({ loadingEpisodes: false });
@@ -176,13 +176,13 @@ class DetailsBackdrop extends Component {
           this.handleHorribleSubs(Cache[url]);
         } else {
           this.axiosGetHelper(url)
-            .then(response => {
+            .then((response) => {
               const data = response.data;
               Cache[url] = data;
 
               this.handleHorribleSubs(data);
             })
-            .catch(err => {
+            .catch((err) => {
               if (axios.isCancel(err)) return;
               console.error(err);
             });
@@ -213,7 +213,7 @@ class DetailsBackdrop extends Component {
 
       if (type === 'animes') {
         this.axiosGetHelper(`${this.props.server}/kitsu/${media.id}`)
-          .then(response => {
+          .then((response) => {
             const data = response.data.data;
             media.title = media.title || data.attributes.canonicalTitle;
             media.year = media.year || getYear(data);
@@ -223,7 +223,7 @@ class DetailsBackdrop extends Component {
                 CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
                 Plot: data.attributes.synopsis,
                 Rated: data.attributes.ageRating,
-                Genres: data.relationships.genres.data.map(g => Genre.anime.find(i => g.id === i.id).label),
+                Genres: data.relationships.genres.data.map((g) => Genre.anime.find((i) => g.id === i.id).label),
                 EpisodeCount: data.attributes.episodeCount,
                 PosterPath: data.attributes.posterImage.small,
               },
@@ -233,14 +233,14 @@ class DetailsBackdrop extends Component {
             this.getNyaa(media.title, 1);
             this.getHorribleSubs();
           })
-          .catch(err => {
+          .catch((err) => {
             if (axios.isCancel(err)) return;
             console.error(err);
             this.setState({ moreData: 'ERROR' });
           });
       } else {
         this.axiosGetHelper(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id)
-          .then(response => {
+          .then((response) => {
             const data = response.data;
             const updated = { tmdbData: data, loadingEpisodes: type === 'shows' || type === 'subscriptions', showCover: true };
             media.title = media.title || data.title || data.original_name;
@@ -252,15 +252,15 @@ class DetailsBackdrop extends Component {
             if (type === 'shows' || type === 'subscriptions') {
               const moreData = data;
               if (moreData.seasons) {
-                moreData.seasons.forEach(season => {
+                moreData.seasons.forEach((season) => {
                   this.axiosGetHelper(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`)
-                    .then(response => {
+                    .then((response) => {
                       if (moreData.seasons[season.season_number - 1]) {
                         moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
                         this.setState({ moreData: moreData });
                       }
                     })
-                    .catch(err => {
+                    .catch((err) => {
                       if (axios.isCancel(err)) return;
                       console.error(err);
                     });
@@ -274,10 +274,10 @@ class DetailsBackdrop extends Component {
                 this.setState({ moreData: Cache[omdbUrl] });
               } else {
                 this.axiosGetHelper(omdbUrl)
-                  .then(response => {
+                  .then((response) => {
                     this.setState({ moreData: response.data });
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     if (axios.isCancel(err)) return;
                     console.error(err);
                     this.setState({ moreData: 'ERROR' });
@@ -293,10 +293,10 @@ class DetailsBackdrop extends Component {
                     this.setState({ pb: Cache[pirateUrl] });
                   } else {
                     this.axiosGetHelper(pirateUrl)
-                      .then(response => {
+                      .then((response) => {
                         this.setState({ pb: response.data });
                       })
-                      .catch(err => {
+                      .catch((err) => {
                         if (axios.isCancel(err)) return;
                         console.error(err);
                       });
@@ -306,7 +306,7 @@ class DetailsBackdrop extends Component {
               );
             }
           })
-          .catch(err => {
+          .catch((err) => {
             if (axios.isCancel(err)) return;
             console.error(err);
             this.setState({ moreData: 'ERROR' });
@@ -328,7 +328,7 @@ class DetailsBackdrop extends Component {
   }
 
   downloadSeason(episodes) {
-    episodes.forEach(episode => {
+    episodes.forEach((episode) => {
       if (episode.torrents.length > 0) this.props.downloadTorrent(episode.torrents[0]);
     });
   }
@@ -422,13 +422,13 @@ class DetailsBackdrop extends Component {
       <div
         ref={this.containerRef}
         className={'backdropContainer ' + viewMode}
-        onClick={e => {
+        onClick={(e) => {
           if (viewMode === 'standard') {
             this.setState(this.getDefaultState());
             onCloseModal();
           }
         }}
-        onScroll={e => {
+        onScroll={(e) => {
           // Prevent scrolling vertically
           if (this.containerRef.current.scrollTop !== 0) this.containerRef.current.scrollTop = 0;
         }}
@@ -438,9 +438,9 @@ class DetailsBackdrop extends Component {
         }}
       >
         {youtubeId ? (
-          <div className={'ytContainer ' + viewMode} onClick={e => e.stopPropagation()}>
+          <div className={'ytContainer ' + viewMode} onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 this.setState({ youtubeId: null });
               }}
@@ -462,11 +462,11 @@ class DetailsBackdrop extends Component {
                 ) : (
                   <FaRssSquare
                     className={`subscription ${hasSubscription(media.id, status.subscriptions) ? 'orange' : 'gray'}`}
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       this.toggleSubscription();
                     }}
-                    onKeyDown={e => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') this.toggleSubscription();
                     }}
                     tabIndex="0"
@@ -500,11 +500,11 @@ class DetailsBackdrop extends Component {
             {details.trailer ? (
               <div
                 className="trailer"
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   this.playYoutubeVideo(details.trailer.key);
                 }}
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') this.playYoutubeVideo(details.trailer.key);
                 }}
                 tabIndex="0"
@@ -521,11 +521,11 @@ class DetailsBackdrop extends Component {
               {fileExists ? (
                 <div className="fileExists">
                   <FaPlayCircle
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       window.open(fileExists.url, '_blank').focus();
                     }}
-                    onKeyPress={e => {
+                    onKeyPress={(e) => {
                       if (e.key === 'Enter') window.open(fileExists.url, '_blank').focus();
                     }}
                     tabIndex="0"
@@ -536,14 +536,14 @@ class DetailsBackdrop extends Component {
           ) : null}
         </div>
         {tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? (
-          <div className={'otherVideos' + (!otherVideos ? ' hidden' : '')} onClick={e => e.stopPropagation()}>
+          <div className={'otherVideos' + (!otherVideos ? ' hidden' : '')} onClick={(e) => e.stopPropagation()}>
             <div className="toggle">
               <span
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   this.setState({ otherVideos: !this.state.otherVideos });
                 }}
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') this.setState({ otherVideos: !this.state.otherVideos });
                 }}
                 tabIndex="0"
@@ -552,7 +552,7 @@ class DetailsBackdrop extends Component {
               </span>
             </div>
             <div className="videoContainer" tabIndex="-1">
-              {tmdbData.videos.results.map(v => {
+              {tmdbData.videos.results.map((v) => {
                 if (v.site === 'YouTube') {
                   return (
                     <div className="video" key={v.key}>
@@ -561,7 +561,7 @@ class DetailsBackdrop extends Component {
                         loading="lazy"
                         alt={v.name}
                         onClick={() => this.playYoutubeVideo(v.key)}
-                        onKeyDown={e => {
+                        onKeyDown={(e) => {
                           if (e.key === 'Enter') this.playYoutubeVideo(v.key);
                         }}
                         tabIndex={this.state.otherVideos ? '0' : '-1'}
@@ -580,7 +580,7 @@ class DetailsBackdrop extends Component {
           <div
             className="closeButton"
             tabIndex="0"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               const menu = document.querySelector('.toggleButton');
               if (menu) menu.focus();
@@ -592,7 +592,7 @@ class DetailsBackdrop extends Component {
         <div className="spacer"></div>
         <div
           className={'right' + (tmdbData && tmdbData.videos && tmdbData.videos.results.length > 0 ? ' videos' : '')}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           tabIndex="-1"
         >
           <div className="details" tabIndex="0">
@@ -627,14 +627,14 @@ class DetailsBackdrop extends Component {
             pb ? (
               versions.length > 0 ? (
                 <div className="versions">
-                  {versions.map(version => (
+                  {versions.map((version) => (
                     <Version
                       key={version.hashString}
                       version={version}
                       started={started}
                       getProgress={getProgress}
                       getTorrent={getTorrent}
-                      downloadTorrent={version => {
+                      downloadTorrent={(version) => {
                         if (
                           !fileExists ||
                           (!window.cordova &&
@@ -644,7 +644,7 @@ class DetailsBackdrop extends Component {
                         } else if (window.cordova) {
                           confirm(
                             'This file already exists in plex. Are you sure you want to download it again?',
-                            button => {
+                            (button) => {
                               if (button === 2) downloadTorrent(version);
                             },
                             'Confirm',
@@ -682,8 +682,8 @@ class DetailsBackdrop extends Component {
                   <h3 className="season">
                     Season
                     {seasons.length > 1 ? (
-                      <select onChange={event => this.updateSeason(event.target.value)} value={season}>
-                        {seasons.map(season => (
+                      <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
+                        {seasons.map((season) => (
                           <option key={season} value={season}>
                             {season}
                           </option>
@@ -708,7 +708,7 @@ class DetailsBackdrop extends Component {
                       <div className="versions">
                         {horribleSubs
                           .sort((a, b) => Number.parseInt(b.quality) - Number.parseInt(a.quality))
-                          .map(t => (
+                          .map((t) => (
                             <Version
                               key={t.filename + t.quality}
                               version={t}
@@ -730,14 +730,14 @@ class DetailsBackdrop extends Component {
                   ) : null}
                   <div className="episodeList">
                     {episodes[season] && episodes[season].length > 0
-                      ? episodes[season].map(episode =>
+                      ? episodes[season].map((episode) =>
                           episode ? (
                             <Fragment key={episode.episode}>
                               <h4 className="episode">{episode.title}</h4>
 
                               <div className="versions">
                                 {episode.torrents
-                                  ? episode.torrents.map(version => (
+                                  ? episode.torrents.map((version) => (
                                       <Version
                                         key={version.hashString}
                                         version={version}
@@ -767,7 +767,7 @@ class DetailsBackdrop extends Component {
               <h4>You Might Also Like...</h4>
               <div className="recommendationContainer">
                 <div className="recommendations" tabIndex="-1">
-                  {recommendations.map(r => {
+                  {recommendations.map((r) => {
                     const recommendation = parseMedia(r, 'movies');
 
                     return (
@@ -780,7 +780,7 @@ class DetailsBackdrop extends Component {
                             onOpenModal(recommendation);
                           });
                         }}
-                        onKeyDown={e => {
+                        onKeyDown={(e) => {
                           if (e.key === 'Enter')
                             this.setState(this.getDefaultState(), () => {
                               onOpenModal(recommendation);

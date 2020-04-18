@@ -8,7 +8,7 @@ function getEZTVDetails(url, title) {
   return new Promise((resolve, reject) => {
     axios
       .get(url)
-      .then(response => {
+      .then((response) => {
         const torrents = [];
 
         const $ = cheerio.load(response.data);
@@ -44,7 +44,7 @@ function getEZTVDetails(url, title) {
 
         resolve({ page: 1, total: torrents.length, limit: torrents.length, torrents, url, title });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         resolve({ page: 1, total: 0, limit: 30, torrents: [], url, title });
       });
@@ -54,7 +54,7 @@ function getEZTVDetails(url, title) {
 function updateEZTVShows(endpoint) {
   axios
     .get(`${endpoint}/showlist/`)
-    .then(response => {
+    .then((response) => {
       const $ = cheerio.load(response.data);
 
       const table = $('.forum_header_border').eq(1);
@@ -76,7 +76,7 @@ function updateEZTVShows(endpoint) {
 
       eztvShows = shows;
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 }
