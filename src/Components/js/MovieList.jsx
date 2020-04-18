@@ -471,10 +471,15 @@ class MovieList extends Component {
         },
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
+          if (!lastPage) {
           const movieList = document.querySelector('.movie-list');
           const searchEl = document.querySelector('.search');
-          if (!lastPage && movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight)
+            if (this.state.viewMode === 'carousel') {
+              setTimeout(() => this.updateScroll(), 1000);
+            } else if (movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight) {
             setTimeout(() => this.changePage(1), 1000);
+            }
+          }
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
@@ -997,6 +1002,19 @@ class MovieList extends Component {
     if (searchEl && viewMode === 'carousel' && type === 'pirate')
       movieListStyle = { maxHeight: `calc(100vh - ${searchEl.clientHeight}px)` };
 
+    if (logo) {
+      return <Logo />;
+    } else if (viewMode !== 'carousel' && (!isLoaded || !status)) {
+      return (
+        <div className="message">
+          <span>
+            Loading...
+            <Spinner visible />
+          </span>
+        </div>
+      );
+    }
+
     if (error) {
       return (
         <div className="message">
@@ -1014,16 +1032,6 @@ class MovieList extends Component {
     } else {
       return (
         <Fragment>
-          {logo ? (
-            <Logo />
-          ) : !isLoaded || !status ? (
-            <div className="message">
-              <span>
-                Loading...
-                <Spinner visible />
-              </span>
-            </div>
-          ) : (
             <Menu
               type={type}
               upgrade={this.upgrade}
@@ -1036,7 +1044,6 @@ class MovieList extends Component {
               viewMode={viewMode}
               toggleViewMode={this.toggleViewMode}
             />
-          )}
 
           {window.cordova && this.state.cordovaDev ? (
             <div className="cordovaDev">
