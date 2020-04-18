@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 
 export default class MultiImage extends Component {
+  smallTimeout = undefined;
+  largeTimeout = undefined;
+
   constructor(props) {
     super(props);
-    this.state = { finalImage: null };
+    this.state = { waitForSmall: true, finalImage: null };
   }
 
   componentDidMount() {
@@ -17,21 +20,31 @@ export default class MultiImage extends Component {
   }
 
   updateImage() {
-    const src = this.props.src;
-    if (src.indexOf('image.tmdb') !== -1) {
-      const finalImage = src.replace('w300', 'original');
-      const image = new Image();
-      image.src = finalImage;
+    this.setState({ waitForSmall: true, finalImage: null });
 
-      image.onload = () => {
-        this.setState({ finalImage });
-      };
-    }
+    if (this.smallTimeout) clearTimeout(this.smallTimeout);
+    this.smallTimeout = setTimeout(() => {
+      this.setState({ waitForSmall: false });
+    }, 250);
 
-    this.setState({ finalImage: null });
+    if (this.Largetimeout) clearTimeout(this.Largetimeout);
+    this.Largetimeout = setTimeout(() => {
+      const src = this.props.src;
+      if (src.indexOf('image.tmdb') !== -1) {
+        const finalImage = src.replace('w300', 'original');
+        const image = new Image();
+        image.src = finalImage;
+
+        image.onload = () => {
+          this.setState({ finalImage });
+        };
+      }
+    }, 2000);
   }
 
   render() {
+    if (this.state.waitForSmall) return null;
+
     return (
       <img
         src={this.state.finalImage || this.props.src}

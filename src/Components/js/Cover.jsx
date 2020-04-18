@@ -147,7 +147,7 @@ class Cover extends Component {
           }}
           tabIndex={type === 'subscriptions' ? undefined : '0'}
         >
-          <img className="movieCover" src={media.poster_path} alt="" />
+          <img className="movieCover" src={media.poster_path} alt="" loading="lazy" />
           <div className="movieIcon">{this.getIcon()}</div>
           {fileExists ? (
             <div className="fileExists hover" tabIndex={viewMode === 'carousel' ? undefined : '0'}>

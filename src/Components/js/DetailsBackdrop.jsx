@@ -28,6 +28,8 @@ import Version from './Version';
 
 class DetailsBackdrop extends Component {
   cancelTokens = [];
+
+  initialTimeout = undefined;
   nyaaTimeout = undefined;
   horribleSubsTimeout = undefined;
   eztvTimeout = undefined;
@@ -69,9 +71,6 @@ class DetailsBackdrop extends Component {
   cancelRequests() {
     this.cancelTokens.forEach((t) => t.cancel());
     this.cancelTokens = [];
-
-    // Also remove torrent data just in case
-    this.setState({ pb: null, eztv: null, nyaa: null, horribleSubs: null });
   }
 
   getEztv(media) {
@@ -211,111 +210,113 @@ class DetailsBackdrop extends Component {
     if (media && (this.state.onLoad || media.id !== (prevProps.media ? prevProps.media.id : ''))) {
       this.cancelRequests();
 
-      if (type === 'animes') {
-        this.axiosGetHelper(`${this.props.server}/kitsu/${media.id}`)
-          .then((response) => {
-            const data = response.data.data;
-            media.title = media.title || data.attributes.canonicalTitle;
-            media.year = media.year || getYear(data);
+      // Just go to square one when we change props instead of retaining bits and pieces like previously
+      this.setState(this.getDefaultState());
 
-            this.setState({
-              moreData: {
-                CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
-                Plot: data.attributes.synopsis,
-                Rated: data.attributes.ageRating,
-                Genres: data.relationships.genres.data.map((g) => Genre.anime.find((i) => g.id === i.id).label),
-                EpisodeCount: data.attributes.episodeCount,
-                PosterPath: data.attributes.posterImage.small,
-              },
-              loadingEpisodes: true,
+      if (this.initialTimeout) clearTimeout(this.initialTimeout);
+      this.initialTimeout = setTimeout(() => {
+        if (type === 'animes') {
+          this.axiosGetHelper(`${this.props.server}/kitsu/${media.id}`)
+            .then((response) => {
+              const data = response.data.data;
+              media.title = media.title || data.attributes.canonicalTitle;
+              media.year = media.year || getYear(data);
+
+              this.setState({
+                moreData: {
+                  CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
+                  Plot: data.attributes.synopsis,
+                  Rated: data.attributes.ageRating,
+                  Genres: data.relationships.genres.data.map((g) => Genre.anime.find((i) => g.id === i.id).label),
+                  EpisodeCount: data.attributes.episodeCount,
+                  PosterPath: data.attributes.posterImage.small,
+                },
+                loadingEpisodes: true,
+              });
+
+              this.getNyaa(media.title, 1);
+              this.getHorribleSubs();
+            })
+            .catch((err) => {
+              if (axios.isCancel(err)) return;
+              console.error(err);
+              this.setState({ moreData: 'ERROR' });
             });
+        } else {
+          this.axiosGetHelper(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id)
+            .then((response) => {
+              const data = response.data;
+              const updated = { tmdbData: data, loadingEpisodes: type === 'shows' || type === 'subscriptions', showCover: true };
+              media.title = media.title || data.title || data.original_name;
+              media.year = media.year || getYear(data);
+              if (type === 'shows' || type === 'subscriptions') updated.moreData = data;
 
-            this.getNyaa(media.title, 1);
-            this.getHorribleSubs();
-          })
-          .catch((err) => {
-            if (axios.isCancel(err)) return;
-            console.error(err);
-            this.setState({ moreData: 'ERROR' });
-          });
-      } else {
-        this.axiosGetHelper(this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id)
-          .then((response) => {
-            const data = response.data;
-            const updated = { tmdbData: data, loadingEpisodes: type === 'shows' || type === 'subscriptions', showCover: true };
-            media.title = media.title || data.title || data.original_name;
-            media.year = media.year || getYear(data);
-            if (type === 'shows' || type === 'subscriptions') updated.moreData = data;
+              this.setState(updated);
 
-            this.setState(updated);
-
-            if (type === 'shows' || type === 'subscriptions') {
-              const moreData = data;
-              if (moreData.seasons) {
-                moreData.seasons.forEach((season) => {
-                  this.axiosGetHelper(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`)
-                    .then((response) => {
-                      if (moreData.seasons[season.season_number - 1]) {
-                        moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
-                        this.setState({ moreData: moreData });
-                      }
-                    })
-                    .catch((err) => {
-                      if (axios.isCancel(err)) return;
-                      console.error(err);
-                    });
-                });
-              }
-              this.getEztv(media);
-            } else {
-              const omdbUrl = this.props.server + '/omdb/' + data.imdb_id;
-
-              if (Cache[omdbUrl]) {
-                this.setState({ moreData: Cache[omdbUrl] });
-              } else {
-                this.axiosGetHelper(omdbUrl)
-                  .then((response) => {
-                    this.setState({ moreData: response.data });
-                  })
-                  .catch((err) => {
-                    if (axios.isCancel(err)) return;
-                    console.error(err);
-                    this.setState({ moreData: 'ERROR' });
-                  });
-              }
-
-              if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
-              this.pirateTimeout = setTimeout(
-                () => {
-                  const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
-
-                  if (Cache[pirateUrl]) {
-                    this.setState({ pb: Cache[pirateUrl] });
-                  } else {
-                    this.axiosGetHelper(pirateUrl)
+              if (type === 'shows' || type === 'subscriptions') {
+                const moreData = data;
+                if (moreData.seasons) {
+                  moreData.seasons.forEach((season) => {
+                    this.axiosGetHelper(`${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`)
                       .then((response) => {
-                        this.setState({ pb: response.data });
+                        if (moreData.seasons[season.season_number - 1]) {
+                          moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
+                          this.setState({ moreData: moreData });
+                        }
                       })
                       .catch((err) => {
                         if (axios.isCancel(err)) return;
                         console.error(err);
                       });
-                  }
-                },
-                this.props.viewMode === 'carousel' ? 2000 : 0
-              );
-            }
-          })
-          .catch((err) => {
-            if (axios.isCancel(err)) return;
-            console.error(err);
-            this.setState({ moreData: 'ERROR' });
-          });
-      }
-      if (this.state.onLoad) this.setState({ onLoad: false });
-      // } else if (this.state !== prevState) {
-      //     this.setState({tmdbData: null, moreData: null, pb: null, eztv: null, nyaa: null, season: 1, maxSeason: 1, showCover: true});
-      // }
+                  });
+                }
+                this.getEztv(media);
+              } else {
+                const omdbUrl = this.props.server + '/omdb/' + data.imdb_id;
+
+                if (Cache[omdbUrl]) {
+                  this.setState({ moreData: Cache[omdbUrl] });
+                } else {
+                  this.axiosGetHelper(omdbUrl)
+                    .then((response) => {
+                      this.setState({ moreData: response.data });
+                    })
+                    .catch((err) => {
+                      if (axios.isCancel(err)) return;
+                      console.error(err);
+                      this.setState({ moreData: 'ERROR' });
+                    });
+                }
+
+                if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
+                this.pirateTimeout = setTimeout(
+                  () => {
+                    const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
+
+                    if (Cache[pirateUrl]) {
+                      this.setState({ pb: Cache[pirateUrl] });
+                    } else {
+                      this.axiosGetHelper(pirateUrl)
+                        .then((response) => {
+                          this.setState({ pb: response.data });
+                        })
+                        .catch((err) => {
+                          if (axios.isCancel(err)) return;
+                          console.error(err);
+                        });
+                    }
+                  },
+                  this.props.viewMode === 'carousel' ? 2000 : 0
+                );
+              }
+            })
+            .catch((err) => {
+              if (axios.isCancel(err)) return;
+              console.error(err);
+              this.setState({ moreData: 'ERROR' });
+            });
+        }
+      }, 1000);
     }
   }
 

@@ -25,6 +25,8 @@ const hashMapping = {};
 const showMedia = false;
 
 class MovieList extends Component {
+  precacheTimeout = undefined;
+
   constructor(props) {
     super(props);
 
@@ -676,21 +678,27 @@ class MovieList extends Component {
         if (media && media.id === m.id) currentIndex = i;
       });
 
-      // Precache previous background image
-      if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
-        const largeImg = new Image();
-        largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex - 1].backdrop_path;
-        const smallImg = new Image();
-        smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex - 1].backdrop_path;
+      if (this.precacheTimeout) {
+        clearTimeout(this.precacheTimeout);
+        console.log('clearing timeout');
       }
+      this.precacheTimeout = setTimeout(() => {
+        // Precache previous background image
+        // if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
+        // const largeImg = new Image();
+        // largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex - 1].backdrop_path;
+        // const smallImg = new Image();
+        // smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex - 1].backdrop_path;
+        // }
 
-      // Precache next background image
-      if (currentIndex < this.state.results.length - 1 && this.state.results[currentIndex + 1].backdrop_path) {
-        const largeImg = new Image();
-        largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex + 1].backdrop_path;
-        const smallImg = new Image();
-        smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex + 1].backdrop_path;
-      }
+        // Precache next background image
+        if (currentIndex < this.state.results.length - 1 && this.state.results[currentIndex + 1].backdrop_path) {
+          // const largeImg = new Image();
+          // largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex + 1].backdrop_path;
+          const smallImg = new Image();
+          smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex + 1].backdrop_path;
+        }
+      }, 1500);
 
       if (currentIndex !== -1 && this.listRef.current) {
         const covers = this.listRef.current.querySelectorAll('.cover');
