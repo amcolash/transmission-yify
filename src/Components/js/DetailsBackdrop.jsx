@@ -28,6 +28,10 @@ import Version from './Version';
 
 class DetailsBackdrop extends Component {
   cancelTokens = [];
+  nyaaTimeout = undefined;
+  horribleSubsTimeout = undefined;
+  eztvTimeout = undefined;
+  pirateTimeout = undefined;
 
   constructor(props) {
     super(props);
@@ -65,27 +69,36 @@ class DetailsBackdrop extends Component {
   cancelRequests() {
     this.cancelTokens.forEach(t => t.cancel());
     this.cancelTokens = [];
+
+    // Also remove torrent data just in case
+    this.setState({ pb: null, eztv: null, nyaa: null, horribleSubs: null });
   }
 
   getEztv(media) {
-    const url = `${this.props.server}/eztv/${media.title}`;
+    if (this.eztvTimeout) clearTimeout(this.eztvTimeout);
+    this.eztvTimeout = setTimeout(
+      () => {
+        const url = `${this.props.server}/eztv/${media.title}`;
 
-    if (Cache[url]) {
-      this.handleEztv(Cache[url]);
-    } else {
-      this.axiosGetHelper(url)
-        .then(response => {
-          const data = response.data;
-          Cache[url] = data;
+        if (Cache[url]) {
+          this.handleEztv(Cache[url]);
+        } else {
+          this.axiosGetHelper(url)
+            .then(response => {
+              const data = response.data;
+              Cache[url] = data;
 
-          this.handleEztv(data);
-        })
-        .catch(err => {
-          if (axios.isCancel(err)) return;
-          console.error(err);
-          this.setState({ loadingEpisodes: false });
-        });
-    }
+              this.handleEztv(data);
+            })
+            .catch(err => {
+              if (axios.isCancel(err)) return;
+              console.error(err);
+              this.setState({ loadingEpisodes: false });
+            });
+        }
+      },
+      this.props.viewMode === 'carousel' ? 2000 : 0
+    );
   }
 
   handleEztv(data) {
@@ -110,24 +123,30 @@ class DetailsBackdrop extends Component {
   }
 
   getNyaa(title, page) {
-    const limit = 50;
-    const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
+    if (this.nyaaTimeout) clearTimeout(this.nyaaTimeout);
+    this.nyaaTimeout = setTimeout(
+      () => {
+        const limit = 50;
+        const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
-    if (Cache[url]) {
-      this.handleNyaa(Cache[url], title, page, limit);
-    } else {
-      this.axiosGetHelper(url)
-        .then(response => {
-          const data = response.data;
-          Cache[url] = data;
-          this.handleNyaa(data, title, page, limit);
-        })
-        .catch(err => {
-          if (axios.isCancel(err)) return;
-          console.error(err);
-          this.setState({ loadingEpisodes: false });
-        });
-    }
+        if (Cache[url]) {
+          this.handleNyaa(Cache[url], title, page, limit);
+        } else {
+          this.axiosGetHelper(url)
+            .then(response => {
+              const data = response.data;
+              Cache[url] = data;
+              this.handleNyaa(data, title, page, limit);
+            })
+            .catch(err => {
+              if (axios.isCancel(err)) return;
+              console.error(err);
+              this.setState({ loadingEpisodes: false });
+            });
+        }
+      },
+      this.props.viewMode === 'carousel' ? 2000 : 0
+    );
   }
 
   handleNyaa(data, title, page, limit) {
@@ -148,23 +167,29 @@ class DetailsBackdrop extends Component {
   }
 
   getHorribleSubs() {
-    const url = `${this.props.server}/horribleSubs/${this.props.media.title}`;
+    if (this.horribleSubsTimeout) clearTimeout(this.horribleSubsTimeout);
+    this.horribleSubsTimeout = setTimeout(
+      () => {
+        const url = `${this.props.server}/horribleSubs/${this.props.media.title}`;
 
-    if (Cache[url]) {
-      this.handleHorribleSubs(Cache[url]);
-    } else {
-      this.axiosGetHelper(url)
-        .then(response => {
-          const data = response.data;
-          Cache[url] = data;
+        if (Cache[url]) {
+          this.handleHorribleSubs(Cache[url]);
+        } else {
+          this.axiosGetHelper(url)
+            .then(response => {
+              const data = response.data;
+              Cache[url] = data;
 
-          this.handleHorribleSubs(data);
-        })
-        .catch(err => {
-          if (axios.isCancel(err)) return;
-          console.error(err);
-        });
-    }
+              this.handleHorribleSubs(data);
+            })
+            .catch(err => {
+              if (axios.isCancel(err)) return;
+              console.error(err);
+            });
+        }
+      },
+      this.props.viewMode === 'carousel' ? 2000 : 0
+    );
   }
 
   handleHorribleSubs(data) {
@@ -259,20 +284,26 @@ class DetailsBackdrop extends Component {
                   });
               }
 
-              const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
+              if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
+              this.pirateTimeout = setTimeout(
+                () => {
+                  const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
 
-              if (Cache[pirateUrl]) {
-                this.setState({ pb: Cache[pirateUrl] });
-              } else {
-                this.axiosGetHelper(pirateUrl)
-                  .then(response => {
-                    this.setState({ pb: response.data });
-                  })
-                  .catch(err => {
-                    if (axios.isCancel(err)) return;
-                    console.error(err);
-                  });
-              }
+                  if (Cache[pirateUrl]) {
+                    this.setState({ pb: Cache[pirateUrl] });
+                  } else {
+                    this.axiosGetHelper(pirateUrl)
+                      .then(response => {
+                        this.setState({ pb: response.data });
+                      })
+                      .catch(err => {
+                        if (axios.isCancel(err)) return;
+                        console.error(err);
+                      });
+                  }
+                },
+                this.props.viewMode === 'carousel' ? 2000 : 0
+              );
             }
           })
           .catch(err => {
