@@ -59,7 +59,6 @@
 .movie-list {
   padding: 1em 0;
   overflow: auto;
-  scroll-behavior: smooth;
 }
 
 /* Backup in case js doesn't work properly in render */
@@ -72,6 +71,7 @@
   margin: 0 0.25em;
   min-height: 9.5em;
   margin-bottom: 1em;
+  scroll-snap-type: x mandatory;
 }
 
 .carousel .carouselTop {

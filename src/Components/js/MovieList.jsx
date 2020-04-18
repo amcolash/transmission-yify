@@ -33,8 +33,8 @@ class MovieList extends Component {
     if (process.env.NODE_ENV === 'development') {
       port = 9000;
       devOverrides = {
-        // type: 'animes',
-        // search: 'One punch man'
+        // type: 'shows',
+        // search: 'community',
       };
     } else {
       // After the initial logo, hide it and go back to loading
@@ -105,15 +105,15 @@ class MovieList extends Component {
     // Get movie list
     this.updateData();
 
-      // Check if dev version of cordova app
-      if (window.cordova) {
-        getIdentifier(
-          data => {
-            this.setState({ cordovaDev: data.indexOf('pirateflix_dev') !== -1 });
-          },
-          err => console.error(err)
-        );
-      }
+    // Check if dev version of cordova app
+    if (window.cordova) {
+      getIdentifier(
+        data => {
+          this.setState({ cordovaDev: data.indexOf('pirateflix_dev') !== -1 });
+        },
+        err => console.error(err)
+      );
+    }
 
     // Update base window size
     this.updateSize();
@@ -472,12 +472,12 @@ class MovieList extends Component {
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
           if (!lastPage) {
-          const movieList = document.querySelector('.movie-list');
-          const searchEl = document.querySelector('.search');
+            const movieList = document.querySelector('.movie-list');
+            const searchEl = document.querySelector('.search');
             if (this.state.viewMode === 'carousel') {
               setTimeout(() => this.updateScroll(), 1000);
             } else if (movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight) {
-            setTimeout(() => this.changePage(1), 1000);
+              setTimeout(() => this.changePage(1), 1000);
             }
           }
 
@@ -882,7 +882,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          setTimeout(() => this.focusItem(movieListEl, -1), 25);
+          this.focusItem(movieListEl, -1);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -895,7 +895,7 @@ class MovieList extends Component {
         else if (coverFocus) {
           if (rightEl) rightEl.scrollTop = 0;
           if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          setTimeout(() => this.focusItem(movieListEl, 1), 25);
+          this.focusItem(movieListEl, 1);
         } else if (menuOpen && menuToggleEl) {
           menuToggleEl.focus();
           menuToggleEl.click();
@@ -932,7 +932,7 @@ class MovieList extends Component {
       case 'Enter':
         if (videosEl && videosButtonEl && active === videosButtonEl) {
           e.preventDefault();
-          setTimeout(() => videosEl.querySelector('img').focus(), 250);
+          videosEl.querySelector('img').focus();
         }
         if (coverFocus) {
           e.preventDefault();
@@ -1032,18 +1032,18 @@ class MovieList extends Component {
     } else {
       return (
         <Fragment>
-            <Menu
-              type={type}
-              upgrade={this.upgrade}
-              addMagnet={this.addMagnet}
-              clearCache={this.clearCache}
-              updateSearch={this.updateSearch}
-              status={status}
-              torrents={torrents}
-              listRef={this.listRef}
-              viewMode={viewMode}
-              toggleViewMode={this.toggleViewMode}
-            />
+          <Menu
+            type={type}
+            upgrade={this.upgrade}
+            addMagnet={this.addMagnet}
+            clearCache={this.clearCache}
+            updateSearch={this.updateSearch}
+            status={status}
+            torrents={torrents}
+            listRef={this.listRef}
+            viewMode={viewMode}
+            toggleViewMode={this.toggleViewMode}
+          />
 
           {window.cordova && this.state.cordovaDev ? (
             <div className="cordovaDev">

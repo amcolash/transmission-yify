@@ -128,22 +128,8 @@ class Cover extends Component {
       });
     }
 
-    return (
-      <ScrollAnimation
-        initiallyVisible={viewMode !== 'standard'}
-        animateIn="fadeIn"
-        animateOnce={true}
-        offset={100}
-        scrollableParentSelector=".movie-list"
-        className={'movie ' + viewMode}
-        afterAnimatedIn={() => {
-          if (this.props.type === 'movies') {
-            if (this.props.viewMode === 'standard') this.updatePB();
-            else setTimeout(() => this.updatePB(), Math.random() * 2000);
-          }
-        }}
-        ref={this.ref}
-      >
+    const innerContents = (
+      <Fragment>
         <div
           className={'cover' + (viewMode === 'carousel' && parseInt(selected ? selected.id : -1) === id ? ' selected' : '')}
           id={id}
@@ -261,7 +247,29 @@ class Cover extends Component {
             Latest: S{subscription.lastSeason}E{subscription.lastEpisode}
           </span>
         ) : null}
+      </Fragment>
+    );
+
+    return viewMode === 'standard' ? (
+      <ScrollAnimation
+        initiallyVisible={viewMode !== 'standard'}
+        animateIn="fadeIn"
+        animateOnce={true}
+        offset={100}
+        scrollableParentSelector=".movie-list"
+        className={'movie ' + viewMode}
+        afterAnimatedIn={() => {
+          if (this.props.type === 'movies') {
+            if (this.props.viewMode === 'standard') this.updatePB();
+            else setTimeout(() => this.updatePB(), Math.random() * 2000);
+          }
+        }}
+        ref={this.ref}
+      >
+        {innerContents}
       </ScrollAnimation>
+    ) : (
+      <div className={'movie ' + viewMode}>{innerContents}</div>
     );
   }
 }

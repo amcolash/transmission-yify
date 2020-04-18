@@ -52,6 +52,7 @@
 
 .carousel .cover.selected {
   border-color: #eee;
+  scroll-snap-align: center;
 }
 
 .cover.selected {

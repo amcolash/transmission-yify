@@ -52,7 +52,6 @@ export default class CoverList extends Component {
             toggleSubscription={toggleSubscription}
             viewMode={viewMode}
             showLatest={showLatest}
-            onFocus={e => this.list.parentElement.scrollTo(e.target.offsetLeft - 7, 0)}
           />
         ))}
         <br />

@@ -8,7 +8,7 @@ class Ratings extends Component {
 
     if (!moreData || moreData === 'ERROR' || !moreData.Ratings) return null;
 
-    console.log(moreData.Ratings);
+    // console.log(moreData.Ratings);
 
     return (
       <div className="ratings">
