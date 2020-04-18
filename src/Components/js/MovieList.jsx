@@ -474,13 +474,15 @@ class MovieList extends Component {
         () => {
           // Safety check if we need to load more data since things were filtered and may not fill client height
           if (!lastPage) {
-            const movieList = document.querySelector('.movie-list');
-            const searchEl = document.querySelector('.search');
-            if (this.state.viewMode === 'carousel') {
-              setTimeout(() => this.updateScroll(), 1000);
-            } else if (movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight) {
-              setTimeout(() => this.changePage(1), 1000);
-            }
+            setTimeout(() => {
+              const movieList = document.querySelector('.movie-list');
+              const searchEl = document.querySelector('.search');
+              if (this.state.viewMode === 'carousel') {
+                setTimeout(() => this.updateScroll(), 500);
+              } else if (movieList && movieList.scrollHeight < window.innerHeight - searchEl.clientHeight) {
+                setTimeout(() => this.changePage(1), 500);
+              }
+            }, 500);
           }
 
           // Show media after loaded
