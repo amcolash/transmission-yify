@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import Cache from '../../Util/Cache';
+
 export default class MultiImage extends Component {
   smallTimeout = undefined;
   largeTimeout = undefined;
@@ -23,23 +25,30 @@ export default class MultiImage extends Component {
     this.setState({ waitForSmall: true, finalImage: null });
 
     if (this.smallTimeout) clearTimeout(this.smallTimeout);
-    this.smallTimeout = setTimeout(() => {
-      this.setState({ waitForSmall: false });
-    }, 250);
+    this.smallTimeout = setTimeout(
+      () => {
+        this.setState({ waitForSmall: false });
+      },
+      Cache[this.props.src] ? 0 : 250
+    );
 
     if (this.Largetimeout) clearTimeout(this.Largetimeout);
-    this.Largetimeout = setTimeout(() => {
-      const src = this.props.src;
-      if (src.indexOf('image.tmdb') !== -1) {
-        const finalImage = src.replace('w300', 'original');
-        const image = new Image();
-        image.src = finalImage;
+    this.Largetimeout = setTimeout(
+      () => {
+        const src = this.props.src;
+        if (src.indexOf('image.tmdb') !== -1) {
+          const finalImage = src.replace('w300', 'original');
+          const image = new Image();
+          image.src = finalImage;
 
-        image.onload = () => {
-          this.setState({ finalImage });
-        };
-      }
-    }, 2000);
+          image.onload = () => {
+            this.setState({ finalImage });
+            Cache[this.props.src] = true;
+          };
+        }
+      },
+      Cache[this.props.src] ? 0 : 2000
+    );
   }
 
   render() {

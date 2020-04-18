@@ -74,14 +74,14 @@ class DetailsBackdrop extends Component {
   }
 
   getEztv(media) {
-    if (this.eztvTimeout) clearTimeout(this.eztvTimeout);
-    this.eztvTimeout = setTimeout(
-      () => {
-        const url = `${this.props.server}/eztv/${media.title}`;
+    const url = `${this.props.server}/eztv/${media.title}`;
 
-        if (Cache[url]) {
-          this.handleEztv(Cache[url]);
-        } else {
+    if (Cache[url]) {
+      this.handleEztv(Cache[url]);
+    } else {
+      if (this.eztvTimeout) clearTimeout(this.eztvTimeout);
+      this.eztvTimeout = setTimeout(
+        () => {
           this.axiosGetHelper(url)
             .then((response) => {
               const data = response.data;
@@ -94,10 +94,10 @@ class DetailsBackdrop extends Component {
               console.error(err);
               this.setState({ loadingEpisodes: false });
             });
-        }
-      },
-      this.props.viewMode === 'carousel' ? 2000 : 0
-    );
+        },
+        this.props.viewMode === 'carousel' ? 2000 : 0
+      );
+    }
   }
 
   handleEztv(data) {
@@ -122,15 +122,15 @@ class DetailsBackdrop extends Component {
   }
 
   getNyaa(title, page) {
-    if (this.nyaaTimeout) clearTimeout(this.nyaaTimeout);
-    this.nyaaTimeout = setTimeout(
-      () => {
-        const limit = 50;
-        const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
+    const limit = 50;
+    const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
 
-        if (Cache[url]) {
-          this.handleNyaa(Cache[url], title, page, limit);
-        } else {
+    if (Cache[url]) {
+      this.handleNyaa(Cache[url], title, page, limit);
+    } else {
+      if (this.nyaaTimeout) clearTimeout(this.nyaaTimeout);
+      this.nyaaTimeout = setTimeout(
+        () => {
           this.axiosGetHelper(url)
             .then((response) => {
               const data = response.data;
@@ -142,10 +142,10 @@ class DetailsBackdrop extends Component {
               console.error(err);
               this.setState({ loadingEpisodes: false });
             });
-        }
-      },
-      this.props.viewMode === 'carousel' ? 2000 : 0
-    );
+        },
+        this.props.viewMode === 'carousel' ? 2000 : 0
+      );
+    }
   }
 
   handleNyaa(data, title, page, limit) {
@@ -166,14 +166,14 @@ class DetailsBackdrop extends Component {
   }
 
   getHorribleSubs() {
-    if (this.horribleSubsTimeout) clearTimeout(this.horribleSubsTimeout);
-    this.horribleSubsTimeout = setTimeout(
-      () => {
-        const url = `${this.props.server}/horribleSubs/${this.props.media.title}`;
+    const url = `${this.props.server}/horribleSubs/${this.props.media.title}`;
 
-        if (Cache[url]) {
-          this.handleHorribleSubs(Cache[url]);
-        } else {
+    if (Cache[url]) {
+      this.handleHorribleSubs(Cache[url]);
+    } else {
+      if (this.horribleSubsTimeout) clearTimeout(this.horribleSubsTimeout);
+      this.horribleSubsTimeout = setTimeout(
+        () => {
           this.axiosGetHelper(url)
             .then((response) => {
               const data = response.data;
@@ -185,10 +185,10 @@ class DetailsBackdrop extends Component {
               if (axios.isCancel(err)) return;
               console.error(err);
             });
-        }
-      },
-      this.props.viewMode === 'carousel' ? 2000 : 0
-    );
+        },
+        this.props.viewMode === 'carousel' ? 2000 : 0
+      );
+    }
   }
 
   handleHorribleSubs(data) {
@@ -288,26 +288,27 @@ class DetailsBackdrop extends Component {
                     });
                 }
 
-                if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
-                this.pirateTimeout = setTimeout(
-                  () => {
-                    const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
+                const pirateUrl = getPirateSearchUrl(this.props.server, media.title, media.year);
 
-                    if (Cache[pirateUrl]) {
-                      this.setState({ pb: Cache[pirateUrl] });
-                    } else {
+                if (Cache[pirateUrl]) {
+                  this.setState({ pb: Cache[pirateUrl] });
+                } else {
+                  if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
+                  this.pirateTimeout = setTimeout(
+                    () => {
                       this.axiosGetHelper(pirateUrl)
                         .then((response) => {
+                          Cache[pirateUrl] = response.data;
                           this.setState({ pb: response.data });
                         })
                         .catch((err) => {
                           if (axios.isCancel(err)) return;
                           console.error(err);
                         });
-                    }
-                  },
-                  this.props.viewMode === 'carousel' ? 2000 : 0
-                );
+                    },
+                    this.props.viewMode === 'carousel' ? 2000 : 0
+                  );
+                }
               }
             })
             .catch((err) => {

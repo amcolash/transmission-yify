@@ -678,18 +678,15 @@ class MovieList extends Component {
         if (media && media.id === m.id) currentIndex = i;
       });
 
-      if (this.precacheTimeout) {
-        clearTimeout(this.precacheTimeout);
-        console.log('clearing timeout');
-      }
+      if (this.precacheTimeout) clearTimeout(this.precacheTimeout);
       this.precacheTimeout = setTimeout(() => {
         // Precache previous background image
-        // if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
-        // const largeImg = new Image();
-        // largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex - 1].backdrop_path;
-        // const smallImg = new Image();
-        // smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex - 1].backdrop_path;
-        // }
+        if (currentIndex > 0 && this.state.results[currentIndex - 1].backdrop_path) {
+          // const largeImg = new Image();
+          // largeImg.src = 'https://image.tmdb.org/t/p/original' + this.state.results[currentIndex - 1].backdrop_path;
+          const smallImg = new Image();
+          smallImg.src = 'https://image.tmdb.org/t/p/w300' + this.state.results[currentIndex - 1].backdrop_path;
+        }
 
         // Precache next background image
         if (currentIndex < this.state.results.length - 1 && this.state.results[currentIndex + 1].backdrop_path) {
@@ -969,9 +966,7 @@ class MovieList extends Component {
   };
 
   toggleViewMode() {
-    console.log('toggle view mode');
     const viewMode = this.state.viewMode === 'standard' ? 'carousel' : 'standard';
-    this.setState({ viewMode });
     window.localStorage.setItem('viewMode', viewMode);
     window.location.reload();
   }
