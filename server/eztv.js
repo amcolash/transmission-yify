@@ -28,6 +28,9 @@ function getEZTVDetails(url, title) {
           const season = parsed.season ? Number.parseInt(parsed.season) : undefined;
           if (!episode || !season) return;
 
+          // Odd exception for 'Breaking Bad' - there is a show called 'Breaking Brad' which interferes :(
+          if (title.toLowerCase() === 'breaking bad' && parsed.title.toLowerCase() === 'breaking brad') return;
+
           const torrent = {
             filename,
             link,

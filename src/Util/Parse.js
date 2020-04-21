@@ -41,6 +41,8 @@ export function getSeasons(type, maxSeason, moreData) {
     }
   }
 
+  console.log(moreData, seasons);
+
   return seasons;
 }
 
