@@ -67,7 +67,7 @@
 .movie.carousel .cover .movieCover {
   height: 8em;
   width: 5.3em;
-  transition: none;
+  transition: transform 0.5s;
 }
 
 .standard .movie:not(.disabled) .cover:hover {
