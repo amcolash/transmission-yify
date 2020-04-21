@@ -627,7 +627,6 @@ class MovieList extends Component {
     } else {
       if (window.cordova)
         prompt('Password?', (results) => {
-          console.log(results);
           if (results.buttonIndex === 1) promptCallback(results.input1);
         });
       else key = promptCallback(window.prompt('Password?', ''));

@@ -29,7 +29,7 @@ export default class MultiImage extends Component {
       () => {
         this.setState({ waitForSmall: false });
       },
-      Cache[this.props.src] ? 0 : 250
+      Cache[this.props.src] ? 0 : 50
     );
 
     if (this.Largetimeout) clearTimeout(this.Largetimeout);
@@ -47,7 +47,7 @@ export default class MultiImage extends Component {
           };
         }
       },
-      Cache[this.props.src] ? 0 : 2000
+      Cache[this.props.src] ? 0 : 1000
     );
   }
 
