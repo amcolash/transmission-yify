@@ -840,6 +840,8 @@ class MovieList extends Component {
     if (searchEl) searchFocus = searchEl.contains(active);
     let backdropFocus = false;
     if (backdropEl) backdropFocus = backdropEl.contains(active);
+    let loadingBackdrop = false;
+    if (backdropEl) loadingBackdrop = backdropEl.querySelectorAll('.spinner').length > 0;
     let videosOpen = false;
     if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
 
@@ -856,7 +858,7 @@ class MovieList extends Component {
     }
 
     // If we are focused on the info on the right side, scroll if possible
-    if (active === infoEl && rightEl) {
+    if (active === infoEl && rightEl && !loadingBackdrop) {
       if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) {
         rightEl.scrollTop -= 15;
 
@@ -912,7 +914,7 @@ class MovieList extends Component {
           // If on the 1st item and up press, go back to covers
           const focusableEls = this.getFocusable(backdropEl);
           const index = this.getFocusIndex(focusableEls);
-          if (index === 0) this.focusCover();
+          if (index === 0 && !loadingBackdrop) this.focusCover();
           else this.focusItem(backdropEl, -1, true);
         } else if (coverFocus && menuToggleEl) menuToggleEl.focus();
         else this.focusItem(document, -1);
