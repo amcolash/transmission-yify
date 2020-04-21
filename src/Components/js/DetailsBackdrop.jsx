@@ -51,7 +51,7 @@ class DetailsBackdrop extends Component {
       nyaa: null,
       horribleSubs: null,
       season: 1,
-      maxSeason: 1,
+      maxSeason: 0,
       showCover: true,
       loadingEpisodes: false,
       subscribing: false,
@@ -107,7 +107,7 @@ class DetailsBackdrop extends Component {
     if (data.torrents) {
       const moreData = this.state.moreData;
 
-      let maxSeason = 1;
+      let maxSeason = 0;
       data.torrents.forEach((t) => {
         const s = parseInt(t.season);
         if (s > maxSeason && moreData && moreData.seasons && s <= moreData.seasons.length) {
@@ -713,25 +713,27 @@ class DetailsBackdrop extends Component {
                 <h4>No Torrents Found</h4>
               ) : (
                 <Fragment>
-                  <h3 className="season">
-                    Season
-                    {seasons.length > 1 ? (
-                      <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
-                        {seasons.map((season) => (
-                          <option key={season} value={season}>
-                            {season}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      ' 1'
-                    )}
-                    {episodes[season] && episodes[season].length > 0 ? (
-                      <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
-                        <FaDownload />
-                      </button>
-                    ) : null}
-                  </h3>
+                  {maxSeason > 0 ? (
+                    <h3 className="season">
+                      Season
+                      {seasons.length > 1 ? (
+                        <select onChange={(event) => this.updateSeason(event.target.value)} value={season}>
+                          {seasons.map((season) => (
+                            <option key={season} value={season}>
+                              {season}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        ' 1'
+                      )}
+                      {episodes[season] && episodes[season].length > 0 ? (
+                        <button className="orange download" onClick={() => this.downloadSeason(episodes[season])}>
+                          <FaDownload />
+                        </button>
+                      ) : null}
+                    </h3>
+                  ) : null}
                   {horribleSubs && horribleSubs.length > 0 ? (
                     <div>
                       <h4 className="episode">

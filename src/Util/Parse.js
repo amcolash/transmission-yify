@@ -38,8 +38,6 @@ export function getSeasons(type, maxSeason, moreData) {
       for (let i = 1; i < maxSeason + 1; i++) {
         if (moreData && moreData.seasons && i <= moreData.seasons.length) seasons.push(i);
       }
-    } else {
-      seasons.push(1);
     }
   }
 
@@ -172,7 +170,8 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
     header = `${media.year || ''}${moreData ? ', ' + convertTime(moreData.Runtime) : ''}`;
   } else {
     header = `${moreData && moreData.Year ? moreData.Year : media.year || ''}`;
-    if (type === 'shows' || type === 'subscriptions') header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    if ((type === 'shows' || type === 'subscriptions') && maxSeason > 0)
+      header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
   }
 
   const plot =
