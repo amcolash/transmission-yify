@@ -19,7 +19,7 @@ const { getPlexFiles } = require('./plex');
 const { setupSubscriptions, findSubscription, downloadSubscription, writeSubscriptions } = require('./subscriptions');
 const { getTrackerCache, setupCache, clearCache, checkCache, checkTrackerCache } = require('./cache');
 const { setupAnalytics, analyticsMiddleware, getAnalytics } = require('./analytics');
-const { autoPrune, filterMovieResults, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
+const { autoPrune, filterMovieResults, filterPBShows, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately } = require('./util');
 
 require('dotenv').config();
 
@@ -327,17 +327,17 @@ app.delete('/cache', function (req, res) {
   res.sendStatus(200);
 });
 
-app.get('/pirate/:search/:precache?', function (req, res) {
+app.get('/pirate/:search', function (req, res) {
   const search = req.params.search;
   const filter = req.query.all ? '/99/0' : '/99/200';
   const cacheName = search + (req.query.page ? `-page${req.query.page}` : '') + (req.query.movie ? '-movie' : '') + filter;
   const trackerCache = getTrackerCache();
 
   // If precache, send a-ok now
-  if (req.params.precache) res.sendStatus(200);
+  if (req.query.precache) res.sendStatus(200);
 
   // Add a simple cache here to make things faster on the client
-  if (trackerCache[cacheName] && !req.params.precache) {
+  if (trackerCache[cacheName] && !req.query.precache) {
     // cache for 6 hours
     if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
     res.send(trackerCache[cacheName]);
@@ -350,7 +350,7 @@ app.get('/pirate/:search/:precache?', function (req, res) {
         trackerCache[cacheName] = results;
 
         // No response if we are precaching
-        if (req.params.precache) return;
+        if (req.query.precache) return;
 
         // cache for 6 hours
         if (IS_DOCKER) res.set('Cache-Control', 'public, max-age=21600');
@@ -360,11 +360,53 @@ app.get('/pirate/:search/:precache?', function (req, res) {
         console.error(err);
 
         // No response if we are precaching
-        if (req.params.precache) return;
+        if (req.query.precache) return;
 
         res.send({ page: 1, total: 0, limit: 30, torrents: [] });
       });
   }
+});
+
+app.get('/pirate/:show/:season', function (req, res) {
+  const trackerCache = getTrackerCache();
+
+  const { show, season } = req.params;
+  const numEpisodes = Number.parseInt(req.query.numEpisodes);
+
+  const promises = [];
+  const finalResults = {};
+  for (let i = 1; i < numEpisodes + 1; i++) {
+    const episodeNumber = i.toString();
+    const search = `${show} s${season.toString().padStart(2, '0')}e${episodeNumber.padStart(2, '0')}`;
+    const cacheName = search;
+
+    // If precache, send a-ok now
+    // if (req.params.precache) res.sendStatus(200);
+
+    // Add a simple cache here to make things faster on the client
+    if (trackerCache[cacheName] && !req.params.precache) {
+      finalResults[episodeNumber] = trackerCache[cacheName];
+    } else {
+      promises.push(
+        piratePool
+          .exec('searchPirateBay', [search, 1, '/99/200', currentStatus.pirateBay])
+          .then((results) => {
+            const filtered = filterPBShows(results);
+
+            trackerCache[cacheName] = filtered;
+            finalResults[episodeNumber] = filtered;
+          })
+          .catch((err) => {
+            console.error(err);
+          })
+      );
+    }
+  }
+
+  Promise.all(promises).then(() => {
+    // console.log(results);
+    res.send(finalResults);
+  });
 });
 
 app.get('/eztv_shows', function (req, res) {

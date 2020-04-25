@@ -74,6 +74,14 @@ function filterMovieResults(results) {
   return { page: results.page, total: filtered.length, limit: filtered.length, torrents: filtered };
 }
 
+function filterPBShows(results) {
+  // Only return non-eztv torrents which are alive and have enough info
+  return results.torrents.filter((t) => {
+    const parsed = ptn(t.name);
+    return parsed.quality && parsed.resolution && t.seeds > 0 && t.name.indexOf('eztv') === -1;
+  });
+}
+
 function JSONStringify(object) {
   var cache = [];
   var str = JSON.stringify(
@@ -125,4 +133,4 @@ function setIntervalImmediately(func, interval) {
   return setInterval(func, interval);
 }
 
-module.exports = { autoPrune, filterMovieResults, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately };
+module.exports = { autoPrune, filterPBShows, filterMovieResults, JSONStringify, searchShow, getTMDBUrl, setIntervalImmediately };
