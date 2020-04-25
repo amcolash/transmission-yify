@@ -76,10 +76,7 @@ function filterMovieResults(results) {
 
 function filterPBShows(results) {
   // Only return non-eztv torrents which are alive and have enough info
-  return results.torrents.filter((t) => {
-    const parsed = ptn(t.name);
-    return parsed.quality && parsed.resolution && t.seeds > 0 && t.name.indexOf('eztv') === -1;
-  });
+  return results.torrents.filter((t) => t.seeds > 0 && t.name.indexOf('eztv') === -1);
 }
 
 function JSONStringify(object) {

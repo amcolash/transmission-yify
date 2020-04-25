@@ -374,7 +374,7 @@ app.get('/pirate/:show/:season', function (req, res) {
   const numEpisodes = Number.parseInt(req.query.numEpisodes);
 
   const promises = [];
-  const finalResults = {};
+  const finalResults = { torrents: [] };
   for (let i = 1; i < numEpisodes + 1; i++) {
     const episodeNumber = i.toString();
     const search = `${show} s${season.toString().padStart(2, '0')}e${episodeNumber.padStart(2, '0')}`;
@@ -385,7 +385,7 @@ app.get('/pirate/:show/:season', function (req, res) {
 
     // Add a simple cache here to make things faster on the client
     if (trackerCache[cacheName] && !req.params.precache) {
-      finalResults[episodeNumber] = trackerCache[cacheName];
+      finalResults.torrents = finalResults.torrents.concat(trackerCache[cacheName]);
     } else {
       promises.push(
         piratePool
@@ -394,7 +394,7 @@ app.get('/pirate/:show/:season', function (req, res) {
             const filtered = filterPBShows(results);
 
             trackerCache[cacheName] = filtered;
-            finalResults[episodeNumber] = filtered;
+            finalResults.torrents = finalResults.torrents.concat(filtered);
           })
           .catch((err) => {
             console.error(err);
