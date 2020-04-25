@@ -35,6 +35,8 @@ class DetailsBackdrop extends Component {
   eztvTimeout = undefined;
   pirateTimeout = undefined;
 
+  torrentDelay = 1000;
+
   constructor(props) {
     super(props);
     this.state = { ...this.getDefaultState(), onLoad: props.media ? true : false };
@@ -95,7 +97,7 @@ class DetailsBackdrop extends Component {
               this.setState({ loadingEpisodes: false });
             });
         },
-        this.props.viewMode === 'carousel' ? 2000 : 0
+        this.props.viewMode === 'carousel' ? this.torrentDelay : 0
       );
     }
   }
@@ -143,7 +145,7 @@ class DetailsBackdrop extends Component {
               this.setState({ loadingEpisodes: false });
             });
         },
-        this.props.viewMode === 'carousel' ? 2000 : 0
+        this.props.viewMode === 'carousel' ? this.torrentDelay : 0
       );
     }
   }
@@ -186,7 +188,7 @@ class DetailsBackdrop extends Component {
               console.error(err);
             });
         },
-        this.props.viewMode === 'carousel' ? 2000 : 0
+        this.props.viewMode === 'carousel' ? this.torrentDelay : 0
       );
     }
   }
@@ -270,7 +272,7 @@ class DetailsBackdrop extends Component {
                 console.error(err);
               });
           },
-          this.props.viewMode === 'carousel' ? 2000 : 0
+          this.props.viewMode === 'carousel' ? this.torrentDelay : 0
         );
       }
     }
@@ -329,7 +331,7 @@ class DetailsBackdrop extends Component {
                 console.error(err);
                 this.setState({ moreData: 'ERROR' });
               });
-          }, 1000);
+          }, 500);
         }
       } else {
         const url = this.props.server + '/tmdbid/' + (type === 'movies' ? 'movie/' : 'tv/') + media.id;
@@ -349,7 +351,7 @@ class DetailsBackdrop extends Component {
                 console.error(err);
                 this.setState({ moreData: 'ERROR' });
               });
-          }, 1000);
+          }, 500);
         }
       }
     }
