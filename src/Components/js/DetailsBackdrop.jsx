@@ -211,9 +211,9 @@ class DetailsBackdrop extends Component {
     if (type === 'shows' || type === 'subscriptions') {
       const moreData = data;
       if (moreData.seasons) {
-        moreData.seasons.forEach((season) => {
-          if (season.name.toLowerCase().indexOf('specials' !== -1)) return;
+        moreData.seasons = moreData.seasons.filter((s) => s.name.toLowerCase().indexOf('specials') === -1);
 
+        moreData.seasons.forEach((season) => {
           const url = `${this.props.server}/tmdb/seasons/${media.id}/${season.season_number}`;
           if (Cache[url]) {
             moreData.seasons[season.season_number - 1].episodes = Cache[url].episodes;
