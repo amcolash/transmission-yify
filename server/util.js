@@ -75,8 +75,26 @@ function filterMovieResults(results) {
 }
 
 function filterPBShows(results) {
-  // Only return non-eztv torrents which are alive and have enough info
-  return results.torrents.filter((t) => t.seeds > 0 && t.name.indexOf('eztv') === -1);
+  const finalData = [];
+
+  results.torrents.forEach((t) => {
+    // Only return non-eztv torrents which are alive and have enough info
+    const parsed = ptn(t.name);
+    if (t.seeds > 0 && t.name.indexOf('eztv') === -1 && parsed.season && parsed.season > 0 && parsed.episode && parsed.episode > 0) {
+      // Make a new object which matches the eztv payload and infers some data
+      finalData.push({
+        date: t.date,
+        size: t.size,
+        filename: t.name,
+        magnet: t.magnetLink,
+        seeds: t.seeds,
+        episode: parsed.episode,
+        season: parsed.season,
+      });
+    }
+  });
+
+  return finalData;
 }
 
 function JSONStringify(object) {

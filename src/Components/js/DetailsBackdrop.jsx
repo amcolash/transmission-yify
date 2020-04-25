@@ -123,6 +123,43 @@ class DetailsBackdrop extends Component {
     }
   }
 
+  getPBSeasons(media, seasons) {
+    if (this.pirateTimeout) clearTimeout(this.pirateTimeout);
+    this.pirateTimeout = setTimeout(
+      () => {
+        for (let i = 0; i < seasons.length; i++) {
+          const season = i + 1;
+          const numEpisodes = seasons[i].episode_count;
+
+          const url = `${this.props.server}/pirate/${media.title}/${season}?numEpisodes=${numEpisodes}`;
+          if (Cache[url]) {
+            this.handlePBSeasons(Cache[url]);
+          } else {
+            this.axiosGetHelper(url)
+              .then((response) => {
+                const data = response.data;
+                Cache[url] = data;
+
+                // If we loaded data for another show, don't handle it now
+                if (media.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
+
+                this.handlePBSeasons(data);
+              })
+              .catch((err) => {
+                if (axios.isCancel(err)) return;
+                console.error(err);
+              });
+          }
+        }
+      },
+      this.props.viewMode === 'carousel' ? this.torrentDelay : 0
+    );
+  }
+
+  handlePBSeasons(data) {
+    this.setState({ pb: (this.state.pb || []).concat(data.torrents) });
+  }
+
   getNyaa(title, page) {
     const limit = 50;
     const url = `${this.props.server}/nyaa/?q=${title}&limit=${limit}&page=${page}`;
@@ -237,6 +274,7 @@ class DetailsBackdrop extends Component {
         });
       }
       this.getEztv(media);
+      this.getPBSeasons(media, moreData.seasons);
     } else {
       const omdbUrl = this.props.server + '/omdb/' + data.imdb_id;
 
@@ -431,7 +469,10 @@ class DetailsBackdrop extends Component {
     const versions = getMovies(media, pb ? pb.torrents : [], type);
 
     const seasons = getSeasons(type, maxSeason, moreData);
-    const episodes = getEpisodes(eztv || nyaa, moreData, type);
+
+    let rawEpisodes = eztv || nyaa;
+    if (rawEpisodes && pb) rawEpisodes.torrents = rawEpisodes.torrents.concat(pb);
+    const episodes = getEpisodes(rawEpisodes, moreData, type);
 
     const details = getDetails(media, moreData, tmdbData, type, maxSeason);
     const fileExists = hasFile(media, files);
