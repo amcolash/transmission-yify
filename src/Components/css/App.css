@@ -176,10 +176,7 @@ select:focus,
   color: #333;
 }
 
-.carousel input:focus {
-  outline: none;
-}
-
+.carousel input:focus,
 .carousel select:focus {
   background-color: #888;
   color: #eee;
