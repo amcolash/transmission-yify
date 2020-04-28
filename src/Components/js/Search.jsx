@@ -6,6 +6,7 @@ import { FaFilm, FaLaughBeam, FaSkullCrossbones, FaTimes, FaTv } from 'react-ico
 
 import Genre from '../../Data/Genre';
 import Order from '../../Data/Order';
+import { isKeyboardVisible, showKeyboard } from '../../Util/cordova-plugins';
 import { shouldUpdate } from '../../Util/Util';
 import Spinner from './Spinner';
 
@@ -72,10 +73,13 @@ class Search extends Component {
                 // Only open soft keyboard when enter is pressed when running in cordova
                 if (ref && window.cordova) {
                   // Only set readonly when the keyboard is hidden
-                  if (this.props.baseHeight === window.innerHeight) ref.readOnly = true;
+                  if (!isKeyboardVisible()) ref.readOnly = true;
 
                   ref.onkeydown = (e) => {
-                    if (e.key === 'Enter') ref.readOnly = false;
+                    if (e.key === 'Enter') {
+                      // Flip this so that the search icon on keyboard actually works
+                      ref.readOnly = !ref.readOnly;
+                    }
                   };
                   ref.onblur = () => (ref.readOnly = true);
                 }

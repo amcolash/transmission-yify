@@ -8,7 +8,7 @@ import openSocket from 'socket.io-client';
 
 import Order from '../../Data/Order';
 import Cache from '../../Util/Cache';
-import { alert, cacheClear, confirm, getIdentifier, prompt } from '../../Util/cordova-plugins';
+import { alert, cacheClear, confirm, getIdentifier, isKeyboardVisible, prompt } from '../../Util/cordova-plugins';
 import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import Analytics from './Analytics';
@@ -487,7 +487,8 @@ class MovieList extends Component {
 
           // Show media after loaded
           if ((process.env.NODE_ENV === 'development' && showMedia) || (this.state.viewMode === 'carousel' && page === 1)) {
-            setTimeout(() => this.onOpenModal(firstLoad ? this.state.media || data[0] : data[0]), 100);
+            // Only focus when in non-cordova env or when the keyboard is closed
+            if (!isKeyboardVisible()) setTimeout(() => this.onOpenModal(firstLoad ? this.state.media || data[0] : data[0]), 100);
           }
         }
       );
@@ -1092,7 +1093,6 @@ class MovieList extends Component {
                 type={this.state.type}
                 page={this.state.page}
                 viewMode={viewMode}
-                baseHeight={height}
               />
 
               <div className={'movie-list ' + viewMode} ref={this.listRef} onScroll={this.updateScroll} style={movieListStyle}>

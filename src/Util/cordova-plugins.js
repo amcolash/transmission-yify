@@ -2,7 +2,6 @@
 // empty shell that redirects and I am hacking things together to make it simpler.
 
 // cordova-plugin-cache-clear
-
 export function cacheClear(success, error) {
   window.cordova.exec(success, error, 'CacheClear', 'task', []);
 }
@@ -10,6 +9,37 @@ export function cacheClear(success, error) {
 // cordova-plugin-appinfo
 export function getIdentifier(success, fail) {
   window.cordova.exec(success, fail, 'AppInfo', 'getIdentifier', []);
+}
+
+// cordova-plugin-ionic-keyboard
+let keyboardVisible = false;
+
+export function showKeyboard() {
+  window.cordova.exec(null, null, 'CDVIonicKeyboard', 'show', []);
+}
+
+export function hideKeyboard() {
+  window.cordova.exec(null, null, 'CDVIonicKeyboard', 'hide', []);
+}
+
+export function initKeyboard() {
+  function kbCallback(msg) {
+    var action = msg.charAt(0);
+    if (action === 'S') {
+      keyboardVisible = true;
+      console.log('show keyboard');
+    } else if (action === 'H') {
+      keyboardVisible = false;
+      console.log('hide keyboard');
+    }
+  }
+
+  window.cordova.exec(kbCallback, null, 'CDVIonicKeyboard', 'init', []);
+}
+
+export function isKeyboardVisible() {
+  console.log('visible?', keyboardVisible);
+  return keyboardVisible;
 }
 
 // cordova-plugin-dialogs
