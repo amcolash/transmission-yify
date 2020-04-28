@@ -935,11 +935,12 @@ class MovieList extends Component {
         this.handleBack();
         break;
       case 'Enter':
-        if (videosEl && videosButtonEl && active === videosButtonEl) {
+        if (searchFocus && isKeyboardVisible()) {
+          this.focusCover();
+        } else if (videosEl && videosButtonEl && active === videosButtonEl) {
           e.preventDefault();
           videosEl.querySelector('img').focus();
-        }
-        if (coverFocus) {
+        } else if (coverFocus) {
           e.preventDefault();
           this.focusItem(backdropEl, 0);
         }
@@ -990,7 +991,7 @@ class MovieList extends Component {
   }
 
   render() {
-    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode, height } = this.state;
+    const { error, isLoaded, showLogo, results, media, started, status, type, search, isSearching, files, viewMode } = this.state;
 
     // Filter out completed torrents from all views
     const torrents = this.state.torrents.filter((t) => t.percentDone < 1);

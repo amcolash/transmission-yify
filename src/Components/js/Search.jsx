@@ -6,7 +6,7 @@ import { FaFilm, FaLaughBeam, FaSkullCrossbones, FaTimes, FaTv } from 'react-ico
 
 import Genre from '../../Data/Genre';
 import Order from '../../Data/Order';
-import { isKeyboardVisible, showKeyboard } from '../../Util/cordova-plugins';
+import { isKeyboardVisible } from '../../Util/cordova-plugins';
 import { shouldUpdate } from '../../Util/Util';
 import Spinner from './Spinner';
 
