@@ -10,7 +10,6 @@ import Cache from '../../Util/Cache';
 import { confirm } from '../../Util/cordova-plugins';
 import { getMovies, hasFile, hasSubscription } from '../../Util/Parse';
 import { getPirateSearchUrl, shouldUpdate } from '../../Util/Util';
-import ScrollAnimation from './ScrollAnimation';
 import Spinner from './Spinner';
 
 class Cover extends Component {
@@ -22,16 +21,19 @@ class Cover extends Component {
     this.ref = React.createRef();
   }
 
+  componentDidMount() {
+    if (this.props.type === 'movies') {
+      setTimeout(() => this.updatePB(), Math.random() * this.props.viewMode === 'carousel' ? 2000 : 500);
+    }
+  }
+
   componentWillUnmount() {
     this.cancelPB();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      this.props.type === 'movies' &&
-      (prevProps.media !== this.props.media || (prevProps.viewMode === 'carousel' && this.props.viewMode === 'standard'))
-    ) {
-      this.updatePB();
+    if (this.props.type === 'movies' && prevProps.media !== this.props.media) {
+      setTimeout(() => this.updatePB(), Math.random() * this.props.viewMode === 'carousel' ? 2000 : 500);
     }
   }
 
@@ -250,27 +252,7 @@ class Cover extends Component {
       </Fragment>
     );
 
-    return viewMode === 'standard' ? (
-      <ScrollAnimation
-        initiallyVisible={viewMode !== 'standard'}
-        animateIn="fadeIn"
-        animateOnce={true}
-        offset={100}
-        scrollableParentSelector=".movie-list"
-        className={'movie ' + viewMode}
-        afterAnimatedIn={() => {
-          if (this.props.type === 'movies') {
-            if (this.props.viewMode === 'standard') this.updatePB();
-            else setTimeout(() => this.updatePB(), Math.random() * 2000);
-          }
-        }}
-        ref={this.ref}
-      >
-        {innerContents}
-      </ScrollAnimation>
-    ) : (
-      <div className={'movie ' + viewMode}>{innerContents}</div>
-    );
+    return <div className={'movie ' + viewMode}>{innerContents}</div>;
   }
 }
 
