@@ -45,7 +45,7 @@
   },
   "scripts": {
     "start": "concurrently -k 'npm run server' 'npm run client' 'transmission-gtk'",
-    "client": "HTTPS=true react-scripts start",
+    "client": "HTTPS=true SSL_CRT_FILE=.cert/cert.pem SSL_KEY_FILE=.cert/privkey.pem react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
