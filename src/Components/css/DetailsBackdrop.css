@@ -1,3 +1,7 @@
+.react-responsive-modal-overlay {
+  padding: 0;
+}
+
 #modalFullscreen {
   height: 100vh;
   width: 100vw;

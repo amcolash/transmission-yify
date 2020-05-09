@@ -1109,7 +1109,6 @@ class MovieList extends Component {
                           cancelTorrent={this.cancelTorrent}
                           getProgress={this.getProgress}
                           getTorrent={this.getTorrent}
-                          viewMode={viewMode}
                         />
                       ))}
                       {isSearching ? (

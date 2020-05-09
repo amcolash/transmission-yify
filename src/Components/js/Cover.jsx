@@ -1,5 +1,3 @@
-import 'animate.css/animate.min.css';
-
 import '../css/Cover.css';
 
 import axios from 'axios';

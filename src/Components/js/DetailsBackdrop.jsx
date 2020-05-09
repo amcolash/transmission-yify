@@ -1,3 +1,5 @@
+import 'react-responsive-modal/styles.css';
+
 import '../css/DetailsBackdrop.css';
 
 import axios from 'axios';

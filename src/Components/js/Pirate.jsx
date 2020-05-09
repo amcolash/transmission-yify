@@ -1,10 +1,7 @@
-import 'animate.css/animate.min.css';
-
 import '../css/Pirate.css';
 
 import magnet from 'magnet-uri';
 import React, { Component } from 'react';
-import ScrollAnimation from 'react-animate-on-scroll';
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf, FaBatteryQuarter, FaDownload } from 'react-icons/fa';
 
 import Progress from './Progress';
@@ -12,7 +9,7 @@ import Spinner from './Spinner';
 
 class Pirate extends Component {
   render() {
-    const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started, viewMode } = this.props;
+    const { media, cancelTorrent, downloadTorrent, getProgress, getTorrent, started } = this.props;
 
     if (!media.magnetLink) return null;
 
@@ -32,15 +29,7 @@ class Pirate extends Component {
     }
 
     return (
-      <ScrollAnimation
-        animateIn="fadeIn"
-        animateOnce={true}
-        className="pirateRow"
-        offset={30}
-        duration={viewMode === 'carousel' ? 0 : 0.5}
-        initiallyVisible={viewMode === 'carousel'}
-        scrollableParentSelector=".movie-list"
-      >
+      <div className="pirateRow">
         <div className="categories">
           <div className="category">{media.category}</div>
           <div className="subcategory">{media.subCategory}</div>
@@ -72,7 +61,7 @@ class Pirate extends Component {
             </button>
           )}
         </div>
-      </ScrollAnimation>
+      </div>
     );
   }
 }
