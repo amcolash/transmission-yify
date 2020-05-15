@@ -323,6 +323,8 @@ class DetailsBackdrop extends Component {
     media.title = media.title || data.attributes.canonicalTitle;
     media.year = media.year || getYear(data);
 
+    console.log(data);
+
     this.setState({
       moreData: {
         CoverImage: data.attributes.coverImage ? data.attributes.coverImage.large : '',
@@ -363,8 +365,8 @@ class DetailsBackdrop extends Component {
           this.initialTimeout = setTimeout(() => {
             this.axiosGetHelper(url)
               .then((response) => {
-                Cache[url] = response.data;
-                this.handleKitsu(response.data);
+                Cache[url] = response.data.data;
+                this.handleKitsu(response.data.data);
               })
               .catch((err) => {
                 if (axios.isCancel(err)) return;
