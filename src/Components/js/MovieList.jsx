@@ -178,6 +178,7 @@ class MovieList extends Component {
             );
           } else {
             window.localStorage.setItem('lastBuild', data.buildTime);
+            window.localStorage.setItem('update', true);
 
             window.location.reload(true);
           }
