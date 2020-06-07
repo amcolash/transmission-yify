@@ -139,7 +139,7 @@ select {
   border-radius: 3px;
 }
 
-input {
+input:not([type='checkbox']) {
   width: 11.25em;
   height: 1.5em;
 }

@@ -43,9 +43,10 @@
 }
 
 @media (max-width: 750px) {
-  .progress progress {
+  .progress progress,
+  .progressFull progress {
     width: auto;
-    min-width: 4em;
+    min-width: 3em;
   }
 }
 

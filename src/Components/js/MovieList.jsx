@@ -1059,7 +1059,7 @@ class MovieList extends Component {
 
           {type === 'downloads' ? (
             <TorrentList
-              torrents={torrents}
+              torrents={this.state.torrents} // Not using filtered list since the component will filter
               cancelTorrent={this.cancelTorrent}
               getProgress={this.getProgress}
               ref={(instance) => {
