@@ -32,8 +32,8 @@ class Progress extends Component {
           </Fragment>
         )}
         {!hideInfo && progress < 99 ? (
-          <div className={'status ' + (speed > 0.25 ? 'green' : speed > 0.125 ? 'orange' : 'red')}>
-            {speed < 0.15 ? <FaExclamationCircle /> : null}
+          <div className={'status ' + (speed > 0.25 ? 'green' : speed > 0.05 ? 'orange' : 'red')}>
+            {speed < 0.05 ? <FaExclamationCircle /> : null}
             {speed} MB/s, peers: {peers}
           </div>
         ) : null}
