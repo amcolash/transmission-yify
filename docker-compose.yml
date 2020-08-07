@@ -14,6 +14,8 @@ services:
       - TR_INCOMPLETE_DIR_ENABLED=true
       - TR_DOWNLOAD_DIR=/var/lib/transmission-daemon/completed
       - TR_RATIO_LIMIT_ENABLED=false
+    networks:
+      - app_network
     ports:
       - 9091:9091
     restart: unless-stopped
@@ -23,8 +25,8 @@ services:
       - ./scripts/start.sh:/scripts/start.sh:ro
     env_file:
       - .env
-    entrypoint: ["/sbin/tini",  "--"]
-    command: ["/scripts/start.sh"]
+    entrypoint: ['/sbin/tini', '--']
+    command: ['/scripts/start.sh']
 
   server:
     image: amcolash/transmission-yify
@@ -35,6 +37,8 @@ services:
       - transmission
     links:
       - transmission:transmission
+    networks:
+      - app_network
     ports:
       - 9090:9090
     volumes:
@@ -44,3 +48,11 @@ services:
       - .cert:/usr/src/app/.cert
     env_file:
       - .env
+
+networks:
+  app_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
