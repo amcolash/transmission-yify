@@ -35,7 +35,7 @@ TODO
 - [DONE] Persist Upgrade / Cache Key in localstorage
 - [DONE] Fix opening show from subscription view
 - [DONE - may want to make it prettier] Show latest season / episode in subscription view
-- Use client IDs to count unique users for analytics view
-- Look into android tv app / webapp
+- [DONE] Use client IDs to count unique users for analytics view
+- [DONE] Look into android tv app / webapp
 - Precache on the server side when cache cleared
 - Move to Mongo?

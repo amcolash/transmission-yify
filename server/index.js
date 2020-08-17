@@ -572,7 +572,7 @@ function updateEZTVEndpoint() {
   //   console.error(err);
   // });
 
-  const endpointList = ['https://eztv.io', 'https://eztv.ag', 'https://eztv.re', 'https://eztv.it', 'https://eztv.ch'];
+  const endpointList = ['https://eztv.io', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
   const chosen = endpointList[eztvIndex];
   axios
     .get(chosen)

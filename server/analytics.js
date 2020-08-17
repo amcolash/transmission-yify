@@ -67,8 +67,9 @@ function analyticsMiddleware(req, res, next) {
       query: Object.values(query).length > 0 ? query : undefined,
     };
 
-    // If we are heading through the remote proxy, exit and do not record
+    // If we are heading through proxies, exit and do not record
     if (url.indexOf('/remote') !== -1) return;
+    if (url.indexOf('/spectrum') !== -1) return;
 
     let type = analyticsType.EXPRESS_BASE;
     if (url.indexOf('movie') !== -1 || url.indexOf('omdb') !== -1 || query.movie) type = analyticsType.MOVIES;
