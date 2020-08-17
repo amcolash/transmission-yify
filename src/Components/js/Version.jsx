@@ -16,15 +16,19 @@ class Version extends Component {
 
   getSnapshotBeforeUpdate(prevProps, prevState) {
     // If the download/delete button has focus right before the component is re-rendered
-    return (
-      (document.activeElement.classList.contains('orange') || document.activeElement.classList.contains('red')) &&
-      hasParent(document.activeElement, this.ref.current)
-    );
+    return {
+      update:
+        (document.activeElement.classList.contains('orange') || document.activeElement.classList.contains('red')) &&
+        hasParent(document.activeElement, this.ref.current),
+      el: document.activeElement,
+    };
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     // If the download/delete button was focused before re-render, then re-focus since there is a component swap
-    if (snapshot) focusItem(this.ref.current, 0);
+    if (snapshot.update && snapshot.el !== document.activeElement) {
+      focusItem(this.ref.current, 0);
+    }
   }
 
   render() {

@@ -24,7 +24,7 @@ export function focusCover(state) {
   if (covers.length > foundIndex) covers[foundIndex].focus();
 }
 
-function getFocusable(el) {
+export function getFocusable(el) {
   return (el || document).querySelectorAll(
     'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
       'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), ' +
@@ -32,7 +32,7 @@ function getFocusable(el) {
   );
 }
 
-function getFocusIndex(els, active) {
+export function getFocusIndex(els, active) {
   const activeElement = active || document.activeElement;
 
   if (activeElement) {
@@ -57,6 +57,13 @@ function getFocusableItem(el, dir, shouldWrap) {
   }
 
   return focusableEls[index];
+}
+
+export function focusToIndex(el, index) {
+  const focusableEls = getFocusable(el);
+
+  index = Math.max(0, Math.min(index, focusableEls.length - 1));
+  if (focusableEls[index]) focusableEls[index].focus();
 }
 
 export function focusItem(el, dir, shouldWrap) {
