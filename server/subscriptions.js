@@ -14,6 +14,7 @@ function setupSubscriptions(currentStatus) {
     else writeSubscriptions(currentStatus.subscriptions, SUBSCRIPTION_FILE);
   } catch (err) {
     console.error(err);
+    if (fs.existsSync(SUBSCRIPTION_FILE)) fs.copyFileSync(SUBSCRIPTION_FILE + '_backup' + new Date().getTime());
     writeSubscriptions(currentStatus.subscriptions, SUBSCRIPTION_FILE);
   }
 }

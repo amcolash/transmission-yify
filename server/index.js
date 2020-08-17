@@ -668,6 +668,6 @@ function initStatusWatchers() {
   const day = 1000 * 60 * 60 * 12;
   setIntervalImmediately(() => updateHorribleSubsShows(), day);
 
-  // Wait a moment before getting shows so that the correct eztv domain cna be resolved (if needed)
+  // Wait a moment before getting shows so that the correct eztv domain can be resolved (if needed)
   setTimeout(() => setIntervalImmediately(() => updateEZTVShows(currentStatus.eztv), day), 10000);
 }
