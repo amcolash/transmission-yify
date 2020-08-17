@@ -61,7 +61,6 @@ function getFocusableItem(el, dir, shouldWrap) {
 
 export function focusItem(el, dir, shouldWrap) {
   const item = getFocusableItem(el, dir, shouldWrap);
-  console.log(el, item);
   if (item) item.focus();
 }
 
