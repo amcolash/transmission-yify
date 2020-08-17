@@ -9,6 +9,7 @@ import openSocket from 'socket.io-client';
 import Order from '../../Data/Order';
 import Cache from '../../Util/Cache';
 import { alert, cacheClear, confirm, getIdentifier, isKeyboardVisible, prompt } from '../../Util/cordova-plugins';
+import { focusCover, handleBack, handleKeys, onfocus } from '../../Util/Focus';
 import { hasSubscription, parseMedia } from '../../Util/Parse';
 import { shouldUpdate } from '../../Util/Util';
 import Analytics from './Analytics';
@@ -91,9 +92,6 @@ class MovieList extends Component {
     this.updateScroll = this.updateScroll.bind(this);
     this.toggleViewMode = this.toggleViewMode.bind(this);
     this.changeItem = this.changeItem.bind(this);
-    this.handleKeys = this.handleKeys.bind(this);
-    this.handleBack = this.handleBack.bind(this);
-    this.onfocus = this.onfocus.bind(this);
     this.updateSize = this.updateSize.bind(this);
 
     this.listRef = React.createRef();
@@ -125,9 +123,9 @@ class MovieList extends Component {
     window.addEventListener('popstate', this.updateHistory);
 
     // Handle key presses / focus events
-    window.addEventListener('keydown', this.handleKeys);
-    window.addEventListener('focusin', this.onfocus);
-    document.addEventListener('backbutton', this.handleBack, false);
+    window.addEventListener('keydown', (e) => handleKeys(e, this.state));
+    window.addEventListener('focusin', onfocus);
+    document.addEventListener('backbutton', (e) => handleBack(e, this.state), false);
 
     window.addEventListener('resize', this.updateSize);
     window.addEventListener('scroll', () => {
@@ -190,14 +188,7 @@ class MovieList extends Component {
       if (data) this.setState({ files: data });
     });
 
-    if (this.state.viewMode === 'carousel') setTimeout(() => this.focusCover(), 150);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('hashchange', this.updateHash);
-    window.removeEventListener('popstate', this.updateHistory);
-    window.removeEventListener('keydown', this.handleKeys);
-    document.removeEventListener('backbutton', this.handleBack, false);
+    if (this.state.viewMode === 'carousel') setTimeout(() => focusCover(this.state), 150);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -712,255 +703,6 @@ class MovieList extends Component {
     window.location.hash = '';
     this.setState({ media: null });
   };
-
-  onfocus(e) {
-    const backdrop = document.querySelector('.backdropCarousel');
-    if (backdrop) {
-      const focused = backdrop.contains(e.target);
-      backdrop.classList.toggle('expanded', focused);
-      const top = document.querySelector('.carouselTop');
-      if (top) top.classList.toggle('collapsed', focused);
-      const menu = document.querySelector('.toggleButton');
-      if (menu) menu.classList.toggle('collapsed', focused);
-    }
-  }
-
-  focusCover() {
-    if (!this.state.media) return;
-
-    const covers = document.querySelectorAll('.cover');
-    let foundIndex = 0;
-    for (let i = 0; i < covers.length; i++) {
-      if (parseInt(covers[i].id) === this.state.media.id || covers[i].id === this.state.media.id) foundIndex = i;
-    }
-
-    if (covers.length > foundIndex) covers[foundIndex].focus();
-  }
-
-  getFocusable(el) {
-    return (el || document).querySelectorAll(
-      'a[href]:not([disabled]), button:not([disabled]):not(.arrow), textarea:not([disabled]), input[type="text"]:not([disabled]), ' +
-        'input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled]), ' +
-        '[tabindex="0"]:not([disabled])'
-    );
-  }
-
-  getFocusIndex(els) {
-    const active = document.activeElement;
-
-    if (active) {
-      for (let i = 0; i < els.length; i++) {
-        if (els[i] === active) return i;
-      }
-    }
-
-    return 0;
-  }
-
-  getFocusableItem(el, dir, shouldWrap) {
-    const focusableEls = this.getFocusable(el);
-    let index = this.getFocusIndex(focusableEls) + dir;
-
-    if (shouldWrap) {
-      if (index >= focusableEls.length) index = 0;
-      if (index < 0) index = focusableEls.length - 1;
-    } else {
-      if (index >= focusableEls.length) index = focusableEls.length - 1;
-      index = Math.max(0, index);
-    }
-
-    return focusableEls[index];
-  }
-
-  focusItem(el, dir, shouldWrap) {
-    const item = this.getFocusableItem(el, dir, shouldWrap);
-    if (item) item.focus();
-  }
-
-  handleBack(e) {
-    // console.log('handleBack', e);
-
-    const active = document.activeElement;
-
-    const menuToggleEl = document.querySelector('.toggleButton');
-    const backdropEl = document.querySelector('.backdropContainer');
-    const videosContainerEl = document.querySelector('.otherVideos');
-    const videosButtonEl = document.querySelector('.otherVideos .toggle span');
-    const youtubeCloseButton = document.querySelector('.ytContainer button');
-
-    let backdropFocus = false;
-    if (backdropEl) backdropFocus = backdropEl.contains(active);
-    let videosOpen = false;
-    if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
-
-    if (youtubeCloseButton) youtubeCloseButton.click();
-    else if (videosOpen && videosButtonEl) {
-      videosButtonEl.click();
-      videosButtonEl.focus();
-    } else if (backdropFocus) this.focusCover();
-    else if (menuToggleEl) {
-      if (active === menuToggleEl && navigator.app && new Date().getTime() - (this.lastBack || 0) < 1000) {
-        navigator.app.exitApp();
-        return;
-      }
-
-      menuToggleEl.focus();
-      document.querySelector('#root').scrollTo(0, 0);
-    }
-
-    this.lastBack = new Date().getTime();
-
-    return false;
-  }
-
-  handleKeys(e) {
-    // For now, only have the arrow key navigation work for carousel
-    if (this.state.viewMode !== 'carousel') return;
-
-    const active = document.activeElement;
-
-    const menuEl = document.querySelector('.menu');
-    const menuToggleEl = document.querySelector('.toggleButton');
-    const backdropEl = document.querySelector('.backdropContainer');
-    const searchEl = document.querySelector('.search .form');
-    const videosContainerEl = document.querySelector('.otherVideos');
-    const videosButtonEl = document.querySelector('.otherVideos .toggle span');
-    const videosEl = document.querySelector('.otherVideos .videoContainer');
-    const movieListEl = document.querySelector('.movie-list');
-    const infoEl = document.querySelector('.backdropContainer .right .details');
-    const rightEl = document.querySelector('.backdropContainer .right');
-    const recommendationsEl = document.querySelector('.recommendations');
-
-    const coverFocus =
-      active.classList.contains('cover') && (this.state.type === 'movies' || this.state.type === 'shows' || this.state.type === 'animes');
-
-    let menuToggleFocus = false;
-    if (menuEl) menuToggleFocus = active === menuToggleEl;
-    let menuOpen = false;
-    if (menuEl) menuOpen = !menuEl.classList.contains('hidden');
-    let searchFocus = false;
-    if (searchEl) searchFocus = searchEl.contains(active);
-    let backdropFocus = false;
-    if (backdropEl) backdropFocus = backdropEl.contains(active);
-    let loadingBackdrop = false;
-    if (backdropEl) loadingBackdrop = backdropEl.querySelectorAll('.spinner').length > 0;
-    let videosOpen = false;
-    if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
-
-    // console.log(e, active);
-
-    // Always focus onto menu button when body is active element
-    if (
-      active === document.body &&
-      menuToggleEl &&
-      (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')
-    ) {
-      menuToggleEl.focus();
-      return;
-    }
-
-    // If we are focused on the info on the right side, scroll if possible
-    if (active === infoEl && rightEl && !loadingBackdrop) {
-      if (e.key === 'ArrowUp' && rightEl.scrollTop !== 0) {
-        rightEl.scrollTop -= 15;
-
-        // Since android + cordova doesn't seem to scroll as the default, force the scroll
-        e.preventDefault();
-        return;
-      }
-      if (e.key === 'ArrowDown') {
-        const next = this.getFocusableItem(backdropEl, 1, false);
-        if (next && rightEl.scrollTop + rightEl.clientHeight < next.offsetTop) {
-          rightEl.scrollTop += 15;
-
-          // Since android + cordova doesn't seem to scroll as the default, force the scroll
-          e.preventDefault();
-          return;
-        }
-      }
-    }
-
-    switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        if (videosOpen && videosEl) this.focusItem(videosEl, -1, true);
-        else if (backdropFocus) this.focusItem(backdropEl, -1, true);
-        else if (coverFocus) {
-          if (rightEl) rightEl.scrollTop = 0;
-          if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          this.focusItem(movieListEl, -1);
-        } else if (menuOpen && menuToggleEl) {
-          menuToggleEl.focus();
-          menuToggleEl.click();
-        } else this.focusItem(document, -1);
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        if (videosOpen && videosEl) this.focusItem(videosEl, 1, true);
-        else if (backdropFocus) this.focusItem(backdropEl, 1, true);
-        else if (coverFocus) {
-          if (rightEl) rightEl.scrollTop = 0;
-          if (recommendationsEl) recommendationsEl.scrollLeft = 0;
-          this.focusItem(movieListEl, 1);
-        } else if (menuOpen && menuToggleEl) {
-          menuToggleEl.focus();
-          menuToggleEl.click();
-        } else this.focusItem(document, 1);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (videosOpen && videosButtonEl) {
-          videosButtonEl.click();
-          videosButtonEl.focus();
-        } else if (backdropFocus) {
-          // If on the 1st item and up press, go back to covers
-          const focusableEls = this.getFocusable(backdropEl);
-          const index = this.getFocusIndex(focusableEls);
-          if (index === 0 && !loadingBackdrop) this.focusCover();
-          else this.focusItem(backdropEl, -1, true);
-        } else if (coverFocus && menuToggleEl) menuToggleEl.focus();
-        else this.focusItem(document, -1);
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        if (videosOpen && videosButtonEl) {
-          videosButtonEl.click();
-          videosButtonEl.focus();
-        } else if (backdropFocus) this.focusItem(backdropEl, 1, true);
-        else if (coverFocus) this.focusItem(backdropEl, 0);
-        else if (menuOpen) this.focusItem(menuEl, 1);
-        else if ((searchFocus || menuToggleFocus) && backdropEl) this.focusCover();
-        else this.focusItem(document, 1);
-        break;
-      case 'Escape':
-        this.handleBack();
-        break;
-      case 'Enter':
-        if (searchFocus && isKeyboardVisible()) {
-          this.focusCover();
-        } else if (videosEl && videosButtonEl && active === videosButtonEl) {
-          e.preventDefault();
-          videosEl.querySelector('img').focus();
-        } else if (coverFocus) {
-          e.preventDefault();
-          this.focusItem(backdropEl, 0);
-        }
-        break;
-      default:
-        break;
-    }
-
-    // Scroll to bottom when recommendation is first selected
-    if (
-      document.activeElement &&
-      rightEl &&
-      document.activeElement.parentElement.classList.contains('recommendations') &&
-      document.activeElement.classList.contains('item') &&
-      rightEl.scrollTop < rightEl.scrollHeight - rightEl.clientHeight - 10
-    ) {
-      rightEl.scrollTop = rightEl.scrollHeight - rightEl.clientHeight;
-    }
-  }
 
   changePage = (direction) => {
     const page = this.state.page;

@@ -55,3 +55,9 @@ export function getPirateSearchUrl(server, title, year) {
   const url = `${server}/pirate/${cleanedTitle} ${year}?movie=true`;
   return url;
 }
+
+export function hasParent(el, parent) {
+  if (el.parentElement === parent) return true;
+  else if (el.parentElement) return hasParent(el.parentElement, parent);
+  else return false;
+}
