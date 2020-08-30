@@ -2,7 +2,7 @@ const fs = require('fs');
 const transmissionWrapper = require('transmission');
 
 const IS_DOCKER = fs.existsSync('/.dockerenv');
-const PORT = IS_DOCKER ? 9090 : 9000;
+const PORT = 9090;
 const DATA = IS_DOCKER ? '/data' : process.env.DATA_DIR;
 const CACHE_FILE = DATA + '/cache.json';
 const SUBSCRIPTION_FILE = DATA + '/subscriptions.json';

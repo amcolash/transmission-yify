@@ -30,5 +30,5 @@ COPY ./ ./
 RUN date > ./build_time
 
 # Set things up
-EXPOSE 9000
+EXPOSE 9090
 CMD [ "npm", "run", "docker" ]

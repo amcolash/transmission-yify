@@ -496,7 +496,7 @@ class DetailsBackdrop extends Component {
           : ''
         : backdrop
         ? `https://image.tmdb.org/t/p/w300${backdrop}`
-        : 'unset';
+        : '';
 
     let recommendations =
       tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;

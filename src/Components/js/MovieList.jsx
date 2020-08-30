@@ -31,10 +31,10 @@ class MovieList extends Component {
   constructor(props) {
     super(props);
 
-    let port = window.cordova ? 9000 : undefined;
+    let port = window.cordova ? 9090 : undefined;
     let devOverrides = {};
     if (process.env.NODE_ENV === 'development') {
-      port = 9000;
+      port = 9090;
       devOverrides = {
         // type: 'shows',
         // search: 'community',
