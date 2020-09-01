@@ -25,6 +25,7 @@ require('dotenv').config();
 
 // Init global vars
 const { IS_DOCKER, PORT, DATA, CACHE_FILE, interval, transmission } = require('./global');
+const eztv = require('./eztv');
 
 let currentTorrents = [];
 let currentFiles = [];
@@ -578,13 +579,18 @@ function updateEZTVEndpoint() {
     .get(chosen)
     .then((response) => {
       // All good
+      currentStatus.eztv = chosen;
     })
     .catch((err) => {
       console.error(err);
 
-      // If things failed, try the next one
-      eztvIndex = (eztvIndex + 1) % endpointList.length;
-      setTimeout(updateEZTVEndpoint, 5000);
+      // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
+      if (eztvIndex < endpointList.length) {
+        eztvIndex = (eztvIndex + 1) % endpointList.length;
+        setTimeout(updateEZTVEndpoint, 5000);
+      } else {
+        eztvIndex = 0;
+      }
     });
 }
 
