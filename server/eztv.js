@@ -72,7 +72,7 @@ function updateEZTVShows(endpoint) {
         let title = row.text();
         if (title.endsWith(', The')) title = `The ${title.replace(', The', '')}`;
         title = title.replace(/\s*\(\d{4}\)/g, '');
-        const url = `${endpoint}${row.attr('href').substring(1)}`;
+        const url = `${endpoint}/${row.attr('href').substring(1)}`;
         shows.push({
           title,
           url,
