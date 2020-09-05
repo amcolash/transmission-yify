@@ -1,8 +1,8 @@
 # Use node, version 12 so that we get worker threads
 FROM mhart/alpine-node:12
 
-# Install openssh client
-RUN apk add --no-cache openssh
+# Install openssh client + timezone support
+RUN apk add --no-cache openssh tzdata
 
 # Create app directory
 WORKDIR /usr/src/app
