@@ -1,6 +1,6 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
 const workerpool = require('workerpool');
+const { axios } = require('./global');
 
 getTorrentsV1 = function ($) {
   const table = $('#searchResult tbody').html();
@@ -156,7 +156,6 @@ searchPirateBay = function (query, p, filter, endpoint) {
         resolve({ page, total, limit, torrents });
       })
       .catch((err) => {
-        console.error(err);
         reject();
       });
   });

@@ -1,6 +1,6 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
 const ptn = require('../src/Util/TorrentName');
+const { axios } = require('./global');
 
 let eztvShows = [];
 
@@ -50,7 +50,6 @@ function getEZTVDetails(url, title) {
         resolve({ page: 1, total: torrents.length, limit: torrents.length, torrents, url, title });
       })
       .catch((err) => {
-        console.error(err);
         resolve({ page: 1, total: 0, limit: 30, torrents: [], url, title });
       });
   });
@@ -81,9 +80,7 @@ function updateEZTVShows(endpoint) {
 
       eztvShows = shows;
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => {});
 }
 
 function getEZTVShows() {

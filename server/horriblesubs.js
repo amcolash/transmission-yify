@@ -1,5 +1,5 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
+const { axios } = require('./global');
 
 let horribleSubsShows = [];
 
@@ -25,9 +25,7 @@ function updateHorribleSubsShows() {
 
       horribleSubsShows = shows;
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => {});
 }
 
 function parseHorribleSubsVersion(data, url) {
@@ -85,9 +83,7 @@ function queueHorribleSubs(showId, page, torrents, outerResolve) {
         outerResolve();
       }
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => {});
 
   return promise;
 }
@@ -115,9 +111,7 @@ function getHorribleSubsDetails(url) {
                   if (parsed.length === 1) batches.push(...parsed[0]);
                 }
               })
-              .catch((err) => {
-                console.error(err);
-              })
+              .catch((err) => {})
           );
 
           // Start queueing up individual episodes
@@ -133,7 +127,6 @@ function getHorribleSubsDetails(url) {
         }
       })
       .catch((err) => {
-        console.error(err);
         resolve({ page: 1, total: 0, limit: 30, torrents: [], batches: [] });
       });
   });

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.19.2",
+    "axios-logger": "^2.4.0",
     "cheerio": "^1.0.0-rc.3",
     "cors": "^2.8.5",
     "cron": "^1.8.2",

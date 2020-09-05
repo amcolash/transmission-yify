@@ -1,8 +1,7 @@
 const fs = require('fs');
-const axios = require('axios');
 const CronJob = require('cron').CronJob;
 
-const { CACHE_FILE, IS_DOCKER } = require('./global');
+const { CACHE_FILE, IS_DOCKER, axios } = require('./global');
 const { searchShow } = require('./util');
 const { getEZTVShows } = require('./eztv');
 
@@ -105,7 +104,6 @@ function cacheRequest(url, res, shouldRetry) {
       if (shouldRetry) {
         setTimeout(() => cacheRequest(url, res, false), 10000);
       } else {
-        console.error(error);
         res.send(error);
       }
     });
@@ -141,7 +139,6 @@ function checkTrackerCache(url, res) {
         trackerCache[url] = response.data;
       })
       .catch((err) => {
-        console.error(err);
         if (res) res.send([]);
       });
   }

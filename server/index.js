@@ -1,6 +1,5 @@
 'use strict';
 
-const axios = require('axios');
 const cors = require('cors');
 const { exec } = require('child_process');
 const express = require('express');
@@ -24,9 +23,7 @@ const { autoPrune, filterMovieResults, filterPBShows, JSONStringify, searchShow,
 require('dotenv').config();
 
 // Init global vars
-const { IS_DOCKER, PORT, DATA, CACHE_FILE, interval, transmission } = require('./global');
-const eztv = require('./eztv');
-
+const { IS_DOCKER, PORT, DATA, CACHE_FILE, interval, transmission, axios } = require('./global');
 let currentTorrents = [];
 let currentFiles = [];
 
@@ -557,9 +554,7 @@ function updatePirateBayEndpoint() {
       const rnd = Math.floor((Math.random() * links.length) / 2);
       currentStatus.pirateBay = links.eq(rnd).attr('href');
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => {});
 }
 
 function updateEZTVEndpoint() {
@@ -582,8 +577,6 @@ function updateEZTVEndpoint() {
       currentStatus.eztv = chosen;
     })
     .catch((err) => {
-      console.error(err);
-
       // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
       if (eztvIndex < endpointList.length) {
         eztvIndex = (eztvIndex + 1) % endpointList.length;

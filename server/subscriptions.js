@@ -1,8 +1,7 @@
 const fs = require('fs');
-const axios = require('axios');
 const ptn = require('../src/Util/TorrentName');
 
-const { SUBSCRIPTION_FILE, IS_DOCKER, transmission } = require('./global');
+const { SUBSCRIPTION_FILE, IS_DOCKER, transmission, axios } = require('./global');
 const { getCache } = require('./cache');
 const { getEZTVShows, getEZTVDetails } = require('./eztv');
 const { getTMDBUrl, searchShow } = require('./util');
@@ -40,7 +39,6 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
       data = res.data;
       getCache()[url] = data;
     } catch (err) {
-      console.error(err);
       return; // bail, things went wrong getting data
     }
   }
