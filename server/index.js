@@ -578,8 +578,8 @@ function updateEZTVEndpoint() {
     })
     .catch((err) => {
       // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
+      eztvIndex++;
       if (eztvIndex < endpointList.length) {
-        eztvIndex = (eztvIndex + 1) % endpointList.length;
         setTimeout(updateEZTVEndpoint, 5000);
       } else {
         eztvIndex = 0;
