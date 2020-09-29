@@ -288,6 +288,11 @@ class MovieList extends Component {
       if (movieList) movieList.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
 
+    // Wipe the ordering if set to default
+    if (type === 'movies' && order === Order.movies[0].value) order = '';
+    if (type === 'shows' && order === Order.tv[0].value) order = '';
+    if (type === 'animes' && order === Order.anime[0].value) order = '';
+
     let newurl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?${type}`;
     if (window.location.href !== newurl) {
       if (this.state.media && this.state.type === type) newurl += `#${this.state.media.id}`;

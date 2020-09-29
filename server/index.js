@@ -178,10 +178,9 @@ app.get('/discover/:type/:page', function (req, res) {
   let sort = req.query.sort;
   switch (req.params.type) {
     case 'movies':
-      if (sort === 'trending' && !req.query.genre) {
+      if (sort === 'trending') {
         url = 'https://api.themoviedb.org/3/trending/movie/week?&page=' + req.params.page + '&api_key=' + process.env.THE_MOVIE_DB_KEY;
       } else {
-        if (sort === 'trending') sort = 'popularity.desc';
         url =
           'https://api.themoviedb.org/3/discover/movie/?page=' +
           req.params.page +
@@ -195,10 +194,9 @@ app.get('/discover/:type/:page', function (req, res) {
       }
       break;
     case 'shows':
-      if (sort === 'trending' && !req.query.genre) {
+      if (sort === 'trending') {
         url = 'https://api.themoviedb.org/3/trending/tv/week?&page=' + req.params.page + '&api_key=' + process.env.THE_MOVIE_DB_KEY;
       } else {
-        if (sort === 'trending') sort = 'popularity.desc';
         url =
           'https://api.themoviedb.org/3/discover/tv/?page=' +
           req.params.page +

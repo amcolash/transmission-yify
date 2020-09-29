@@ -89,7 +89,11 @@ class Search extends Component {
 
           <div className="searchItem">
             <span>Genre</span>
-            <select onChange={(event) => updateSearch(search, event.target.value, order, type)} value={genre} disabled={type === 'pirate'}>
+            <select
+              onChange={(event) => updateSearch(search, event.target.value, order, type)}
+              value={genre}
+              disabled={type === 'pirate' || ((type === 'movies' || type === 'shows') && order === '')}
+            >
               {genres.map((genre) => (
                 <option key={genre.label} value={genre.value}>
                   {genre.label}
