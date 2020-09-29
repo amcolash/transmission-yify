@@ -185,6 +185,7 @@ select:focus,
 input:disabled,
 select:disabled {
   background-color: #aaa !important;
+  color: #ccc !important;
 }
 
 .spacer {
