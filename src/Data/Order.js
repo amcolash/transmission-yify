@@ -6,8 +6,8 @@ export default {
     { value: 'vote_average.desc', label: 'Rating' },
   ],
   tv: [
-    { value: 'trending', label: 'Trending' },
     { value: 'popularity.desc', label: 'Popularity' },
+    { value: 'first_air_data.dec', label: 'First Air Date' },
     { value: 'vote_average.desc', label: 'Rating' },
   ],
   anime: [
