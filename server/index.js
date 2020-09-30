@@ -495,15 +495,17 @@ app.get('/fileList', function (req, res) {
           .on('end', () => {
             res.send(items);
           })
-          .on('error', () => {
-            res.sendStatus(500);
+          .on('error', (err, item) => {
+            res.send(err + ', ' + item);
+            res.status(500);
           });
       } else {
         res.send(items);
       }
     })
-    .on('error', () => {
-      res.sendStatus(500);
+    .on('error', (err, item) => {
+      res.send(err + ', ' + item);
+      res.status(500);
     });
 });
 
