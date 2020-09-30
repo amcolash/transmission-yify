@@ -39,3 +39,6 @@ TODO
 - [DONE] Look into android tv app / webapp
 - Precache on the server side when cache cleared
 - Move to Mongo?
+
+- Broken TV torrent cache
+- Add stream from server option (bypass plex)

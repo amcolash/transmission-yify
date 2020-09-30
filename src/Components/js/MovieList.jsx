@@ -20,6 +20,7 @@ import Menu from './Menu';
 import Pirate from './Pirate';
 import Search from './Search';
 import Spinner from './Spinner';
+import Stream from './Stream';
 import TorrentList from './TorrentList';
 
 const hashMapping = {};
@@ -830,6 +831,8 @@ class MovieList extends Component {
             </div>
           ) : type === 'analytics' ? (
             <Analytics server={this.server} />
+          ) : type === 'stream' ? (
+            <Stream server={this.server} />
           ) : !logo && isLoaded ? (
             <div className="carouselTop">
               <Search

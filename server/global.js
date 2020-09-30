@@ -8,6 +8,7 @@ require('dotenv').config();
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const PORT = 9090;
 const DATA = IS_DOCKER ? '/data' : process.env.DATA_DIR;
+const TV = IS_DOCKER ? '/TV' : process.env.DATA_DIR;
 const CACHE_FILE = DATA + '/cache.json';
 const SUBSCRIPTION_FILE = DATA + '/subscriptions.json';
 const ANALYTICS_FILE = DATA + '/analytics.json';
@@ -28,4 +29,4 @@ const transmission = new transmissionWrapper({
   password: process.env.TRPASSWD,
 });
 
-module.exports = { IS_DOCKER, PORT, DATA, CACHE_FILE, SUBSCRIPTION_FILE, ANALYTICS_FILE, interval, transmission, axios };
+module.exports = { IS_DOCKER, PORT, DATA, TV, CACHE_FILE, SUBSCRIPTION_FILE, ANALYTICS_FILE, interval, transmission, axios };

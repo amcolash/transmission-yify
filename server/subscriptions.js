@@ -1,7 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 const ptn = require('../src/Util/TorrentName');
 
-const { SUBSCRIPTION_FILE, IS_DOCKER, transmission, axios } = require('./global');
+const { SUBSCRIPTION_FILE, IS_DOCKER, transmission, axios, TV } = require('./global');
 const { getCache } = require('./cache');
 const { getEZTVShows, getEZTVDetails } = require('./eztv');
 const { getTMDBUrl, searchShow } = require('./util');
@@ -74,7 +75,7 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
       // Download each torrent
       episodes.forEach((e) => {
         console.log(`Downloading new subscribed file: ${e.filename}`);
-        transmission.addUrl(e.magnet, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => {
+        transmission.addUrl(e.magnet, { 'download-dir': IS_DOCKER ? TV : path.join(DATA, 'downloads') }, (err, data) => {
           if (err) console.error(err);
         });
       });

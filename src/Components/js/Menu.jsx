@@ -6,6 +6,7 @@ import {
   FaChartBar,
   FaDownload,
   FaExclamationTriangle,
+  FaFileVideo,
   FaFilm,
   FaLaughBeam,
   FaMagnet,
@@ -176,6 +177,7 @@ class Menu extends Component {
                   e.stopPropagation();
                   this.props.addMagnet();
                 })}
+            {this.generateItem(<FaFileVideo />, 'Stream Files', 'stream')}
             <div className="spacer"></div>
             {window.cordova ? null : this.generateItem(<FaChartBar />, 'Analytics', 'analytics')}
             {this.generateItem(<FaRecycle />, 'Clear Cache', this.props.clearCache)}

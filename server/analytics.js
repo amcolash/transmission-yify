@@ -33,7 +33,7 @@ function setupAnalytics() {
   try {
     if (fs.existsSync(ANALYTICS_FILE)) analytics = require(ANALYTICS_FILE);
   } catch (err) {
-    if (fs.existsSync(ANALYTICS_FILE)) fs.copyFileSync(ANALYTICS_FILE + '_backup' + new Date().getTime());
+    if (fs.existsSync(ANALYTICS_FILE)) fs.copyFileSync(ANALYTICS_FILE, ANALYTICS_FILE + '_backup' + new Date().getTime());
     console.error(err);
   }
 

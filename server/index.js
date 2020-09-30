@@ -6,9 +6,11 @@ const express = require('express');
 const proxy = require('express-http-proxy');
 const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
 const fs = require('fs');
+const path = require('path');
 const cheerio = require('cheerio');
 const querystring = require('querystring');
 const workerpool = require('workerpool');
+const klaw = require('klaw');
 
 const piratePool = workerpool.pool(__dirname + '/pirate.js', { maxWorkers: 6 });
 const { getEZTVDetails, getEZTVShows, updateEZTVShows } = require('./eztv');
@@ -23,7 +25,7 @@ const { autoPrune, filterMovieResults, filterPBShows, JSONStringify, searchShow,
 require('dotenv').config();
 
 // Init global vars
-const { IS_DOCKER, PORT, DATA, CACHE_FILE, interval, transmission, axios } = require('./global');
+const { IS_DOCKER, PORT, DATA, TV, CACHE_FILE, interval, transmission, axios } = require('./global');
 let currentTorrents = [];
 let currentFiles = [];
 
@@ -112,6 +114,10 @@ try {
 
 // Set up static content, cache for a little bit
 app.use('/', express.static('build', IS_DOCKER ? { maxAge: '4h' } : {}));
+
+// Serve all downloaded files
+app.use('/files', express.static(IS_DOCKER ? path.join(DATA, 'completed') : path.join(DATA, 'downloads')));
+if (IS_DOCKER) app.use('/files', express.static(TV));
 
 app.get('/test', function (req, res) {
   res.send(JSONStringify(req));
@@ -239,9 +245,13 @@ app.delete('/torrents/:hash', function (req, res) {
 
 app.post('/torrents', function (req, res) {
   if (req.body.tv) {
-    transmission.addUrl(req.body.url, IS_DOCKER ? { 'download-dir': '/TV' } : {}, (err, data) => handleResponse(res, err, data));
+    transmission.addUrl(req.body.url, { 'download-dir': IS_DOCKER ? TV : path.join(DATA, 'downloads') }, (err, data) =>
+      handleResponse(res, err, data)
+    );
   } else {
-    transmission.addUrl(req.body.url, (err, data) => handleResponse(res, err, data));
+    transmission.addUrl(req.body.url, IS_DOCKER ? {} : { 'download-dir': path.join(DATA, 'downloads') }, (err, data) =>
+      handleResponse(res, err, data)
+    );
   }
 });
 
@@ -466,6 +476,35 @@ app.get('/analytics', function (req, res) {
   if (req.query.key !== KEY) throw new Error('Invalid key');
 
   res.send(getAnalytics());
+});
+
+app.get('/fileList', function (req, res) {
+  const items = [];
+  const p = IS_DOCKER ? path.join(DATA, 'completed') : path.join(DATA, 'downloads');
+  klaw(p)
+    .on('data', (item) => {
+      if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(p, ''));
+    })
+    .on('end', () => {
+      // Add on tv directory when needed, a little ugly callback-wise, but that's ok
+      if (IS_DOCKER) {
+        klaw(TV)
+          .on('data', (item) => {
+            if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(p, ''));
+          })
+          .on('end', () => {
+            res.send(items);
+          })
+          .on('error', () => {
+            res.sendStatus(500);
+          });
+      } else {
+        res.send(items);
+      }
+    })
+    .on('error', () => {
+      res.sendStatus(500);
+    });
 });
 
 io.on('connection', (client) => {
