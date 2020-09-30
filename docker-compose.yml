@@ -44,6 +44,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA_DIR}:/data
+      - ${TV_DIR}:/TV
       - .ssh:/root/.ssh
       - .cert:/usr/src/app/.cert
     env_file:

@@ -488,7 +488,7 @@ app.get('/fileList', function (req, res) {
     .on('end', () => {
       // Add on tv directory when needed, a little ugly callback-wise, but that's ok
       if (IS_DOCKER) {
-        klaw(process.env.TV_DIR)
+        klaw(TV)
           .on('data', (item) => {
             if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(p, ''));
           })
