@@ -31,19 +31,19 @@ class Stream extends Component {
               <FaTimesCircle onClick={() => this.setState({ file: undefined })} />
               <video controls autoPlay>
                 <source src={this.props.server + '/files' + file} />
-            </video>
-          </div>
+              </video>
+            </div>
           ) : files ? (
             files.map((f) => (
-              <div key={f} style={{ padding: 2, paddingLeft: f.match(/\//g).length * 16 }}>
-              <span className="pointer" onClick={() => this.setState({ file: f })}>
-                {f}
-              </span>
-            </div>
-          ))
+              <div key={f} style={{ padding: 2 }}>
+                <span className="pointer" onClick={() => this.setState({ file: f })}>
+                  {f}
+                </span>
+              </div>
+            ))
           ) : (
             <Spinner visible />
-        )}
+          )}
         </div>
       </div>
     );
