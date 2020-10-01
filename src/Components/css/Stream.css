@@ -1,0 +1,22 @@
+.streamList {
+  overflow: auto;
+  padding-bottom: 10px;
+}
+
+.streamList .list,
+.streamList .player {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.streamList .player svg {
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.streamList .player video {
+  width: 95vw;
+  height: 60vh;
+  background: black;
+}

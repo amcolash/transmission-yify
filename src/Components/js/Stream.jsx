@@ -1,8 +1,10 @@
 import '../css/Stream.css';
 
 import axios from 'axios';
-import React, { Component, Fragment } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import React, { Component } from 'react';
+import { FaTimesCircle } from 'react-icons/fa';
+
+import Spinner from './Spinner';
 
 class Stream extends Component {
   state = { files: undefined, file: undefined };
@@ -18,30 +20,32 @@ class Stream extends Component {
   }
 
   render() {
+    const { files, file } = this.state;
+
     return (
-      <Fragment>
+      <div className="streamList">
         <h2>Stream Files</h2>
-        {this.state.file ? (
-          <div style={{ position: 'relative' }}>
-            <FaTimes
-              style={{ position: 'absolute', top: 5, right: 5, cursor: 'pointer' }}
-              onClick={() => this.setState({ file: undefined })}
-            />
-            <video controls autoPlay style={{ width: '95vw', height: '60vh', background: 'black' }}>
-              <source src={this.props.server + '/files' + this.state.file} />
+        <div className="list">
+          {file ? (
+            <div className="player">
+              <FaTimesCircle onClick={() => this.setState({ file: undefined })} />
+              <video controls autoPlay>
+                <source src={this.props.server + '/files' + file} />
             </video>
           </div>
-        ) : (
-          this.state.files &&
-          this.state.files.map((f) => (
-            <div key={f} style={{ padding: 2 }}>
+          ) : files ? (
+            files.map((f) => (
+              <div key={f} style={{ padding: 2, paddingLeft: f.match(/\//g).length * 16 }}>
               <span className="pointer" onClick={() => this.setState({ file: f })}>
                 {f}
               </span>
             </div>
           ))
+          ) : (
+            <Spinner visible />
         )}
-      </Fragment>
+        </div>
+      </div>
     );
   }
 }
