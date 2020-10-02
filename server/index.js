@@ -219,7 +219,10 @@ app.get('/discover/:type/:page', function (req, res) {
       break;
   }
 
-  if (!url) res.send([]);
+  if (!url) {
+    res.send([]);
+    return;
+  }
 
   checkCache(url, res);
 });

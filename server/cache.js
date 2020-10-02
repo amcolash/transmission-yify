@@ -90,6 +90,11 @@ function filterTV(url, data) {
 
 // Stick things into a cache
 function cacheRequest(url, res, shouldRetry) {
+  if (!url) {
+    res.sendStatus(404);
+    return;
+  }
+
   axios
     .get(url, { timeout: 10000 })
     .then((response) => {

@@ -350,7 +350,7 @@ class MovieList extends Component {
       }
       // use all so that we do not filter here
       ENDPOINT = `${this.server}/pirate/${search}?all=true&page=${page}`;
-    } else if (type === 'subscriptions' || type === 'downloads' || type === 'analytics') {
+    } else if (type === 'subscriptions' || type === 'downloads' || type === 'analytics' || type === 'stream') {
       this.setState({
         isLoaded: true,
         isSearching: false,
