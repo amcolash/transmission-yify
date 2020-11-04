@@ -9,7 +9,7 @@ import * as ptn from '../../Util/TorrentName';
 import Spinner from './Spinner';
 
 class Stream extends Component {
-  state = { files: undefined, file: undefined, search: '', type: 'movie' };
+  state = { files: undefined, file: undefined, search: '', type: 'movie', error: undefined };
 
   componentDidMount() {
     this.updateData();
@@ -19,11 +19,14 @@ class Stream extends Component {
     axios
       .get(this.props.server + '/fileList')
       .then((response) => this.setState({ files: response.data }))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        this.setState({ error: err });
+      });
   }
 
   render() {
-    const { files, file, search, type } = this.state;
+    const { files, file, search, type, error } = this.state;
 
     return (
       <div className="streamList">
@@ -40,7 +43,12 @@ class Stream extends Component {
         </div>
         <hr />
         <div className="list">
-          {file ? (
+          {error ? (
+            <div>
+              <h3>There was an error loading files from the server</h3>
+              <span>{JSON.stringify(error)}</span>
+            </div>
+          ) : file ? (
             <div className="player">
               <FaTimesCircle onClick={() => this.setState({ file: undefined })} />
               <video controls autoPlay>
@@ -62,7 +70,7 @@ class Stream extends Component {
 
               return (
                 <div key={f} className="item">
-                  <FaPlayCircle />
+                  <FaPlayCircle tabIndex="0" />
                   <span className="pointer" onClick={() => this.setState({ file: f })}>
                     {f}
                   </span>

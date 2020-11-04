@@ -37,8 +37,8 @@ TODO
 - [DONE - may want to make it prettier] Show latest season / episode in subscription view
 - [DONE] Use client IDs to count unique users for analytics view
 - [DONE] Look into android tv app / webapp
-- Precache on the server side when cache cleared
+- [DONE] Add stream from server option (bypass plex)
+- Precache base initial data on the server side when cache cleared
 - Move to Mongo?
 
 - Broken TV torrent cache
-- Add stream from server option (bypass plex)

@@ -51,6 +51,9 @@ if (fs.existsSync('./build_time') && IS_DOCKER) {
   }
 }
 
+// Make the download folder if it doesn't exist
+fs.mkdirSync(IS_DOCKER ? path.join(DATA, 'completed') : path.join(DATA, 'downloads'), { recursive: true });
+
 // App Server
 const app = express();
 app.use(express.json());
@@ -499,16 +502,16 @@ app.get('/fileList', function (req, res) {
             res.send(items);
           })
           .on('error', (err, item) => {
-            res.send(err + ', ' + item);
             res.status(500);
+            res.send(err + ', ' + item);
           });
       } else {
         res.send(items);
       }
     })
     .on('error', (err, item) => {
-      res.send(err + ', ' + item);
       res.status(500);
+      res.send(err + ', ' + item);
     });
 });
 
