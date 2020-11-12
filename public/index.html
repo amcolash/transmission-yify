@@ -28,9 +28,7 @@
     <title>Pirate Flix</title>
   </head>
   <body>
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.
@@ -45,7 +43,8 @@
 
     <!-- Only load cordova if running on android -->
     <script type="text/javascript">
-      if (navigator.userAgent.toLowerCase().match('android tv')) {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.indexOf('android tv') !== -1 || userAgent.indexOf('chromecast') !== -1) {
         document.write("<script src='%PUBLIC_URL%/cordova.js'><\/script>");
       }
     </script>
