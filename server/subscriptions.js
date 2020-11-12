@@ -44,6 +44,8 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
     }
   }
 
+  console.log(`Checking subscription for ${data.name}`);
+
   // handle things this way so that the data stored is upgraded on the fly, it modifies the existing object this way
   subscription.id = id;
   subscription.imdb = data.external_ids.imdb_id;

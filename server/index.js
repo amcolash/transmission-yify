@@ -36,7 +36,7 @@ let currentStatus = {
   plex: process.env.PLEX_SERVER,
   subscriptions: [],
   pirateBay: 'https://thepiratebay10.org/',
-  eztv: 'https://eztv.io/',
+  eztv: 'https://eztv.re/',
 };
 
 let isUpgrading = false;
@@ -603,32 +603,34 @@ function updatePirateBayEndpoint() {
 }
 
 function updateEZTVEndpoint() {
-  // axios
-  // .get('https://eztvstatus.com')
-  // .then(response => {
-  //   const $ = cheerio.load(response.data);
-  //   currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
-  // })
-  // .catch(err => {
-  //   console.error(err);
-  // });
-
-  const endpointList = ['https://eztv.io', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
-  const chosen = endpointList[eztvIndex];
   axios
-    .get(chosen)
+    .get('https://eztvstatus.com')
     .then((response) => {
-      // All good
-      currentStatus.eztv = chosen;
+      const $ = cheerio.load(response.data);
+      currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
     })
     .catch((err) => {
-      // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
-      eztvIndex++;
-      if (eztvIndex < endpointList.length) {
-        setTimeout(updateEZTVEndpoint, 5000);
-      } else {
-        eztvIndex = 0;
-      }
+      console.error(err);
+
+      // All of these backups seem dead...
+      // // If we can't get the status from the site, then try from the list...
+      // const endpointList = ['https://eztv.re', 'https://eztv.io', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
+      // const chosen = endpointList[eztvIndex];
+      // axios
+      //   .get(chosen)
+      //   .then((response) => {
+      //     // All good
+      //     currentStatus.eztv = chosen;
+      //   })
+      //   .catch((err) => {
+      //     // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
+      //     eztvIndex++;
+      //     if (eztvIndex < endpointList.length) {
+      //       setTimeout(updateEZTVEndpoint, 5000);
+      //     } else {
+      //       eztvIndex = 0;
+      //     }
+      //   });
     });
 }
 
