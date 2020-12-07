@@ -15,12 +15,15 @@ const ANALYTICS_FILE = DATA + '/analytics.json';
 const interval = 2000;
 
 const axios = axiosMain.create();
-axios.interceptors.request.use((request) => {
-  return AxiosLogger.requestLogger(request, {
-    dateFormat: 'h:MM:ss TT mm/dd/yyyy',
-    headers: true,
-  });
+
+AxiosLogger.setGlobalConfig({
+  data: false,
+  dateFormat: 'h:MM:ss TT mm/dd/yyyy',
+  // headers: true,
 });
+
+axios.interceptors.request.use(AxiosLogger.requestLogger, AxiosLogger.errorLogger);
+axios.interceptors.response.use(AxiosLogger.responseLogger, AxiosLogger.errorLogger);
 
 // Transmission wrapper, conditional host based on if running from a docker container
 const transmission = new transmissionWrapper({

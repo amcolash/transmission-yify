@@ -69,11 +69,9 @@ class Stream extends Component {
               if (type === 'tv' && f.indexOf('/TV') === -1) return null;
 
               return (
-                <div key={f} className="item">
+                <div key={f} className="item pointer" onClick={() => this.setState({ file: f })}>
                   <FaPlayCircle tabIndex="0" />
-                  <span className="pointer" onClick={() => this.setState({ file: f })}>
-                    {f}
-                  </span>
+                  <span>{f}</span>
                 </div>
               );
             })

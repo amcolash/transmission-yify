@@ -610,8 +610,7 @@ function updateEZTVEndpoint() {
       currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
     })
     .catch((err) => {
-      console.error(err);
-
+      // console.error(err);
       // All of these backups seem dead...
       // // If we can't get the status from the site, then try from the list...
       // const endpointList = ['https://eztv.re', 'https://eztv.io', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
@@ -687,11 +686,11 @@ function initStatusWatchers() {
               };
             },
             (error) => {
-              console.error(error);
+              // console.error(error);
             }
           );
         } catch (err) {
-          console.error(err);
+          // console.error(err);
         }
       }, interval * 150);
 
@@ -702,7 +701,7 @@ function initStatusWatchers() {
             downloadSubscription(subscription.id, currentStatus.subscriptions, false);
           } catch (e) {
             // Last ditch attempt to try and prevent issues with subscriptions
-            console.error(e);
+            // console.error(e);
           }
         });
       }, interval * 30 * 60);
