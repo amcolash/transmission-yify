@@ -102,7 +102,8 @@ function getEpisodes(subscription, torrents, onlyLast) {
     const parsed = ptn(t.filename);
     const episode = t.episode || parsed.episode;
     const season = t.season || parsed.season;
-    if (!episode || !season) return;
+    const resolution = Number.parseInt(parsed.resolution);
+    if (!episode || !season || Number.isNaN(resolution) || resolution < 720 || resolution > 1080) return;
 
     t.episode = Number.parseInt(episode);
     t.season = Number.parseInt(season);
@@ -114,7 +115,7 @@ function getEpisodes(subscription, torrents, onlyLast) {
       const existing = episodes[season][episode];
       const parsedExisting = ptn(existing.filename);
 
-      if (t.seeds > existing.seeds && Number.parseInt(parsed.resolution) >= Number.parseInt(parsedExisting.resolution)) {
+      if (t.seeds > existing.seeds && resolution >= Number.parseInt(parsedExisting.resolution)) {
         episodes[season][episode] = t;
       }
     }
