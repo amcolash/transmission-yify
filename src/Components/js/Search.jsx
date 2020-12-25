@@ -67,7 +67,7 @@ class Search extends Component {
             <DebounceInput
               value={search}
               placeholder={'Search'}
-              debounceTimeout={500}
+              debounceTimeout={window.cordova ? 3000 : 1000}
               onChange={(event) => updateSearch(event.target.value, genre, order, type)}
               inputRef={(ref) => {
                 // Only open soft keyboard when enter is pressed when running in cordova
