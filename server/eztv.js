@@ -26,7 +26,8 @@ function getEZTVDetails(url, title) {
           const parsed = ptn(filename);
           const episode = parsed.episode ? Number.parseInt(parsed.episode) : undefined;
           const season = parsed.season ? Number.parseInt(parsed.season) : undefined;
-          if (!episode || !season) return;
+          const parsedResolution = Number.parseInt(parsed.resolution);
+          if (!episode || !season || parsedResolution > 1080) return;
 
           // Odd exception for 'Breaking Bad' - there is a show called 'Breaking Brad' which interferes :(
           if (title && parsed.title) {
