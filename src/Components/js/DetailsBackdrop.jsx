@@ -579,7 +579,7 @@ class DetailsBackdrop extends Component {
                 </Fragment>
               </h4>
             ) : null}
-            <Ratings moreData={moreData} imdb={tmdbData ? tmdbData.imdb_id : null} />
+            <Ratings moreData={moreData} tmdbData={tmdbData} />
             {details.trailer ? (
               <div
                 className="trailer"
