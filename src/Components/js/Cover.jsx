@@ -29,7 +29,7 @@ class Cover extends Component {
     this.cancelPB();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.type === 'movies' && prevProps.media !== this.props.media) {
       setTimeout(() => this.updatePB(), Math.random() * this.props.viewMode === 'carousel' ? 2000 : 500);
     }
@@ -133,7 +133,7 @@ class Cover extends Component {
         <div
           className={'cover' + (viewMode === 'carousel' && parseInt(selected ? selected.id : -1) === id ? ' selected' : '')}
           id={id}
-          onClick={(e) => {
+          onClick={() => {
             if (click) click(media);
           }}
           onKeyDown={(e) => {
@@ -236,7 +236,7 @@ class Cover extends Component {
         </div>
         {viewMode === 'standard' ? (
           <Fragment>
-            <span onClick={(e) => click(media)}>
+            <span onClick={() => click(media)}>
               {media.title} {media.year ? <span>({media.year})</span> : null}
             </span>
             <br />

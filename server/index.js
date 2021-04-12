@@ -475,11 +475,10 @@ app.get('/horriblesubs/:search', function (req, res) {
   }
 });
 
-// TODO: Password protect
 app.get('/analytics', function (req, res) {
   const KEY = process.env.UPGRADE_KEY;
-  if (!KEY || KEY.length === 0) throw new Error('No key has been set, canceling cache clean');
-  if (req.query.key !== KEY) throw new Error('Invalid key');
+  if (!KEY || KEY.length === 0) throw new Error('No analytics key has been set, canceling cache clean');
+  if (req.query.key !== KEY) throw new Error('Invalid analytics key');
 
   res.send(getAnalytics());
 });

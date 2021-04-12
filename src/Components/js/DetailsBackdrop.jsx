@@ -341,7 +341,7 @@ class DetailsBackdrop extends Component {
     this.getHorribleSubs();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps, prevState) {
     const { media, type } = this.props;
 
     if (!media && this.state === prevState) {
@@ -505,13 +505,13 @@ class DetailsBackdrop extends Component {
       <div
         ref={this.containerRef}
         className={'backdropContainer ' + viewMode}
-        onClick={(e) => {
+        onClick={() => {
           if (viewMode === 'standard') {
             this.setState(this.getDefaultState());
             onCloseModal();
           }
         }}
-        onScroll={(e) => {
+        onScroll={() => {
           // Prevent scrolling vertically
           if (this.containerRef.current.scrollTop !== 0) this.containerRef.current.scrollTop = 0;
         }}
@@ -900,6 +900,7 @@ class DetailsBackdrop extends Component {
         }}
         styles={{
           closeIcon: { fill: '#bbb', stroke: '#bbb' },
+          modal: { margin: 0 },
         }}
         closeIconId="closeButton"
         focusTrapOptions={{

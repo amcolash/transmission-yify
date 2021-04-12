@@ -15,7 +15,7 @@ export default class MultiImage extends Component {
     this.updateImage();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.src !== prevProps.src) {
       this.updateImage();
     }

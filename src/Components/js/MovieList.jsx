@@ -136,15 +136,17 @@ class MovieList extends Component {
 
     // Open a socket and try to force using a websocket
     const socket = openSocket(this.server, { transports: ['websocket'] });
-    socket.on('connect', (data) => {
-      socket.emit('subscribe', 'torrents');
-      socket.emit('subscribe', 'status');
-      socket.emit('subscribe', 'files');
-    });
 
     // If something fails with connecting, reset to defaults
     socket.on('reconnect_attempt', () => {
       socket.io.opts.transports = ['polling', 'websocket'];
+    });
+
+    // Once connected, subscribe to things
+    socket.on('connect', () => {
+      socket.emit('subscribe', 'torrents');
+      socket.emit('subscribe', 'status');
+      socket.emit('subscribe', 'files');
     });
 
     socket.on('torrents', (data) => {
