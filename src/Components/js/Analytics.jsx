@@ -282,7 +282,11 @@ class Analytics extends Component {
           <div className="searchItem">
             <span>Date Filter</span>
             <select
-              onChange={(event) => this.setState({ filter: Number.parseInt(event.target.value) }, () => this.updateOptions())}
+              onChange={(event) =>
+                this.setState({ filter: event.target.value === 'none' ? 'none' : Number.parseInt(event.target.value) }, () =>
+                  this.updateOptions()
+                )
+              }
               value={filter}
             >
               <option key="none" value="none">

@@ -123,6 +123,7 @@ export function handleKeys(e, state) {
   const infoEl = document.querySelector('.backdropContainer .right .details');
   const rightEl = document.querySelector('.backdropContainer .right');
   const recommendationsEl = document.querySelector('.recommendations');
+  const backdropCarouselExpandedEl = document.querySelector('.backdropCarousel.expanded');
 
   const coverFocus = active.classList.contains('cover') && (state.type === 'movies' || state.type === 'shows' || state.type === 'animes');
 
@@ -138,6 +139,12 @@ export function handleKeys(e, state) {
   if (backdropEl) loadingBackdrop = backdropEl.querySelectorAll('.spinner').length > 0;
   let videosOpen = false;
   if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
+
+  // If the backdrop is expanded, but focus is on body make a focus trap and keep things focused inside backdrop
+  if (active === document.body && backdropCarouselExpandedEl) {
+    focusItem(backdropEl, 0, true);
+    return;
+  }
 
   // Always focus onto menu button when body is active element
   if (

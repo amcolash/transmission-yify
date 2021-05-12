@@ -60,7 +60,7 @@
   background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.5) 100%);
   text-align: left;
   color: #ddd;
-  text-shadow: 2px 2px 3px #000000, -1px 0px 0px #888, 1px 0px 0px #888, 0px -1px 0px #888, 0px 1px 0px #888;
+  text-shadow: 2px 2px 3px #000000;
   overflow: hidden;
   position: relative;
 }
@@ -193,7 +193,7 @@
   max-height: calc(100vh - 6.5em);
   border-radius: 0.5em 0 0 0;
   overflow-y: auto;
-  transition: all 0.5s;
+  transition: all 0.5s, text-shadow 0s;
 }
 
 .backdropCarousel .backdropContainer.carousel .right {

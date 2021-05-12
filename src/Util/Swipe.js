@@ -21,7 +21,7 @@ export function swipedetect(el, callback) {
     allowedTime = 300, // maximum time allowed to travel that distance
     elapsedTime,
     startTime,
-    handleswipe = callback || function (swipedir) {};
+    handleswipe = callback || function () {};
 
   el.addEventListener(
     'touchstart',
