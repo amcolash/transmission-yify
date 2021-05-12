@@ -35,10 +35,10 @@ deploy:
     branch: master
 
 after_script:
-  # List docker images after the build 
+  # List docker images after the build
   - docker images
   # Send upgrade command to current (and then add newline to output for travis)
-  - curl --max-time 15 -X POST $UPGRADE_SERVER; echo
+  - curl --insecure --max-time 15 -X POST $UPGRADE_SERVER; echo
   # Update the README file on docker hub
   - |
     docker run \
