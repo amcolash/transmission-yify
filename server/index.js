@@ -63,6 +63,7 @@ app.use(redirectToHTTPS());
 // proxy remote commands through
 app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
 app.use('/spectrum', proxy(process.env.SPECTRUM_IP));
+app.use('/calendar', proxy(process.env.CALENDAR_UNLOCK_IP));
 
 // record requests through analytics handler
 app.use(analyticsMiddleware);
