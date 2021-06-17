@@ -40,5 +40,6 @@ TODO
 - [DONE] Add stream from server option (bypass plex)
 - Precache base initial data on the server side when cache cleared
 - Move to Mongo?
+- Move to Github Actions and away from Travis
 
 - Broken TV torrent cache

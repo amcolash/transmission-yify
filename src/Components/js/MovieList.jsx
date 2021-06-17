@@ -448,7 +448,7 @@ class MovieList extends Component {
         }
       } else if (type === 'movies' || type === 'shows') {
         // Filter by popularity and vote count to remove obscure results
-        data = data.filter((d) => d.popularity > 1 && d.vote_count > 3);
+        data = data.filter((d) => d.popularity > 1 || d.vote_count > 3);
       }
       if (data.length === 0) lastPage = true;
 
