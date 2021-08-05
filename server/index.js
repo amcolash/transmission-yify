@@ -593,12 +593,22 @@ function updatePirateBayEndpoint() {
     .get('https://piratebayproxy.info')
     .then((response) => {
       const $ = cheerio.load(response.data);
-      const links = $('.t1');
-      // choose a random link from the top half of the list
-      const rnd = Math.floor((Math.random() * links.length) / 2);
-      currentStatus.pirateBay = links.eq(rnd).attr('href');
+      const links = $('#searchResult tr:not(.header)');
+
+      const filtered = links.filter(function () {
+        const status = $('.status img', this).attr('src');
+        return status.indexOf('down') === -1;
+      });
+
+      // choose a random link from the flitered list
+      const rnd = Math.floor(Math.random() * filtered.length);
+      currentStatus.pirateBay = $(filtered).eq(rnd).find('.site a').attr('href');
+
+      console.log('Updated piratebay:', currentStatus.pirateBay);
     })
-    .catch((err) => {});
+    .catch((err) => {
+      console.error('Error updating piratebay', err);
+    });
 }
 
 function updateEZTVEndpoint() {
@@ -607,12 +617,14 @@ function updateEZTVEndpoint() {
     .then((response) => {
       const $ = cheerio.load(response.data);
       currentStatus.eztv = $('.b-primaryDomain .domainLink').attr('href');
+
+      console.log('Updated eztv: ', currentStatus.eztv);
     })
     .catch((err) => {
-      // console.error(err);
+      console.error('Error updating eztv', err);
       // All of these backups seem dead...
       // // If we can't get the status from the site, then try from the list...
-      // const endpointList = ['https://eztv.re', 'https://eztv.io', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
+      // const endpointList = ['https://eztv.re', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
       // const chosen = endpointList[eztvIndex];
       // axios
       //   .get(chosen)
