@@ -2,7 +2,7 @@ const cheerio = require('cheerio');
 const workerpool = require('workerpool');
 const { axios } = require('./global');
 
-getTorrentsV1 = function ($) {
+const getTorrentsV1 = function ($) {
   const table = $('#searchResult tbody').html();
   const rows = $('tr', table);
 
@@ -55,7 +55,7 @@ getTorrentsV1 = function ($) {
 };
 
 // Looks like some offshoot mirrors have a different layout, secondary parsing for these
-getTorrentsV2 = function ($, endpoint) {
+const getTorrentsV2 = function ($, endpoint) {
   const timeRegex = new RegExp(/\d{2}:\d{2}/);
   const categoryRegex = new RegExp(/.*(?= >)/);
   const subCategoryRegex = new RegExp(/(> )(.*)/);
@@ -128,7 +128,7 @@ getTorrentsV2 = function ($, endpoint) {
   return torrents;
 };
 
-searchPirateBay = function (query, p, filter, endpoint) {
+const searchPirateBay = function (query, p, filter, endpoint) {
   const page = Number.parseInt(p);
 
   return new Promise((resolve, reject) => {

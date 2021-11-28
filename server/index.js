@@ -40,7 +40,6 @@ let currentStatus = {
 };
 
 let isUpgrading = false;
-let eztvIndex = 0;
 
 // Figure out build time
 if (fs.existsSync('./build_time') && IS_DOCKER) {
@@ -313,7 +312,7 @@ app.post('/subscriptions', function (req, res) {
 
   res.sendStatus(200);
   console.log('subscribing to ' + id);
-  downloadSubscription(id, currentStatus.subscriptions, true);
+  downloadSubscription(id, currentStatus.subscriptions, piratePool, currentStatus.pirateBay, true);
 });
 
 app.delete('/subscriptions', function (req, res) {
@@ -613,7 +612,7 @@ function updatePirateBayEndpoint() {
 }
 
 function updateEZTVEndpoint() {
-  axios
+  return axios
     .get('https://eztvstatus.com')
     .then((response) => {
       const $ = cheerio.load(response.data);
@@ -623,25 +622,6 @@ function updateEZTVEndpoint() {
     })
     .catch((err) => {
       console.error('Error updating eztv', err);
-      // All of these backups seem dead...
-      // // If we can't get the status from the site, then try from the list...
-      // const endpointList = ['https://eztv.re', 'https://eztv.wf', 'https://eztv.tf', 'https://eztv.yt'];
-      // const chosen = endpointList[eztvIndex];
-      // axios
-      //   .get(chosen)
-      //   .then((response) => {
-      //     // All good
-      //     currentStatus.eztv = chosen;
-      //   })
-      //   .catch((err) => {
-      //     // If things failed, try the next one - give up if nothing works as we retry every 10 minutes anyways
-      //     eztvIndex++;
-      //     if (eztvIndex < endpointList.length) {
-      //       setTimeout(updateEZTVEndpoint, 5000);
-      //     } else {
-      //       eztvIndex = 0;
-      //     }
-      //   });
     });
 }
 
@@ -652,7 +632,9 @@ function initStatusWatchers() {
   // Grab piratebay/eztv proxy list every 10 minutes
   setIntervalImmediately(() => {
     updatePirateBayEndpoint();
-    updateEZTVEndpoint();
+
+    // Update eztv endpoint and then update shows afterwards
+    updateEZTVEndpoint().then(() => updateEZTVShows(currentStatus.eztv));
   }, interval * 300);
 
   // Get storage info every minute
@@ -710,7 +692,7 @@ function initStatusWatchers() {
       setIntervalImmediately(() => {
         currentStatus.subscriptions.forEach((subscription) => {
           try {
-            downloadSubscription(subscription.id, currentStatus.subscriptions, false);
+            downloadSubscription(subscription.id, currentStatus.subscriptions, piratePool, currentStatus.pirateBay, false);
           } catch (e) {
             // Last ditch attempt to try and prevent issues with subscriptions
             // console.error(e);
@@ -722,9 +704,9 @@ function initStatusWatchers() {
   );
 
   // Refresh list of eztv / horriblesubs shows twice a day
-  const day = 1000 * 60 * 60 * 12;
-  setIntervalImmediately(() => updateHorribleSubsShows(), day);
+  const halfDay = 1000 * 60 * 60 * 12;
+  setIntervalImmediately(() => updateHorribleSubsShows(), halfDay);
 
-  // Wait a moment before getting shows so that the correct eztv domain can be resolved (if needed)
-  setTimeout(() => setIntervalImmediately(() => updateEZTVShows(currentStatus.eztv), day), 10000);
+  // Update shows twice a day (first update is after domain resolved - following updateEZTVEndpoint() )
+  setInterval(() => updateEZTVShows(currentStatus.eztv), halfDay);
 }

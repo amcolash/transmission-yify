@@ -41,7 +41,7 @@ parser.addHandler(({ title, result }) => {
 
 module.exports = function (name) {
   // cleanup to remove + symbols and remove group from front
-  const cleaned = name.replace(/\+/g, ' ').replace(/^\[([\w\d-]+)\]/, '');
+  const cleaned = (name || '').replace(/\+/g, ' ').replace(/^\[([\w\d-]+)\]/, '');
   const parsed = parser.parse(cleaned);
 
   return parsed;

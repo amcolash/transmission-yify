@@ -24,7 +24,7 @@ function findSubscription(id, subscriptions) {
   return matched.length === 1 ? matched[0] : undefined;
 }
 
-async function downloadSubscription(id, subscriptions, onlyLast) {
+async function downloadSubscription(id, subscriptions, piratePool, pirateBay, onlyLast) {
   // Get the current subscription status
   const matched = findSubscription(id, subscriptions);
   let subscription = matched || {};
@@ -65,12 +65,41 @@ async function downloadSubscription(id, subscriptions, onlyLast) {
 
   // find torrents for the show
   const matchedShow = searchShow(subscription.title, getEZTVShows());
-  if (!matchedShow || !matchedShow.url) return;
+  if (!matchedShow || !matchedShow.url) {
+    console.error(`Could not find show ${JSON.stringify(matchedShow || {})}, ${JSON.stringify(subscription || {})}`);
+    return;
+  }
+
+  // Get 5 pages of pb data (latest uploaded using '/3/0'), to augment eztv data (if new episodes/seasons are missing)
+  const pirateSearches = [];
+  const pirateData = [];
+  for (let i = 1; i <= 5; i++) {
+    const worker = piratePool.exec('searchPirateBay', [subscription.title, i, '/3/0', pirateBay]);
+
+    worker
+      .then((data) => {
+        // Update PB data to include slightly different names to match EZTV torrents
+        const augmented = data.torrents.map((t) => {
+          return { ...t, filename: t.name, magnet: t.magnetLink };
+        });
+        pirateData.push(...augmented);
+      })
+      .catch((err) => console.error(err));
+
+    pirateSearches.push(worker);
+  }
+
+  await Promise.all(pirateSearches)
+    .then(() => console.log('All done with PB, got', pirateData.length, 'results'))
+    .catch((err) => console.error(err));
 
   getEZTVDetails(matchedShow.url, subscription.title)
     .then((data) => {
+      // Augment eztv data with pirate bay data
+      const allData = [...data.torrents, ...pirateData];
+
       // Generate a list of all episodes from the query
-      const { episodes, lastEpisode } = getEpisodes(subscription, data.torrents, onlyLast);
+      const { episodes, lastEpisode } = getEpisodes(subscription, allData, onlyLast);
 
       if (episodes.length > 0) console.log(`need to get ${episodes.length} new files for ${subscription.title}`);
 
