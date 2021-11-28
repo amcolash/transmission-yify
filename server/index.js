@@ -289,6 +289,7 @@ app.post('/upgrade', function (req, res) {
         exec(ssh + command, (error, stdout, stderr) => {
           console.log(stdout);
           if (stderr) console.error(stderr);
+          if (error) console.error(error);
         });
       } else {
         console.error(stderr);

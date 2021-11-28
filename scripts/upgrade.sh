@@ -13,6 +13,7 @@ fi
 # Move into the root of the app directory
 cd $(dirname "$0")
 cd ../
+pwd
 
 # Redirect all output to log file
 readonly LOG_FILE="upgrade.log"
@@ -22,6 +23,7 @@ exec >> $LOG_FILE 2>&1 && tail $LOG_FILE
 echo "----------------"
 echo $(date)
 echo "Starting Upgrade"
+pwd
 
 echo "Waiting a moment for the dust to settle"
 sleep 20

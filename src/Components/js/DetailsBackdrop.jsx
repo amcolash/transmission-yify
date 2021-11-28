@@ -119,6 +119,9 @@ class DetailsBackdrop extends Component {
         }
       });
 
+      // EZTV isn't always updated properly - handle cases where we want more seasons even if they don't "exist"
+      maxSeason = Math.max(maxSeason, moreData.seasons.length);
+
       this.setState({ eztv: data, season: maxSeason, maxSeason, loadingEpisodes: false });
     } else {
       this.setState({ loadingEpisodes: false });
@@ -443,20 +446,8 @@ class DetailsBackdrop extends Component {
       viewMode,
     } = this.props;
 
-    const {
-      tmdbData,
-      moreData,
-      eztv,
-      nyaa,
-      pb,
-      horribleSubs,
-      season,
-      maxSeason,
-      youtubeId,
-      loadingEpisodes,
-      subscribing,
-      otherVideos,
-    } = this.state;
+    const { tmdbData, moreData, eztv, nyaa, pb, horribleSubs, season, maxSeason, youtubeId, loadingEpisodes, subscribing, otherVideos } =
+      this.state;
 
     let media = this.props.media || {};
 

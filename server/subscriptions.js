@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const ptn = require('../src/Util/TorrentName');
 
-const { SUBSCRIPTION_FILE, IS_DOCKER, transmission, axios, TV } = require('./global');
+const { DATA, SUBSCRIPTION_FILE, IS_DOCKER, transmission, axios, TV } = require('./global');
 const { getCache } = require('./cache');
 const { getEZTVShows, getEZTVDetails } = require('./eztv');
 const { getTMDBUrl, searchShow } = require('./util');
