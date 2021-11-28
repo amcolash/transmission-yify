@@ -120,7 +120,7 @@ class DetailsBackdrop extends Component {
       });
 
       // EZTV isn't always updated properly - handle cases where we want more seasons even if they don't "exist"
-      maxSeason = Math.max(maxSeason, moreData.seasons.length);
+      if (moreData && moreData.seasons) maxSeason = Math.max(maxSeason, moreData.seasons.length);
 
       this.setState({ eztv: data, season: maxSeason, maxSeason, loadingEpisodes: false });
     } else {
@@ -253,6 +253,8 @@ class DetailsBackdrop extends Component {
     this.setState(updated);
 
     if (type === 'shows' || type === 'subscriptions') {
+      const promises = [];
+
       const moreData = data;
       if (moreData.seasons) {
         moreData.seasons = moreData.seasons.filter((s) => s.name.toLowerCase().indexOf('specials') === -1);
@@ -263,7 +265,8 @@ class DetailsBackdrop extends Component {
             moreData.seasons[season.season_number - 1].episodes = Cache[url].episodes;
             this.setState({ moreData: moreData });
           } else {
-            this.axiosGetHelper(url)
+            const get = this.axiosGetHelper(url);
+            get
               .then((response) => {
                 if (moreData.seasons[season.season_number - 1]) {
                   moreData.seasons[season.season_number - 1].episodes = response.data.episodes;
@@ -275,14 +278,18 @@ class DetailsBackdrop extends Component {
                 if (axios.isCancel(err)) return;
                 console.error(err);
               });
+
+            promises.push(get);
           }
         });
       }
-      this.getEztv(media);
-      this.getPBSeasons(media, moreData.seasons);
+
+      Promise.all(promises).then(() => {
+        this.getEztv(media);
+        this.getPBSeasons(media, moreData.seasons);
+      });
     } else {
       const omdbUrl = this.props.server + '/omdb/' + data.imdb_id;
-
       if (Cache[omdbUrl]) {
         this.setState({ moreData: Cache[omdbUrl] });
       } else {
