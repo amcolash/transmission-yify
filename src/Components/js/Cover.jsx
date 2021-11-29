@@ -247,6 +247,7 @@ class Cover extends Component {
             Latest: S{subscription.lastSeason}E{subscription.lastEpisode}
           </span>
         ) : null}
+        {media.status === 'Ended' && <span> [Ended]</span>}
       </Fragment>
     );
 

@@ -172,6 +172,7 @@ export function getDetails(m, moreData, tmdbData, type, maxSeason) {
     header = `${moreData && moreData.Year ? moreData.Year : media.year || ''}`;
     if ((type === 'shows' || type === 'subscriptions') && maxSeason > 0)
       header += `, ${maxSeason + (maxSeason > 1 ? ' Seasons' : ' Season')}`;
+    if (moreData && moreData.status === 'Ended') header += ' [Ended]';
   }
 
   const plot =

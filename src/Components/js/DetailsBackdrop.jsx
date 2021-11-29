@@ -106,7 +106,7 @@ class DetailsBackdrop extends Component {
 
   handleEztv(data) {
     // If we loaded data for another show, don't handle it now
-    if (data.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
+    if (!data.title || data.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
 
     if (data.torrents) {
       const moreData = this.state.moreData;
@@ -146,7 +146,7 @@ class DetailsBackdrop extends Component {
                 Cache[url] = data;
 
                 // If we loaded data for another show, don't handle it now
-                if (media.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
+                if (!media.title || media.title.toLowerCase() !== this.props.media.title.toLowerCase()) return;
 
                 this.handlePBSeasons(data);
               })
