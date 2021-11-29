@@ -33,7 +33,7 @@ let prevStatus = {};
 let currentStatus = {
   buildTime: 'Dev Build',
   isDocker: IS_DOCKER,
-  plex: process.env.PLEX_SERVER,
+  plex: 'https://app.plex.tv/desktop',
   subscriptions: [],
   pirateBay: 'https://thepiratebay10.org/',
   eztv: 'https://eztv.re/',

@@ -44,7 +44,7 @@ function getPlexFiles(currentFiles) {
               for (var i = 0; i < values.length; i++) {
                 const data = values[i].MediaContainer.Metadata;
                 for (var j = 0; j < data.length; j++) {
-                  const url = `http://${process.env.PLEX_HOSTNAME}:32400/web/index.html#!/server/${machineId}/details?key=${data[j].key}`;
+                  const url = `https://app.plex.tv/desktop/#!/server/${machineId}/details?key=${data[j].key}`;
                   files.push({ title: data[j].title, year: data[j].year, url: url });
                 }
               }

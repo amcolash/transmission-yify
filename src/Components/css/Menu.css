@@ -35,6 +35,7 @@
 
 .menu:not(.hidden) + .menu-darken {
   opacity: 0.4;
+  pointer-events: unset;
 }
 
 .menu.hidden {
