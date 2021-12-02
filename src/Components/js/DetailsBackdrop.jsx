@@ -491,13 +491,15 @@ class DetailsBackdrop extends Component {
       type === 'animes'
         ? moreData && moreData !== 'ERROR'
           ? `${moreData.CoverImage}`
-          : ''
+          : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
         : backdrop
         ? `https://image.tmdb.org/t/p/w300${backdrop}`
-        : '';
+        : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-    let recommendations =
+    const recommendations =
       tmdbData && tmdbData.recommendations && tmdbData.recommendations.results ? tmdbData.recommendations.results : undefined;
+
+    const cast = tmdbData && tmdbData.credits ? tmdbData.credits.cast : undefined;
 
     const innerContent = !media.id ? null : (
       <div
@@ -685,7 +687,6 @@ class DetailsBackdrop extends Component {
                 <Fragment>
                   {details.director ? <div className="padding">{details.director}</div> : null}
                   {details.writers ? <div className="padding">{details.writers}</div> : null}
-                  <div className="padding">Actors: {moreData.Actors}</div>
                 </Fragment>
               ) : (
                 <Fragment>
@@ -842,6 +843,30 @@ class DetailsBackdrop extends Component {
                   </div>
                 </Fragment>
               )}
+            </Fragment>
+          )}
+
+          {cast && cast.length > 0 && (
+            <Fragment>
+              <h4>Cast</h4>
+              <div className="castContainer">
+                <div className="cast" tabIndex="-1">
+                  {cast.slice(0, 15).map((c) => (
+                    <div className="item" key={c.id}>
+                      <img
+                        tabIndex="0"
+                        src={
+                          c.profile_path !== null
+                            ? `https://themoviedb.org/t/p/w138_and_h175_face/${c.profile_path}`
+                            : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+                        }
+                      />
+                      <div className="name">{c.name}</div>
+                      <div className="character">{c.character}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </Fragment>
           )}
 

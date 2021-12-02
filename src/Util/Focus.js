@@ -106,9 +106,14 @@ export function handleBack(e, state) {
   return false;
 }
 
+let throttle = 0;
 export function handleKeys(e, state) {
   // For now, only have the arrow key navigation work for carousel
   if (state.viewMode !== 'carousel') return;
+
+  // Throttle key handling just a little bit since things seem to be a little finicky
+  if (Date.now() - throttle < 50) return;
+  throttle = Date.now();
 
   const active = document.activeElement;
 
@@ -123,6 +128,7 @@ export function handleKeys(e, state) {
   const infoEl = document.querySelector('.backdropContainer .right .details');
   const rightEl = document.querySelector('.backdropContainer .right');
   const recommendationsEl = document.querySelector('.recommendations');
+  const castEl = document.querySelector('.cast');
   const backdropCarouselExpandedEl = document.querySelector('.backdropCarousel.expanded');
 
   const coverFocus = active.classList.contains('cover') && (state.type === 'movies' || state.type === 'shows' || state.type === 'animes');
@@ -139,6 +145,11 @@ export function handleKeys(e, state) {
   if (backdropEl) loadingBackdrop = backdropEl.querySelectorAll('.spinner').length > 0;
   let videosOpen = false;
   if (videosContainerEl && !videosContainerEl.classList.contains('hidden')) videosOpen = true;
+
+  let recommendationsFocus = false;
+  if (recommendationsEl) recommendationsFocus = recommendationsEl.contains(active);
+  let castFocus = false;
+  if (castEl) castFocus = castEl.contains(active);
 
   // If the backdrop is expanded, but focus is on body make a focus trap and keep things focused inside backdrop
   if (active === document.body && backdropCarouselExpandedEl) {
@@ -210,11 +221,16 @@ export function handleKeys(e, state) {
         videosButtonEl.click();
         videosButtonEl.focus();
       } else if (backdropFocus) {
-        // If on the 1st item and up press, go back to covers
-        const focusableEls = getFocusable(backdropEl);
-        const index = getFocusIndex(focusableEls);
-        if (index === 0 && !loadingBackdrop) focusCover(state);
-        else focusItem(backdropEl, -1, true);
+        if (recommendationsFocus && castEl) {
+          const focusableEls = getFocusable(castEl);
+          focusableEls[0].focus();
+        } else {
+          // If on the 1st item and up press, go back to covers
+          const focusableEls = getFocusable(backdropEl);
+          const index = getFocusIndex(focusableEls);
+          if (index === 0 && !loadingBackdrop) focusCover(state);
+          else focusItem(backdropEl, -1, true);
+        }
       } else if (coverFocus && menuToggleEl) menuToggleEl.focus();
       else focusItem(document, -1);
       break;
@@ -223,8 +239,14 @@ export function handleKeys(e, state) {
       if (videosOpen && videosButtonEl) {
         videosButtonEl.click();
         videosButtonEl.focus();
-      } else if (backdropFocus) focusItem(backdropEl, 1, true);
-      else if (coverFocus) focusItem(backdropEl, 0);
+      } else if (backdropFocus) {
+        if (castFocus && recommendationsEl) {
+          const focusableEls = getFocusable(recommendationsEl);
+          focusableEls[0].focus();
+        } else {
+          focusItem(backdropEl, 1, true);
+        }
+      } else if (coverFocus) focusItem(backdropEl, 0);
       else if (menuOpen) focusItem(menuEl, 1);
       else if ((searchFocus || menuToggleFocus) && backdropEl) focusCover(state);
       else focusItem(document, 1);

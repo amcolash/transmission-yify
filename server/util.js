@@ -148,7 +148,7 @@ function getTMDBUrl(id, type) {
     id +
     '?api_key=' +
     process.env.THE_MOVIE_DB_KEY +
-    '&append_to_response=external_ids,videos,recommendations' +
+    '&append_to_response=external_ids,videos,recommendations,credits' +
     (type === 'tv' ? ',content_ratings' : '')
   );
 }

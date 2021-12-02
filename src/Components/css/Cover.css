@@ -7,7 +7,7 @@
 }
 
 .movie.carousel {
-  margin: 0.2em;
+  margin: 0.2em 0.35em;
 }
 
 .movie:not(.disabled):hover {

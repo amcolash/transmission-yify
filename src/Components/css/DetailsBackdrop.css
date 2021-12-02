@@ -225,12 +225,14 @@
   padding-top: 1em;
 }
 
-.recommendationContainer {
+.recommendationContainer,
+.castContainer {
   display: flex;
   align-items: center;
 }
 
-.recommendations {
+.recommendations,
+.cast {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -243,6 +245,12 @@
   scroll-behavior: smooth;
 }
 
+.cast .item {
+  width: 10em;
+  padding: 0.4em;
+  text-align: center;
+}
+
 .recommendations .item {
   display: flex;
   flex-direction: column;
@@ -251,7 +259,8 @@
   min-width: 7em;
 }
 
-.recommendations .item:last-of-type {
+.recommendations .item:last-of-type,
+.cast .item:last-of-type {
   margin-right: 0;
 }
 
@@ -261,7 +270,8 @@
   overflow: hidden;
 }
 
-.recommendations img {
+.recommendations img,
+.cast img {
   width: 100%;
   flex: 1 1;
   object-fit: cover;
@@ -270,6 +280,20 @@
   margin-top: 0.1em;
   max-height: 10em;
   max-width: 7em;
+}
+
+.cast img {
+  width: 7em;
+  height: 7em;
+  border-radius: 100%;
+}
+
+.cast .name {
+  margin-bottom: 0.35em;
+}
+
+.cast .character {
+  opacity: 0.7;
 }
 
 .recommendations .item:focus {
@@ -296,6 +320,7 @@
 .carousel .recommendations .item:focus img {
   border-color: #eee;
   outline-color: #eee;
+  transition: outline 0.15s;
 }
 
 .versions {
