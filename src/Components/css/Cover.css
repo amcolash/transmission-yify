@@ -8,6 +8,7 @@
 
 .movie.carousel {
   margin: 0.2em 0.35em;
+  scroll-snap-align: center;
 }
 
 .movie:not(.disabled):hover {

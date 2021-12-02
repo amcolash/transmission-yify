@@ -6,11 +6,11 @@ class Ratings extends Component {
   render() {
     const { moreData, tmdbData } = this.props;
 
-    if (!moreData || moreData === 'ERROR' || !moreData.Ratings) return null;
+    if (!moreData || moreData === 'ERROR') return null;
 
     // console.log(moreData.Ratings);
 
-    const allRatings = [...moreData.Ratings];
+    const allRatings = [...(moreData.Ratings || [])];
     if (tmdbData.vote_average) allRatings.push({ Source: 'TMDB', Value: `${tmdbData.vote_average}/10` });
 
     return (
