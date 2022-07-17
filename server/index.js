@@ -60,11 +60,11 @@ app.use(cors());
 app.use(redirectToHTTPS());
 
 // proxy remote commands through
-app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
-app.use('/spectrum', proxy(process.env.SPECTRUM_IP));
-app.use('/piano-led', proxy(process.env.PIANO_LED_IP));
-app.use('/fish-led', proxy(process.env.FISH_LED_IP));
-app.use('/sunset', proxy(process.env.SUNSET_IP));
+if (process.env.REMOTEBOOT_IP) app.use('/remote', proxy(process.env.REMOTEBOOT_IP));
+if (process.env.SPECTRUM_IP) app.use('/spectrum', proxy(process.env.SPECTRUM_IP));
+if (process.env.PIANO_LED_IP) app.use('/piano-led', proxy(process.env.PIANO_LED_IP));
+if (process.env.FISH_LED_IP) app.use('/fish-led', proxy(process.env.FISH_LED_IP));
+if (process.env.SUNSET_IP) app.use('/sunset', proxy(process.env.SUNSET_IP));
 
 // record requests through analytics handler
 app.use(analyticsMiddleware);
