@@ -7,14 +7,38 @@ import levenshtein from 'js-levenshtein';
 import React, { Component } from 'react';
 import { FaPlayCircle, FaTimesCircle } from 'react-icons/fa';
 
+import { isKeyboardVisible } from '../../Util/cordova-plugins';
 import * as ptn from '../../Util/TorrentName';
 import Spinner from './Spinner';
 
 class Stream extends Component {
   state = { files: undefined, file: undefined, search: '', type: 'movie', error: undefined };
 
+  constructor(props) {
+    super(props);
+    this.inputRef = React.createRef();
+  }
+
   componentDidMount() {
     this.updateData();
+  }
+
+  componentDidUpdate() {
+    // Only open soft keyboard when enter is pressed when running in cordova
+    if (this.inputRef.current && window.cordova) {
+      const ref = this.inputRef.current;
+
+      // Only set readonly when the keyboard is hidden
+      if (!isKeyboardVisible()) ref.readOnly = true;
+
+      ref.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          // Flip this so that the search icon on keyboard actually works
+          ref.readOnly = !ref.readOnly;
+        }
+      };
+      ref.onblur = () => (ref.readOnly = true);
+    }
   }
 
   updateData() {
@@ -58,14 +82,21 @@ class Stream extends Component {
           ) : files ? (
             <div>
               <div className="searchbar">
-                <input placeholder="Search" value={search} onChange={(e) => this.setState({ search: e.target.value })} />
+                <input
+                  placeholder="Search"
+                  type="text"
+                  value={search}
+                  onChange={(e) => this.setState({ search: e.target.value })}
+                  ref={this.inputRef}
+                />
 
                 <label htmlFor="type">Media Type</label>
-                <select name="type" onChange={(e) => this.setState({ type: e.target.value })} value={type}>
+                <select name="type" onChange={(e) => this.setState({ search: '', type: e.target.value })} value={type}>
                   <option value="movie">Movie</option>
                   <option value="tv">TV Show</option>
                 </select>
               </div>
+
               <hr />
 
               {files
@@ -111,7 +142,7 @@ class Stream extends Component {
                     onClick={() => {
                       if (!window.cordova) this.setState({ file: parsed.file });
                       else {
-                        const url = this.props.server + '/files' + parsed.file;
+                        const url = encodeURI(this.props.server + '/files' + parsed.file);
 
                         window.plugins.webintent.startActivity(
                           {
@@ -120,12 +151,9 @@ class Stream extends Component {
                             url,
                             type: 'video/*',
                           },
+                          function () {},
                           function () {
-                            alert('ok');
-                          },
-                          function () {
-                            alert('Failed to open URL via Android Intent.');
-                            console.log('Failed to open URL via Android Intent. URL: ' + url);
+                            alert('Failed to open URL via Android Intent.\n' + url);
                           }
                         );
                       }

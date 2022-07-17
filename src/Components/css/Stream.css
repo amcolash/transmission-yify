@@ -66,6 +66,10 @@
   align-items: baseline;
 }
 
+.streamList .searchbar input {
+  margin-right: 10px;
+}
+
 .streamList hr {
   width: 99%;
   margin: 18px auto;
