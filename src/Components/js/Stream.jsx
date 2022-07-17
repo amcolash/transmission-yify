@@ -1,5 +1,7 @@
 import '../css/Stream.css';
 
+import { basename } from 'path';
+
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
 import React, { Component } from 'react';
@@ -31,17 +33,6 @@ class Stream extends Component {
     return (
       <div className="streamList">
         <h2>Stream Files</h2>
-        <div className="searchbar">
-          <label htmlFor="search">Search</label>
-          <input type="search" name="search" value={search} onChange={(e) => this.setState({ search: e.target.value })} />
-
-          <label htmlFor="type">Media Type</label>
-          <select name="type" onChange={(e) => this.setState({ type: e.target.value })}>
-            <option value="movie">Movie</option>
-            <option value="tv">TV Show</option>
-          </select>
-        </div>
-        <hr />
         <div className="list">
           {error ? (
             <div>
@@ -50,31 +41,108 @@ class Stream extends Component {
             </div>
           ) : file ? (
             <div className="player">
-              <FaTimesCircle onClick={() => this.setState({ file: undefined })} />
+              <div className="controls">
+                <FaTimesCircle
+                  onClick={() => this.setState({ file: undefined })}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') this.setState({ file: undefined });
+                  }}
+                  tabIndex="0"
+                  className="close"
+                />
+              </div>
               <video controls autoPlay>
                 <source src={this.props.server + '/files' + file} />
               </video>
             </div>
           ) : files ? (
-            files.sort().map((f) => {
-              const parsed = ptn(f);
-              if (search.length > 0 && parsed.title) {
-                const lev = levenshtein(parsed.title.toLowerCase(), search.toLowerCase());
-                const match = 1 - lev / Math.max(parsed.title.length, search.length);
+            <div>
+              <div className="searchbar">
+                <input placeholder="Search" value={search} onChange={(e) => this.setState({ search: e.target.value })} />
 
-                if (match < 0.75 && parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1) return null;
-              }
+                <label htmlFor="type">Media Type</label>
+                <select name="type" onChange={(e) => this.setState({ type: e.target.value })} value={type}>
+                  <option value="movie">Movie</option>
+                  <option value="tv">TV Show</option>
+                </select>
+              </div>
+              <hr />
 
-              if (type === 'movie' && f.indexOf('/TV') !== -1) return null;
-              if (type === 'tv' && f.indexOf('/TV') === -1) return null;
+              {files
+                .map((f) => {
+                  const parsed = ptn(basename(f));
+                  parsed.file = f;
 
-              return (
-                <div key={f} className="item pointer" onClick={() => this.setState({ file: f })}>
-                  <FaPlayCircle tabIndex="0" />
-                  <span>{f}</span>
-                </div>
-              );
-            })
+                  if (!parsed.title) return null;
+
+                  parsed.title = parsed.title
+                    .replace('/', '')
+                    .replace(/\./g, '')
+                    .replace(/^\d+\) /, '')
+                    .replace(/^\[.+\]\s*/, '')
+                    .replace(/^\s*[-_]*/, '')
+                    .trim();
+
+                  if (parsed.title.match(/^\d+$/)) return null;
+                  if (parsed.title.toLowerCase().indexOf('sample') !== -1) return null;
+
+                  if (search.length > 0) {
+                    const lev = levenshtein(parsed.title.toLowerCase(), search.toLowerCase());
+                    const match = 1 - lev / Math.max(parsed.title.length, search.length);
+
+                    if (match < 0.75 && parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1) return null;
+                  }
+
+                  if (type === 'movie' && f.indexOf('/TV') !== -1) return null;
+                  if (type === 'tv' && f.indexOf('/TV') === -1) return null;
+
+                  return parsed;
+                })
+                .filter((p) => p !== null)
+                .sort((a, b) => {
+                  return a.title.localeCompare(b.title);
+                })
+                .map((parsed) => (
+                  <div
+                    key={parsed.file}
+                    className="item pointer"
+                    title={parsed.file}
+                    tabIndex="0"
+                    onClick={() => {
+                      if (!window.cordova) this.setState({ file: parsed.file });
+                      else {
+                        const url = this.props.server + '/files' + parsed.file;
+
+                        window.plugins.webintent.startActivity(
+                          {
+                            action: window.plugins.webintent.ACTION_VIEW,
+                            package: 'org.videolan.vlc',
+                            url,
+                            type: 'video/*',
+                          },
+                          function () {
+                            alert('ok');
+                          },
+                          function () {
+                            alert('Failed to open URL via Android Intent.');
+                            console.log('Failed to open URL via Android Intent. URL: ' + url);
+                          }
+                        );
+                      }
+                    }}
+                  >
+                    <FaPlayCircle />
+                    <div className="space">
+                      <div>
+                        {parsed.title} {parsed.year && `(${parsed.year})`}
+                        {parsed.season && `S${parsed.season.toString().padStart(2, '0')}`}
+                        {parsed.episode && `E${parsed.episode.toString().padStart(2, '0')}`}
+                      </div>
+                      <div>{parsed.resolution && `[${parsed.resolution}${parsed.cam ? '-CAM' : ''}]`}</div>
+                    </div>
+                  </div>
+                ))}
+            </div>
           ) : (
             <Spinner visible />
           )}

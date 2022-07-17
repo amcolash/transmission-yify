@@ -103,7 +103,7 @@ try {
   setupSubscriptions(currentStatus);
   setupAnalytics();
 
-  server.listen(PORT);
+  server.listen(PORT, '0.0.0.0');
   console.log(`Running on port ${PORT}`);
   if (typeof currentStatus.buildTime !== 'string') console.log(`Docker image build time ${currentStatus.buildTime}`);
 
