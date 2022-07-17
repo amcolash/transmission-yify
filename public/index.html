@@ -46,9 +46,16 @@
     <!-- Only load cordova if running on android -->
     <script type="text/javascript">
       const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.indexOf('android tv') !== -1 || userAgent.indexOf('chromecast') !== -1) {
-        document.write("<script src='%PUBLIC_URL%/cordova.js'><\/script>");
-      }
+
+      const allowedUA = [
+        'android tv',
+        'chromecast',
+        // 'android'
+      ]
+
+      allowedUA.forEach(ua => {
+        if (userAgent.indexOf(ua) !== -1) document.write("<script src='%PUBLIC_URL%/cordova.js'><\/script>");
+      })
     </script>
   </body>
 </html>
