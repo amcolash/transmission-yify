@@ -498,7 +498,7 @@ app.get('/fileList', function (req, res) {
       if (IS_DOCKER) {
         klaw(TV)
           .on('data', (item) => {
-            if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(p, ''));
+            if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(TV, ''));
           })
           .on('end', () => {
             res.send(items);
