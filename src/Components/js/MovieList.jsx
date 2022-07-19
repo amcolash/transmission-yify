@@ -456,7 +456,8 @@ class MovieList extends Component {
       if (page > 1) {
         let filtered = [];
         results.concat(data).forEach((d) => {
-          if (!filtered.find((f) => f.title === d.title)) filtered.push(d);
+          if (d.id && !filtered.find((f) => f.id === d.id)) filtered.push(d);
+          else if (!filtered.find((f) => f.title === d.title)) filtered.push(d);
         });
         data = filtered;
       }

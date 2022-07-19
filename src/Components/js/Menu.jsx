@@ -159,6 +159,11 @@ class Menu extends Component {
             {this.generateItem(<FaTv />, 'TV Shows', 'shows')}
             {this.generateItem(<FaLaughBeam />, 'Anime', 'animes')}
             {this.generateItem(<FaSkullCrossbones />, 'Pirate Bay', 'pirate')}
+            {!window.cordova &&
+              this.generateItem(<FaSkullCrossbones />, '1337x', () => {
+                window.open('https://1337x.to/', '_blank');
+                this.setVisible(false);
+              })}
             <div className="item disabled"></div>
             {this.generateItem(<FaDownload />, `Downloads ${torrents.length > 0 ? `(${torrents.length})` : ''}`, 'downloads')}
             {this.generateItem(<FaRssSquare />, 'Subscriptions', 'subscriptions')}
