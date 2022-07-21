@@ -84,7 +84,7 @@ class Stream extends Component {
               <div className="searchbar">
                 <input
                   placeholder="Search"
-                  type="text"
+                  type="search"
                   value={search}
                   onChange={(e) => this.setState({ search: e.target.value })}
                   ref={this.inputRef}
@@ -99,11 +99,7 @@ class Stream extends Component {
 
               <hr />
 
-              {files
-                .filter((f) => {
-                  if (type === 'movie' && f.indexOf('/TV') === -1) return true;
-                  if (type === 'tv' && f.indexOf('/TV') !== -1) return true;
-                })
+              {(type === 'movie' ? files.movies : files.tv)
                 .map((f) => {
                   const parsed = ptn(basename(f));
                   parsed.file = f;

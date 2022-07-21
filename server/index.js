@@ -487,18 +487,21 @@ app.get('/analytics', function (req, res) {
 });
 
 app.get('/fileList', function (req, res) {
-  const items = [];
+  const items = { movies: [], tv: [] };
   const p = IS_DOCKER ? path.join(DATA, 'completed') : path.join(DATA, 'downloads');
   klaw(p)
     .on('data', (item) => {
-      if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(p, ''));
+      if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) {
+        if (item.path.indexOf('TV') === -1) items.movies.push(item.path.replace(p, ''));
+        else items.tv.push(item.path.replace(p, ''));
+      }
     })
     .on('end', () => {
       // Add on tv directory when needed, a little ugly callback-wise, but that's ok
       if (IS_DOCKER) {
         klaw(TV)
           .on('data', (item) => {
-            if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.push(item.path.replace(TV, ''));
+            if (item.stats.isFile() && item.path.match(/.*\.((mp4)|(mkv)|(avi)|(m4v))$/)) items.tv.push(item.path.replace(TV, ''));
           })
           .on('end', () => {
             res.send(items);
