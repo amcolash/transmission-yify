@@ -854,17 +854,26 @@ class MovieList extends Component {
                 {isSearching && this.state.page === 1 ? null : type === 'pirate' ? (
                   results && results.torrents && results.torrents.length > 0 ? (
                     <div className="pirateList">
-                      {results.torrents.map((media) => (
-                        <Pirate
-                          key={media.link}
-                          media={media}
-                          started={started}
-                          downloadTorrent={this.downloadTorrent}
-                          cancelTorrent={this.cancelTorrent}
-                          getProgress={this.getProgress}
-                          getTorrent={this.getTorrent}
-                        />
-                      ))}
+                      {results.torrents
+                        .filter((media) => media.link)
+                        .sort((a, b) => {
+                          if (a.date && b.date) {
+                            return new Date(b.date).getTime() - new Date(a.date).getTime();
+                          }
+                          return 0;
+                        })
+                        .map((media) => (
+                          <Pirate
+                            key={media.link}
+                            id={media.link}
+                            media={media}
+                            started={started}
+                            downloadTorrent={this.downloadTorrent}
+                            cancelTorrent={this.cancelTorrent}
+                            getProgress={this.getProgress}
+                            getTorrent={this.getTorrent}
+                          />
+                        ))}
                       {isSearching ? (
                         <div style={{ marginBottom: '1em' }}>
                           <Spinner visible big />

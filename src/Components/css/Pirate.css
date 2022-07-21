@@ -20,6 +20,7 @@
   overflow: hidden;
   max-height: 2.3em;
   overflow-wrap: break-word;
+  width: 100%;
 }
 
 .pirateRow div:not(.spinner):not(.spacer) {

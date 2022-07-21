@@ -216,7 +216,7 @@ function convertButtonLabels(buttonLabels) {
       function (args) {
         callback(args);
       },
-      function (args) {},
+      function () {},
       'WebIntent',
       'onNewIntent',
       []

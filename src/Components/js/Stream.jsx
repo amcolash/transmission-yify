@@ -100,6 +100,10 @@ class Stream extends Component {
               <hr />
 
               {files
+                .filter((f) => {
+                  if (type === 'movie' && f.indexOf('/TV') === -1) return true;
+                  if (type === 'tv' && f.indexOf('/TV') !== -1) return true;
+                })
                 .map((f) => {
                   const parsed = ptn(basename(f));
                   parsed.file = f;
@@ -117,15 +121,12 @@ class Stream extends Component {
                   if (parsed.title.match(/^\d+$/)) return null;
                   if (parsed.title.toLowerCase().indexOf('sample') !== -1) return null;
 
-                  if (search.length > 0) {
+                  if (search.length > 0 && parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1) {
                     const lev = levenshtein(parsed.title.toLowerCase(), search.toLowerCase());
                     const match = 1 - lev / Math.max(parsed.title.length, search.length);
 
-                    if (match < 0.75 && parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1) return null;
+                    if (match < 0.75) return null;
                   }
-
-                  if (type === 'movie' && f.indexOf('/TV') !== -1) return null;
-                  if (type === 'tv' && f.indexOf('/TV') === -1) return null;
 
                   return parsed;
                 })

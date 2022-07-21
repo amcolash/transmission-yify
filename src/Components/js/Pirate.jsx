@@ -29,7 +29,7 @@ class Pirate extends Component {
     }
 
     return (
-      <div className="pirateRow">
+      <div className="pirateRow" key={this.props.id}>
         <div className="categories">
           <div className="category">{media.category}</div>
           <div className="subcategory">{media.subCategory}</div>

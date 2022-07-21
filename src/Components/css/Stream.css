@@ -1,5 +1,5 @@
 .streamList {
-  overflow: hidden;
+  overflow: auto;
   padding: 10px 16px;
   height: calc(100vh - 20px);
   display: flex;
