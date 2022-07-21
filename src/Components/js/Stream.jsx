@@ -1,6 +1,6 @@
 import '../css/Stream.css';
 
-import { basename } from 'path';
+import { basename, dirname } from 'path';
 
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
@@ -117,24 +117,32 @@ class Stream extends Component {
                   if (parsed.title.match(/^\d+$/)) return null;
                   if (parsed.title.toLowerCase().indexOf('sample') !== -1) return null;
 
-                  if (search.length > 0 && parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1) {
+                  if (
+                    search.length > 0 &&
+                    parsed.title.toLowerCase().indexOf(search.toLowerCase()) === -1 &&
+                    parsed.file.toLowerCase().indexOf(search.toLowerCase()) === -1
+                  ) {
                     const lev = levenshtein(parsed.title.toLowerCase(), search.toLowerCase());
                     const match = 1 - lev / Math.max(parsed.title.length, search.length);
 
                     if (match < 0.75) return null;
                   }
 
+                  parsed.fullTitle = parsed.title;
+                  if (parsed.year) parsed.fullTitle += ` (${parsed.year})`;
+                  if (parsed.season) parsed.fullTitle += ` S${parsed.season.toString().padStart(2, '0')}`;
+                  if (parsed.episode) parsed.fullTitle += ` E${parsed.episode.toString().padStart(2, '0')}`;
+
                   return parsed;
                 })
-                .filter((p) => p !== null)
+                .filter((p, i) => p !== null && i < 250)
                 .sort((a, b) => {
-                  return a.title.localeCompare(b.title);
+                  return a.fullTitle.localeCompare(b.fullTitle);
                 })
                 .map((parsed) => (
                   <div
                     key={parsed.file}
                     className="item pointer"
-                    title={parsed.file}
                     tabIndex="0"
                     onClick={() => {
                       if (!window.cordova) this.setState({ file: parsed.file });
@@ -158,11 +166,8 @@ class Stream extends Component {
                   >
                     <FaPlayCircle />
                     <div className="space">
-                      <div>
-                        {parsed.title} {parsed.year && `(${parsed.year})`}
-                        {parsed.season && `S${parsed.season.toString().padStart(2, '0')}`}
-                        {parsed.episode && `E${parsed.episode.toString().padStart(2, '0')}`}
-                      </div>
+                      <div className="title">{parsed.fullTitle}</div>
+                      <div className="file">{parsed.file}</div>
                       <div>{parsed.resolution && `[${parsed.resolution}${parsed.cam ? '-CAM' : ''}]`}</div>
                     </div>
                   </div>
