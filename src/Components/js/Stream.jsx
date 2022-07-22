@@ -115,7 +115,9 @@ class Stream extends Component {
                     .trim();
 
                   if (parsed.title.match(/^\d+$/)) return null;
-                  if (parsed.title.toLowerCase().indexOf('sample') !== -1) return null;
+                  if (f.toLowerCase().indexOf('sample') !== -1) return null;
+                  if (f.toLowerCase().indexOf('trailer') !== -1) return null;
+                  if (f.toLowerCase().indexOf('extras') !== -1) return null;
 
                   if (
                     search.length > 0 &&
@@ -135,7 +137,7 @@ class Stream extends Component {
 
                   return parsed;
                 })
-                .filter((p, i) => p !== null && i < 250)
+                .filter((p) => p !== null)
                 .sort((a, b) => {
                   return a.fullTitle.localeCompare(b.fullTitle);
                 })
