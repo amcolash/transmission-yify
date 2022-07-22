@@ -114,7 +114,7 @@ class Search extends Component {
           </div>
 
           <button
-            className="red"
+            className="red clear"
             style={{ display: clearVisible ? 'inline' : 'none' }}
             onClick={() => this.clearSearch()}
             disabled={!clearVisible}

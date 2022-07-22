@@ -195,3 +195,9 @@ select:disabled {
 .spacer {
   flex: 1;
 }
+
+button.clear {
+  border: none;
+  padding: 0.45em;
+  margin: 0;
+}

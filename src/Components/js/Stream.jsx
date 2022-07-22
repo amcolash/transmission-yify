@@ -1,11 +1,12 @@
 import '../css/Stream.css';
 
-import { basename, dirname } from 'path';
+import { basename } from 'path';
 
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
 import React, { Component } from 'react';
-import { FaPlayCircle, FaTimesCircle } from 'react-icons/fa';
+import { DebounceInput } from 'react-debounce-input';
+import { FaPlayCircle, FaTimes, FaTimesCircle } from 'react-icons/fa';
 
 import { isKeyboardVisible } from '../../Util/cordova-plugins';
 import * as ptn from '../../Util/TorrentName';
@@ -14,31 +15,8 @@ import Spinner from './Spinner';
 class Stream extends Component {
   state = { files: undefined, file: undefined, search: '', type: 'movie', error: undefined };
 
-  constructor(props) {
-    super(props);
-    this.inputRef = React.createRef();
-  }
-
   componentDidMount() {
     this.updateData();
-  }
-
-  componentDidUpdate() {
-    // Only open soft keyboard when enter is pressed when running in cordova
-    if (this.inputRef.current && window.cordova) {
-      const ref = this.inputRef.current;
-
-      // Only set readonly when the keyboard is hidden
-      if (!isKeyboardVisible()) ref.readOnly = true;
-
-      ref.onkeydown = (e) => {
-        if (e.key === 'Enter') {
-          // Flip this so that the search icon on keyboard actually works
-          ref.readOnly = !ref.readOnly;
-        }
-      };
-      ref.onblur = () => (ref.readOnly = true);
-    }
   }
 
   updateData() {
@@ -82,12 +60,26 @@ class Stream extends Component {
           ) : files ? (
             <div>
               <div className="searchbar">
-                <input
-                  placeholder="Search"
-                  type="search"
+                <DebounceInput
                   value={search}
+                  placeholder={'Search'}
+                  debounceTimeout={window.cordova ? 3000 : 1000}
                   onChange={(e) => this.setState({ search: e.target.value })}
-                  ref={this.inputRef}
+                  inputRef={(ref) => {
+                    // Only open soft keyboard when enter is pressed when running in cordova
+                    if (ref && window.cordova) {
+                      // Only set readonly when the keyboard is hidden
+                      if (!isKeyboardVisible()) ref.readOnly = true;
+
+                      ref.onkeydown = (e) => {
+                        if (e.key === 'Enter') {
+                          // Flip this so that the search icon on keyboard actually works
+                          ref.readOnly = !ref.readOnly;
+                        }
+                      };
+                      ref.onblur = () => (ref.readOnly = true);
+                    }
+                  }}
                 />
 
                 <label htmlFor="type">Media Type</label>
@@ -95,6 +87,14 @@ class Stream extends Component {
                   <option value="movie">Movie</option>
                   <option value="tv">TV Show</option>
                 </select>
+
+                <button
+                  className="red clear"
+                  style={{ marginLeft: '0.5em', display: this.state.search.length > 0 ? 'inline' : 'none' }}
+                  onClick={() => this.setState({ search: '' })}
+                >
+                  <FaTimes />
+                </button>
               </div>
 
               <hr />
