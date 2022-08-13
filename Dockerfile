@@ -1,5 +1,5 @@
 # Use node 16
-FROM jellydn/alpine-node:16
+FROM node:16-alpine
 
 # Install openssh client + timezone support
 RUN apk add --no-cache openssh tzdata
