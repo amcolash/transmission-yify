@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
 # Install deps
-RUN DISABLE_OPENCOLLECTIVE=true npm ci
+RUN DISABLE_OPENCOLLECTIVE=true npm ci --no-audit
 
 # Copy only react source code (to keep cache alive if nothing changed here)
 COPY ./public/ ./public
@@ -21,7 +21,7 @@ COPY ./src/ ./src
 RUN npm run build
 
 # Clean up build deps
-RUN DISABLE_OPENCOLLECTIVE=true npm ci --production
+RUN DISABLE_OPENCOLLECTIVE=true npm ci --production --no-audit
 
 # Copy everything else over to docker image
 COPY ./ ./
