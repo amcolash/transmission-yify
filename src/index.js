@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -5,6 +7,9 @@ import App from './Components/js/App';
 import { initKeyboard } from './Util/cordova-plugins';
 
 const startApp = () => ReactDOM.render(<App />, document.getElementById('root'));
+
+// polyfill Buffer
+window.Buffer = Buffer;
 
 document.body.onload = () => {
   console.log('cordova? ', window.cordova);

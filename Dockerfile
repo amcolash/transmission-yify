@@ -1,5 +1,5 @@
-# Use node, version 12 so that we get worker threads
-FROM mhart/alpine-node:12
+# Use node 16
+FROM jellydn/alpine-node:16
 
 # Install openssh client + timezone support
 RUN apk add --no-cache openssh tzdata

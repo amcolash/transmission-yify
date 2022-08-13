@@ -1,9 +1,8 @@
 import '../css/Stream.css';
 
-import { basename } from 'path';
-
 import axios from 'axios';
 import levenshtein from 'js-levenshtein';
+import { basename } from 'path-browserify';
 import React, { Component } from 'react';
 import { DebounceInput } from 'react-debounce-input';
 import { FaPlayCircle, FaTimes, FaTimesCircle } from 'react-icons/fa';
