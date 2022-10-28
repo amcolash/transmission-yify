@@ -66,6 +66,7 @@ if (process.env.PIANO_LED_IP) app.use('/piano-led', proxy(process.env.PIANO_LED_
 if (process.env.FISH_LED_IP) app.use('/fish-led', proxy(process.env.FISH_LED_IP));
 if (process.env.SUNSET_IP) app.use('/sunset', proxy(process.env.SUNSET_IP));
 if (process.env.PHOTO_FRAME_IP) app.use('/frame', proxy(process.env.PHOTO_FRAME_IP));
+if (process.env.HALLWAY_CAMERA_IP) app.use('/hallway-camera', proxy(process.env.HALLWAY_CAMERA_IP));
 
 // record requests through analytics handler
 app.use(analyticsMiddleware);
